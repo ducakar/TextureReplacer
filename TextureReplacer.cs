@@ -29,7 +29,10 @@ using UnityEngine;
 public class TextureReplacer : MonoBehaviour
 {
   private static readonly string[] TEXTURE_NAMES = {
-    "kerbalHead", "kerbalMain", "kerbalMainGrey", "kerbalHelmetGrey", "EVAtexture", "EVAhelmet", "EVAjetpack"
+    "kerbalHead", "kerbalMain", "kerbalMainGrey", "kerbalHelmetGrey",
+    "EVAtexture", "EVAhelmet", "EVAjetpack",
+    "GalaxyTex_NegativeX", "GalaxyTex_NegativeY", "GalaxyTex_NegativeZ",
+    "GalaxyTex_PositiveX", "GalaxyTex_PositiveY", "GalaxyTex_PositiveZ"
   };
   private Dictionary<string, Texture2D> mappedTextures;
   private int oldTextureCount = 0;
@@ -51,34 +54,43 @@ public class TextureReplacer : MonoBehaviour
 
       foreach (string name in TEXTURE_NAMES)
       {
-        string url = "TextureReplacer/Kerbal/" + name;
+        string url = "TextureReplacer/Textures/" + name;
         Texture2D texture = GameDatabase.Instance.GetTexture(url, false);
 
         if (texture != null)
+        {
+          texture.filterMode = FilterMode.Trilinear;
           mappedTextures.Add(name, texture);
+        }
       }
       areTexturesLoaded = true;
     }
 
     Texture[] textures = Resources.FindObjectsOfTypeAll(typeof(Texture)) as Texture[];
+    if (textures.Length == oldTextureCount)
+      return;
 
-    if (textures.Length != oldTextureCount)
+    oldTextureCount = textures.Length;
+
+    Material[] materials = Resources.FindObjectsOfTypeAll(typeof(Material)) as Material[];
+    foreach (Material material in materials)
     {
-      oldTextureCount = textures.Length;
-      Material[] materials = Resources.FindObjectsOfTypeAll(typeof(Material)) as Material[];
+      if (material.mainTexture == null)
+        continue;
 
-      foreach (Material material in materials)
+      if (!mappedTextures.ContainsKey(material.mainTexture.name))
       {
-        if (material.mainTexture == null || !mappedTextures.ContainsKey(material.mainTexture.name))
-          continue;
+        if (material.mainTexture.filterMode == FilterMode.Bilinear)
+          material.mainTexture.filterMode = FilterMode.Trilinear;
 
-        Texture2D texture = mappedTextures[material.mainTexture.name];
+        continue;
+      }
 
-        if (texture != null)
-        {
-          Resources.UnloadAsset(material.mainTexture);
-          material.mainTexture = mappedTextures[material.mainTexture.name];
-        }
+      Texture2D texture = mappedTextures[material.mainTexture.name];
+      if (texture != null)
+      {
+        Resources.UnloadAsset(material.mainTexture);
+        material.mainTexture = mappedTextures[material.mainTexture.name];
       }
     }
   }

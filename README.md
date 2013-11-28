@@ -1,29 +1,51 @@
-TextureReplace
-==============
+TextureReplacer
+===============
 
 [GitHub page](http://github.com/ducakar/TextureReplacer)
 
-TextureReplacer is a very simple plugin for Kerbal Space Program that replaces
-specific textures. For now, only replacing Kerbal textures (face and suits) is
-supported.
+TextureReplacer is a simple plugin for Kerbal Space Program that replaces
+specific textures. For now, only replacing Kerbal (face and suits) and skybox
+textures is supported.
+
+The second thing it does is enforcing trilinear texture filter for all textures
+that originally use bilinear filter.
+
+Special thanks to Tingle who created UniverseReplacer. Studying his code helped
+me a lot when writing this plugin.
 
 
 Direcory Layout
 ---------------
 For now ony Kerbal textures can be replaced. The textures to be replaced should
-be put into `GameData/TextureReplacer/Kerbal` and have the following names:
+be put into `GameData/TextureReplacer/Textures` and have the following names:
 
-    kerbalHead       // Head
+    kerbalHead           // Kerbal head
+    kerbalMain           // IVA Suit (Veteran)
+    kerbalMainGrey       // IVA Suit
+    kerbalHelmetGrey     // IVA Helmet
+    EVAtexture           // EVA Suit
+    EVAhelmet            // EVA Helmet
+    EVAjetpack           // EVA Jetpack
 
-    kerbalMain       // IVA Suit (Veteran)
-    kerbalMainGrey   // IVA Suit
-    kerbalHelmetGrey // IVA Helmet
+    GalaxyTex_NegativeX  // Skybox -X
+    GalaxyTex_PositiveX  // Skybox +X
+    GalaxyTex_NegativeY  // Skybox -Y
+    GalaxyTex_PositiveY  // Skybox +Y
+    GalaxyTex_NegativeZ  // Skybox -Z
+    GalaxyTex_PositiveZ  // Skybox +Z
 
-    EVAtexture       // EVA Suit
-    EVAhelmet        // EVA Helmet
-    EVAjetpack       // EVA Jetpack
+TGAs are recommended since Unity fails to generate mipmaps for PNGs.
 
-TGA images are recommended since Unity fails to generate mipmaps for PNGs.
+
+Change Log
+----------
+0.1
+  - initial version
+  - Kerbal textures replaceability
+
+0.2
+  - enforcement of trilinear texture filter in place of bilinear
+  - skybox textures replaceability
 
 
 Licence

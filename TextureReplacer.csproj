@@ -43,4 +43,7 @@
       <HintPath>..\..\..\..\run\media\davorin\Windows 7\KSP-0.22\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
 </Project>
