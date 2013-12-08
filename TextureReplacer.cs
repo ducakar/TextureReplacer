@@ -28,7 +28,7 @@ using UnityEngine;
 // upTeeth01, upTeeth02, tongue
 // headset_band01 (?)
 //
-[KSPAddon(KSPAddon.Startup.Instantly, true)]
+[KSPAddon(KSPAddon.Startup.EveryScene, true)]
 public class TextureReplacer : MonoBehaviour
 {
   private static readonly string[] TEXTURE_NAMES = {
@@ -57,6 +57,8 @@ public class TextureReplacer : MonoBehaviour
     "snowydwarfplanet00"
   };
   private Dictionary<string, Texture2D> mappedTextures;
+  private int updateCounter = 0;
+  private int lastMaterialLength = 0;
   private Vessel lastVessel = null;
   private bool isInitialised = false;
 
@@ -69,6 +71,8 @@ public class TextureReplacer : MonoBehaviour
 
     if (!mappedTextures.ContainsKey(texture.name))
     {
+      // Set trilinear filter just in case. Trilinear filter is also set in initialisation, but that
+      // loop only iterates through textures in `GameData/`.
       if (texture.filterMode == FilterMode.Bilinear)
         texture.filterMode = FilterMode.Trilinear;
 
@@ -78,6 +82,8 @@ public class TextureReplacer : MonoBehaviour
     Texture2D newTexture = mappedTextures[texture.name];
     if (newTexture != null && newTexture != texture)
     {
+      // Replace texture. No need to set trilinear filter here as replacement textures reside in
+      // `GameData/` so that has already been set in initialisation.
       material.mainTexture = newTexture;
       Resources.UnloadAsset(texture);
 
@@ -103,7 +109,7 @@ public class TextureReplacer : MonoBehaviour
   {
     if (!isInitialised)
     {
-      if (!GameDatabase.Instance.IsReady())
+      if (!GameDatabase.Instance.IsReady() || HighLogic.LoadedScene != GameScenes.MAINMENU)
         return;
 
       mappedTextures = new Dictionary<string, Texture2D>();
@@ -121,6 +127,11 @@ public class TextureReplacer : MonoBehaviour
 
       Debug.Log("[TextureReplacer] Compressing textures in GameDatabase");
 
+      // This tries to compress all uncompressed textures inside `GameData/` directory. Compression
+      // fails on read-only textures (i.e. those which are not loaded in RAM), but there's no way
+      // to check whether a texture is read-only. `TextureInfo.isReadable` and
+      // `TextureInfo.isCompressed` always return true, no matter whether the texture is readable or
+      // compressed. So we have to live with a bunch of error messages in log.
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
@@ -130,18 +141,45 @@ public class TextureReplacer : MonoBehaviour
           texture.Compress(true);
       }
 
+      // Replace textures (and apply trilinear filter). This doesn't reach some textures like skybox
+      // and kerbalMainGrey. Those will be replaced later.
       foreach (Material material in GameObject.FindObjectsOfTypeIncludingAssets(typeof(Material)))
         replaceTexture(material);
 
       isInitialised = true;
     }
 
-    if (lastVessel != FlightGlobals.ActiveVessel)
+    if (HighLogic.LoadedSceneIsFlight)
     {
-      lastVessel = FlightGlobals.ActiveVessel;
+      // When in flight, perform replacement on each vehicle switch. We have to do this at least
+      // because of IVA suits that are reset by KSP on vehicle switch (probably because it sets
+      // orange suits to Jeb, Bin & Bob and grey to all others).
+      if (lastVessel != FlightGlobals.ActiveVessel)
+      {
+        lastVessel = FlightGlobals.ActiveVessel;
 
-      foreach (Material material in Resources.FindObjectsOfTypeAll(typeof(Material)))
-        replaceTexture(material);
+        foreach (Material material in Resources.FindObjectsOfTypeAll(typeof(Material)))
+          replaceTexture(material);
+      }
+    }
+    else if (updateCounter > 0)
+    {
+      --updateCounter;
+    }
+    else
+    {
+      updateCounter = 16;
+
+      // For non-flight scenes we perform replacement every 8 frames because the replacement in the
+      // initialisation doesn't replace certain textures, like skybox for example.
+      Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
+      if (materials.Length != lastMaterialLength)
+      {
+        lastMaterialLength = materials.Length;
+
+        foreach (Material material in materials)
+          replaceTexture(material);
+      }
     }
   }
 }

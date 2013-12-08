@@ -11,8 +11,9 @@ high-altitude planet textures is supported. Additionaly, this plugin enforces
 trilinear texture filtering (i.e. smooth transitions between mipmaps) and
 compresses uncompressed textures from `GameData/` that are loaded in RAM.
 
-Special thanks to Tingle who created UniverseReplacer. Studying his code helped
-me a lot when writing this plugin.
+Special thanks to Tingle for Universe Replacer and therealcrow999 for testing
+and benchmarks of my plugin. Studying Tingle's Universe Replacer code helped me
+a lot when writing this plugin.
 
 
 Directory Layout
@@ -73,6 +74,9 @@ The textures to be replaced should be put into
 
 Change Log
 ----------
+* 0.5
+    - replacement is run every 16 frames in all non-flight scenes
+    - comments added to the code
 * 0.4
     - replacement is only run on startup and on vehicle switch
 * 0.3
