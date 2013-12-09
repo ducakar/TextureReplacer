@@ -74,6 +74,9 @@ The textures to be replaced should be put into
 
 Change Log
 ----------
+* 0.7
+    - more verbose log output
+    - some code refactoring
 * 0.6.1
     - bug from 0.6 that caused slowdown fixed
 * 0.6
