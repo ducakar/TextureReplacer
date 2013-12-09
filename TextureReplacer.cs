@@ -28,7 +28,7 @@ using UnityEngine;
 // upTeeth01, upTeeth02, tongue
 // headset_band01 (?)
 //
-[KSPAddon(KSPAddon.Startup.EveryScene, true)]
+[KSPAddon(KSPAddon.Startup.Instantly, true)]
 public class TextureReplacer : MonoBehaviour
 {
   private static readonly string[] TEXTURE_NAMES = {
@@ -58,9 +58,10 @@ public class TextureReplacer : MonoBehaviour
   };
   private Dictionary<string, Texture2D> mappedTextures;
   private int updateCounter = 0;
-  private int lastMaterialLength = 0;
+  private int lastMaterialsLength = 0;
   private Vessel lastVessel = null;
   private bool isInitialised = false;
+  private bool isReplaceScheduled = false;
 
   private void replaceTexture(Material material)
   {
@@ -109,7 +110,7 @@ public class TextureReplacer : MonoBehaviour
   {
     if (!isInitialised)
     {
-      if (!GameDatabase.Instance.IsReady() || HighLogic.LoadedScene != GameScenes.MAINMENU)
+      if (!GameDatabase.Instance.IsReady())
         return;
 
       mappedTextures = new Dictionary<string, Texture2D>();
@@ -153,32 +154,43 @@ public class TextureReplacer : MonoBehaviour
     {
       // When in flight, perform replacement on each vehicle switch. We have to do this at least
       // because of IVA suits that are reset by KSP on vehicle switch (probably because it sets
-      // orange suits to Jeb, Bin & Bob and grey to all others).
+      // orange suits to Jeb, Bin & Bob and grey to all others). Replacement is postponed for 1
+      // frame to avoid possible race conditions. (I experienced once that IVA textures were not
+      // replaced. I suspect race condition as the most plausible cause).
       if (lastVessel != FlightGlobals.ActiveVessel)
       {
         lastVessel = FlightGlobals.ActiveVessel;
-
+        isReplaceScheduled = true;
+      }
+      else if (isReplaceScheduled)
+      {
         foreach (Material material in Resources.FindObjectsOfTypeAll(typeof(Material)))
           replaceTexture(material);
       }
     }
-    else if (updateCounter > 0)
-    {
-      --updateCounter;
-    }
     else
     {
-      updateCounter = 16;
+      lastVessel = null;
+      isReplaceScheduled = false;
 
-      // For non-flight scenes we perform replacement every 8 frames because the replacement in the
-      // initialisation doesn't replace certain textures, like skybox for example.
-      Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
-      if (materials.Length != lastMaterialLength)
+      if (updateCounter > 0)
       {
-        lastMaterialLength = materials.Length;
+        --updateCounter;
+      }
+      else
+      {
+        updateCounter = 16;
 
-        foreach (Material material in materials)
-          replaceTexture(material);
+        // For non-flight scenes we perform replacement every 8 frames because the replacement in
+        // the initialisation doesn't replace certain textures, like skybox for example.
+        Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
+        if (materials.Length != lastMaterialsLength)
+        {
+          lastMaterialsLength = materials.Length;
+
+          foreach (Material material in materials)
+            replaceTexture(material);
+        }
       }
     }
   }

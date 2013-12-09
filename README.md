@@ -74,6 +74,9 @@ The textures to be replaced should be put into
 
 Change Log
 ----------
+* 0.6
+    - texture replacement on vehicle switch is postponed for 1 frame
+    - fixed skybox loading
 * 0.5
     - replacement is run every 16 frames in all non-flight scenes
     - comments added to the code
