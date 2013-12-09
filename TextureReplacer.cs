@@ -164,6 +164,8 @@ public class TextureReplacer : MonoBehaviour
       }
       else if (isReplaceScheduled)
       {
+        isReplaceScheduled = false;
+
         foreach (Material material in Resources.FindObjectsOfTypeAll(typeof(Material)))
           replaceTexture(material);
       }

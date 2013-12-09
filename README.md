@@ -74,6 +74,8 @@ The textures to be replaced should be put into
 
 Change Log
 ----------
+* 0.6.1
+    - bug from 0.6 that caused slowdown fixed
 * 0.6
     - texture replacement on vehicle switch is postponed for 1 frame
     - fixed skybox loading
