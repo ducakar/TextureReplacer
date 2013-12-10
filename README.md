@@ -74,6 +74,8 @@ The textures to be replaced should be put into
 
 Change Log
 ----------
+* 0.7.1
+    - fixed normal maps
 * 0.7
     - more verbose log output
     - some code refactoring

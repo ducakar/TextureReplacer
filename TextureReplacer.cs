@@ -124,7 +124,7 @@ public class TextureReplacer : MonoBehaviour
       }
 
       Texture2D newTexture = mappedTextures[texture.name];
-      if (newTexture == null || newTexture == texture)
+      if (newTexture == texture)
         continue;
 
       // Replace texture. No need to set trilinear filter here as replacement textures reside in
@@ -139,13 +139,13 @@ public class TextureReplacer : MonoBehaviour
         continue;
 
       Texture2D newNormalMap = mappedTextures[normalMap.name];
-      if (newNormalMap == null || newNormalMap == normalMap)
+      if (newNormalMap == normalMap)
         continue;
 
-      material.SetTexture("_BumpMap", normalMap);
+      material.SetTexture("_BumpMap", newNormalMap);
       Resources.UnloadAsset(normalMap);
 
-      print("[TextureReplacer] " + texture.name + " (normal map) replaced");
+      print("[TextureReplacer] " + normalMap.name + " (normal map) replaced");
     }
   }
 
