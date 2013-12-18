@@ -8,10 +8,10 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
  * and/or sell copies of the Software, and to permit persons to whom the
  * Software is furnished to do so, subject to the following conditions:
-
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
-
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -32,7 +32,7 @@ using UnityEngine;
 // headset_band01 (?)
 //
 [KSPAddon(KSPAddon.Startup.Instantly, true)]
-public class TextureReplacer : MonoBehaviour
+public class VegaTextureReplacer : MonoBehaviour
 {
   private static readonly string[] TEXTURE_NAMES = {
     "kerbalHead",
@@ -60,13 +60,14 @@ public class TextureReplacer : MonoBehaviour
     "snowydwarfplanet00"
   };
   private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
-  private int memorySaved = 0;
-  private int lastTextureCount = 0;
   private int updateCounter = 0;
-  private int lastMaterialsLength = 0;
+  private int lastMaterialsCount = 0;
   private Vessel lastVessel = null;
-  private bool isInitialised = false;
   private bool isReplaceScheduled = false;
+  private int memorySpared = 0;
+  private int lastTextureCount = 0;
+  private bool isTextureCompressorDetected = false;
+  private bool isInitialised = false;
 
   private void compressTextures()
   {
@@ -100,11 +101,11 @@ public class TextureReplacer : MonoBehaviour
                     texture.format == TextureFormat.RGB24 ? nPixels * 3 : nPixels * 4;
       int newSize = texture.format == TextureFormat.DXT1 ? nPixels / 2 : nPixels;
 
-      int saved = oldSize - newSize;
-      memorySaved += saved;
+      int spared = oldSize - newSize;
+      memorySpared += spared;
 
-      print(String.Format("[TextureReplacer] Compressed {0} [{1} {2}x{3}], saved {4:0.0} KiB",
-                          texture.name, format, texture.width, texture.height, saved / 1024.0));
+      print(String.Format("[TextureReplacer] Compressed {0} [{1} {2}x{3}], spared {4:0.0} KiB",
+                          texture.name, format, texture.width, texture.height, spared / 1024.0));
     }
 
     lastTextureCount = texInfos.Count;
@@ -172,24 +173,39 @@ public class TextureReplacer : MonoBehaviour
 
     // Replace textures (and apply trilinear filter). This doesn't reach some textures like skybox
     // and kerbalMainGrey. Those will be replaced later.
-    replaceTextures((Material[]) Material.FindObjectsOfTypeIncludingAssets(typeof(Material)));
+    replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)));
   }
 
-  protected TextureReplacer()
+  protected void Start()
   {
     DontDestroyOnLoad(this);
+
+    // Prevent conficts with TextureCompressor. If it is found among loaded plugins, texture
+    // compression step will be skipped, since TextureCompressor should handle it (better).
+    foreach (GameObject go in GameObject.FindObjectsOfType(typeof(GameObject)))
+    {
+      if (go.name == "TextureCompressor")
+      {
+        print("[TextureReplacer] Detected TextureCompressor, disabling texture compression");
+        isTextureCompressorDetected = true;
+        break;
+      }
+    }
   }
 
   protected void Update()
   {
     if (!isInitialised)
     {
-      compressTextures();
+      if (!isTextureCompressorDetected)
+        compressTextures();
 
       if (GameDatabase.Instance.IsReady())
       {
-        print(String.Format("[TextureReplacer] Texture compression saved total {0:0.0} MiB = {1:0.0} MB",
-                            memorySaved / 1024.0 / 1024.0, memorySaved / 1000.0 / 1000.0));
+        print(String.Format(
+          "[TextureReplacer] Texture compression spared total {0:0.0} MiB = {1:0.0} MB",
+          memorySpared / 1024.0 / 1024.0, memorySpared / 1000.0 / 1000.0
+        ));
 
         initialiseReplacer();
         isInitialised = true;
@@ -199,12 +215,14 @@ public class TextureReplacer : MonoBehaviour
     {
       // When in flight, perform replacement on each vehicle switch. We have to do this at least
       // because of IVA suits that are reset by KSP on vehicle switch (probably because it sets
-      // orange suits to Jeb, Bin & Bob and grey to all others). Replacement is postponed for 1
+      // orange suits to Jeb, Bill & Bob and grey to all others). Replacement is postponed for one
       // frame to avoid possible race conditions. (I experienced once that IVA textures were not
       // replaced. I suspect race condition as the most plausible cause).
-      if (lastVessel != FlightGlobals.ActiveVessel)
+      if (FlightGlobals.ActiveVessel != lastVessel)
       {
         lastVessel = FlightGlobals.ActiveVessel;
+        lastMaterialsCount = 0;
+        updateCounter = 0;
         isReplaceScheduled = true;
       }
       else if (isReplaceScheduled)
@@ -213,7 +231,7 @@ public class TextureReplacer : MonoBehaviour
         replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)));
       }
     }
-    else
+    else if (HighLogic.LoadedScene == GameScenes.MAINMENU)
     {
       lastVessel = null;
       isReplaceScheduled = false;
@@ -224,15 +242,15 @@ public class TextureReplacer : MonoBehaviour
       }
       else
       {
-        updateCounter = 16;
+        updateCounter = 10;
 
         // For non-flight scenes we perform replacement once every 10 frames because the next
         // `Resources.FindObjectsOfTypeAll()` call is expensive and the replacement in the
         // initialisation cannot replace certain textures, like skybox for example.
         Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
-        if (materials.Length != lastMaterialsLength)
+        if (materials.Length != lastMaterialsCount)
         {
-          lastMaterialsLength = materials.Length;
+          lastMaterialsCount = materials.Length;
           replaceTextures(materials);
         }
       }

@@ -3,27 +3,26 @@
 TextureReplacer
 ===============
 
-[GitHub page](http://github.com/ducakar/TextureReplacer)
+[GitHub page](http://github.com/ducakar/VegaTech)
 
-TextureReplacer is a simple plugin for Kerbal Space Program that replaces
-and improves textures. For now, it replaces Kerbal (face and suits), skybox and
-high-altitude planet textures. Additionally, this plugin enforces trilinear
-texture filtering (i.e. smooth transitions between mipmaps) and compresses all
-non-compressed textures from `GameData/` that are found in RAM.
+TextureReplacer is a plugin for Kerbal Space Program that replaces and improves
+textures. For now, it replaces Kerbal (face and suits), skybox and high-altitude
+planet textures. Additionally, this plugin enforces trilinear texture filtering
+(i.e. smooth transitions between mipmaps) and compresses all non-compressed
+textures from `GameData/` that are found in RAM.
 
 Special thanks to:
 * Tingle for Universe Replacer; studying his code helped me a lot while
   developing this plugin,
-* rbray89 for TextureCompressor (a.k.a. Active TextureCompression Mod) which has
+* rbray89 for TextureCompressor (a.k.a. Active Memory Reduction Mod) which has
   been merged into TextureReplacer and
 * therealcrow999 for testing and benchmarking this plugin.
 
 
 Directory Layout
 ----------------
-The textures to be replaced should be put into
-`GameData/TextureReplacer/Textures` and have the following names (plus
-.tga/.png/.mbm extensions, of course):
+The textures should be put into `GameData/TextureReplacer/Textures` and have the
+following names (plus .tga/.png/.mbm extensions, of course):
 
     kerbalHead              // Kerbal head
     kerbalMain              // IVA suit (veteran)
@@ -62,21 +61,30 @@ The textures to be replaced should be put into
     gp1minormoon200         // Pol
     snowydwarfplanet00      // Eeloo
 
+
+Notes
+-----
 * TGAs are recommended over PNGs since Unity fails to generate mipmaps for the
   latter.
 * If only diffuse textures are replaced for Kerbals, the stock normal maps are
   kept.
-* Replacing only normal map is not supported.
+* Replacing only the normal map texture is not supported.
 * The planet textures being replaced are the high-altitude textures, which are
   also used in the map mode and in the tracking station. When getting closer to
   the surface, those textures are slowly interpolated into the high-resolution
   ones that cannot be replaced by this plugin.
 * Replacing normal maps for planets is not supported since it doesn't make
   sense as a planet's normal map must match its heightmap data.
+* If you use Module Manager, make sure it is updated to the latest version.
+  TextureReplacer is known to conflict with the version 1.0.
 
 
 Change Log
 ----------
+* 0.9
+    - replacement is only run on vehicle switch and every 10 frames in main menu
+    - texture compression is disabled when TextureCompressor mod is detected
+    - rebuilt for KSP 0.23
 * 0.8
     - merged TextureCompressor:
         + textures are compressed immediately when loaded, which should enable
