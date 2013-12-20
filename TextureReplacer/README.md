@@ -83,6 +83,8 @@ Notes
 
 Change Log
 ----------
+* 0.10.1
+    - fixed 0.10 not loading any textures
 * 0.10
     - set of texture names is not hard-coded any more
 * 0.9

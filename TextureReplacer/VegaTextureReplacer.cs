@@ -139,7 +139,7 @@ public class VegaTextureReplacer : MonoBehaviour
              in GameDatabase.Instance.databaseTexture.FindAll(texInfo =>
                                                               texInfo.name.StartsWith(DIR_PREFIX)))
     {
-      if (texInfo.texture != null)
+      if (texInfo.texture == null)
         continue;
 
       string originalName = texInfo.texture.name.Substring(DIR_PREFIX.Length);
