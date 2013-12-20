@@ -34,31 +34,7 @@ using UnityEngine;
 [KSPAddon(KSPAddon.Startup.Instantly, true)]
 public class VegaTextureReplacer : MonoBehaviour
 {
-  private static readonly string[] TEXTURE_NAMES = {
-    "kerbalHead",
-    "kerbalMain", "kerbalMainGrey", "kerbalHelmetGrey",
-    "EVAtexture", "EVAhelmet", "EVAjetpack",
-    "kerbalMainNRM", "kerbalHelmetNRM", "EVAtextureNRM", "EVAjetpackNRM",
-    "GalaxyTex_NegativeX", "GalaxyTex_NegativeY", "GalaxyTex_NegativeZ",
-    "GalaxyTex_PositiveX", "GalaxyTex_PositiveY", "GalaxyTex_PositiveZ",
-    "suncoronanew",
-    "moho00",
-    "Eve2_00",
-    "evemoon100",
-    "KerbinScaledSpace300",
-    "NewMunSurfaceMapDiffuse",
-    "NewMunSurfaceMap00",
-    "Duna5_00",
-    "desertplanetmoon00",
-    "dwarfplanet100",
-    "gas1_clouds",
-    "newoceanmoon00",
-    "gp1icemoon00",
-    "rockymoon100",
-    "gp1minormoon100",
-    "gp1minormoon200",
-    "snowydwarfplanet00"
-  };
+  private static readonly string DIR_PREFIX = "TextureReplacer/Textures/";
   private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
   private int updateCounter = 0;
   private int lastMaterialsCount = 0;
@@ -159,16 +135,17 @@ public class VegaTextureReplacer : MonoBehaviour
 
   private void initialiseReplacer()
   {
-    foreach (string name in TEXTURE_NAMES)
+    foreach (GameDatabase.TextureInfo texInfo
+             in GameDatabase.Instance.databaseTexture.FindAll(texInfo =>
+                                                              texInfo.name.StartsWith(DIR_PREFIX)))
     {
-      string url = "TextureReplacer/Textures/" + name;
-      Texture2D texture = GameDatabase.Instance.GetTexture(url, false);
+      if (texInfo.texture != null)
+        continue;
 
-      if (texture != null)
-      {
-        print("[TextureReplacer] Mapping " + name + " -> " + url);
-        mappedTextures.Add(name, texture);
-      }
+      string originalName = texInfo.texture.name.Substring(DIR_PREFIX.Length);
+
+      print("[TextureReplacer] Mapping " + originalName + " -> " + texInfo.name);
+      mappedTextures.Add(originalName, texInfo.texture);
     }
 
     // Replace textures (and apply trilinear filter). This doesn't reach some textures like skybox
@@ -235,12 +212,9 @@ public class VegaTextureReplacer : MonoBehaviour
     {
       lastVessel = null;
       isReplaceScheduled = false;
+      --updateCounter;
 
-      if (updateCounter > 0)
-      {
-        --updateCounter;
-      }
-      else
+      if (updateCounter <= 0)
       {
         updateCounter = 10;
 
