@@ -46,28 +46,45 @@ Here is a list of some internal KSP texture names:
     GalaxyTex_NegativeZ     // Skybox -Z
     GalaxyTex_PositiveZ     // Skybox +Z
 
+    suncoronanew            // Sun corona
     moho00                  // Moho
+    moho01                  // Moho normal map
     Eve2_00                 // Eve
+    Eve2_01                 // Eve normal map
     evemoon100              // Gilly
+    evemoon101              // Gilly normal map
     KerbinScaledSpace300    // Kerbin
+    KerbinScaledSpace401    // Kerbin normal map
     NewMunSurfaceMapDiffuse // Mün
+    NewMunSurfaceMapNormals // Mün normal map
     NewMunSurfaceMap00      // Minmus
+    NewMunSurfaceMap01      // Minmus normal map
     Duna5_00                // Duna
+    Duna5_01                // Duna normal map
     desertplanetmoon00      // Ike
+    desertplanetmoon01      // Ike normal map
     dwarfplanet100          // Dres
+    dwarfplanet101          // Dres normal map
     gas1_clouds             // Jool
+    cloud_normal            // Jool normal map
     newoceanmoon00          // Laythe
+    newoceanmoon01          // Laythe normal map
     gp1icemoon00            // Vall
+    gp1icemoon01            // Vall normal map
     rockymoon100            // Tylo
+    rockymoon101            // Tylo normal map
     gp1minormoon100         // Bop
+    gp1minormoon101         // Bop normal map
     gp1minormoon200         // Pol
+    gp1minormoon201         // Pol normal map
     snowydwarfplanet00      // Eeloo
+    snowydwarfplanet01      // Eeloo normal map
 
 
 Notes
 -----
-* TGAs are recommended over PNGs since Unity fails to generate mipmaps for the
-  latter.
+* TGAs are recommended over PNGs/JPEGs since KSP fails to generate mipmaps for
+  the latter.
 * When you convert PNGs to TGAs, make sure you change indexed and greyscale
   images to RGB. Only TGAs with RGB colours work in Unity.
 * If only diffuse textures are replaced for Kerbals, the stock normal maps are
@@ -83,6 +100,8 @@ Notes
 
 Change Log
 ----------
+* 0.10.2
+    - prevent crashing when game database is corrupted
 * 0.10.1
     - fixed 0.10 not loading any textures
 * 0.10

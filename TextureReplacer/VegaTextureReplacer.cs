@@ -144,8 +144,15 @@ public class VegaTextureReplacer : MonoBehaviour
 
       string originalName = texInfo.texture.name.Substring(DIR_PREFIX.Length);
 
-      print("[TextureReplacer] Mapping " + originalName + " -> " + texInfo.name);
-      mappedTextures.Add(originalName, texInfo.texture);
+      if (mappedTextures.ContainsKey(originalName))
+      {
+        print("[TextureReplacer] Corrupted GameDatabase! Problematic TGA? " + texInfo.texture.name);
+      }
+      else
+      {
+        print("[TextureReplacer] Mapping " + originalName + " -> " + texInfo.texture.name);
+        mappedTextures.Add(originalName, texInfo.texture);
+      }
     }
 
     // Replace textures (and apply trilinear filter). This doesn't reach some textures like skybox
