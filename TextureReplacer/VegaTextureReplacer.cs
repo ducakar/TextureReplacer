@@ -39,6 +39,7 @@ public class VegaTextureReplacer : MonoBehaviour
   private int updateCounter = 0;
   private int lastMaterialsCount = 0;
   private Vessel lastVessel = null;
+  private int lastCrewCount = 0;
   private bool isReplaceScheduled = false;
   private int memorySpared = 0;
   private int lastTextureCount = 0;
@@ -144,6 +145,9 @@ public class VegaTextureReplacer : MonoBehaviour
 
       string originalName = texInfo.texture.name.Substring(DIR_PREFIX.Length);
 
+      // When a TGA loading fails, IndexOutOfBounds exception is thrown and GameDatabase gets
+      // corrupted. The problematic TGA is duplicated in GameDatabase, so that it also overrides the
+      // preceding texture.
       if (mappedTextures.ContainsKey(originalName))
       {
         print("[TextureReplacer] Corrupted GameDatabase! Problematic TGA? " + texInfo.texture.name);
@@ -197,16 +201,18 @@ public class VegaTextureReplacer : MonoBehaviour
     }
     else if (HighLogic.LoadedSceneIsFlight)
     {
-      // When in flight, perform replacement on each vehicle switch. We have to do this at least
-      // because of IVA suits that are reset by KSP on vehicle switch (probably because it sets
-      // orange suits to Jeb, Bill & Bob and grey to all others). Replacement is postponed for one
-      // frame to avoid possible race conditions. (I experienced once that IVA textures were not
+      lastMaterialsCount = 0;
+      updateCounter = 0;
+
+      // When in flight, perform replacement on each vehicle switch and docking. We have to do this
+      // at least because of IVA suits that are reset by KSP on vehicle switch (probably because it
+      // sets orange suits to Jeb, Bill & Bob and grey to all others). Replacement is postponed for
+      // one frame to avoid possible race conditions. (I experienced once that IVA textures were not
       // replaced. I suspect race condition as the most plausible cause).
-      if (FlightGlobals.ActiveVessel != lastVessel)
+      if (FlightGlobals.ActiveVessel != lastVessel || lastVessel.GetCrewCount() != lastCrewCount)
       {
         lastVessel = FlightGlobals.ActiveVessel;
-        lastMaterialsCount = 0;
-        updateCounter = 0;
+        lastCrewCount = lastVessel.GetCrewCount();
         isReplaceScheduled = true;
       }
       else if (isReplaceScheduled)
@@ -218,9 +224,10 @@ public class VegaTextureReplacer : MonoBehaviour
     else if (HighLogic.LoadedScene == GameScenes.MAINMENU)
     {
       lastVessel = null;
+      lastCrewCount = 0;
       isReplaceScheduled = false;
-      --updateCounter;
 
+      --updateCounter;
       if (updateCounter <= 0)
       {
         updateCounter = 10;
@@ -235,6 +242,15 @@ public class VegaTextureReplacer : MonoBehaviour
           replaceTextures(materials);
         }
       }
+    }
+    else
+    {
+      lastMaterialsCount = 0;
+      updateCounter = 0;
+
+      lastVessel = null;
+      lastCrewCount = 0;
+      isReplaceScheduled = false;
     }
   }
 }

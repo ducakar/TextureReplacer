@@ -100,6 +100,8 @@ Notes
 
 Change Log
 ----------
+* 0.10.3
+    - replacement is run on vehicle docking
 * 0.10.2
     - prevent crashing when game database is corrupted
 * 0.10.1
