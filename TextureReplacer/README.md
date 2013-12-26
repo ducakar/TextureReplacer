@@ -21,9 +21,9 @@ Special thanks to:
 
 Directory Layout
 ----------------
-The textures should be put into `GameData/TextureReplacer/Textures` and have the
-same names as the internal KSP textures they should replace (plus .tga/.png/.mbm
-extensions, of course).
+The textures should be put into `GameData/TextureReplacer/Textures` (or its
+subdirectories) and have the same names as the internal KSP textures they should
+replace (plus .tga/.png/.mbm extensions, of course).
 
 Here is a list of some internal KSP texture names:
 
@@ -100,8 +100,11 @@ Notes
 
 Change Log
 ----------
+* 0.11
+    - textures can be organised in subdirectories
+    - fixed trilinear filtering not applied everywhere in 0.10
 * 0.10.3
-    - replacement is run on vehicle docking
+    - replacement is run on docking
 * 0.10.2
     - prevent crashing when game database is corrupted
 * 0.10.1

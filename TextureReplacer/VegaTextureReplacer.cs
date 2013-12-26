@@ -49,8 +49,6 @@ public class VegaTextureReplacer : MonoBehaviour
   private void compressTextures()
   {
     List<GameDatabase.TextureInfo> texInfos = GameDatabase.Instance.databaseTexture;
-    if (lastTextureCount == texInfos.Count)
-      return;
 
     for (int i = lastTextureCount; i < texInfos.Count; ++i)
     {
@@ -98,15 +96,11 @@ public class VegaTextureReplacer : MonoBehaviour
       if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp"))
         continue;
 
-      if (!mappedTextures.ContainsKey(texture.name))
-      {
-        // Set trilinear filter. Trilinear filter is also set in initialisation but that loop only
-        // iterates through textures in `GameData/`.
-        if (texture.filterMode == FilterMode.Bilinear)
-          texture.filterMode = FilterMode.Trilinear;
+      if (texture.filterMode == FilterMode.Bilinear)
+        texture.filterMode = FilterMode.Trilinear;
 
+      if (!mappedTextures.ContainsKey(texture.name))
         continue;
-      }
 
       Texture2D newTexture = mappedTextures[texture.name];
       if (newTexture == texture)
@@ -136,27 +130,37 @@ public class VegaTextureReplacer : MonoBehaviour
 
   private void initialiseReplacer()
   {
+    string lastTextureName = "";
+
     foreach (GameDatabase.TextureInfo texInfo
              in GameDatabase.Instance.databaseTexture.FindAll(texInfo =>
                                                               texInfo.name.StartsWith(DIR_PREFIX)))
     {
-      if (texInfo.texture == null)
-        continue;
+      Texture2D texture = texInfo.texture;
 
-      string originalName = texInfo.texture.name.Substring(DIR_PREFIX.Length);
+      if (texture == null)
+        continue;
 
       // When a TGA loading fails, IndexOutOfBounds exception is thrown and GameDatabase gets
       // corrupted. The problematic TGA is duplicated in GameDatabase, so that it also overrides the
       // preceding texture.
-      if (mappedTextures.ContainsKey(originalName))
+      if (texture.name == lastTextureName)
       {
-        print("[TextureReplacer] Corrupted GameDatabase! Problematic TGA? " + texInfo.texture.name);
+        print("[TextureReplacer] Corrupted GameDatabase! Problematic TGA? " + texture.name);
       }
       else
       {
-        print("[TextureReplacer] Mapping " + originalName + " -> " + texInfo.texture.name);
-        mappedTextures.Add(originalName, texInfo.texture);
+        int lastSlash = texture.name.LastIndexOf('/');
+        string originalName = texture.name.Substring(lastSlash + 1);
+
+        if (!mappedTextures.ContainsKey(originalName))
+        {
+          print("[TextureReplacer] Mapping " + originalName + " -> " + texture.name);
+          mappedTextures.Add(originalName, texture);
+        }
       }
+
+      lastTextureName = texture.name;
     }
 
     // Replace textures (and apply trilinear filter). This doesn't reach some textures like skybox
@@ -199,11 +203,8 @@ public class VegaTextureReplacer : MonoBehaviour
         isInitialised = true;
       }
     }
-    else if (HighLogic.LoadedSceneIsFlight)
+    else if (HighLogic.LoadedSceneIsFlight && FlightGlobals.ActiveVessel != null)
     {
-      lastMaterialsCount = 0;
-      updateCounter = 0;
-
       // When in flight, perform replacement on each vehicle switch and docking. We have to do this
       // at least because of IVA suits that are reset by KSP on vehicle switch (probably because it
       // sets orange suits to Jeb, Bill & Bob and grey to all others). Replacement is postponed for
@@ -214,6 +215,9 @@ public class VegaTextureReplacer : MonoBehaviour
         lastVessel = FlightGlobals.ActiveVessel;
         lastCrewCount = lastVessel.GetCrewCount();
         isReplaceScheduled = true;
+
+        lastMaterialsCount = 0;
+        updateCounter = 0;
       }
       else if (isReplaceScheduled)
       {
@@ -221,26 +225,22 @@ public class VegaTextureReplacer : MonoBehaviour
         replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)));
       }
     }
-    else if (HighLogic.LoadedScene == GameScenes.MAINMENU)
+    else if (HighLogic.LoadedScene == GameScenes.MAINMENU && --updateCounter <= 0)
     {
+      updateCounter = 10;
+
       lastVessel = null;
       lastCrewCount = 0;
       isReplaceScheduled = false;
 
-      --updateCounter;
-      if (updateCounter <= 0)
+      // For non-flight scenes we perform replacement once every 10 frames because the next
+      // `Resources.FindObjectsOfTypeAll()` call is expensive and the replacement in the
+      // initialisation cannot replace certain textures, like skybox for example.
+      Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
+      if (materials.Length != lastMaterialsCount)
       {
-        updateCounter = 10;
-
-        // For non-flight scenes we perform replacement once every 10 frames because the next
-        // `Resources.FindObjectsOfTypeAll()` call is expensive and the replacement in the
-        // initialisation cannot replace certain textures, like skybox for example.
-        Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
-        if (materials.Length != lastMaterialsCount)
-        {
-          lastMaterialsCount = materials.Length;
-          replaceTextures(materials);
-        }
+        lastMaterialsCount = materials.Length;
+        replaceTextures(materials);
       }
     }
     else
