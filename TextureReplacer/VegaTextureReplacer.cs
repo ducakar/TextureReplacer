@@ -225,22 +225,25 @@ public class VegaTextureReplacer : MonoBehaviour
         replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)));
       }
     }
-    else if (HighLogic.LoadedScene == GameScenes.MAINMENU && --updateCounter <= 0)
+    else if (HighLogic.LoadedScene == GameScenes.MAINMENU)
     {
-      updateCounter = 10;
-
-      lastVessel = null;
-      lastCrewCount = 0;
-      isReplaceScheduled = false;
-
-      // For non-flight scenes we perform replacement once every 10 frames because the next
-      // `Resources.FindObjectsOfTypeAll()` call is expensive and the replacement in the
-      // initialisation cannot replace certain textures, like skybox for example.
-      Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
-      if (materials.Length != lastMaterialsCount)
+      if (--updateCounter <= 0)
       {
-        lastMaterialsCount = materials.Length;
-        replaceTextures(materials);
+        updateCounter = 10;
+
+        lastVessel = null;
+        lastCrewCount = 0;
+        isReplaceScheduled = false;
+
+        // For non-flight scenes we perform replacement once every 10 frames because the next
+        // `Resources.FindObjectsOfTypeAll()` call is expensive and the replacement in the
+        // initialisation cannot replace certain textures, like skybox for example.
+        Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
+        if (materials.Length != lastMaterialsCount)
+        {
+          lastMaterialsCount = materials.Length;
+          replaceTextures(materials);
+        }
       }
     }
     else

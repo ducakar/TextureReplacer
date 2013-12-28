@@ -23,7 +23,7 @@ Directory Layout
 ----------------
 The textures should be put into `GameData/TextureReplacer/Textures` (or its
 subdirectories) and have the same names as the internal KSP textures they should
-replace (plus .tga/.png/.mbm extensions, of course).
+replace (plus .tga/.png/.jpg/.mbm extensions, of course).
 
 Here is a list of some internal KSP texture names:
 
@@ -34,7 +34,7 @@ Here is a list of some internal KSP texture names:
     EVAtexture              // EVA suit
     EVAhelmet               // EVA helmet
     EVAjetpack              // EVA jetpack
-    kerbalMainNRM           // normal map for IVA suit (standard & veteran)
+    kerbalMainNRM           // normal map for IVA suit (veteran & standard)
     kerbalHelmetNRM         // normal map for IVA & EVA helmet
     EVAtextureNRM           // normal map for EVA suit
     EVAjetpackNRM           // normal map for EVA jetpack
@@ -46,7 +46,6 @@ Here is a list of some internal KSP texture names:
     GalaxyTex_NegativeZ     // Skybox -Z
     GalaxyTex_PositiveZ     // Skybox +Z
 
-    suncoronanew            // Sun corona
     moho00                  // Moho
     moho01                  // Moho normal map
     Eve2_00                 // Eve
@@ -85,11 +84,10 @@ Notes
 -----
 * TGAs are recommended over PNGs/JPEGs since KSP fails to generate mipmaps for
   the latter.
-* When you convert PNGs to TGAs, make sure you change indexed and greyscale
-  images to RGB. Only TGAs with RGB colours work in Unity.
-* If only diffuse textures are replaced for Kerbals, the stock normal maps are
-  kept.
-* Replacing only the normal map texture is not supported.
+* When you convert a PNG/JPEG to a TGA, make sure you change indexed and
+  greyscale images to RGB. KSP can only load TGAs with RGB colours.
+* If only diffuse textures are replaced, the stock normal maps are kept.
+* Replacing only normal map is not supported.
 * The planet textures being replaced are the high-altitude textures, which are
   also used in the map mode and in the tracking station. When getting closer to
   the surface, those textures are slowly interpolated into the high-resolution
@@ -100,6 +98,8 @@ Notes
 
 Change Log
 ----------
+* 0.11.1
+    - fixed bug in 0.11 updating main menu every second frame
 * 0.11
     - textures can be organised in subdirectories
     - fixed trilinear filtering not applied everywhere in 0.10
