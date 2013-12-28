@@ -58,6 +58,17 @@ public class VegaTextureReplacer : MonoBehaviour
       // Set trilinear filter.
       texture.filterMode = FilterMode.Trilinear;
 
+      // `texture.GetPixel() throws an exception if the texture is not readable and hence it
+      // cannot be compressed or mipmaps generated.
+      try
+      {
+        texture.GetPixel(0, 0);
+      }
+      catch (UnityException)
+      {
+        continue;
+      }
+
       // Generate mipmaps if neccessary. Images that may be UI icons should be excluded to prevent
       // blurrines when using less-than-full texture quality.
       if (texture.mipmapCount == 1 && (texture.width | texture.height) != 1 &&
@@ -71,34 +82,23 @@ public class VegaTextureReplacer : MonoBehaviour
 
         texture.Apply(true, false);
         texture.Compress(true);
-        texture.Apply(true, true);
 
         print("[TextureReplacer] Generated mipmaps for " + texture.name);
       }
       // Compress if neccessary.
       else if (!hasCompressor && format != TextureFormat.DXT1 && format != TextureFormat.DXT5)
       {
-        try
-        {
-          // `texture.GetPixel() throws an exception if the texture is not readable and hence it
-          // cannot be compressed.
-          texture.GetPixel(0, 0);
-          texture.Compress(true);
-          texture.Apply(true, true);
+        texture.Compress(true);
 
-          int nPixels = texture.width * texture.height;
-          int oldSize = texture.format == TextureFormat.Alpha8 ? nPixels :
-                        texture.format == TextureFormat.RGB24 ? nPixels * 3 : nPixels * 4;
-          int newSize = texture.format == TextureFormat.DXT1 ? nPixels / 2 : nPixels;
+        int nPixels = texture.width * texture.height;
+        int oldSize = texture.format == TextureFormat.Alpha8 ? nPixels :
+                      texture.format == TextureFormat.RGB24 ? nPixels * 3 : nPixels * 4;
+        int newSize = texture.format == TextureFormat.DXT1 ? nPixels / 2 : nPixels;
 
-          int spared = oldSize - newSize;
-          memorySpared += spared;
+        int spared = oldSize - newSize;
+        memorySpared += spared;
 
-          print("[TextureReplacer] Compressed " + texture.name);
-        }
-        catch (UnityException)
-        {
-        }
+        print("[TextureReplacer] Compressed " + texture.name);
       }
     }
 

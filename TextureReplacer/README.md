@@ -83,11 +83,6 @@ Here is a list of some internal KSP texture names:
 
 Notes
 -----
-* KSP never generates mipmaps for PNGs and JPEGs by itself. TextureReplacer
-  fixes this by generating mipmaps for all PNGs and JPEGs in (subdirectories of)
-  `TextureReplacer/Textures` and whose path contains `/Parts/` substring. Other
-  images are excluded to prevent generating mipmaps for UI icons used by various
-  plugins and thus making them blurry when not using the full texture quality.
 * KSP can only load TGAs with RGB colours.
 * TGAs are compressed a little better since information about transparency is
   preserved on load.
@@ -97,14 +92,22 @@ Notes
   also used in the map mode and in the tracking station. When getting closer to
   the surface, those textures are slowly interpolated into the high-resolution
   ones that cannot be replaced by this plugin.
+* KSP never generates mipmaps for PNGs and JPEGs by itself. TextureReplacer
+  fixes this by generating mipmaps for all PNGs and JPEGs in (subdirectories of)
+  `TextureReplacer/Textures` and whose path contains `/Parts/` substring. Other
+  images are excluded to prevent generating mipmaps for UI icons used by various
+  plugins and thus making them blurry when not using the full texture quality.
 * If you use Module Manager, make sure it is updated to the latest version.
   TextureReplacer is known to conflict with the version 1.0.
 
 
 Change Log
 ----------
+* 0.12.1
+    - reverted change from 0.12 that made textures unreadable
 * 0.12
     - added mipmap generation (for most textures)
+    - textures are made unreadable after compression/mipmap generation
     - less verbose log output
 * 0.11.1
     - fixed bug in 0.11 updating main menu every second frame

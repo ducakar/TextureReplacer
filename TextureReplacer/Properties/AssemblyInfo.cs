@@ -9,4 +9,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyCopyright("© 2013 Davorin Učakar, Ryan Bray")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("0.12.0.*")]
+[assembly: AssemblyVersion("0.12.1.*")]
