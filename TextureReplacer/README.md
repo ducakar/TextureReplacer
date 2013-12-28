@@ -8,14 +8,15 @@ TextureReplacer
 TextureReplacer is a plugin for Kerbal Space Program that replaces and improves
 textures. It can replace Kerbal textures (face and suits), skybox, high-altitude
 planet textures etc. Additionally, it also enforces trilinear texture filtering
-(i.e. smooth transitions between mipmaps) and compresses all non-compressed
-textures from `GameData/` that are found in RAM.
+(i.e. smooth transitions between mipmaps), generates mipmaps for PNGs and JPEGs
+and compresses all non-compressed textures from `GameData/` that are found in
+RAM (i.e. TGAs and sometimes MBMs).
 
 Special thanks to:
 * Tingle for Universe Replacer; studying his code helped me a lot while
   developing this plugin,
-* rbray89 for TextureCompressor (a.k.a. Active Memory Reduction Mod) which has
-  been merged into TextureReplacer and
+* rbray89 for TextureCompressor (a.k.a. Active Memory Reduction Mod) and Visual
+  Enhancements where some code has been borrowed from and
 * therealcrow999 for testing and benchmarking this plugin.
 
 
@@ -23,7 +24,7 @@ Directory Layout
 ----------------
 The textures should be put into `GameData/TextureReplacer/Textures` (or its
 subdirectories) and have the same names as the internal KSP textures they should
-replace (plus .tga/.png/.jpg/.mbm extensions, of course).
+replace (plus .png/.jpg/.tga/.mbm extensions, of course).
 
 Here is a list of some internal KSP texture names:
 
@@ -82,10 +83,14 @@ Here is a list of some internal KSP texture names:
 
 Notes
 -----
-* TGAs are recommended over PNGs/JPEGs since KSP fails to generate mipmaps for
-  the latter.
-* When you convert a PNG/JPEG to a TGA, make sure you change indexed and
-  greyscale images to RGB. KSP can only load TGAs with RGB colours.
+* KSP never generates mipmaps for PNGs and JPEGs by itself. TextureReplacer
+  fixes this by generating mipmaps for all PNGs and JPEGs in (subdirectories of)
+  `TextureReplacer/Textures` and whose path contains `/Parts/` substring. Other
+  images are excluded to prevent generating mipmaps for UI icons used by various
+  plugins and thus making them blurry when not using the full texture quality.
+* KSP can only load TGAs with RGB colours.
+* TGAs are compressed a little better since information about transparency is
+  preserved on load.
 * If only diffuse textures are replaced, the stock normal maps are kept.
 * Replacing only normal map is not supported.
 * The planet textures being replaced are the high-altitude textures, which are
@@ -98,6 +103,9 @@ Notes
 
 Change Log
 ----------
+* 0.12
+    - added mipmap generation (for most textures)
+    - less verbose log output
 * 0.11.1
     - fixed bug in 0.11 updating main menu every second frame
 * 0.11

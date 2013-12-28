@@ -43,10 +43,10 @@ public class VegaTextureReplacer : MonoBehaviour
   private bool isReplaceScheduled = false;
   private int memorySpared = 0;
   private int lastTextureCount = 0;
-  private bool isTextureCompressorDetected = false;
+  private bool hasCompressor = false;
   private bool isInitialised = false;
 
-  private void compressTextures()
+  private void processTextures()
   {
     List<GameDatabase.TextureInfo> texInfos = GameDatabase.Instance.databaseTexture;
 
@@ -55,32 +55,51 @@ public class VegaTextureReplacer : MonoBehaviour
       Texture2D texture = texInfos[i].texture;
       TextureFormat format = texture.format;
 
-      if (format == TextureFormat.DXT1 || format == TextureFormat.DXT5)
-        continue;
+      // Set trilinear filter.
+      texture.filterMode = FilterMode.Trilinear;
 
-      // `texture.GetPixel() throws an exception if the texture is not readable and hence it cannot
-      // be compressed.
-      try
+      // Generate mipmaps if neccessary. Images that may be UI icons should be excluded to prevent
+      // blurrines when using less-than-full texture quality.
+      if (texture.mipmapCount == 1 && (texture.width | texture.height) != 1 &&
+          (texture.name.StartsWith(DIR_PREFIX) ||
+          texture.name.IndexOf("/Parts/", StringComparison.OrdinalIgnoreCase) >= 0))
       {
-        texture.filterMode = FilterMode.Trilinear;
-        texture.GetPixel(0, 0);
+        Color32[] pixels = texture.GetPixels32();
+
+        texture.Resize(texture.width, texture.height, TextureFormat.RGBA32, true);
+        texture.SetPixels32(pixels);
+
+        texture.Apply(true, false);
         texture.Compress(true);
+        texture.Apply(true, true);
+
+        print("[TextureReplacer] Generated mipmaps for " + texture.name);
       }
-      catch (UnityException)
+      // Compress if neccessary.
+      else if (!hasCompressor && format != TextureFormat.DXT1 && format != TextureFormat.DXT5)
       {
-        continue;
+        try
+        {
+          // `texture.GetPixel() throws an exception if the texture is not readable and hence it
+          // cannot be compressed.
+          texture.GetPixel(0, 0);
+          texture.Compress(true);
+          texture.Apply(true, true);
+
+          int nPixels = texture.width * texture.height;
+          int oldSize = texture.format == TextureFormat.Alpha8 ? nPixels :
+                        texture.format == TextureFormat.RGB24 ? nPixels * 3 : nPixels * 4;
+          int newSize = texture.format == TextureFormat.DXT1 ? nPixels / 2 : nPixels;
+
+          int spared = oldSize - newSize;
+          memorySpared += spared;
+
+          print("[TextureReplacer] Compressed " + texture.name);
+        }
+        catch (UnityException)
+        {
+        }
       }
-
-      int nPixels = texture.width * texture.height;
-      int oldSize = texture.format == TextureFormat.Alpha8 ? nPixels :
-                    texture.format == TextureFormat.RGB24 ? nPixels * 3 : nPixels * 4;
-      int newSize = texture.format == TextureFormat.DXT1 ? nPixels / 2 : nPixels;
-
-      int spared = oldSize - newSize;
-      memorySpared += spared;
-
-      print(String.Format("[TextureReplacer] Compressed {0} [{1} {2}x{3}], spared {4:0.0} KiB",
-                          texture.name, format, texture.width, texture.height, spared / 1024.0));
     }
 
     lastTextureCount = texInfos.Count;
@@ -88,19 +107,19 @@ public class VegaTextureReplacer : MonoBehaviour
 
   private void replaceTextures(Material[] materials)
   {
-    print("[TextureReplacer] Replacing textures and setting trilinear filter ...");
-
     foreach (Material material in materials)
     {
       Texture texture = material.mainTexture;
       if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp"))
         continue;
 
-      if (texture.filterMode == FilterMode.Bilinear)
-        texture.filterMode = FilterMode.Trilinear;
-
       if (!mappedTextures.ContainsKey(texture.name))
+      {
+        if (texture.filterMode == FilterMode.Bilinear)
+          texture.filterMode = FilterMode.Trilinear;
+
         continue;
+      }
 
       Texture2D newTexture = mappedTextures[texture.name];
       if (newTexture == texture)
@@ -110,8 +129,6 @@ public class VegaTextureReplacer : MonoBehaviour
       // `GameData/` so that has already been set in initialisation.
       material.mainTexture = newTexture;
       Resources.UnloadAsset(texture);
-
-      print("[TextureReplacer] " + texture.name + " replaced");
 
       Texture normalMap = material.GetTexture("_BumpMap");
       if (normalMap == null || !mappedTextures.ContainsKey(normalMap.name))
@@ -123,8 +140,6 @@ public class VegaTextureReplacer : MonoBehaviour
 
       material.SetTexture("_BumpMap", newNormalMap);
       Resources.UnloadAsset(normalMap);
-
-      print("[TextureReplacer] " + normalMap.name + " [normal map] replaced");
     }
   }
 
@@ -179,7 +194,7 @@ public class VegaTextureReplacer : MonoBehaviour
       if (go.name == "TextureCompressor")
       {
         print("[TextureReplacer] Detected TextureCompressor, disabling texture compression");
-        isTextureCompressorDetected = true;
+        hasCompressor = true;
         break;
       }
     }
@@ -189,8 +204,7 @@ public class VegaTextureReplacer : MonoBehaviour
   {
     if (!isInitialised)
     {
-      if (!isTextureCompressorDetected)
-        compressTextures();
+      processTextures();
 
       if (GameDatabase.Instance.IsReady())
       {
