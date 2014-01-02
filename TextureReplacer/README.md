@@ -84,8 +84,6 @@ Here is a list of some internal KSP texture names:
 Notes
 -----
 * KSP can only load TGAs with RGB colours.
-* TGAs are compressed a little better since information about transparency is
-  preserved on load.
 * If only diffuse textures are replaced, the stock normal maps are kept.
 * Replacing only normal map is not supported.
 * The planet textures being replaced are the high-altitude textures, which are
@@ -94,15 +92,21 @@ Notes
   ones that cannot be replaced by this plugin.
 * KSP never generates mipmaps for PNGs and JPEGs by itself. TextureReplacer
   fixes this by generating mipmaps for all PNGs and JPEGs in (subdirectories of)
-  `TextureReplacer/Textures` and whose path contains `/Parts/` substring. Other
-  images are excluded to prevent generating mipmaps for UI icons used by various
-  plugins and thus making them blurry when not using the full texture quality.
+  `TextureReplacer/Textures` and whose path contains `/FX/`, `/Parts/` or
+  `/Spaces/` substring (ignoring case). Other images are excluded to prevent
+  generating mipmaps for UI icons used by various plugins and thus making them
+  blurry when not using the full texture quality.
 * If you use Module Manager, make sure it is updated to the latest version.
-  TextureReplacer is known to conflict with the version 1.0.
+  TextureReplacer is known to conflict with Module Manager 1.0.
 
 
 Change Log
 ----------
+* 0.13
+    - RGBA/DTX5 textures are converted to RGB/DXT1 during mipmap generation if
+      fully opaque, to fix KSP bug that always loads PNGs/JPEGs as transparent
+    - `*/FX/*` and `*/Spaces/*` paths included in mipmap generation
+    - some code refactoring and more comments
 * 0.12.1
     - reverted change from 0.12 that made textures unreadable
 * 0.12

@@ -46,6 +46,37 @@ public class VegaTextureReplacer : MonoBehaviour
   private bool hasCompressor = false;
   private bool isInitialised = false;
 
+  private static void log(string s, params object[] args)
+  {
+    Debug.Log("[TextureReplacer] " + String.Format(s, args));
+  }
+
+  /**
+   * Estimate image size.
+   *
+   * This is only a rough estimate. It doesn't bother with details like the padding bytes or exact
+   * mipmap size calculation.
+   */
+  private static int textureSize(Texture2D texture)
+  {
+    int nPixels = texture.width * texture.height;
+    int size = texture.format == TextureFormat.DXT1 ? nPixels * 4 / 6 :
+               texture.format == TextureFormat.DXT5 ? nPixels * 4 / 4 :
+               texture.format == TextureFormat.Alpha8 ? nPixels * 1 :
+               texture.format == TextureFormat.RGB24 ? nPixels * 3 : nPixels * 4;
+
+    // Is this correct? Does Unity even store mipmaps in RAM?
+    if (texture.mipmapCount != 1)
+      size += size / 3;
+
+    return size;
+  }
+
+  /**
+   * Texture compression & mipmap generation pass.
+   *
+   * This is run on each game update until game database is loaded.
+   */
   private void processTextures()
   {
     List<GameDatabase.TextureInfo> texInfos = GameDatabase.Instance.databaseTexture;
@@ -58,8 +89,8 @@ public class VegaTextureReplacer : MonoBehaviour
       // Set trilinear filter.
       texture.filterMode = FilterMode.Trilinear;
 
-      // `texture.GetPixel() throws an exception if the texture is not readable and hence it
-      // cannot be compressed or mipmaps generated.
+      // `texture.GetPixel() throws an exception if the texture is not readable and hence it cannot
+      // be compressed nor mipmaps generated.
       try
       {
         texture.GetPixel(0, 0);
@@ -71,40 +102,78 @@ public class VegaTextureReplacer : MonoBehaviour
 
       // Generate mipmaps if neccessary. Images that may be UI icons should be excluded to prevent
       // blurrines when using less-than-full texture quality.
-      if (texture.mipmapCount == 1 && (texture.width | texture.height) != 1 &&
-          (texture.name.StartsWith(DIR_PREFIX) ||
-          texture.name.IndexOf("/Parts/", StringComparison.OrdinalIgnoreCase) >= 0))
+      if (texture.mipmapCount == 1 && (texture.width | texture.height) != 1
+          && (texture.name.StartsWith(DIR_PREFIX)
+          || texture.name.IndexOf("/FX/", StringComparison.OrdinalIgnoreCase) >= 0
+          || texture.name.IndexOf("/Parts/", StringComparison.OrdinalIgnoreCase) >= 0
+          || texture.name.IndexOf("/Spaces/", StringComparison.OrdinalIgnoreCase) >= 0))
       {
-        Color32[] pixels = texture.GetPixels32();
+        int oldSize = textureSize(texture);
+        bool isTransparent = false;
+        Color32[] pixels32 = null;
 
-        texture.Resize(texture.width, texture.height, TextureFormat.RGBA32, true);
-        texture.SetPixels32(pixels);
+        if (format == TextureFormat.RGBA32 || format == TextureFormat.DXT5)
+        {
+          pixels32 = texture.GetPixels32();
+
+          foreach (Color32 pixel in pixels32)
+          {
+            if (pixel.a != 255)
+            {
+              isTransparent = true;
+              break;
+            }
+          }
+        }
+
+        if (isTransparent)
+        {
+          texture.Resize(texture.width, texture.height, TextureFormat.RGBA32, true);
+          texture.SetPixels32(pixels32);
+        }
+        else
+        {
+          Color[] pixels24 = texture.GetPixels();
+
+          texture.Resize(texture.width, texture.height, TextureFormat.RGB24, true);
+          texture.SetPixels(pixels24);
+        }
 
         texture.Apply(true, false);
         texture.Compress(true);
 
-        print("[TextureReplacer] Generated mipmaps for " + texture.name);
+        int newSize = textureSize(texture);
+        memorySpared += oldSize - newSize;
+
+        log("Generated mipmaps for {0} [{1}x{2} {3} -> {4}]",
+            texture.name, texture.width, texture.height, format, texture.format);
       }
       // Compress if neccessary.
       else if (!hasCompressor && format != TextureFormat.DXT1 && format != TextureFormat.DXT5)
       {
+        int oldSize = textureSize(texture);
+
         texture.Compress(true);
 
-        int nPixels = texture.width * texture.height;
-        int oldSize = texture.format == TextureFormat.Alpha8 ? nPixels :
-                      texture.format == TextureFormat.RGB24 ? nPixels * 3 : nPixels * 4;
-        int newSize = texture.format == TextureFormat.DXT1 ? nPixels / 2 : nPixels;
+        int newSize = textureSize(texture);
+        memorySpared += oldSize - newSize;
 
-        int spared = oldSize - newSize;
-        memorySpared += spared;
-
-        print("[TextureReplacer] Compressed " + texture.name);
+        log("Compressed {0} [{1}x{2} {3} -> {4}]",
+            texture.name, texture.width, texture.height, format, texture.format);
       }
     }
 
     lastTextureCount = texInfos.Count;
   }
 
+  /**
+   * Texture replacement step.
+   *
+   * This is run every 10 frames in main menu (because KSP resets twice when main menu opens) and in
+   * the flight scene on scene start, vessel switch or docking. The vessel switch and docking runs
+   * are required to fix IVA suit textures that are reset by KSP. Vessel switch also occurs on scene
+   * start, so there's no need to explicitly cover that case.
+   */
   private void replaceTextures(Material[] materials)
   {
     foreach (Material material in materials)
@@ -115,6 +184,8 @@ public class VegaTextureReplacer : MonoBehaviour
 
       if (!mappedTextures.ContainsKey(texture.name))
       {
+        // Set trilinear filter. Trilinear filter is also set in initialisation but it only iterates
+        // through textures in `GameData/`.
         if (texture.filterMode == FilterMode.Bilinear)
           texture.filterMode = FilterMode.Trilinear;
 
@@ -125,8 +196,6 @@ public class VegaTextureReplacer : MonoBehaviour
       if (newTexture == texture)
         continue;
 
-      // Replace texture. No need to set trilinear filter here as the replacement textures reside in
-      // `GameData/` so that has already been set in initialisation.
       material.mainTexture = newTexture;
       Resources.UnloadAsset(texture);
 
@@ -143,6 +212,9 @@ public class VegaTextureReplacer : MonoBehaviour
     }
   }
 
+  /**
+   * Initialisation for textures replacement.
+   */
   private void initialiseReplacer()
   {
     string lastTextureName = "";
@@ -152,25 +224,26 @@ public class VegaTextureReplacer : MonoBehaviour
                                                               texInfo.name.StartsWith(DIR_PREFIX)))
     {
       Texture2D texture = texInfo.texture;
-
       if (texture == null)
         continue;
 
       // When a TGA loading fails, IndexOutOfBounds exception is thrown and GameDatabase gets
-      // corrupted. The problematic TGA is duplicated in GameDatabase, so that it also overrides the
+      // corrupted. The problematic TGA is duplicated in GameDatabase so that it also overrides the
       // preceding texture.
       if (texture.name == lastTextureName)
       {
-        print("[TextureReplacer] Corrupted GameDatabase! Problematic TGA? " + texture.name);
+        log("Corrupted GameDatabase! Problematic TGA? {0}", texture.name);
       }
       else
       {
         int lastSlash = texture.name.LastIndexOf('/');
         string originalName = texture.name.Substring(lastSlash + 1);
 
+        // This in wrapped inside an 'if' clause just in case if corrupted GameDatabase contains
+        // non-consecutive duplicated entries for some strange reason.
         if (!mappedTextures.ContainsKey(originalName))
         {
-          print("[TextureReplacer] Mapping " + originalName + " -> " + texture.name);
+          log("Mapping {0} -> {1}", originalName, texture.name);
           mappedTextures.Add(originalName, texture);
         }
       }
@@ -188,12 +261,12 @@ public class VegaTextureReplacer : MonoBehaviour
     DontDestroyOnLoad(this);
 
     // Prevent conficts with TextureCompressor. If it is found among loaded plugins, texture
-    // compression step will be skipped, since TextureCompressor should handle it (better).
+    // compression step will be skipped since TextureCompressor should handle it (better).
     foreach (GameObject go in GameObject.FindObjectsOfType(typeof(GameObject)))
     {
       if (go.name == "TextureCompressor")
       {
-        print("[TextureReplacer] Detected TextureCompressor, disabling texture compression");
+        log("Detected TextureCompressor, disabling texture compression");
         hasCompressor = true;
         break;
       }
@@ -208,10 +281,11 @@ public class VegaTextureReplacer : MonoBehaviour
 
       if (GameDatabase.Instance.IsReady())
       {
-        print(String.Format(
-          "[TextureReplacer] Texture compression spared total {0:0.0} MiB = {1:0.0} MB",
-          memorySpared / 1024.0 / 1024.0, memorySpared / 1000.0 / 1000.0
-        ));
+        if (memorySpared > 0)
+        {
+          log("Texture compression spared {0:0.0} MiB = {1:0.0} MB",
+              memorySpared / 1024.0 / 1024.0, memorySpared / 1000.0 / 1000.0);
+        }
 
         initialiseReplacer();
         isInitialised = true;
@@ -219,11 +293,11 @@ public class VegaTextureReplacer : MonoBehaviour
     }
     else if (HighLogic.LoadedSceneIsFlight && FlightGlobals.ActiveVessel != null)
     {
-      // When in flight, perform replacement on each vehicle switch and docking. We have to do this
-      // at least because of IVA suits that are reset by KSP on vehicle switch (probably because it
-      // sets orange suits to Jeb, Bill & Bob and grey to all others). Replacement is postponed for
-      // one frame to avoid possible race conditions. (I experienced once that IVA textures were not
-      // replaced. I suspect race condition as the most plausible cause).
+      // When in flight, perform replacement on each vehicle switch and on docking. We have to do
+      // this at least because IVA suits are reset by KSP when new portraits appear (probably
+      // because it sets orange suits for Jeb, Bill & Bob and grey to all others). Replacement is
+      // postponed for one frame to avoid possible race conditions. (I experienced once that IVA
+      // textures were not replaced. I suspect race condition as the most plausible cause).
       if (FlightGlobals.ActiveVessel != lastVessel || lastVessel.GetCrewCount() != lastCrewCount)
       {
         lastVessel = FlightGlobals.ActiveVessel;
@@ -249,9 +323,9 @@ public class VegaTextureReplacer : MonoBehaviour
         lastCrewCount = 0;
         isReplaceScheduled = false;
 
-        // For non-flight scenes we perform replacement once every 10 frames because the next
+        // For non-flight scenes we perform replacement once every 10 frames because the following
         // `Resources.FindObjectsOfTypeAll()` call is expensive and the replacement in the
-        // initialisation cannot replace certain textures, like skybox for example.
+        // initialisation doesn't replace certain textures, like skybox for example.
         Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
         if (materials.Length != lastMaterialsCount)
         {
