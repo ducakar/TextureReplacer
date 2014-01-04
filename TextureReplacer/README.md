@@ -22,9 +22,13 @@ Special thanks to:
 
 Directory Layout
 ----------------
-The textures should be put into `GameData/TextureReplacer/Textures` (or its
+The textures should be put into `GameData/TextureReplacer/` (or its
 subdirectories) and have the same names as the internal KSP textures they should
 replace (plus .png/.jpg/.tga/.mbm extensions, of course).
+
+Per-Kerbal head texture should be named `kerbalHead` (plus extension) and must
+reside in `GameData/TextureReplacer/CustomKerbals/<name>/`, where `<name>` is
+the full name of some Kerbal.
 
 Here is a list of some internal KSP texture names:
 
@@ -83,19 +87,22 @@ Here is a list of some internal KSP texture names:
 
 Notes
 -----
-* KSP can only load TGAs with RGB colours.
-* If only diffuse textures are replaced, the stock normal maps are kept.
-* Replacing only normal map is not supported.
+* Texture compression step is disabled if TextureCompressor is detected. Texture
+  compression is then left to TextureCompressor which is a more specialised mod
+  for that purpuse.
 * The planet textures being replaced are the high-altitude textures, which are
   also used in the map mode and in the tracking station. When getting closer to
   the surface, those textures are slowly interpolated into the high-resolution
   ones that cannot be replaced by this plugin.
 * KSP never generates mipmaps for PNGs and JPEGs by itself. TextureReplacer
   fixes this by generating mipmaps for all PNGs and JPEGs in (subdirectories of)
-  `TextureReplacer/Textures` and whose path contains `/FX/`, `/Parts/` or
-  `/Spaces/` substring (ignoring case). Other images are excluded to prevent
-  generating mipmaps for UI icons used by various plugins and thus making them
-  blurry when not using the full texture quality.
+  `TextureReplacer/` and those whose paths contain `/FX/`, `/Parts/` or
+  `/Spaces/` (ignoring case). Other images are excluded to prevent generating
+  mipmaps for UI icons used by various plugins and thus making them blurry when
+  not using the full texture quality.
+* KSP can only load TGAs with RGB colours.
+* If only diffuse textures are replaced, the stock normal maps are kept.
+* Replacing only normal map is not supported.
 * If you use Module Manager, make sure it is updated to the latest version.
   TextureReplacer is known to conflict with Module Manager 1.0.
 
@@ -103,6 +110,9 @@ Notes
 Change Log
 ----------
 * 0.13
+    - added support for per-Kerbal head textures
+    - other textures can now be in any subdirectory of `TextureReplacer/` other
+      than `CustomKerbals/`
     - RGBA/DTX5 textures are converted to RGB/DXT1 during mipmap generation if
       fully opaque, to fix KSP bug that always loads PNGs/JPEGs as transparent
     - `*/FX/*` and `*/Spaces/*` paths included in mipmap generation
@@ -165,7 +175,7 @@ Change Log
 
 Licence
 -------
-    Copyright © 2013 Davorin Učakar
+    Copyright © 2014 Davorin Učakar
     Copyright © 2013 Ryan Bray
 
     Permission is hereby granted, free of charge, to any person obtaining a
