@@ -34,16 +34,32 @@ using UnityEngine;
 [KSPAddon(KSPAddon.Startup.Instantly, true)]
 public class VegaTextureReplacer : MonoBehaviour
 {
+  private class KerbalSkin
+  {
+    public Texture2D head;
+    public Texture2D suit;
+    public Texture2D suitNRM;
+    public Texture2D helmet;
+    public Texture2D helmetNRM;
+    public Texture2D evaSuit;
+    public Texture2D evaSuitNRM;
+    public Texture2D evaHelmet;
+    public Texture2D evaJetpack;
+    public Texture2D evaJetpackNRM;
+  };
+
   private static readonly string DIR_PREFIX = "TextureReplacer/";
   private static readonly string DIR_CUSTOM_KERBALS = DIR_PREFIX + "CustomKerbals/";
+  private static readonly string DIR_GENERIC_KERBALS = DIR_PREFIX + "GenericKerbals/";
   private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
-  private Dictionary<string, Texture2D> kerbalHeads = new Dictionary<string, Texture2D>();
+  private Dictionary<string, KerbalSkin> customSkins = new Dictionary<string, KerbalSkin>();
+  private List<KerbalSkin> genericHeadSkins = new List<KerbalSkin>();
+  private List<KerbalSkin> genericSuitSkins = new List<KerbalSkin>();
   private int updateCounter = 0;
   private int lastMaterialsCount = 0;
   private Vessel lastVessel = null;
   private int lastVesselCount = 0;
   private int lastCrewCount = 0;
-  private bool isReplaceScheduled = false;
   private int memorySpared = 0;
   private int lastTextureCount = 0;
   private bool hasCompressor = false;
@@ -199,74 +215,154 @@ public class VegaTextureReplacer : MonoBehaviour
       }
 
       Texture2D newTexture = mappedTextures[texture.name];
-      if (newTexture == texture)
-        continue;
-
-      material.mainTexture = newTexture;
-      if (doUnload)
-        Resources.UnloadAsset(texture);
+      if (newTexture != texture)
+      {
+        material.mainTexture = newTexture;
+        if (doUnload)
+          Resources.UnloadAsset(texture);
+      }
 
       Texture normalMap = material.GetTexture("_BumpMap");
       if (normalMap == null || !mappedTextures.ContainsKey(normalMap.name))
         continue;
 
       Texture2D newNormalMap = mappedTextures[normalMap.name];
-      if (newNormalMap == normalMap)
-        continue;
-
-      material.SetTexture("_BumpMap", newNormalMap);
-      if (doUnload)
-        Resources.UnloadAsset(normalMap);
+      if (newNormalMap != normalMap)
+      {
+        material.SetTexture("_BumpMap", newNormalMap);
+        if (doUnload)
+          Resources.UnloadAsset(normalMap);
+      }
     }
   }
 
   /**
-   * Set custom Kerbal head textures.
+   * Replace Kerbal textures.
    *
-   * This is run after texture replacement step on each vessel switch, docking and when number of
-   * vessel on the scene changes (for the case when you approach a Kerbal on EVA).
+   * This is a helper method for `replaceKerbalSkins()`. It replaces textues in an IVA or an EVA
+   * Kerbal.
    */
-  private void replaceKerbalHeads()
+  private void replaceKerbalSkin(Component component, string name)
   {
-    foreach (KerbalEVA ke in KerbalEVA.FindObjectsOfType(typeof(KerbalEVA)))
+    bool isEva = component is KerbalEVA;
+    KerbalSkin headSkin = null;
+    KerbalSkin suitSkin = null;
+
+    if (customSkins.ContainsKey(name))
     {
-      GameObject go = ke.gameObject;
-      Vessel vessel = go.GetComponent<Vessel>();
+      headSkin = customSkins[name];
+      suitSkin = headSkin;
+    }
+    else if (genericHeadSkins.Count != 0 || genericSuitSkins.Count != 0)
+    {
+      int hash = name.GetHashCode();
 
-      if (vessel == null || !kerbalHeads.ContainsKey(vessel.vesselName))
-        continue;
+      if (genericHeadSkins.Count != 0)
+        headSkin = genericHeadSkins[(hash & 0x7fffffff) % genericHeadSkins.Count];
 
-      foreach (SkinnedMeshRenderer smr in go.GetComponentsInChildren<SkinnedMeshRenderer>())
-      {
-        if (smr.name != "headMesh01")
-          continue;
-
-        Texture2D newTexture = kerbalHeads[vessel.vesselName];
-        if (newTexture != smr.material.mainTexture)
-          smr.material.mainTexture = newTexture;
-
-        break;
-      }
+      if (genericSuitSkins.Count != 0)
+        suitSkin = genericSuitSkins[(hash * 33 & 0x7fffffff) % genericSuitSkins.Count];
+    }
+    else
+    {
+      return;
     }
 
-    foreach (Kerbal k in Kerbal.FindObjectsOfType(typeof(Kerbal)))
+    foreach (SkinnedMeshRenderer smr in component.GetComponentsInChildren<SkinnedMeshRenderer>())
     {
-      GameObject go = k.gameObject;
-
-      if (!kerbalHeads.ContainsKey(go.name))
+      Material material = smr.material;
+      if (material.mainTexture == null)
         continue;
 
-      foreach (SkinnedMeshRenderer smr in go.GetComponentsInChildren<SkinnedMeshRenderer>())
+      Texture2D newTexture = null;
+      Texture2D newNormalMap = null;
+
+      if (headSkin != null && smr.name == "headMesh01")
       {
-        if (smr.name != "headMesh01")
-          continue;
-
-        Texture2D newTexture = kerbalHeads[go.name];
-        if (newTexture != smr.material.mainTexture)
-          smr.material.mainTexture = newTexture;
-
-        break;
+        newTexture = headSkin.head;
       }
+      else if (suitSkin != null)
+      {
+        if (smr.name == "body01")
+        {
+          newTexture = isEva ? suitSkin.evaSuit : suitSkin.suit;
+          newNormalMap = isEva ? suitSkin.evaSuitNRM : suitSkin.suitNRM;
+        }
+        else if (smr.name == "helmet")
+        {
+          newTexture = isEva ? suitSkin.evaHelmet : suitSkin.helmet;
+          newNormalMap = suitSkin.helmetNRM;
+        }
+        else if (material.name.StartsWith("jetpack"))
+        {
+          newTexture = suitSkin.evaJetpack;
+          newNormalMap = suitSkin.evaJetpackNRM;
+        }
+      }
+
+      if (newTexture != null && newTexture != smr.material.mainTexture)
+        smr.material.mainTexture = newTexture;
+
+      if (newNormalMap != null && newNormalMap != smr.material.GetTexture("_BumpMap"))
+        smr.material.SetTexture("_BumpMap", newNormalMap);
+    }
+  }
+
+  /**
+   * Set custom Kerbals' textures.
+   *
+   * This is run after texture replacement step on each vessel switch, docking and when the number
+   * of vessels on the scene changes (for the case when you approach a Kerbal on EVA).
+   */
+  private void replaceKerbalSkins()
+  {
+    foreach (Kerbal kerbal in Kerbal.FindObjectsOfType(typeof(Kerbal)))
+      replaceKerbalSkin(kerbal, kerbal.name);
+
+    foreach (KerbalEVA eva in KerbalEVA.FindObjectsOfType(typeof(KerbalEVA)))
+    {
+      if (eva.vessel != null)
+        replaceKerbalSkin(eva, eva.vessel.vesselName);
+    }
+  }
+
+  private bool setSkinTexture(KerbalSkin skin, Texture2D texture, string originalName)
+  {
+    switch (originalName)
+    {
+      case "kerbalHead":
+        skin.head = texture;
+        return true;
+      case "kerbalMainGrey":
+        skin.suit = texture;
+        return true;
+      case "kerbalMainNRM":
+        skin.suitNRM = texture;
+        return true;
+      case "kerbalHelmetGrey":
+        skin.helmet = texture;
+        return true;
+      case "kerbalHelmetNRM":
+        skin.helmetNRM = texture;
+        return true;
+      case "EVAtexture":
+        skin.evaSuit = texture;
+        return true;
+      case "EVAtextureNRM":
+        skin.evaSuitNRM = texture;
+        return true;
+      case "EVAhelmet":
+        skin.evaHelmet = texture;
+        return true;
+      case "EVAjetpack":
+        skin.evaJetpack = texture;
+        return true;
+      case "EVAjetpackNRM":
+        skin.evaJetpackNRM = texture;
+        return true;
+      default:
+        log("Unknown kerbal texture name {0} [{1}]", originalName, texture.name);
+        return false;
     }
   }
 
@@ -275,6 +371,8 @@ public class VegaTextureReplacer : MonoBehaviour
    */
   private void initialiseReplacer()
   {
+    Dictionary<string, int> genericDirs = new Dictionary<string, int>();
+    List<KerbalSkin> genericSkins = new List<KerbalSkin>();
     string lastTextureName = "";
 
     foreach (GameDatabase.TextureInfo texInfo
@@ -298,10 +396,49 @@ public class VegaTextureReplacer : MonoBehaviour
         string originalName = texture.name.Substring(lastSlash + 1);
         string kerbalName = texture.name.Substring(DIR_CUSTOM_KERBALS.Length, kerbalNameLength);
 
-        if (!kerbalHeads.ContainsKey(kerbalName))
-        {
+        if (!customSkins.ContainsKey(kerbalName))
+          customSkins.Add(kerbalName, new KerbalSkin());
+
+        KerbalSkin skin = customSkins[kerbalName];
+
+        if (setSkinTexture(skin, texture, originalName))
           log("Mapping {0}'s {1} -> {2}", kerbalName, originalName, texture.name);
-          kerbalHeads.Add(kerbalName, texture);
+      }
+      else if (texture.name.StartsWith(DIR_GENERIC_KERBALS))
+      {
+        int lastSlash = texture.name.LastIndexOf('/');
+        int dirNameLength = lastSlash - DIR_GENERIC_KERBALS.Length;
+        string originalName = texture.name.Substring(lastSlash + 1);
+
+        KerbalSkin skin;
+        int index = genericSkins.Count;
+
+        if (originalName.StartsWith("kerbalHead"))
+        {
+          skin = new KerbalSkin();
+          skin.head = texture;
+          genericSkins.Add(skin);
+
+          log("Mapping generic[{0:00}] {1} -> {2}", index, originalName, texture.name);
+        }
+        else if (dirNameLength > 0)
+        {
+          string dirName = texture.name.Substring(DIR_GENERIC_KERBALS.Length, dirNameLength);
+
+          if (genericDirs.ContainsKey(dirName))
+          {
+            index = genericDirs[dirName];
+            skin = genericSkins[index];
+          }
+          else
+          {
+            genericDirs.Add(dirName, index);
+            skin = new KerbalSkin();
+            genericSkins.Add(skin);
+          }
+
+          if (setSkinTexture(skin, texture, originalName))
+            log("Mapping generic[{0:00}] {1} -> {2}", index, originalName, texture.name);
         }
       }
       else
@@ -319,6 +456,16 @@ public class VegaTextureReplacer : MonoBehaviour
       }
 
       lastTextureName = texture.name;
+    }
+
+    foreach (KerbalSkin skin in genericSkins)
+    {
+      if (skin.head != null)
+        genericHeadSkins.Add(skin);
+
+      if (skin.suit != null || skin.helmet != null || skin.evaSuit != null || skin.evaHelmet != null
+          || skin.evaJetpack != null)
+        genericSuitSkins.Add(skin);
     }
 
     // Replace textures (and apply trilinear filter). This doesn't reach some textures like skybox
@@ -343,7 +490,7 @@ public class VegaTextureReplacer : MonoBehaviour
     }
   }
 
-  protected void Update()
+  protected void LateUpdate()
   {
     if (!isInitialised)
     {
@@ -377,16 +524,12 @@ public class VegaTextureReplacer : MonoBehaviour
         lastVessel = FlightGlobals.ActiveVessel;
         lastVesselCount = nVessels;
         lastCrewCount = lastVessel.GetCrewCount();
-        isReplaceScheduled = true;
 
         lastMaterialsCount = 0;
         updateCounter = 0;
-      }
-      else if (isReplaceScheduled)
-      {
-        isReplaceScheduled = false;
+
         replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)), false);
-        replaceKerbalHeads();
+        replaceKerbalSkins();
       }
     }
     else if (HighLogic.LoadedScene == GameScenes.MAINMENU)
@@ -398,7 +541,6 @@ public class VegaTextureReplacer : MonoBehaviour
         lastVessel = null;
         lastVesselCount = 0;
         lastCrewCount = 0;
-        isReplaceScheduled = false;
 
         // For non-flight scenes we perform replacement once every 10 frames because the following
         // `Resources.FindObjectsOfTypeAll()` call is expensive and the replacement in the
@@ -419,7 +561,6 @@ public class VegaTextureReplacer : MonoBehaviour
       lastVessel = null;
       lastVesselCount = 0;
       lastCrewCount = 0;
-      isReplaceScheduled = false;
     }
   }
 }

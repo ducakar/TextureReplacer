@@ -20,29 +20,26 @@ Special thanks to:
 * therealcrow999 for testing and benchmarking this plugin.
 
 
-Directory Layout
-----------------
-The textures should be put into `GameData/TextureReplacer/` (or its
+Instructions
+------------
+### General Textures ###
+The textures should be put into `GameData/TextureReplacer/Default/` (or its
 subdirectories) and have the same names as the internal KSP textures they should
 replace (plus .png/.jpg/.tga/.mbm extensions, of course).
 
-Per-Kerbal head texture should be named `kerbalHead` (plus extension) and must
-reside in `GameData/TextureReplacer/CustomKerbals/<name>/`, where `<name>` is
-the full name of some Kerbal.
-
 Here is a list of some internal KSP texture names:
 
-    kerbalHead              // Kerbal head
-    kerbalMain              // IVA suit (veteran)
-    kerbalMainGrey          // IVA suit (standard)
-    kerbalHelmetGrey        // IVA helmet
-    EVAtexture              // EVA suit
-    EVAhelmet               // EVA helmet
-    EVAjetpack              // EVA jetpack
-    kerbalMainNRM           // normal map for IVA suit (veteran & standard)
-    kerbalHelmetNRM         // normal map for IVA & EVA helmet
-    EVAtextureNRM           // normal map for EVA suit
-    EVAjetpackNRM           // normal map for EVA jetpack
+    kerbalHead              // Default Kerbal head
+    kerbalMain              // Default IVA suit (veteran)
+    kerbalMainGrey          // Default IVA suit (standard)
+    kerbalMainNRM           // Default IVA suit normal map
+    kerbalHelmetGrey        // Default IVA helmet (veteran & standard)
+    kerbalHelmetNRM         // Default IVA & EVA helmet normal map
+    EVAtexture              // Default EVA suit
+    EVAtextureNRM           // Default EVA suit normal map
+    EVAhelmet               // Default EVA helmet
+    EVAjetpack              // Default EVA jetpack
+    EVAjetpackNRM           // Default EVA jetpack normal map
 
     GalaxyTex_NegativeX     // Skybox -X
     GalaxyTex_PositiveX     // Skybox +X
@@ -84,6 +81,32 @@ Here is a list of some internal KSP texture names:
     snowydwarfplanet00      // Eeloo
     snowydwarfplanet01      // Eeloo normal map
 
+### Personalised Kerbal Textures ###
+Personalised Kerbal textures that are bound to a specific Kerbal name, should
+reside in `GameData/TextureReplacer/CustomKerbals/<name>/`, where `<name>` is
+the full name of some Kerbal.
+
+The list of personalised Kerbal textures (note that there is no `kerbalMain`):
+
+    kerbalHead              // Kerbal head
+    kerbalMainGrey          // IVA suit
+    kerbalMainNRM           // IVA suit normal map
+    kerbalHelmetGrey        // IVA helmet
+    kerbalHelmetNRM         // IVA & EVA helmet normal map
+    EVAtexture              // EVA suit
+    EVAtextureNRM           // EVA suit normal map
+    EVAhelmet               // EVA helmet
+    EVAjetpack              // EVA jetpack
+    EVAjetpackNRM           // EVA jetpack normal map
+
+### Generic Kerbal Textures ###
+Generic head textures should be in `GameData/TextureReplacer/GenericKerbals/`
+(or its subdirecoties) and have names begining with `kerbalHead`.
+
+Textures for each generic suit should reside inside its own subdirectory in
+`GameData/TextureReplacer/GenericKerbals/`. Naming scheme for suit textures is
+the same as for personalised Kerbals (i.e. no `kerbalMain` texture).
+
 
 Notes
 -----
@@ -101,14 +124,16 @@ Notes
   mipmaps for UI icons used by various plugins and thus making them blurry when
   not using the full texture quality.
 * KSP can only load TGAs with RGB colours.
-* If only diffuse textures are replaced, the stock normal maps are kept.
-* Replacing only normal map is not supported.
 * If you use Module Manager, make sure it is updated to the latest version.
   TextureReplacer is known to conflict with Module Manager 1.0.
 
 
 Change Log
 ----------
+* 0.14
+    - added support for per-Kerbal suits
+    - added generic (random) Kerbal head & suit textures
+    - normal maps can be replaced without replacing the main textures
 * 0.13
     - added support for per-Kerbal head textures
     - other textures can now be in any subdirectory of `TextureReplacer/` other
