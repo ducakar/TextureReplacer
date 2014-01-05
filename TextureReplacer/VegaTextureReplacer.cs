@@ -46,6 +46,46 @@ public class VegaTextureReplacer : MonoBehaviour
     public Texture2D evaHelmet;
     public Texture2D evaJetpack;
     public Texture2D evaJetpackNRM;
+
+    public bool fill(Texture2D texture, string originalName)
+    {
+      switch (originalName)
+      {
+        case "kerbalHead":
+          head = texture;
+          return true;
+        case "kerbalMainGrey":
+          suit = texture;
+          return true;
+        case "kerbalMainNRM":
+          suitNRM = texture;
+          return true;
+        case "kerbalHelmetGrey":
+          helmet = texture;
+          return true;
+        case "kerbalHelmetNRM":
+          helmetNRM = texture;
+          return true;
+        case "EVAtexture":
+          evaSuit = texture;
+          return true;
+        case "EVAtextureNRM":
+          evaSuitNRM = texture;
+          return true;
+        case "EVAhelmet":
+          evaHelmet = texture;
+          return true;
+        case "EVAjetpack":
+          evaJetpack = texture;
+          return true;
+        case "EVAjetpackNRM":
+          evaJetpackNRM = texture;
+          return true;
+        default:
+          log("Unknown kerbal texture name {0} [{1}]", originalName, texture.name);
+          return false;
+      }
+    }
   };
 
   private static readonly string DIR_PREFIX = "TextureReplacer/";
@@ -131,6 +171,8 @@ public class VegaTextureReplacer : MonoBehaviour
         bool isTransparent = false;
         Color32[] pixels32 = null;
 
+        // PNGs and JPEGs are always loaded as transparent, so we check if they actually contain any
+        // tranpsarent pixels. If not, they are converted to DXT1.
         if (format == TextureFormat.RGBA32 || format == TextureFormat.DXT5)
         {
           pixels32 = texture.GetPixels32();
@@ -188,11 +230,6 @@ public class VegaTextureReplacer : MonoBehaviour
   /**
    * Texture replacement step.
    *
-   * This is run every 10 frames in main menu (because KSP resets twice when main menu opens) and in
-   * the flight scene on scene start, vessel switch or docking. The vessel switch and docking runs
-   * are required to fix IVA suit textures that are reset by KSP. Vessel switch also occurs on scene
-   * start, so there's no need to explicitly cover that case.
-   *
    * I'm not sure if unloading textures during flight is a good idea. Since some textures are often
    * reset to the old ones they would need to be re-loaded.
    */
@@ -239,12 +276,11 @@ public class VegaTextureReplacer : MonoBehaviour
   /**
    * Replace Kerbal textures.
    *
-   * This is a helper method for `replaceKerbalSkins()`. It replaces textues in an IVA or an EVA
-   * Kerbal.
+   * This is a helper method for `replaceKerbalSkins()`. It sets personalised or random textures for
+   * an IVA or an EVA Kerbal.
    */
-  private void replaceKerbalSkin(Component component, string name)
+  private void replaceKerbalSkin(Component component, string name, bool isEva)
   {
-    bool isEva = component is KerbalEVA;
     KerbalSkin headSkin = null;
     KerbalSkin suitSkin = null;
 
@@ -258,10 +294,10 @@ public class VegaTextureReplacer : MonoBehaviour
       int hash = name.GetHashCode();
 
       if (genericHeadSkins.Count != 0)
-        headSkin = genericHeadSkins[(hash & 0x7fffffff) % genericHeadSkins.Count];
+        headSkin = genericHeadSkins[((hash * 1021) & 0x7fffffff) % genericHeadSkins.Count];
 
       if (genericSuitSkins.Count != 0)
-        suitSkin = genericSuitSkins[(hash * 33 & 0x7fffffff) % genericSuitSkins.Count];
+        suitSkin = genericSuitSkins[(hash * 2053 & 0x7fffffff) % genericSuitSkins.Count];
     }
     else
     {
@@ -309,60 +345,23 @@ public class VegaTextureReplacer : MonoBehaviour
   }
 
   /**
-   * Set custom Kerbals' textures.
-   *
-   * This is run after texture replacement step on each vessel switch, docking and when the number
-   * of vessels on the scene changes (for the case when you approach a Kerbal on EVA).
+   * Set personalised and random Kerbals' textures.
    */
-  private void replaceKerbalSkins()
+  private void replaceKerbalSkins(bool isMannedVessel, bool hasVesselCountChanged)
   {
-    foreach (Kerbal kerbal in Kerbal.FindObjectsOfType(typeof(Kerbal)))
-      replaceKerbalSkin(kerbal, kerbal.name);
-
-    foreach (KerbalEVA eva in KerbalEVA.FindObjectsOfType(typeof(KerbalEVA)))
+    if (isMannedVessel)
     {
-      if (eva.vessel != null)
-        replaceKerbalSkin(eva, eva.vessel.vesselName);
+      foreach (Kerbal kerbal in Kerbal.FindObjectsOfType(typeof(Kerbal)))
+        replaceKerbalSkin(kerbal, kerbal.name, false);
     }
-  }
 
-  private bool setSkinTexture(KerbalSkin skin, Texture2D texture, string originalName)
-  {
-    switch (originalName)
+    if (hasVesselCountChanged)
     {
-      case "kerbalHead":
-        skin.head = texture;
-        return true;
-      case "kerbalMainGrey":
-        skin.suit = texture;
-        return true;
-      case "kerbalMainNRM":
-        skin.suitNRM = texture;
-        return true;
-      case "kerbalHelmetGrey":
-        skin.helmet = texture;
-        return true;
-      case "kerbalHelmetNRM":
-        skin.helmetNRM = texture;
-        return true;
-      case "EVAtexture":
-        skin.evaSuit = texture;
-        return true;
-      case "EVAtextureNRM":
-        skin.evaSuitNRM = texture;
-        return true;
-      case "EVAhelmet":
-        skin.evaHelmet = texture;
-        return true;
-      case "EVAjetpack":
-        skin.evaJetpack = texture;
-        return true;
-      case "EVAjetpackNRM":
-        skin.evaJetpackNRM = texture;
-        return true;
-      default:
-        log("Unknown kerbal texture name {0} [{1}]", originalName, texture.name);
-        return false;
+      foreach (KerbalEVA eva in KerbalEVA.FindObjectsOfType(typeof(KerbalEVA)))
+      {
+        if (eva.vessel != null)
+          replaceKerbalSkin(eva, eva.vessel.vesselName, true);
+      }
     }
   }
 
@@ -401,7 +400,7 @@ public class VegaTextureReplacer : MonoBehaviour
 
         KerbalSkin skin = customSkins[kerbalName];
 
-        if (setSkinTexture(skin, texture, originalName))
+        if (skin.fill(texture, originalName))
           log("Mapping {0}'s {1} -> {2}", kerbalName, originalName, texture.name);
       }
       else if (texture.name.StartsWith(DIR_GENERIC_KERBALS))
@@ -419,7 +418,7 @@ public class VegaTextureReplacer : MonoBehaviour
           skin.head = texture;
           genericSkins.Add(skin);
 
-          log("Mapping generic[{0:00}] {1} -> {2}", index, originalName, texture.name);
+          log("Mapping generic[{0}] {1} -> {2}", index, originalName, texture.name);
         }
         else if (dirNameLength > 0)
         {
@@ -437,8 +436,8 @@ public class VegaTextureReplacer : MonoBehaviour
             genericSkins.Add(skin);
           }
 
-          if (setSkinTexture(skin, texture, originalName))
-            log("Mapping generic[{0:00}] {1} -> {2}", index, originalName, texture.name);
+          if (skin.fill(texture, originalName))
+            log("Mapping generic[{0}] {1} -> {2}", index, originalName, texture.name);
         }
       }
       else
@@ -510,26 +509,29 @@ public class VegaTextureReplacer : MonoBehaviour
     }
     else if (HighLogic.LoadedSceneIsFlight && FlightGlobals.ActiveVessel != null)
     {
+      Vessel vessel = FlightGlobals.ActiveVessel;
+      int crewCount = vessel.GetCrewCount();
       int nVessels = 0;
+
       FlightGlobals.Vessels.ForEach(v => nVessels = v.loaded ? nVessels + 1 : nVessels);
 
       // When in flight, perform replacement on each vehicle switch, on docking and when a new
       // vessel appears on the scene. We have to do this to replace Kerbal heads and IVA suits that
       // are reset by KSP when new portraits appear (probably because it sets orange suits for
-      // Jeb, Bill & Bob and grey to all others). Replacement is postponed for one frame to avoid
-      // possible race conditions.
-      if (FlightGlobals.ActiveVessel != lastVessel || lastVessel.GetCrewCount() != lastCrewCount
-          || nVessels != lastVesselCount)
+      // Jeb, Bill & Bob and grey to all others). Replacement when a new vessel appears is
+      // neccessary to set personalised/random Kerbal textures when you approach a Kerbal on EVA
+      // from > 2.4 km.
+      if (vessel != lastVessel || crewCount != lastCrewCount || nVessels != lastVesselCount)
       {
-        lastVessel = FlightGlobals.ActiveVessel;
+        replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)), false);
+        replaceKerbalSkins(crewCount != 0, nVessels != lastVesselCount);
+
+        lastVessel = vessel;
         lastVesselCount = nVessels;
-        lastCrewCount = lastVessel.GetCrewCount();
+        lastCrewCount = crewCount;
 
         lastMaterialsCount = 0;
         updateCounter = 0;
-
-        replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)), false);
-        replaceKerbalSkins();
       }
     }
     else if (HighLogic.LoadedScene == GameScenes.MAINMENU)

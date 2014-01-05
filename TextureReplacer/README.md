@@ -23,89 +23,110 @@ Special thanks to:
 Instructions
 ------------
 ### General Textures ###
-The textures should be put into `GameData/TextureReplacer/Default/` (or its
-subdirectories) and have the same names as the internal KSP textures they should
-replace (plus .png/.jpg/.tga/.mbm extensions, of course).
+General replacement texture is of the form
 
-Here is a list of some internal KSP texture names:
+    GameData/TextureReplacer/Default/[<subDir>]/<internalName>
 
-    kerbalHead              // Default Kerbal head
-    kerbalMain              // Default IVA suit (veteran)
-    kerbalMainGrey          // Default IVA suit (standard)
-    kerbalMainNRM           // Default IVA suit normal map
-    kerbalHelmetGrey        // Default IVA helmet (veteran & standard)
-    kerbalHelmetNRM         // Default IVA & EVA helmet normal map
-    EVAtexture              // Default EVA suit
-    EVAtextureNRM           // Default EVA suit normal map
-    EVAhelmet               // Default EVA helmet
-    EVAjetpack              // Default EVA jetpack
-    EVAjetpackNRM           // Default EVA jetpack normal map
+where `<internalName>` is the texture's internal name in KSP (plus .png/.jpg/
+.tga/.mbm extension, of course). The subdirectory is optional.
 
-    GalaxyTex_NegativeX     // Skybox -X
-    GalaxyTex_PositiveX     // Skybox +X
-    GalaxyTex_NegativeY     // Skybox -Y
-    GalaxyTex_PositiveY     // Skybox +Y
-    GalaxyTex_NegativeZ     // Skybox -Z
-    GalaxyTex_PositiveZ     // Skybox +Z
+Examples:
 
-    moho00                  // Moho
-    moho01                  // Moho normal map
-    Eve2_00                 // Eve
-    Eve2_01                 // Eve normal map
-    evemoon100              // Gilly
-    evemoon101              // Gilly normal map
-    KerbinScaledSpace300    // Kerbin
-    KerbinScaledSpace401    // Kerbin normal map
-    NewMunSurfaceMapDiffuse // Mün
-    NewMunSurfaceMapNormals // Mün normal map
-    NewMunSurfaceMap00      // Minmus
-    NewMunSurfaceMap01      // Minmus normal map
-    Duna5_00                // Duna
-    Duna5_01                // Duna normal map
-    desertplanetmoon00      // Ike
-    desertplanetmoon01      // Ike normal map
-    dwarfplanet100          // Dres
-    dwarfplanet101          // Dres normal map
-    gas1_clouds             // Jool
-    cloud_normal            // Jool normal map
-    newoceanmoon00          // Laythe
-    newoceanmoon01          // Laythe normal map
-    gp1icemoon00            // Vall
-    gp1icemoon01            // Vall normal map
-    rockymoon100            // Tylo
-    rockymoon101            // Tylo normal map
-    gp1minormoon100         // Bop
-    gp1minormoon101         // Bop normal map
-    gp1minormoon200         // Pol
-    gp1minormoon201         // Pol normal map
-    snowydwarfplanet00      // Eeloo
-    snowydwarfplanet01      // Eeloo normal map
+    GameData/TextureReplacer/
+      Default/kerbalHead              // Default Kerbal head
+      Default/kerbalMain              // Default IVA suit (veteran/orange)
+      Default/kerbalMainGrey          // Default IVA suit (standard/grey)
+      Default/kerbalMainNRM           // Default IVA suit normal map
+      Default/kerbalHelmetGrey        // Default IVA helmet
+      Default/kerbalHelmetNRM         // Default IVA & EVA helmet normal map
+      Default/EVAtexture              // Default EVA suit
+      Default/EVAtextureNRM           // Default EVA suit normal map
+      Default/EVAhelmet               // Default EVA helmet
+      Default/EVAjetpack              // Default EVA jetpack
+      Default/EVAjetpackNRM           // Default EVA jetpack normal map
+
+      Default/GalaxyTex_NegativeX     // Skybox -X
+      Default/GalaxyTex_PositiveX     // Skybox +X
+      Default/GalaxyTex_NegativeY     // Skybox -Y
+      Default/GalaxyTex_PositiveY     // Skybox +Y
+      Default/GalaxyTex_NegativeZ     // Skybox -Z
+      Default/GalaxyTex_PositiveZ     // Skybox +Z
+
+      Default/moho00                  // Moho
+      Default/moho01                  // Moho normal map
+      Default/Eve2_00                 // Eve
+      Default/Eve2_01                 // Eve normal map
+      Default/evemoon100              // Gilly
+      Default/evemoon101              // Gilly normal map
+      Default/KerbinScaledSpace300    // Kerbin
+      Default/KerbinScaledSpace401    // Kerbin normal map
+      Default/NewMunSurfaceMapDiffuse // Mün
+      Default/NewMunSurfaceMapNormals // Mün normal map
+      Default/NewMunSurfaceMap00      // Minmus
+      Default/NewMunSurfaceMap01      // Minmus normal map
+      Default/Duna5_00                // Duna
+      Default/Duna5_01                // Duna normal map
+      Default/desertplanetmoon00      // Ike
+      Default/desertplanetmoon01      // Ike normal map
+      Default/dwarfplanet100          // Dres
+      Default/dwarfplanet101          // Dres normal map
+      Default/gas1_clouds             // Jool
+      Default/cloud_normal            // Jool normal map
+      Default/newoceanmoon00          // Laythe
+      Default/newoceanmoon01          // Laythe normal map
+      Default/gp1icemoon00            // Vall
+      Default/gp1icemoon01            // Vall normal map
+      Default/rockymoon100            // Tylo
+      Default/rockymoon101            // Tylo normal map
+      Default/gp1minormoon100         // Bop
+      Default/gp1minormoon101         // Bop normal map
+      Default/gp1minormoon200         // Pol
+      Default/gp1minormoon201         // Pol normal map
+      Default/snowydwarfplanet00      // Eeloo
+      Default/snowydwarfplanet01      // Eeloo normal map
 
 ### Personalised Kerbal Textures ###
-Personalised Kerbal textures that are bound to a specific Kerbal name, should
-reside in `GameData/TextureReplacer/CustomKerbals/<name>/`, where `<name>` is
-the full name of some Kerbal.
+Personalised Kerbal textures are bound to a specific Kerbal. Texture names are
+the same as for default textures, except that there is no `kerbalMain` texture
+(`kerbalMainGrey` replaces both veteran and standard suits):
 
-The list of personalised Kerbal textures (note that there is no `kerbalMain`):
-
-    kerbalHead              // Kerbal head
-    kerbalMainGrey          // IVA suit
-    kerbalMainNRM           // IVA suit normal map
-    kerbalHelmetGrey        // IVA helmet
-    kerbalHelmetNRM         // IVA & EVA helmet normal map
-    EVAtexture              // EVA suit
-    EVAtextureNRM           // EVA suit normal map
-    EVAhelmet               // EVA helmet
-    EVAjetpack              // EVA jetpack
-    EVAjetpackNRM           // EVA jetpack normal map
+    GameData/TextureReplacer/
+      CustomKerbals/<kerbalName>/kerbalHead       // Kerbal head
+      CustomKerbals/<kerbalName>/kerbalMainGrey   // IVA suit
+      CustomKerbals/<kerbalName>/kerbalMainNRM    // IVA suit normal map
+      CustomKerbals/<kerbalName>/kerbalHelmetGrey // IVA helmet
+      CustomKerbals/<kerbalName>/kerbalHelmetNRM  // IVA & EVA helmet normal map
+      CustomKerbals/<kerbalName>/EVAtexture       // EVA suit
+      CustomKerbals/<kerbalName>/EVAtextureNRM    // EVA suit normal map
+      CustomKerbals/<kerbalName>/EVAhelmet        // EVA helmet
+      CustomKerbals/<kerbalName>/EVAjetpack       // EVA jetpack
+      CustomKerbals/<kerbalName>/EVAjetpackNRM    // EVA jetpack normal map
 
 ### Generic Kerbal Textures ###
-Generic head textures should be in `GameData/TextureReplacer/GenericKerbals/`
-(or its subdirecoties) and have names begining with `kerbalHead`.
+Generic textures are assigned pseudo-randomly, based on the hash of a Kerbal's
+name. This ensures the same textures are always assigned to the given Kerbal.
 
-Textures for each generic suit should reside inside its own subdirectory in
-`GameData/TextureReplacer/GenericKerbals/`. Naming scheme for suit textures is
-the same as for personalised Kerbals (i.e. no `kerbalMain` texture).
+Generic head textures should be of the form
+
+    GameData/TextureReplacer/GenericKerbals/[<subDir>]/kerbalHead*
+
+i.e. head texture files should begin with `kerbalHead` and can optionally be
+inside a subdirectory.
+
+Suit textures' names are the same as for personalised Kerbals, but each suit
+must reside in its own directory:
+
+    GameData/TextureReplacer/
+      GenericKerbals/<suit>/kerbalMainGrey   // IVA suit
+      GenericKerbals/<suit>/kerbalMainNRM    // IVA suit normal map
+      GenericKerbals/<suit>/kerbalHelmetGrey // IVA helmet
+      GenericKerbals/<suit>/kerbalHelmetNRM  // IVA & EVA helmet normal map
+      GenericKerbals/<suit>/EVAtexture       // EVA suit
+      GenericKerbals/<suit>/EVAtextureNRM    // EVA suit normal map
+      GenericKerbals/<suit>/EVAhelmet        // EVA helmet
+      GenericKerbals/<suit>/EVAjetpack       // EVA jetpack
+      GenericKerbals/<suit>/EVAjetpackNRM    // EVA jetpack normal map
+
 
 
 Notes
@@ -130,6 +151,9 @@ Notes
 
 Change Log
 ----------
+* 0.14.1
+    - better hashing and randomisation & other smaller code tweaks
+    - improved instructions in README
 * 0.14
     - added support for per-Kerbal suits
     - added generic (random) Kerbal head & suit textures
