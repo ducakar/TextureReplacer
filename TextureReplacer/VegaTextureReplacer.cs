@@ -95,13 +95,13 @@ public class VegaTextureReplacer : MonoBehaviour
   private Dictionary<string, KerbalSkin> customSkins = new Dictionary<string, KerbalSkin>();
   private List<KerbalSkin> genericHeadSkins = new List<KerbalSkin>();
   private List<KerbalSkin> genericSuitSkins = new List<KerbalSkin>();
+  private GameScenes lastScene = GameScenes.LOADING;
   private int updateCounter = 0;
-  private int lastMaterialsCount = 0;
-  private Vessel lastVessel = null;
-  private int lastVesselCount = 0;
-  private int lastCrewCount = 0;
-  private int memorySpared = 0;
+  private int lastMaterialCount = 0;
+  private bool doReplaceIVASkins = false;
+  private bool doReplaceEVASkins = false;
   private int lastTextureCount = 0;
+  private int memorySpared = 0;
   private bool hasCompressor = false;
   private bool isInitialised = false;
 
@@ -229,11 +229,8 @@ public class VegaTextureReplacer : MonoBehaviour
 
   /**
    * Texture replacement step.
-   *
-   * I'm not sure if unloading textures during flight is a good idea. Since some textures are often
-   * reset to the old ones they would need to be re-loaded.
    */
-  private void replaceTextures(Material[] materials, bool doUnload)
+  private void replaceTextures(Material[] materials)
   {
     foreach (Material material in materials)
     {
@@ -255,8 +252,7 @@ public class VegaTextureReplacer : MonoBehaviour
       if (newTexture != texture)
       {
         material.mainTexture = newTexture;
-        if (doUnload)
-          Resources.UnloadAsset(texture);
+        Resources.UnloadAsset(texture);
       }
 
       Texture normalMap = material.GetTexture("_BumpMap");
@@ -267,8 +263,7 @@ public class VegaTextureReplacer : MonoBehaviour
       if (newNormalMap != normalMap)
       {
         material.SetTexture("_BumpMap", newNormalMap);
-        if (doUnload)
-          Resources.UnloadAsset(normalMap);
+        Resources.UnloadAsset(normalMap);
       }
     }
   }
@@ -312,6 +307,7 @@ public class VegaTextureReplacer : MonoBehaviour
 
       Texture2D newTexture = null;
       Texture2D newNormalMap = null;
+      bool isSuit = false;
 
       if (headSkin != null && smr.name == "headMesh01")
       {
@@ -323,6 +319,7 @@ public class VegaTextureReplacer : MonoBehaviour
         {
           newTexture = isEva ? suitSkin.evaSuit : suitSkin.suit;
           newNormalMap = isEva ? suitSkin.evaSuitNRM : suitSkin.suitNRM;
+          isSuit = true;
         }
         else if (smr.name == "helmet")
         {
@@ -335,6 +332,17 @@ public class VegaTextureReplacer : MonoBehaviour
           newNormalMap = suitSkin.evaJetpackNRM;
         }
       }
+      else if (smr.name == "body01")
+      {
+        isSuit = true;
+      }
+
+      // This is required to fix IVA suits after KSP resetting them to the stock ones all the time.
+      // If there is the default replacement for IVA suit texture and the current Kerbal skin
+      // contains no IVA suit, we must set it to the default replacement, otherwise the stock one
+      // will be used.
+      if (isSuit && newTexture == null && mappedTextures.ContainsKey(material.mainTexture.name))
+        newTexture = mappedTextures[material.mainTexture.name];
 
       if (newTexture != null && newTexture != smr.material.mainTexture)
         smr.material.mainTexture = newTexture;
@@ -347,15 +355,15 @@ public class VegaTextureReplacer : MonoBehaviour
   /**
    * Set personalised and random Kerbals' textures.
    */
-  private void replaceKerbalSkins(bool isMannedVessel, bool hasVesselCountChanged)
+  private void replaceKerbalSkins()
   {
-    if (isMannedVessel)
+    if (doReplaceIVASkins)
     {
       foreach (Kerbal kerbal in Kerbal.FindObjectsOfType(typeof(Kerbal)))
         replaceKerbalSkin(kerbal, kerbal.name, false);
     }
 
-    if (hasVesselCountChanged)
+    if (doReplaceEVASkins)
     {
       foreach (KerbalEVA eva in KerbalEVA.FindObjectsOfType(typeof(KerbalEVA)))
       {
@@ -418,7 +426,7 @@ public class VegaTextureReplacer : MonoBehaviour
           skin.head = texture;
           genericSkins.Add(skin);
 
-          log("Mapping generic[{0}] {1} -> {2}", index, originalName, texture.name);
+          log("Mapping generic[{0}] kerbalHead -> {1}", index, texture.name);
         }
         else if (dirNameLength > 0)
         {
@@ -469,7 +477,7 @@ public class VegaTextureReplacer : MonoBehaviour
 
     // Replace textures (and apply trilinear filter). This doesn't reach some textures like skybox
     // and kerbalMainGrey. Those will be replaced later.
-    replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)), true);
+    replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)));
   }
 
   protected void Start()
@@ -487,6 +495,36 @@ public class VegaTextureReplacer : MonoBehaviour
         break;
       }
     }
+
+    // Update IVA textures on vessel switch.
+    GameEvents.onVesselChange.Add(delegate (Vessel v) {
+      doReplaceIVASkins = true;
+    });
+
+    // Update IVA textures when a new Kerbal enters. This should be unneccessary, but we do it
+    // just in case that some plugin (e.g. Crew Manifest) moves Kerbals across the vessel. Even
+    // when it is unneccessary it doesn't hurt performance since vessel switch occurs within the
+    // same frame, so both events trigger only one texture replacement pass.
+    GameEvents.onCrewBoardVessel.Add(delegate {
+      doReplaceIVASkins = true;
+    });
+
+    // Update IVA textures on docking.
+    GameEvents.onVesselWasModified.Add(delegate (Vessel v) {
+      if (v.vesselName != null)
+        doReplaceIVASkins = true;
+    });
+
+    // Update EVA textures when a Kerbal exits a capsule.
+    GameEvents.onCrewOnEva.Add(delegate {
+      doReplaceEVASkins = true;
+    });
+
+    // Update EVA textures when a Kerbal comes into 2.4 km range.
+    GameEvents.onVesselLoaded.Add(delegate (Vessel v) {
+      if (v.isEVA)
+        doReplaceEVASkins = true;
+    });
   }
 
   protected void LateUpdate()
@@ -507,62 +545,34 @@ public class VegaTextureReplacer : MonoBehaviour
         isInitialised = true;
       }
     }
-    else if (HighLogic.LoadedSceneIsFlight && FlightGlobals.ActiveVessel != null)
-    {
-      Vessel vessel = FlightGlobals.ActiveVessel;
-      int crewCount = vessel.GetCrewCount();
-      int nVessels = 0;
-
-      FlightGlobals.Vessels.ForEach(v => nVessels = v.loaded ? nVessels + 1 : nVessels);
-
-      // When in flight, perform replacement on each vehicle switch, on docking and when a new
-      // vessel appears on the scene. We have to do this to replace Kerbal heads and IVA suits that
-      // are reset by KSP when new portraits appear (probably because it sets orange suits for
-      // Jeb, Bill & Bob and grey to all others). Replacement when a new vessel appears is
-      // neccessary to set personalised/random Kerbal textures when you approach a Kerbal on EVA
-      // from > 2.4 km.
-      if (vessel != lastVessel || crewCount != lastCrewCount || nVessels != lastVesselCount)
-      {
-        replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)), false);
-        replaceKerbalSkins(crewCount != 0, nVessels != lastVesselCount);
-
-        lastVessel = vessel;
-        lastVesselCount = nVessels;
-        lastCrewCount = crewCount;
-
-        lastMaterialsCount = 0;
-        updateCounter = 0;
-      }
-    }
-    else if (HighLogic.LoadedScene == GameScenes.MAINMENU)
-    {
-      if (--updateCounter <= 0)
-      {
-        updateCounter = 10;
-
-        lastVessel = null;
-        lastVesselCount = 0;
-        lastCrewCount = 0;
-
-        // For non-flight scenes we perform replacement once every 10 frames because the following
-        // `Resources.FindObjectsOfTypeAll()` call is expensive and the replacement in the
-        // initialisation doesn't replace certain textures, like skybox for example.
-        Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
-        if (materials.Length != lastMaterialsCount)
-        {
-          lastMaterialsCount = materials.Length;
-          replaceTextures(materials, true);
-        }
-      }
-    }
     else
     {
-      lastMaterialsCount = 0;
-      updateCounter = 0;
+      if (HighLogic.LoadedScene != lastScene)
+      {
+        lastScene = HighLogic.LoadedScene;
+        lastMaterialCount = 0;
+        updateCounter = 16;
+      }
 
-      lastVessel = null;
-      lastVesselCount = 0;
-      lastCrewCount = 0;
+      if (updateCounter > 0)
+      {
+        --updateCounter;
+
+        Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
+        if (materials.Length != lastMaterialCount)
+        {
+          replaceTextures(materials);
+          lastMaterialCount = materials.Length;
+        }
+      }
+
+      if (HighLogic.LoadedSceneIsFlight && (doReplaceIVASkins || doReplaceEVASkins))
+      {
+        replaceKerbalSkins();
+
+        doReplaceIVASkins = false;
+        doReplaceEVASkins = false;
+      }
     }
   }
 }

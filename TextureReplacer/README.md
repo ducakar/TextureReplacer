@@ -76,8 +76,8 @@ Examples:
       Default/newoceanmoon01          // Laythe normal map
       Default/gp1icemoon00            // Vall
       Default/gp1icemoon01            // Vall normal map
-      Default/rockymoon100            // Tylo
-      Default/rockymoon101            // Tylo normal map
+      Default/rockyMoon00             // Tylo
+      Default/rockyMoon01             // Tylo normal map
       Default/gp1minormoon100         // Bop
       Default/gp1minormoon101         // Bop normal map
       Default/gp1minormoon200         // Pol
@@ -151,6 +151,12 @@ Notes
 
 Change Log
 ----------
+* 0.15
+    - better logic for triggering texture replacement
+    - full texture replacement is performed on each scene switch
+    - only personalised Kerbal textures are updated during flight
+    - much faster and more reliable way of detecting events that require
+      personalised texture replacement
 * 0.14.1
     - better hashing and randomisation & other smaller code tweaks
     - improved instructions in README
