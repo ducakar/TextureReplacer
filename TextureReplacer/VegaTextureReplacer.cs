@@ -47,7 +47,7 @@ public class VegaTextureReplacer : MonoBehaviour
     public Texture2D evaJetpack;
     public Texture2D evaJetpackNRM;
 
-    public bool fill(Texture2D texture, string originalName)
+    public bool setTexture(string originalName, Texture2D texture)
     {
       switch (originalName)
       {
@@ -408,7 +408,7 @@ public class VegaTextureReplacer : MonoBehaviour
 
         KerbalSkin skin = customSkins[kerbalName];
 
-        if (skin.fill(texture, originalName))
+        if (skin.setTexture(originalName, texture))
           log("Mapping {0}'s {1} -> {2}", kerbalName, originalName, texture.name);
       }
       else if (texture.name.StartsWith(DIR_GENERIC_KERBALS))
@@ -444,7 +444,7 @@ public class VegaTextureReplacer : MonoBehaviour
             genericSkins.Add(skin);
           }
 
-          if (skin.fill(texture, originalName))
+          if (skin.setTexture(originalName, texture))
             log("Mapping generic[{0}] {1} -> {2}", index, originalName, texture.name);
         }
       }
@@ -498,7 +498,8 @@ public class VegaTextureReplacer : MonoBehaviour
 
     // Update IVA textures on vessel switch.
     GameEvents.onVesselChange.Add(delegate (Vessel v) {
-      doReplaceIVASkins = true;
+      if (!v.isEVA)
+        doReplaceIVASkins = true;
     });
 
     // Update IVA textures when a new Kerbal enters. This should be unneccessary, but we do it
@@ -551,7 +552,7 @@ public class VegaTextureReplacer : MonoBehaviour
       {
         lastScene = HighLogic.LoadedScene;
         lastMaterialCount = 0;
-        updateCounter = 16;
+        updateCounter = HighLogic.LoadedScene == GameScenes.MAINMENU ? 64 : 16;
       }
 
       if (updateCounter > 0)

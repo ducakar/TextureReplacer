@@ -132,7 +132,7 @@ must reside in its own directory:
 Notes
 -----
 * Texture compression step is disabled if TextureCompressor is detected. Texture
-  compression is then left to TextureCompressor which is a more specialised mod
+  compression is then left to TextureCompressor, which is a more specialised mod
   for that purpuse.
 * The planet textures being replaced are the high-altitude textures, which are
   also used in the map mode and in the tracking station. When getting closer to
@@ -151,6 +151,8 @@ Notes
 
 Change Log
 ----------
+* 0.15.1
+    - made skybox replacement in the main menu more reliable
 * 0.15
     - better logic for triggering texture replacement
     - full texture replacement is performed on each scene switch
