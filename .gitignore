@@ -1,5 +1,6 @@
-/VegaTech.userprefs
-/*/bin
-/*/obj
-/*/*.jpg
-/*/GameData
+/*.userprefs
+/bin
+/obj
+/GameData
+/*.jpg
+/*.png

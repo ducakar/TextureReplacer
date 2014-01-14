@@ -25,14 +25,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// headMesh01
-// eyeballLeft, eyeballRight
-// pupilLeft, pupilRight
-// upTeeth01, upTeeth02, tongue
-// headset_band01 (?)
-//
 [KSPAddon(KSPAddon.Startup.Instantly, true)]
-public class VegaTextureReplacer : MonoBehaviour
+public class TextureReplacer : MonoBehaviour
 {
   private class KerbalSkin
   {
@@ -95,11 +89,11 @@ public class VegaTextureReplacer : MonoBehaviour
   private Dictionary<string, KerbalSkin> customSkins = new Dictionary<string, KerbalSkin>();
   private List<KerbalSkin> genericHeadSkins = new List<KerbalSkin>();
   private List<KerbalSkin> genericSuitSkins = new List<KerbalSkin>();
+  private List<Vessel> kerbalVessels = new List<Vessel>();
   private GameScenes lastScene = GameScenes.LOADING;
   private int updateCounter = 0;
   private int lastMaterialCount = 0;
-  private bool doReplaceIVASkins = false;
-  private bool doReplaceEVASkins = false;
+  private int ivaReplaceCounter = -1;
   private int lastTextureCount = 0;
   private int memorySpared = 0;
   private bool hasCompressor = false;
@@ -274,7 +268,7 @@ public class VegaTextureReplacer : MonoBehaviour
    * This is a helper method for `replaceKerbalSkins()`. It sets personalised or random textures for
    * an IVA or an EVA Kerbal.
    */
-  private void replaceKerbalSkin(Component component, string name, bool isEva)
+  private void replaceKerbalSkin(Component component, string name, Vessel vessel)
   {
     KerbalSkin headSkin = null;
     KerbalSkin suitSkin = null;
@@ -299,42 +293,49 @@ public class VegaTextureReplacer : MonoBehaviour
       return;
     }
 
+    bool isEva = vessel != null;
+//    bool hasHelmet = isEva && vessel.atmDensity < 0.5;
+
     foreach (SkinnedMeshRenderer smr in component.GetComponentsInChildren<SkinnedMeshRenderer>())
     {
       Material material = smr.material;
-      if (material.mainTexture == null)
-        continue;
-
       Texture2D newTexture = null;
       Texture2D newNormalMap = null;
       bool isSuit = false;
 
-      if (headSkin != null && smr.name == "headMesh01")
+      switch (smr.name)
       {
-        newTexture = headSkin.head;
-      }
-      else if (suitSkin != null)
-      {
-        if (smr.name == "body01")
-        {
-          newTexture = isEva ? suitSkin.evaSuit : suitSkin.suit;
-          newNormalMap = isEva ? suitSkin.evaSuitNRM : suitSkin.suitNRM;
+        case "headMesh01":
+          if (headSkin != null)
+            newTexture = headSkin.head;
+          break;
+        case "body01":
+          if (suitSkin != null)
+          {
+            newTexture = isEva ? suitSkin.evaSuit : suitSkin.suit;
+            newNormalMap = isEva ? suitSkin.evaSuitNRM : suitSkin.suitNRM;
+          }
           isSuit = true;
-        }
-        else if (smr.name == "helmet")
-        {
-          newTexture = isEva ? suitSkin.evaHelmet : suitSkin.helmet;
-          newNormalMap = suitSkin.helmetNRM;
-        }
-        else if (material.name.StartsWith("jetpack"))
-        {
-          newTexture = suitSkin.evaJetpack;
-          newNormalMap = suitSkin.evaJetpackNRM;
-        }
-      }
-      else if (smr.name == "body01")
-      {
-        isSuit = true;
+          break;
+        case "helmet":
+          if (suitSkin != null)
+          {
+            newTexture = isEva ? suitSkin.evaHelmet : suitSkin.helmet;
+            newNormalMap = suitSkin.helmetNRM;
+          }
+//        case "visor":
+//          if (!hasHelmet)
+//            smr.sharedMesh = null;
+          break;
+        case "jetpack_base01":
+        case "tank1":
+        case "tank2":
+          if (suitSkin != null)
+          {
+            newTexture = suitSkin.evaJetpack;
+            newNormalMap = suitSkin.evaJetpackNRM;
+          }
+          break;
       }
 
       // This is required to fix IVA suits after KSP resetting them to the stock ones all the time.
@@ -351,25 +352,89 @@ public class VegaTextureReplacer : MonoBehaviour
         smr.material.SetTexture("_BumpMap", newNormalMap);
     }
   }
+  /*
+  void printHierarchy(Transform t)
+  {
+    for (int level = 0; t != null; ++level)
+    {
+      GameObject go = t.gameObject;
 
+      log("[{0}] {1}", level, t.name);
+
+      if (go != null)
+      {
+        log("[{0}] -> {1} :: {2}", level, go.name, go.GetType());
+
+        foreach (Component c in go.GetComponents<Component>())
+        {
+          log("[{0}]   + {1} : {2}", level, c.name, c.GetType());
+
+          Vessel v = c as Vessel;
+          if (v != null)
+            log("[{0}]     > {1}", level, v.vesselName);
+
+          Part p = c as Part;
+          if (p != null)
+            log("[{0}]     > {1} {2} {3}", level, p.name, p.initialVesselName, p.partName);
+
+          p = p == null ? null : p.parent;
+          if (p != null)
+          {
+            log("[{0}]     > {1} {2} {3}", level, p.name, p.initialVesselName, p.partName);
+
+            GameObject o = p.gameObject;
+            foreach (Component cc in o.GetComponents<Component>())
+              log("[{0}]       >> {1} {2}", level, c.name, c.GetType());
+          }
+
+          KerbalEVA ke = c as KerbalEVA;
+          if (ke != null)
+            log("[{0}]     > {1} {2} {3}", level, ke.name, ke.GUIName, ke.guiText);
+
+          kerbalExpressionSystem kes = c as kerbalExpressionSystem;
+          if (kes != null && kes.kerbal != null)
+            log("[{0}]     > {1}", level, kes.kerbal.crewMemberName);
+        }
+      }
+
+      t = t.parent;
+    }
+  }
+  */
   /**
    * Set personalised and random Kerbals' textures.
    */
   private void replaceKerbalSkins()
   {
-    if (doReplaceIVASkins)
+    // IVA textures must be replaced with a little (2 frame) lag, otherwise we risk race conditions
+    // with KSP handler that resets IVA suits to the stock ones. The race condition issue always
+    // occurs when boarding an external seat.
+    if (ivaReplaceCounter == 0)
     {
-      foreach (Kerbal kerbal in Kerbal.FindObjectsOfType(typeof(Kerbal)))
-        replaceKerbalSkin(kerbal, kerbal.name, false);
+      foreach (Kerbal kerbal in InternalSpace.Instance.GetComponentsInChildren<Kerbal>())
+        replaceKerbalSkin(kerbal, kerbal.name, null);
+
+      ivaReplaceCounter = -1;
     }
 
-    if (doReplaceEVASkins)
+    if (kerbalVessels.Count != 0)
     {
-      foreach (KerbalEVA eva in KerbalEVA.FindObjectsOfType(typeof(KerbalEVA)))
+      foreach (Vessel vessel in kerbalVessels)
       {
-        if (eva.vessel != null)
-          replaceKerbalSkin(eva, eva.vessel.vesselName, true);
+        if (vessel == null || vessel.vesselName == null)
+          continue;
+
+        KerbalEVA eva = vessel.GetComponent<KerbalEVA>();
+        if (eva == null)
+          continue;
+
+        replaceKerbalSkin(eva, vessel.vesselName, vessel);
       }
+
+      kerbalVessels.Clear();
+      // Prevent list capacity from growing too much.
+      if (kerbalVessels.Capacity > 16)
+        kerbalVessels.TrimExcess();
     }
   }
 
@@ -499,7 +564,7 @@ public class VegaTextureReplacer : MonoBehaviour
     // Update IVA textures on vessel switch.
     GameEvents.onVesselChange.Add(delegate (Vessel v) {
       if (!v.isEVA)
-        doReplaceIVASkins = true;
+        ivaReplaceCounter = 2;
     });
 
     // Update IVA textures when a new Kerbal enters. This should be unneccessary, but we do it
@@ -507,24 +572,24 @@ public class VegaTextureReplacer : MonoBehaviour
     // when it is unneccessary it doesn't hurt performance since vessel switch occurs within the
     // same frame, so both events trigger only one texture replacement pass.
     GameEvents.onCrewBoardVessel.Add(delegate {
-      doReplaceIVASkins = true;
+      ivaReplaceCounter = 2;
     });
 
     // Update IVA textures on docking.
     GameEvents.onVesselWasModified.Add(delegate (Vessel v) {
       if (v.vesselName != null)
-        doReplaceIVASkins = true;
+        ivaReplaceCounter = 2;
     });
 
-    // Update EVA textures when a Kerbal exits a capsule.
-    GameEvents.onCrewOnEva.Add(delegate {
-      doReplaceEVASkins = true;
+    // Update EVA textures when a new Kerbal is created.
+    GameEvents.onVesselCreate.Add(delegate (Vessel v) {
+      kerbalVessels.Add(v);
     });
 
     // Update EVA textures when a Kerbal comes into 2.4 km range.
     GameEvents.onVesselLoaded.Add(delegate (Vessel v) {
       if (v.isEVA)
-        doReplaceEVASkins = true;
+        kerbalVessels.Add(v);
     });
   }
 
@@ -552,6 +617,7 @@ public class VegaTextureReplacer : MonoBehaviour
       {
         lastScene = HighLogic.LoadedScene;
         lastMaterialCount = 0;
+        ivaReplaceCounter = -1;
         updateCounter = HighLogic.LoadedScene == GameScenes.MAINMENU ? 64 : 16;
       }
 
@@ -567,12 +633,12 @@ public class VegaTextureReplacer : MonoBehaviour
         }
       }
 
-      if (HighLogic.LoadedSceneIsFlight && (doReplaceIVASkins || doReplaceEVASkins))
+      if (HighLogic.LoadedSceneIsFlight)
       {
-        replaceKerbalSkins();
-
-        doReplaceIVASkins = false;
-        doReplaceEVASkins = false;
+        if (ivaReplaceCounter == 0 || kerbalVessels.Count != 0)
+          replaceKerbalSkins();
+        else if (ivaReplaceCounter > 0)
+          --ivaReplaceCounter;
       }
     }
   }

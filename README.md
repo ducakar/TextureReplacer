@@ -133,7 +133,7 @@ Notes
 -----
 * Texture compression step is disabled if TextureCompressor is detected. Texture
   compression is then left to TextureCompressor, which is a more specialised mod
-  for that purpuse.
+  for that purpose.
 * The planet textures being replaced are the high-altitude textures, which are
   also used in the map mode and in the tracking station. When getting closer to
   the surface, those textures are slowly interpolated into the high-resolution
@@ -149,8 +149,18 @@ Notes
   TextureReplacer is known to conflict with Module Manager 1.0.
 
 
+Known Issues
+------------
+* When a vessel loads, personalised textures are not set for Kerbals on external
+  seats. I'm still struggling to extract Kerbals' names for that case.
+
+
 Change Log
 ----------
+* 0.16
+    - more targeted (and faster) personalised texture replacement
+    - fixed loosing personalised textures when boarding an external seat
+    - fixed IVA suits resetting to stock when a Kerbal boards an external seat
 * 0.15.1
     - made skybox replacement in the main menu more reliable
 * 0.15
