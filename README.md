@@ -3,14 +3,18 @@
 TextureReplacer
 ===============
 
-[GitHub page](http://github.com/ducakar/VegaTech)
+[GitHub page](http://github.com/ducakar/TextureReplacer)
 
-TextureReplacer is a plugin for Kerbal Space Program that replaces and improves
-textures. It can replace Kerbal textures (face and suits), skybox, high-altitude
-planet textures etc. Additionally, it also enforces trilinear texture filtering
-(i.e. smooth transitions between mipmaps), generates mipmaps for PNGs and JPEGs
-and compresses all non-compressed textures from `GameData/` that are found in
-RAM (i.e. TGAs and sometimes MBMs).
+TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
+stock textures and customise you Kerbals. More specifically, it can:
+* replace stock textures with custom ones,
+* generate missing mipmaps for PNG and JPEG model textures,
+* compress uncompressed textures from `GameData/` and reduces RAM usage,
+* change bilinear texture filter to trilinear to improve mipmap quality,
+* set personalised head and suit textures for selected Kerbals,
+* set persistent random head and suit textures for other Kerbals,
+* set helmet visor texture and
+* spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere.
 
 Special thanks to:
 * Tingle for Universe Replacer; studying his code helped me a lot while
@@ -39,11 +43,11 @@ Examples:
       Default/kerbalMainNRM           // Default IVA suit normal map
       Default/kerbalHelmetGrey        // Default IVA helmet
       Default/kerbalHelmetNRM         // Default IVA & EVA helmet normal map
-      Default/kerbalVisor             // Default IVA helmet visor colour
+      Default/kerbalVisor             // Default IVA helmet visor
       Default/EVAtexture              // Default EVA suit
       Default/EVAtextureNRM           // Default EVA suit normal map
       Default/EVAhelmet               // Default EVA helmet
-      Default/EVAvisor                // Default EVA helmet visor colour
+      Default/EVAvisor                // Default EVA helmet visor
       Default/EVAjetpack              // Default EVA jetpack
       Default/EVAjetpackNRM           // Default EVA jetpack normal map
 
@@ -98,11 +102,11 @@ the same as for default textures, except that there is no `kerbalMain` texture
       CustomKerbals/<kerbalName>/kerbalMainNRM    // IVA suit normal map
       CustomKerbals/<kerbalName>/kerbalHelmetGrey // IVA helmet
       CustomKerbals/<kerbalName>/kerbalHelmetNRM  // IVA & EVA helmet normal map
-      CustomKerbals/<kerbalName>/kerbalVisor      // IVA helmet visor colour
+      CustomKerbals/<kerbalName>/kerbalVisor      // IVA helmet visor
       CustomKerbals/<kerbalName>/EVAtexture       // EVA suit
       CustomKerbals/<kerbalName>/EVAtextureNRM    // EVA suit normal map
       CustomKerbals/<kerbalName>/EVAhelmet        // EVA helmet
-      CustomKerbals/<kerbalName>/EVAvisor         // EVA helmet visor colour
+      CustomKerbals/<kerbalName>/EVAvisor         // EVA helmet visor
       CustomKerbals/<kerbalName>/EVAjetpack       // EVA jetpack
       CustomKerbals/<kerbalName>/EVAjetpackNRM    // EVA jetpack normal map
 
@@ -125,11 +129,11 @@ must reside in its own directory:
       GenericKerbals/<suit>/kerbalMainNRM    // IVA suit normal map
       GenericKerbals/<suit>/kerbalHelmetGrey // IVA helmet
       GenericKerbals/<suit>/kerbalHelmetNRM  // IVA & EVA helmet normal map
-      GenericKerbals/<suit>/kerbalVisor      // IVA helmet visor colour
+      GenericKerbals/<suit>/kerbalVisor      // IVA helmet visor
       GenericKerbals/<suit>/EVAtexture       // EVA suit
       GenericKerbals/<suit>/EVAtextureNRM    // EVA suit normal map
       GenericKerbals/<suit>/EVAhelmet        // EVA helmet
-      GenericKerbals/<suit>/EVAvisor         // EVA helmet visor colour
+      GenericKerbals/<suit>/EVAvisor         // EVA helmet visor
       GenericKerbals/<suit>/EVAjetpack       // EVA jetpack
       GenericKerbals/<suit>/EVAjetpackNRM    // EVA jetpack normal map
 
@@ -139,14 +143,16 @@ Configuration is located in
 
     GameData/TextureReplacer/PluginData/TextureReplacer/Config.cfg
 
-Currently, one can edit it do disable texture compression and mipmap generation
-or enable an experimental feature that spawns Kerbals helmet-less and in IVA
-suit when in breathable atmosphere.
+One can edit it to
+* disable texture compression,
+* disable mipmap generation,
+* disable atmospheric IVA suit,
+* disable jetpack removal for atmospheric IVA suit or
+* change air pressure required for atmospheric IVA suit.
 
 
 Notes
 -----
-* Helmet visor texture should be a 1x1 RGBA image that defines the colour.
 * Texture compression step is disabled if TextureCompressor is detected. Texture
   compression is then left to TextureCompressor, which is a more specialised mod
   for that purpose.
@@ -167,16 +173,19 @@ Notes
 
 Known Issues
 ------------
-* When a vessel loads, personalised textures are not set for Kerbals on external
-  seats. I'm still struggling to extract Kerbals' names for that case.
-* Helmet-less IVA suit in breathable atmosphere have several issues:
-    * It is replaced with a 1-frame lag.
-    * It sometimes fails on flight scene load.
-    * It always fails when on an external seat on scene load.
-    * Jeb, Bill & Bob are spawned in standard instead of veteran IVA suit.
+* When using sfr mod, personalised/generic Kerbal IVA textures are not set in
+  transparent pods of non-active vessels when those are loaded.
+
 
 Change Log
 ----------
+* 0.18
+    - added proper visor texture setting (not just colour)
+    - added (optional) jetpack removal for atmospheric IVA suit
+    - atmospheric IVA suit is enabled by default
+    - fixed personalised textures for Kerbals on external seats
+    - fixed all issues of atmospheric IVA suit
+    - fixed to work with sfr mod (mostly)
 * 0.17
     - added configuration file
     - added support for setting helmet visor colour

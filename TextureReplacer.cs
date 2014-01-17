@@ -34,11 +34,11 @@ public class TextureReplacer : MonoBehaviour
     public Texture2D suitNRM;
     public Texture2D helmet;
     public Texture2D helmetNRM;
-    public Color? visor;
+    public Texture2D visor;
     public Texture2D evaSuit;
     public Texture2D evaSuitNRM;
     public Texture2D evaHelmet;
-    public Color? evaVisor;
+    public Texture2D evaVisor;
     public Texture2D evaJetpack;
     public Texture2D evaJetpackNRM;
 
@@ -68,7 +68,7 @@ public class TextureReplacer : MonoBehaviour
         }
         case "kerbalVisor":
         {
-          visor = texture.GetPixel(0, 0);
+          visor = texture;
           return true;
         }
         case "EVAtexture":
@@ -88,7 +88,7 @@ public class TextureReplacer : MonoBehaviour
         }
         case "EVAvisor":
         {
-          evaVisor = texture.GetPixel(0, 0);
+          evaVisor = texture;
           return true;
         }
         case "EVAjetpack":
@@ -114,13 +114,14 @@ public class TextureReplacer : MonoBehaviour
   private static readonly string DIR_CUSTOM_KERBALS = DIR_PREFIX + "CustomKerbals/";
   private static readonly string DIR_GENERIC_KERBALS = DIR_PREFIX + "GenericKerbals/";
   private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
-  private KerbalSkin defaultSkin = new KerbalSkin();
   private Dictionary<string, Texture2D> customHeads = new Dictionary<string, Texture2D>();
   private Dictionary<string, KerbalSkin> customSuits = new Dictionary<string, KerbalSkin>();
   private List<Texture2D> genericHeads = new List<Texture2D>();
   private List<KerbalSkin> genericSuits = new List<KerbalSkin>();
-  private double atmSuitPressure = Double.PositiveInfinity;
-  private bool isAtmSuitEnabled = false;
+  private KerbalSkin defaultSkin = new KerbalSkin();
+  private double atmSuitPressure = 0.5;
+  private bool hasAtmSuitJetpack = false;
+  private bool isAtmSuitEnabled = true;
   private List<Vessel> kerbalVessels = new List<Vessel>();
   private GameScenes lastScene = GameScenes.LOADING;
   private int updateCounter = 0;
@@ -128,6 +129,7 @@ public class TextureReplacer : MonoBehaviour
   private int ivaReplaceCounter = -1;
   private int lastTextureCount = 0;
   private int memorySpared = 0;
+  private bool isSfrDetected = false;
   private bool isCompressionEnabled = true;
   private bool isMipmapGenEnabled = true;
   private bool isInitialised = false;
@@ -148,7 +150,7 @@ public class TextureReplacer : MonoBehaviour
     if (config == null)
       return;
 
-    string sIsCompressionEnabled = config.GetValue("isCompresionEnabled");
+    string sIsCompressionEnabled = config.GetValue("isCompressionEnabled");
     if (sIsCompressionEnabled != null)
       Boolean.TryParse(sIsCompressionEnabled, out isCompressionEnabled);
 
@@ -156,11 +158,17 @@ public class TextureReplacer : MonoBehaviour
     if (sIsMipmapGenEnabled != null)
       Boolean.TryParse(sIsMipmapGenEnabled, out isMipmapGenEnabled);
 
+    string sIsAtmSuitEnabled = config.GetValue("isAtmSuitEnabled");
+    if (sIsAtmSuitEnabled != null)
+      Boolean.TryParse(sIsAtmSuitEnabled, out isAtmSuitEnabled);
+
+    string sHasAtmSuitJetpack = config.GetValue("hasAtmSuitJetpack");
+    if (sHasAtmSuitJetpack != null)
+      Boolean.TryParse(sHasAtmSuitJetpack, out hasAtmSuitJetpack);
+
     string sAtmSuitPressure = config.GetValue("atmSuitPressure");
     if (sAtmSuitPressure != null)
       Double.TryParse(sAtmSuitPressure, out atmSuitPressure);
-
-    isAtmSuitEnabled = !Double.IsInfinity(atmSuitPressure);
   }
 
   /**
@@ -405,12 +413,18 @@ public class TextureReplacer : MonoBehaviour
         if (smr.transform.parent.parent.parent.parent == null)
         {
           if (hasEvaVisor)
-            smr.sharedMaterial.color = mappedTextures["EVAvisor"].GetPixel(0, 0);
+          {
+            smr.sharedMaterial.mainTexture = mappedTextures["EVAvisor"];
+            smr.sharedMaterial.color = Color.white;
+          }
         }
         else
         {
           if (hasIvaVisor)
-            smr.sharedMaterial.color = mappedTextures["kerbalVisor"].GetPixel(0, 0);
+          {
+            smr.sharedMaterial.mainTexture = mappedTextures["kerbalVisor"];
+            smr.sharedMaterial.color = Color.white;
+          }
         }
       }
     }
@@ -463,7 +477,7 @@ public class TextureReplacer : MonoBehaviour
    * This is a helper method for `replaceKerbalSkins()`. It sets personalised or random textures for
    * an IVA or an EVA Kerbal.
    */
-  private void replaceKerbalSkin(Component component, string name, Vessel vessel)
+  private void replaceKerbalSkin(Component component, string name, bool isEva)
   {
     Texture2D headTexture = null;
     KerbalSkin suitSkin = null;
@@ -488,9 +502,16 @@ public class TextureReplacer : MonoBehaviour
       suitSkin = genericSuits[(hash * 2053 & 0x7fffffff) % genericSuits.Count];
     }
 
-    bool isEva = vessel != null;
-    bool isAtmSuit = isAtmSuitEnabled && isEva && vessel.atmDensity > atmSuitPressure &&
-                     vessel.mainBody.atmosphereContainsOxygen;
+    bool isAtmSuit = isEva && isAtmSuitEnabled &&
+                     FlightGlobals.getStaticPressure() >= atmSuitPressure &&
+                     FlightGlobals.currentMainBody.atmosphereContainsOxygen;
+
+    if (isAtmSuit && !hasAtmSuitJetpack)
+    {
+      PartResource evaPropellant = component.gameObject.GetComponent<PartResource>();
+      if (evaPropellant != null)
+        evaPropellant.amount = 0.0;
+    }
 
     foreach (SkinnedMeshRenderer smr in component.GetComponentsInChildren<SkinnedMeshRenderer>())
     {
@@ -522,10 +543,10 @@ public class TextureReplacer : MonoBehaviour
           // stock one will be used.
           if (!isEvaSuit && newTexture == null)
           {
-            if (!isEva && material.mainTexture.name == "kerbalMain")
+            if (name == "Jebediah Kerman" || name == "Bill Kerman" || name == "Bob Kerman")
             {
-              if (mappedTextures.ContainsKey(material.mainTexture.name))
-                newTexture = mappedTextures[material.mainTexture.name];
+              if (mappedTextures.ContainsKey("kerbalMain"))
+                newTexture = mappedTextures["kerbalMain"];
             }
             else
             {
@@ -555,11 +576,13 @@ public class TextureReplacer : MonoBehaviour
           }
           else
           {
+            // Visor texture must be set every time, because the replacement on proto-IVA Kerbal
+            // doesn't seem to work.
             KerbalSkin skin = suitSkin ?? defaultSkin;
-            Color? colour = isEva ? skin.evaVisor : skin.visor;
+            newTexture = isEva ? skin.evaVisor : skin.visor;
 
-            if (colour.HasValue)
-              smr.material.color = colour.Value;
+            if (newTexture != null)
+              smr.material.color = Color.white;
           }
           break;
         }
@@ -567,10 +590,23 @@ public class TextureReplacer : MonoBehaviour
         case "tank1":
         case "tank2":
         {
-          if (suitSkin != null)
+          if (isAtmSuit && !hasAtmSuitJetpack)
+          {
+            smr.sharedMesh = null;
+          }
+          else if (suitSkin != null)
           {
             newTexture = suitSkin.evaJetpack;
             newNormalMap = suitSkin.evaJetpackNRM;
+          }
+          break;
+        }
+        default:
+        {
+          if (isAtmSuit && !hasAtmSuitJetpack &&
+              (smr.name.StartsWith("thruster_") || smr.name.StartsWith("arm_")))
+          {
+            smr.sharedMesh = null;
           }
           break;
         }
@@ -594,8 +630,11 @@ public class TextureReplacer : MonoBehaviour
     // occurs when boarding an external seat.
     if (ivaReplaceCounter == 0)
     {
-      foreach (Kerbal kerbal in InternalSpace.Instance.GetComponentsInChildren<Kerbal>())
-        replaceKerbalSkin(kerbal, kerbal.name, null);
+      Kerbal[] kerbals = isSfrDetected ? (Kerbal[]) Kerbal.FindObjectsOfType(typeof(Kerbal)) :
+                                         InternalSpace.Instance.GetComponentsInChildren<Kerbal>();
+
+      foreach (Kerbal kerbal in kerbals)
+        replaceKerbalSkin(kerbal, kerbal.name, false);
 
       ivaReplaceCounter = -1;
     }
@@ -604,14 +643,28 @@ public class TextureReplacer : MonoBehaviour
     {
       foreach (Vessel vessel in kerbalVessels)
       {
-        if (vessel == null || vessel.vesselName == null)
+        if (vessel == null || !vessel.loaded || vessel.vesselName == null)
           continue;
 
+        // Vessel is a Kerbal.
         KerbalEVA eva = vessel.GetComponent<KerbalEVA>();
-        if (eva == null)
+        if (eva != null)
+        {
+          replaceKerbalSkin(eva, vessel.vesselName, true);
           continue;
+        }
 
-        replaceKerbalSkin(eva, vessel.vesselName, vessel);
+        // Vessel is a ship. Update Kerbals on external seats.
+        foreach (Part part in vessel.rootPart.FindChildParts<Part>())
+        {
+          KerbalSeat seat = part.GetComponent<KerbalSeat>();
+          if (seat == null || seat.Occupant == null)
+            continue;
+
+          List<ProtoCrewMember> crew = seat.Occupant.protoModuleCrew;
+          if (crew.Count != 0)
+            replaceKerbalSkin(seat.Occupant, crew[0].name, true);
+        }
       }
 
       kerbalVessels.Clear();
@@ -627,15 +680,21 @@ public class TextureReplacer : MonoBehaviour
 
     readConfig();
 
-    // Prevent conficts with TextureCompressor. If it is found among loaded plugins, texture
-    // compression step will be skipped since TextureCompressor should handle it (better).
-    foreach (GameObject go in GameObject.FindObjectsOfType(typeof(GameObject)))
+    foreach (AssemblyLoader.LoadedAssembly assembly in AssemblyLoader.loadedAssemblies)
     {
-      if (go.name == "TextureCompressor")
+      // Prevent conficts with TextureCompressor. If it is found among loaded plugins, texture
+      // compression step will be skipped since TextureCompressor should handle it (better).
+      if (assembly.name == "TextureCompressor")
       {
         log("Detected TextureCompressor, disabling texture compression");
         isCompressionEnabled = false;
-        break;
+      }
+      // Use the brute-force approach for Kerbal IVA texture replacement because the standard
+      // approach doesn't work with the sfr pods.
+      else if (assembly.name.StartsWith("sfrPartModules"))
+      {
+        log("Detected sfr mod, enabling alternative Kerbal IVA texture replacement");
+        isSfrDetected = true;
       }
     }
 
@@ -643,8 +702,6 @@ public class TextureReplacer : MonoBehaviour
     GameEvents.onVesselChange.Add(delegate(Vessel v) {
       if (!v.isEVA)
         ivaReplaceCounter = 2;
-      else if (isAtmSuitEnabled)
-        kerbalVessels.Add(v);
     });
 
     // Update IVA textures when a new Kerbal enters. This should be unneccessary, but we do it
