@@ -8,8 +8,8 @@ TextureReplacer
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise you Kerbals. More specifically, it can:
 * replace stock textures with custom ones,
-* generate missing mipmaps for PNG and JPEG model textures,
-* compress uncompressed textures from `GameData/` and reduces RAM usage,
+* generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
+* compress uncompressed textures from `GameData/` and reduce RAM usage,
 * change bilinear texture filter to trilinear to improve mipmap quality,
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
@@ -137,17 +137,16 @@ must reside in its own directory:
       GenericKerbals/<suit>/EVAjetpack       // EVA jetpack
       GenericKerbals/<suit>/EVAjetpackNRM    // EVA jetpack normal map
 
-### Configuration file ###
+### Configuration File ###
 
 Configuration is located in
 
     GameData/TextureReplacer/PluginData/TextureReplacer/Config.cfg
 
-One can edit it to
+One can edit it to:
 * disable texture compression,
 * disable mipmap generation,
-* disable atmospheric IVA suit,
-* disable jetpack removal for atmospheric IVA suit or
+* disable atmospheric IVA suit or
 * change air pressure required for atmospheric IVA suit.
 
 
@@ -179,6 +178,10 @@ Known Issues
 
 Change Log
 ----------
+* 0.18.1
+    - jetpack logic for atmospheric IVA suit changed:
+      + EVA propellant is not removed any more
+      + no more jetpack removal setting, it is always removed now
 * 0.18
     - added proper visor texture setting (not just colour)
     - added (optional) jetpack removal for atmospheric IVA suit

@@ -120,7 +120,6 @@ public class TextureReplacer : MonoBehaviour
   private List<KerbalSkin> genericSuits = new List<KerbalSkin>();
   private KerbalSkin defaultSkin = new KerbalSkin();
   private double atmSuitPressure = 0.5;
-  private bool hasAtmSuitJetpack = false;
   private bool isAtmSuitEnabled = true;
   private List<Vessel> kerbalVessels = new List<Vessel>();
   private GameScenes lastScene = GameScenes.LOADING;
@@ -161,10 +160,6 @@ public class TextureReplacer : MonoBehaviour
     string sIsAtmSuitEnabled = config.GetValue("isAtmSuitEnabled");
     if (sIsAtmSuitEnabled != null)
       Boolean.TryParse(sIsAtmSuitEnabled, out isAtmSuitEnabled);
-
-    string sHasAtmSuitJetpack = config.GetValue("hasAtmSuitJetpack");
-    if (sHasAtmSuitJetpack != null)
-      Boolean.TryParse(sHasAtmSuitJetpack, out hasAtmSuitJetpack);
 
     string sAtmSuitPressure = config.GetValue("atmSuitPressure");
     if (sAtmSuitPressure != null)
@@ -502,16 +497,9 @@ public class TextureReplacer : MonoBehaviour
       suitSkin = genericSuits[(hash * 2053 & 0x7fffffff) % genericSuits.Count];
     }
 
-    bool isAtmSuit = isEva && isAtmSuitEnabled &&
-                     FlightGlobals.getStaticPressure() >= atmSuitPressure &&
-                     FlightGlobals.currentMainBody.atmosphereContainsOxygen;
-
-    if (isAtmSuit && !hasAtmSuitJetpack)
-    {
-      PartResource evaPropellant = component.gameObject.GetComponent<PartResource>();
-      if (evaPropellant != null)
-        evaPropellant.amount = 0.0;
-    }
+    bool isAtmSuit = isEva && isAtmSuitEnabled
+                     && FlightGlobals.getStaticPressure() >= atmSuitPressure
+                     && FlightGlobals.currentMainBody.atmosphereContainsOxygen;
 
     foreach (SkinnedMeshRenderer smr in component.GetComponentsInChildren<SkinnedMeshRenderer>())
     {
@@ -590,7 +578,7 @@ public class TextureReplacer : MonoBehaviour
         case "tank1":
         case "tank2":
         {
-          if (isAtmSuit && !hasAtmSuitJetpack)
+          if (isAtmSuit)
           {
             smr.sharedMesh = null;
           }
@@ -603,11 +591,8 @@ public class TextureReplacer : MonoBehaviour
         }
         default:
         {
-          if (isAtmSuit && !hasAtmSuitJetpack &&
-              (smr.name.StartsWith("thruster_") || smr.name.StartsWith("arm_")))
-          {
+          if (isAtmSuit && (smr.name.StartsWith("thruster_") || smr.name.StartsWith("arm_")))
             smr.sharedMesh = null;
-          }
           break;
         }
       }
@@ -674,7 +659,7 @@ public class TextureReplacer : MonoBehaviour
     }
   }
 
-  protected void Start()
+  public void Start()
   {
     DontDestroyOnLoad(this);
 
@@ -730,7 +715,7 @@ public class TextureReplacer : MonoBehaviour
     });
   }
 
-  protected void LateUpdate()
+  public void LateUpdate()
   {
     if (!isInitialised)
     {
