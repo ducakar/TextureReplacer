@@ -137,6 +137,15 @@ must reside in its own directory:
       GenericKerbals/<suit>/EVAjetpack       // EVA jetpack
       GenericKerbals/<suit>/EVAjetpackNRM    // EVA jetpack normal map
 
+In `GenericKerbals/`, heads are selected independently form suits, so any head
+texture can be paired with any of the suits. Such behaviour may not work well
+when one has gender-specific suits. This is resolved by moving the female
+textures to `GenericKermins/` while leaving the male ones in `GenericKerbals/`.
+The heads will be paired only with the suits from the same root directory.
+
+Each generic head (from either `GenericKerbals/` or `GenericKermins/`) has equal
+chance for being selected.
+
 ### Configuration File ###
 
 Configuration is located in
@@ -178,6 +187,8 @@ Known Issues
 
 Change Log
 ----------
+* 0.19
+    - added `GenericKermins/` directory to enable gender-specific suits
 * 0.18.1
     - jetpack logic for atmospheric IVA suit changed:
       + EVA propellant is not removed any more

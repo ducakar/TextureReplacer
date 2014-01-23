@@ -103,7 +103,6 @@ public class TextureReplacer : MonoBehaviour
         }
         default:
         {
-          log("Unknown kerbal texture name {0} [{1}]", originalName, texture.name);
           return false;
         }
       }
@@ -113,12 +112,15 @@ public class TextureReplacer : MonoBehaviour
   private static readonly string DIR_PREFIX = "TextureReplacer/";
   private static readonly string DIR_CUSTOM_KERBALS = DIR_PREFIX + "CustomKerbals/";
   private static readonly string DIR_GENERIC_KERBALS = DIR_PREFIX + "GenericKerbals/";
+  private static readonly string DIR_GENERIC_KERMINS = DIR_PREFIX + "GenericKermins/";
   private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
   private Dictionary<string, Texture2D> customHeads = new Dictionary<string, Texture2D>();
   private Dictionary<string, KerbalSkin> customSuits = new Dictionary<string, KerbalSkin>();
   private List<Texture2D> genericHeads = new List<Texture2D>();
   private List<KerbalSkin> genericSuits = new List<KerbalSkin>();
   private KerbalSkin defaultSkin = new KerbalSkin();
+  private int firstKerminHead = 0;
+  private int firstKerminSuit = 0;
   private double atmSuitPressure = 0.5;
   private bool isAtmSuitEnabled = true;
   private List<Vessel> kerbalVessels = new List<Vessel>();
@@ -288,7 +290,10 @@ public class TextureReplacer : MonoBehaviour
    */
   private void initialiseReplacer()
   {
-    Dictionary<string, int> genericDirs = new Dictionary<string, int>();
+    List<KerbalSkin> kerminSuits = new List<KerbalSkin>();
+    Dictionary<string, int>[] genericDirs = new Dictionary<string, int>[2] {
+      new Dictionary<string, int>(), new Dictionary<string, int>()
+    };
     string lastTextureName = "";
 
     foreach (GameDatabase.TextureInfo texInfo
@@ -311,6 +316,7 @@ public class TextureReplacer : MonoBehaviour
         int kerbalNameLength = lastSlash - DIR_CUSTOM_KERBALS.Length;
         string originalName = texture.name.Substring(lastSlash + 1);
         string kerbalName = texture.name.Substring(DIR_CUSTOM_KERBALS.Length, kerbalNameLength);
+        KerbalSkin skin = new KerbalSkin();
 
         if (originalName == "kerbalHead")
         {
@@ -320,54 +326,66 @@ public class TextureReplacer : MonoBehaviour
         }
         else
         {
-          KerbalSkin skin;
-
           if (customSuits.ContainsKey(kerbalName))
-          {
             skin = customSuits[kerbalName];
-          }
           else
-          {
-            skin = new KerbalSkin();
             customSuits.Add(kerbalName, skin);
-          }
 
           if (skin.setTexture(originalName, texture))
             log("Mapped {0}'s {1} -> {2}", kerbalName, originalName, texture.name);
+          else
+            log("Unknown Kerbal texture {0}", texture.name);
         }
       }
-      else if (texture.name.StartsWith(DIR_GENERIC_KERBALS))
+      else if (texture.name.StartsWith(DIR_GENERIC_KERBALS)
+               || texture.name.StartsWith(DIR_GENERIC_KERMINS))
       {
+        bool isFemale = texture.name.StartsWith(DIR_GENERIC_KERMINS);
+        int gender = isFemale ? 1 : 0;
+        string baseDir = isFemale ? DIR_GENERIC_KERMINS : DIR_GENERIC_KERBALS;
         int lastSlash = texture.name.LastIndexOf('/');
-        int dirNameLength = lastSlash - DIR_GENERIC_KERBALS.Length;
+        int dirNameLength = lastSlash - baseDir.Length;
         string originalName = texture.name.Substring(lastSlash + 1);
+        KerbalSkin skin = new KerbalSkin();
 
         if (originalName.StartsWith("kerbalHead"))
         {
-          genericHeads.Add(texture);
+          int index = isFemale ? genericHeads.Count : firstKerminHead;
+          genericHeads.Insert(index, texture);
 
-          log("Mapped generic head #{0} kerbalHead -> {1}", genericHeads.Count, texture.name);
+          if (!isFemale)
+            ++firstKerminHead;
+
+          log("Mapped generic {0} head #{1} kerbalHead -> {2}",
+              isFemale ? "Kermin" : "Kerbal", isFemale ? index - firstKerminHead : index,
+              texture.name);
         }
         else if (dirNameLength > 0)
         {
-          string dirName = texture.name.Substring(DIR_GENERIC_KERBALS.Length, dirNameLength);
-          int index = genericSuits.Count;
-          KerbalSkin skin;
+          string dirName = texture.name.Substring(baseDir.Length, dirNameLength);
+          int index;
 
-          if (genericDirs.ContainsKey(dirName))
+          if (genericDirs[gender].ContainsKey(dirName))
           {
-            index = genericDirs[dirName];
-            skin = genericSuits[index];
+            index = genericDirs[gender][dirName];
+            skin = isFemale ? kerminSuits[index] : genericSuits[index];
           }
           else
           {
-            genericDirs.Add(dirName, index);
-            skin = new KerbalSkin();
-            genericSuits.Add(skin);
+            index = isFemale ? kerminSuits.Count : genericSuits.Count;
+            genericDirs[gender].Add(dirName, index);
+
+            if (isFemale)
+              kerminSuits.Add(skin);
+            else
+              genericSuits.Add(skin);
           }
 
           if (skin.setTexture(originalName, texture))
-            log("Mapped generic suit #{0} {1} -> {2}", index, originalName, texture.name);
+            log("Mapped generic {0} suit #{1} {2} -> {3}",
+                isFemale ? "Kermin" : "Kerbal", index, originalName, texture.name);
+          else
+            log("Unknown Kerbal texture {0}", texture.name);
         }
       }
       else
@@ -388,6 +406,9 @@ public class TextureReplacer : MonoBehaviour
 
       lastTextureName = texture.name;
     }
+
+    firstKerminSuit = genericSuits.Count;
+    genericSuits.AddRange(kerminSuits);
 
     // Replace textures (and apply trilinear filter). This doesn't reach some textures like skybox
     // and kerbalMainGrey. Those will be replaced later.
@@ -476,6 +497,8 @@ public class TextureReplacer : MonoBehaviour
   {
     Texture2D headTexture = null;
     KerbalSkin suitSkin = null;
+    int hash = name.GetHashCode();
+    bool isFemale = false;
 
     if (customHeads.ContainsKey(name))
     {
@@ -483,8 +506,10 @@ public class TextureReplacer : MonoBehaviour
     }
     else if (genericHeads.Count != 0)
     {
-      int hash = name.GetHashCode();
-      headTexture = genericHeads[((hash * 1021) & 0x7fffffff) % genericHeads.Count];
+      int index = ((hash * 1021) & 0x7fffffff) % genericHeads.Count;
+
+      isFemale = index >= firstKerminHead;
+      headTexture = genericHeads[index];
     }
 
     if (customSuits.ContainsKey(name))
@@ -493,8 +518,11 @@ public class TextureReplacer : MonoBehaviour
     }
     else if (genericSuits.Count != 0)
     {
-      int hash = name.GetHashCode();
-      suitSkin = genericSuits[(hash * 2053 & 0x7fffffff) % genericSuits.Count];
+      int firstSuit = isFemale ? firstKerminSuit : 0;
+      int nSuits = isFemale ? genericSuits.Count - firstKerminSuit : firstKerminSuit;
+
+      if (nSuits != 0)
+        suitSkin = genericSuits[firstSuit + ((hash * 2053) & 0x7fffffff) % nSuits];
     }
 
     bool isAtmSuit = isEva && isAtmSuitEnabled
