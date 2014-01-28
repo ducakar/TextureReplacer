@@ -3,7 +3,8 @@
 TextureReplacer
 ===============
 
-[GitHub page](http://github.com/ducakar/TextureReplacer)
+[GitHub page](http://github.com/ducakar/TextureReplacer).
+[Forum page](http://forum.kerbalspaceprogram.com/threads/60961).
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise you Kerbals. More specifically, it can:
@@ -162,11 +163,11 @@ One can edit it to:
 Notes
 -----
 * Texture compression step is disabled if TextureCompressor is detected. Texture
-  compression is then left to TextureCompressor, which is a more specialised mod
+  compression is then left to TextureCompressor which is a more specialised mod
   for that purpose.
 * The planet textures being replaced are the high-altitude textures, which are
   also used in the map mode and in the tracking station. When getting closer to
-  the surface, those textures are slowly interpolated into the high-resolution
+  the surface those textures are slowly interpolated into the high-resolution
   ones that cannot be replaced by this plugin.
 * KSP never generates mipmaps for PNGs and JPEGs by itself. TextureReplacer
   fixes this by generating mipmaps for all PNGs and JPEGs in (subdirectories of)
@@ -175,18 +176,22 @@ Notes
   mipmaps for UI icons used by various plugins and thus making them blurry when
   not using the full texture quality.
 * KSP can only load TGAs with RGB colours.
-* If you use Module Manager, make sure it is updated to the latest version.
+* If you use Module Manager make sure it is updated to the latest version.
   TextureReplacer is known to conflict with Module Manager 1.0.
 
 
 Known Issues
 ------------
-* When using sfr mod, personalised/generic Kerbal IVA textures are not set in
-  transparent pods of non-active vessels when those are loaded.
+* When using sfr mod, personalised/generic Kerbal IVA textures are often not set
+  in transparent pods of non-active vessels.
 
 
 Change Log
 ----------
+* 0.20
+    - fixed personalised / randomised Kerbal textures not being set for teeth,
+      tongue and jetpack arms and thrusters
+    - some code polishing, updated comments, README etc.
 * 0.19
     - added `GenericKermins/` directory to enable gender-specific suits
 * 0.18.1

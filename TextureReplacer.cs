@@ -28,7 +28,7 @@ using UnityEngine;
 [KSPAddon(KSPAddon.Startup.Instantly, true)]
 public class TextureReplacer : MonoBehaviour
 {
-  private class KerbalSkin
+  private class KerbalSuit
   {
     public Texture2D suit;
     public Texture2D suitNRM;
@@ -113,23 +113,39 @@ public class TextureReplacer : MonoBehaviour
   private static readonly string DIR_CUSTOM_KERBALS = DIR_PREFIX + "CustomKerbals/";
   private static readonly string DIR_GENERIC_KERBALS = DIR_PREFIX + "GenericKerbals/";
   private static readonly string DIR_GENERIC_KERMINS = DIR_PREFIX + "GenericKermins/";
+  // General texture replacements.
   private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
+  // Personalised Kerbal textures.
   private Dictionary<string, Texture2D> customHeads = new Dictionary<string, Texture2D>();
-  private Dictionary<string, KerbalSkin> customSuits = new Dictionary<string, KerbalSkin>();
+  private Dictionary<string, KerbalSuit> customSuits = new Dictionary<string, KerbalSuit>();
+  // Generic Kerbal textures (male on the beginning of the list, female on the end).
   private List<Texture2D> genericHeads = new List<Texture2D>();
-  private List<KerbalSkin> genericSuits = new List<KerbalSkin>();
-  private KerbalSkin defaultSkin = new KerbalSkin();
+  private List<KerbalSuit> genericSuits = new List<KerbalSuit>();
+  private KerbalSuit defaultSkin = new KerbalSuit();
+  // Indices of the first female face and suit.
   private int firstKerminHead = 0;
   private int firstKerminSuit = 0;
+  // Atmospheric IVA suit parameters.
   private double atmSuitPressure = 0.5;
   private bool isAtmSuitEnabled = true;
+  // List of vessels for which Kerbal EVA has to be updated (either vessel is an EVA or has an EVA
+  // on an external seat).
   private List<Vessel> kerbalVessels = new List<Vessel>();
-  private GameScenes lastScene = GameScenes.LOADING;
-  private int updateCounter = 0;
-  private int lastMaterialCount = 0;
+  // Update counter for IVA replacement. It has to scheduled with a few frame lag to avoid race
+  // conditions with stock IVA texture replacement that sets orage suits to Jeb, Bill and Bob and
+  // grey suits to other Kerbals.
   private int ivaReplaceCounter = -1;
+  // Generic texture replacement parameters.
+  private GameScenes lastScene = GameScenes.LOADING;
+  private int lastMaterialCount = 0;
+  // General replacement has to be performed for more than one frame when a scene switch occurs
+  // since textures and models may also be loaded with a few frame lag. `updateCounter` specifies
+  // for how many frames it should run.
+  private int updateCounter = 0;
+  // Texture compression and mipmap generation parameters.
   private int lastTextureCount = 0;
   private int memorySpared = 0;
+  // Features.
   private bool isSfrDetected = false;
   private bool isCompressionEnabled = true;
   private bool isMipmapGenEnabled = true;
@@ -140,6 +156,9 @@ public class TextureReplacer : MonoBehaviour
     Debug.Log("[TextureReplacer] " + String.Format(s, args));
   }
 
+  /**
+   * Read configuration file, check which features are enabled.
+   */
   private void readConfig()
   {
     string configPath = KSP.IO.IOUtils.GetFilePathFor(GetType(), "Config.cfg");
@@ -169,7 +188,7 @@ public class TextureReplacer : MonoBehaviour
   }
 
   /**
-   * Estimate image size.
+   * Estimate texture size in RAM.
    *
    * This is only a rough estimate. It doesn't bother with details like the padding bytes or exact
    * mipmap size calculation.
@@ -245,6 +264,7 @@ public class TextureReplacer : MonoBehaviour
           }
         }
 
+        // Rebuild texture. This time with mipmaps.
         if (isTransparent)
         {
           texture.Resize(texture.width, texture.height, TextureFormat.RGBA32, true);
@@ -257,7 +277,6 @@ public class TextureReplacer : MonoBehaviour
           texture.Resize(texture.width, texture.height, TextureFormat.RGB24, true);
           texture.SetPixels(pixels24);
         }
-
         texture.Apply(true, false);
         texture.Compress(true);
 
@@ -290,7 +309,7 @@ public class TextureReplacer : MonoBehaviour
    */
   private void initialiseReplacer()
   {
-    List<KerbalSkin> kerminSuits = new List<KerbalSkin>();
+    List<KerbalSuit> kerminSuits = new List<KerbalSuit>();
     Dictionary<string, int>[] genericDirs = new Dictionary<string, int>[2] {
       new Dictionary<string, int>(), new Dictionary<string, int>()
     };
@@ -310,13 +329,13 @@ public class TextureReplacer : MonoBehaviour
       {
         log("Corrupted GameDatabase! Problematic TGA? {0}", texture.name);
       }
+      // Add a presonalised Kerbal texture.
       else if (texture.name.StartsWith(DIR_CUSTOM_KERBALS))
       {
         int lastSlash = texture.name.LastIndexOf('/');
         int kerbalNameLength = lastSlash - DIR_CUSTOM_KERBALS.Length;
         string originalName = texture.name.Substring(lastSlash + 1);
         string kerbalName = texture.name.Substring(DIR_CUSTOM_KERBALS.Length, kerbalNameLength);
-        KerbalSkin skin = new KerbalSkin();
 
         if (originalName == "kerbalHead")
         {
@@ -326,17 +345,23 @@ public class TextureReplacer : MonoBehaviour
         }
         else
         {
-          if (customSuits.ContainsKey(kerbalName))
-            skin = customSuits[kerbalName];
-          else
-            customSuits.Add(kerbalName, skin);
+          // If the suit entry already exists, add the new texture to it, otherwise create a new
+          // suit entry.
+          KerbalSuit suit = null;
+          customSuits.TryGetValue(kerbalName, out suit);
+          if (suit == null)
+          {
+            suit = new KerbalSuit();
+            customSuits.Add(kerbalName, suit);
+          }
 
-          if (skin.setTexture(originalName, texture))
+          if (suit.setTexture(originalName, texture))
             log("Mapped {0}'s {1} -> {2}", kerbalName, originalName, texture.name);
           else
             log("Unknown Kerbal texture {0}", texture.name);
         }
       }
+      // Add a generic Kerbal/Kermin texture.
       else if (texture.name.StartsWith(DIR_GENERIC_KERBALS)
                || texture.name.StartsWith(DIR_GENERIC_KERMINS))
       {
@@ -346,10 +371,10 @@ public class TextureReplacer : MonoBehaviour
         int lastSlash = texture.name.LastIndexOf('/');
         int dirNameLength = lastSlash - baseDir.Length;
         string originalName = texture.name.Substring(lastSlash + 1);
-        KerbalSkin skin = new KerbalSkin();
 
         if (originalName.StartsWith("kerbalHead"))
         {
+          // Male heads go to the beginning, female to the end of the list.
           int index = isFemale ? genericHeads.Count : firstKerminHead;
           genericHeads.Insert(index, texture);
 
@@ -362,13 +387,16 @@ public class TextureReplacer : MonoBehaviour
         }
         else if (dirNameLength > 0)
         {
+          KerbalSuit suit = new KerbalSuit();
           string dirName = texture.name.Substring(baseDir.Length, dirNameLength);
           int index;
 
+          // We use a special list for female suits: `kerminSuits`. At the end of initialisation,
+          // it will be appended to `genericSuits`.
           if (genericDirs[gender].ContainsKey(dirName))
           {
             index = genericDirs[gender][dirName];
-            skin = isFemale ? kerminSuits[index] : genericSuits[index];
+            suit = isFemale ? kerminSuits[index] : genericSuits[index];
           }
           else
           {
@@ -376,18 +404,19 @@ public class TextureReplacer : MonoBehaviour
             genericDirs[gender].Add(dirName, index);
 
             if (isFemale)
-              kerminSuits.Add(skin);
+              kerminSuits.Add(suit);
             else
-              genericSuits.Add(skin);
+              genericSuits.Add(suit);
           }
 
-          if (skin.setTexture(originalName, texture))
+          if (suit.setTexture(originalName, texture))
             log("Mapped generic {0} suit #{1} {2} -> {3}",
                 isFemale ? "Kermin" : "Kerbal", index, originalName, texture.name);
           else
             log("Unknown Kerbal texture {0}", texture.name);
         }
       }
+      // Add a general texture replacement.
       else
       {
         int lastSlash = texture.name.LastIndexOf('/');
@@ -407,6 +436,7 @@ public class TextureReplacer : MonoBehaviour
       lastTextureName = texture.name;
     }
 
+    // Append female suits to the generic suits list.
     firstKerminSuit = genericSuits.Count;
     genericSuits.AddRange(kerminSuits);
 
@@ -457,7 +487,10 @@ public class TextureReplacer : MonoBehaviour
       if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp"))
         continue;
 
-      if (!mappedTextures.ContainsKey(texture.name))
+      Texture2D newTexture = null;
+      mappedTextures.TryGetValue(texture.name, out newTexture);
+
+      if (newTexture == null)
       {
         // Set trilinear filter. Trilinear filter is also set in initialisation but it only iterates
         // through textures in `GameData/`.
@@ -466,20 +499,20 @@ public class TextureReplacer : MonoBehaviour
 
         continue;
       }
-
-      Texture2D newTexture = mappedTextures[texture.name];
-      if (newTexture != texture)
+      else if (newTexture != texture)
       {
         material.mainTexture = newTexture;
         Resources.UnloadAsset(texture);
       }
 
       Texture normalMap = material.GetTexture("_BumpMap");
-      if (normalMap == null || !mappedTextures.ContainsKey(normalMap.name))
+      if (normalMap == null)
         continue;
 
-      Texture2D newNormalMap = mappedTextures[normalMap.name];
-      if (newNormalMap != normalMap)
+      Texture2D newNormalMap = null;
+      mappedTextures.TryGetValue(normalMap.name, out newNormalMap);
+
+      if (newNormalMap != null && newNormalMap != normalMap)
       {
         material.SetTexture("_BumpMap", newNormalMap);
         Resources.UnloadAsset(normalMap);
@@ -496,33 +529,34 @@ public class TextureReplacer : MonoBehaviour
   private void replaceKerbalSkin(Component component, string name, bool isEva)
   {
     Texture2D headTexture = null;
-    KerbalSkin suitSkin = null;
+    KerbalSuit suitSkin = null;
     int hash = name.GetHashCode();
     bool isFemale = false;
 
-    if (customHeads.ContainsKey(name))
+    customHeads.TryGetValue(name, out headTexture);
+    customSuits.TryGetValue(name, out suitSkin);
+
+    if (headTexture == null && genericHeads.Count != 0)
     {
-      headTexture = customHeads[name];
-    }
-    else if (genericHeads.Count != 0)
-    {
+      // Hash is multiplied with a large prime to increase randomisation, since hashes returned by
+      // `GetHashCode()` are close together if strings only differ in the last (few) char(s).
       int index = ((hash * 1021) & 0x7fffffff) % genericHeads.Count;
 
       isFemale = index >= firstKerminHead;
       headTexture = genericHeads[index];
     }
 
-    if (customSuits.ContainsKey(name))
-    {
-      suitSkin = customSuits[name];
-    }
-    else if (genericSuits.Count != 0)
+    if (suitSkin == null && genericSuits.Count != 0)
     {
       int firstSuit = isFemale ? firstKerminSuit : 0;
       int nSuits = isFemale ? genericSuits.Count - firstKerminSuit : firstKerminSuit;
 
       if (nSuits != 0)
+      {
+        // Here we must use a different prime to increase randomisation so that the same head is not
+        // always combined with the same suit.
         suitSkin = genericSuits[firstSuit + ((hash * 2053) & 0x7fffffff) % nSuits];
+      }
     }
 
     bool isAtmSuit = isEva && isAtmSuitEnabled
@@ -537,7 +571,17 @@ public class TextureReplacer : MonoBehaviour
 
       switch (smr.name)
       {
+        case "eyeballLeft":
+        case "eyeballRight":
+        case "pupilLeft":
+        case "pupilRight":
+        {
+          break;
+        }
         case "headMesh01":
+        case "upTeeth01":
+        case "upTeeth02":
+        case "tongue":
         {
           if (headTexture != null)
             newTexture = headTexture;
@@ -560,14 +604,9 @@ public class TextureReplacer : MonoBehaviour
           if (!isEvaSuit && newTexture == null)
           {
             if (name == "Jebediah Kerman" || name == "Bill Kerman" || name == "Bob Kerman")
-            {
-              if (mappedTextures.ContainsKey("kerbalMain"))
-                newTexture = mappedTextures["kerbalMain"];
-            }
+              mappedTextures.TryGetValue("kerbalMain", out newTexture);
             else
-            {
               newTexture = defaultSkin.suit;
-            }
           }
           break;
         }
@@ -594,7 +633,7 @@ public class TextureReplacer : MonoBehaviour
           {
             // Visor texture must be set every time, because the replacement on proto-IVA Kerbal
             // doesn't seem to work.
-            KerbalSkin skin = suitSkin ?? defaultSkin;
+            KerbalSuit skin = suitSkin ?? defaultSkin;
             newTexture = isEva ? skin.evaVisor : skin.visor;
 
             if (newTexture != null)
@@ -602,9 +641,7 @@ public class TextureReplacer : MonoBehaviour
           }
           break;
         }
-        case "jetpack_base01":
-        case "tank1":
-        case "tank2":
+        default: // Jetpack.
         {
           if (isAtmSuit)
           {
@@ -615,12 +652,6 @@ public class TextureReplacer : MonoBehaviour
             newTexture = suitSkin.evaJetpack;
             newNormalMap = suitSkin.evaJetpackNRM;
           }
-          break;
-        }
-        default:
-        {
-          if (isAtmSuit && (smr.name.StartsWith("thruster_") || smr.name.StartsWith("arm_")))
-            smr.sharedMesh = null;
           break;
         }
       }
@@ -717,10 +748,10 @@ public class TextureReplacer : MonoBehaviour
         ivaReplaceCounter = 2;
     });
 
-    // Update IVA textures when a new Kerbal enters. This should be unneccessary, but we do it
-    // just in case that some plugin (e.g. Crew Manifest) moves Kerbals across the vessel. Even
-    // when it is unneccessary it doesn't hurt performance since vessel switch occurs within the
-    // same frame, so both events trigger only one texture replacement pass.
+    // Update IVA textures when a new Kerbal enters. This should be unneccessary but we do it just
+    // in case that some plugin (e.g. Crew Manifest) moves Kerbals across the vessel. Even when it
+    // is unneccessary it doesn't hurt performance since vessel switch occurs within the same frame,
+    // so both events trigger only one texture replacement pass.
     GameEvents.onCrewBoardVessel.Add(delegate {
       ivaReplaceCounter = 2;
     });
@@ -747,6 +778,7 @@ public class TextureReplacer : MonoBehaviour
   {
     if (!isInitialised)
     {
+      // Compress textures, generate mipmaps, convert DXT5 -> DXT1 if necessary etc.
       processTextures();
 
       if (GameDatabase.Instance.IsReady())
@@ -763,6 +795,10 @@ public class TextureReplacer : MonoBehaviour
     }
     else
     {
+      // Schedule general texture replacement pass at the beginning of each scene. Textures are
+      // still loaded several frames after scene switch so this pass must be repeated multipe times.
+      // Especially problematic is the main menu that resets skybox texture twice, second time being
+      // several tens of frames after the load (depending on frame rate).
       if (HighLogic.LoadedScene != lastScene)
       {
         lastScene = HighLogic.LoadedScene;
@@ -771,6 +807,7 @@ public class TextureReplacer : MonoBehaviour
         updateCounter = HighLogic.LoadedScene == GameScenes.MAINMENU ? 64 : 16;
       }
 
+      // General texture replacement pass.
       if (updateCounter > 0)
       {
         --updateCounter;
@@ -783,11 +820,13 @@ public class TextureReplacer : MonoBehaviour
         }
       }
 
+      // IVA/EVA texture replacement pass. It is scheduled via event callback defined in `Start()`.
       if (HighLogic.LoadedSceneIsFlight)
       {
         if (ivaReplaceCounter == 0 || kerbalVessels.Count != 0)
           replaceKerbalSkins();
-        else if (ivaReplaceCounter > 0)
+
+        if (ivaReplaceCounter > 0)
           --ivaReplaceCounter;
       }
     }
