@@ -188,6 +188,9 @@ Known Issues
 
 Change Log
 ----------
+* 0.20.1
+    - fixed some external seat-related issues not properly setting personalised
+      textures and spawning Kerbals without helmets in space
 * 0.20
     - fixed personalised / randomised Kerbal textures not being set for teeth,
       tongue and jetpack arms and thrusters

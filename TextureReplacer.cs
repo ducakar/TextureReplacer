@@ -526,7 +526,7 @@ public class TextureReplacer : MonoBehaviour
    * This is a helper method for `replaceKerbalSkins()`. It sets personalised or random textures for
    * an IVA or an EVA Kerbal.
    */
-  private void replaceKerbalSkin(Component component, string name, bool isEva)
+  private void replaceKerbalSkin(Component component, string name, bool isEva, bool isAtmSuit)
   {
     Texture2D headTexture = null;
     KerbalSuit suitSkin = null;
@@ -558,10 +558,6 @@ public class TextureReplacer : MonoBehaviour
         suitSkin = genericSuits[firstSuit + ((hash * 2053) & 0x7fffffff) % nSuits];
       }
     }
-
-    bool isAtmSuit = isEva && isAtmSuitEnabled
-                     && FlightGlobals.getStaticPressure() >= atmSuitPressure
-                     && FlightGlobals.currentMainBody.atmosphereContainsOxygen;
 
     foreach (SkinnedMeshRenderer smr in component.GetComponentsInChildren<SkinnedMeshRenderer>())
     {
@@ -678,7 +674,7 @@ public class TextureReplacer : MonoBehaviour
                                          InternalSpace.Instance.GetComponentsInChildren<Kerbal>();
 
       foreach (Kerbal kerbal in kerbals)
-        replaceKerbalSkin(kerbal, kerbal.name, false);
+        replaceKerbalSkin(kerbal, kerbal.name, false, false);
 
       ivaReplaceCounter = -1;
     }
@@ -690,11 +686,22 @@ public class TextureReplacer : MonoBehaviour
         if (vessel == null || !vessel.loaded || vessel.vesselName == null)
           continue;
 
+        double atmPressure = FlightGlobals.getStaticPressure();
+        // Workaround for a KSP bug that reports `FlightGlobals.getStaticPressure() == 1.0` and
+        // `vessel.staticPressure == 0.0` whenever a Kerbal leaves an external seat. But we don't
+        // need to personalise textures for Kerbals that leave a seat anyway.
+        if (atmPressure == 1.0 && vessel.staticPressure == 0.0)
+          continue;
+
+        bool isAtmSuit = isAtmSuitEnabled
+                         && atmPressure >= atmSuitPressure
+                         && FlightGlobals.currentMainBody.atmosphereContainsOxygen;
+
         // Vessel is a Kerbal.
         KerbalEVA eva = vessel.GetComponent<KerbalEVA>();
         if (eva != null)
         {
-          replaceKerbalSkin(eva, vessel.vesselName, true);
+          replaceKerbalSkin(eva, vessel.vesselName, true, isAtmSuit);
           continue;
         }
 
@@ -707,7 +714,7 @@ public class TextureReplacer : MonoBehaviour
 
           List<ProtoCrewMember> crew = seat.Occupant.protoModuleCrew;
           if (crew.Count != 0)
-            replaceKerbalSkin(seat.Occupant, crew[0].name, true);
+            replaceKerbalSkin(seat.Occupant, crew[0].name, true, isAtmSuit);
         }
       }
 
@@ -769,8 +776,7 @@ public class TextureReplacer : MonoBehaviour
 
     // Update EVA textures when a Kerbal comes into 2.4 km range.
     GameEvents.onVesselLoaded.Add(delegate(Vessel v) {
-      if (v.isEVA)
-        kerbalVessels.Add(v);
+      kerbalVessels.Add(v);
     });
   }
 
