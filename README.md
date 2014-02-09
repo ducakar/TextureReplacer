@@ -1,10 +1,9 @@
-![logo](http://i.imgur.com/ZljAQdy.jpg)
+![logo](http://i.imgur.com/0esQrqA.jpg)
 
 TextureReplacer
 ===============
-
-[GitHub page](http://github.com/ducakar/TextureReplacer).
-[Forum page](http://forum.kerbalspaceprogram.com/threads/60961).
+* [GitHub page](http://github.com/ducakar/TextureReplacer).
+* [Forum page](http://forum.kerbalspaceprogram.com/threads/60961).
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise you Kerbals. More specifically, it can:
@@ -38,26 +37,26 @@ where `<internalName>` is the texture's internal name in KSP (plus .png/.jpg/
 Examples:
 
     GameData/TextureReplacer/
-      Default/kerbalHead              // Default Kerbal head
-      Default/kerbalMain              // Default IVA suit (veteran/orange)
-      Default/kerbalMainGrey          // Default IVA suit (standard/grey)
-      Default/kerbalMainNRM           // Default IVA suit normal map
-      Default/kerbalHelmetGrey        // Default IVA helmet
-      Default/kerbalHelmetNRM         // Default IVA & EVA helmet normal map
-      Default/kerbalVisor             // Default IVA helmet visor
-      Default/EVAtexture              // Default EVA suit
-      Default/EVAtextureNRM           // Default EVA suit normal map
-      Default/EVAhelmet               // Default EVA helmet
-      Default/EVAvisor                // Default EVA helmet visor
-      Default/EVAjetpack              // Default EVA jetpack
-      Default/EVAjetpackNRM           // Default EVA jetpack normal map
+      Default/kerbalHead              // default Kerbal head
+      Default/kerbalMain              // default IVA suit (veteran/orange)
+      Default/kerbalMainGrey          // default IVA suit (standard/grey)
+      Default/kerbalMainNRM           // default IVA suit normal map
+      Default/kerbalHelmetGrey        // default IVA helmet
+      Default/kerbalHelmetNRM         // default IVA & EVA helmet normal map
+      Default/kerbalVisor             // default IVA helmet visor
+      Default/EVAtexture              // default EVA suit
+      Default/EVAtextureNRM           // default EVA suit normal map
+      Default/EVAhelmet               // default EVA helmet
+      Default/EVAvisor                // default EVA helmet visor
+      Default/EVAjetpack              // default EVA jetpack
+      Default/EVAjetpackNRM           // default EVA jetpack normal map
 
-      Default/GalaxyTex_NegativeX     // Skybox -X
-      Default/GalaxyTex_PositiveX     // Skybox +X
-      Default/GalaxyTex_NegativeY     // Skybox -Y
-      Default/GalaxyTex_PositiveY     // Skybox +Y
-      Default/GalaxyTex_NegativeZ     // Skybox -Z
-      Default/GalaxyTex_PositiveZ     // Skybox +Z
+      Default/GalaxyTex_NegativeX     // skybox -X
+      Default/GalaxyTex_PositiveX     // skybox +X
+      Default/GalaxyTex_NegativeY     // skybox -Y
+      Default/GalaxyTex_PositiveY     // skybox +Y
+      Default/GalaxyTex_NegativeZ     // skybox -Z
+      Default/GalaxyTex_PositiveZ     // skybox +Z
 
       Default/moho00                  // Moho
       Default/moho01                  // Moho normal map
@@ -175,6 +174,8 @@ Notes
   `/Spaces/` (ignoring case). Other images are excluded to prevent generating
   mipmaps for UI icons used by various plugins and thus making them blurry when
   not using the full texture quality.
+* If there is no IVA suit replacement the EVA suit texture is used for
+  atmospheric EVAs. Helmet and jetpack are still removed, though.
 * KSP can only load TGAs with RGB colours.
 * If you use Module Manager make sure it is updated to the latest version.
   TextureReplacer is known to conflict with Module Manager 1.0.
@@ -188,6 +189,10 @@ Known Issues
 
 Change Log
 ----------
+* 0.21
+    - fixed personalisation when a Kerbal is thrown from a seat
+    - when mipmaps are generated texture compression option is now respected
+    - some smaller code tweaks
 * 0.20.1
     - fixed some external seat-related issues not properly setting personalised
       textures and spawning Kerbals without helmets in space
