@@ -146,6 +146,8 @@ public class TextureReplacer : MonoBehaviour
   // Texture compression and mipmap generation parameters.
   private int lastTextureCount = 0;
   private int memorySpared = 0;
+  // List of substrings for paths where mipmap generating is enabled.
+  private string[] mipmapDirSubstrings = null;
   // Features.
   private bool isSfrDetected = false;
   private bool isCompressionEnabled = true;
@@ -155,6 +157,11 @@ public class TextureReplacer : MonoBehaviour
   private static void log(string s, params object[] args)
   {
     Debug.Log("[TextureReplacer] " + String.Format(s, args));
+  }
+
+  private static bool isPow2(int i)
+  {
+    return i > 0 && (i & (i - 1)) == 0;
   }
 
   /**
@@ -186,6 +193,13 @@ public class TextureReplacer : MonoBehaviour
     string sAtmSuitPressure = config.GetValue("atmSuitPressure");
     if (sAtmSuitPressure != null)
       Double.TryParse(sAtmSuitPressure, out atmSuitPressure);
+
+    string sMipmapDirSubstrings = config.GetValue("mipmapDirSubstrings");
+    if (sMipmapDirSubstrings != null)
+    {
+      mipmapDirSubstrings = sMipmapDirSubstrings.Split(new char[] { ' ', ',' },
+                                                       StringSplitOptions.RemoveEmptyEntries);
+    }
   }
 
   /**
@@ -240,22 +254,17 @@ public class TextureReplacer : MonoBehaviour
       // Generate mipmaps if necessary. Images that may be UI icons should be excluded to prevent
       // blurriness when using less-than-full texture quality.
       if (isMipmapGenEnabled && texture.mipmapCount == 1 && (texture.width | texture.height) != 1
-          && (texture.name.StartsWith(DIR_PREFIX)
-          || texture.name.IndexOf("/FX/", StringComparison.OrdinalIgnoreCase) >= 0
-          || texture.name.IndexOf("/Parts/", StringComparison.OrdinalIgnoreCase) >= 0
-          || texture.name.IndexOf("/Spaces/", StringComparison.OrdinalIgnoreCase) >= 0))
+          && mipmapDirSubstrings != null
+          && mipmapDirSubstrings.Any(s => texture.name.IndexOf(s) >= 0))
       {
         int oldSize = textureSize(texture);
         bool isTransparent = false;
-        Color32[] pixels32 = null;
+        Color32[] pixels32 = texture.GetPixels32();
 
         // PNGs and JPEGs are always loaded as transparent, so we check if they actually contain any
         // transparent pixels. If not, they are converted to DXT1.
-        if (format == TextureFormat.RGBA32 || format == TextureFormat.DXT5)
-        {
-          pixels32 = texture.GetPixels32();
+        if (texture.format == TextureFormat.RGBA32 || texture.format == TextureFormat.DXT5)
           isTransparent = pixels32.Any(p => p.a != 255);
-        }
 
         // Rebuild texture. This time with mipmaps.
         TextureFormat newFormat = isTransparent ? TextureFormat.RGBA32 : TextureFormat.RGB24;
@@ -264,27 +273,35 @@ public class TextureReplacer : MonoBehaviour
         texture.SetPixels32(pixels32);
         texture.Apply(true, false);
 
-        if (isCompressionEnabled)
-          texture.Compress(true);
-
         int newSize = textureSize(texture);
         memorySpared += oldSize - newSize;
 
         log("Generated mipmaps for {0} [{1}x{2} {3} -> {4}]",
             texture.name, texture.width, texture.height, format, texture.format);
+
+        format = texture.format;
       }
+
       // Compress if necessary.
-      else if (isCompressionEnabled && format != TextureFormat.DXT1 && format != TextureFormat.DXT5)
+      if (isCompressionEnabled && format != TextureFormat.DXT1 && format != TextureFormat.DXT5)
       {
-        int oldSize = textureSize(texture);
+        if (!isPow2(texture.width) || !isPow2(texture.height))
+        {
+          log("Failed to compress {0}, dimensions {1}x{2} are not powers of 2",
+              texture.name, texture.width, texture.height);
+        }
+        else
+        {
+          int oldSize = textureSize(texture);
 
-        texture.Compress(true);
+          texture.Compress(true);
 
-        int newSize = textureSize(texture);
-        memorySpared += oldSize - newSize;
+          int newSize = textureSize(texture);
+          memorySpared += oldSize - newSize;
 
-        log("Compressed {0} [{1}x{2} {3} -> {4}]",
-            texture.name, texture.width, texture.height, format, texture.format);
+          log("Compressed {0} [{1}x{2} {3} -> {4}]",
+              texture.name, texture.width, texture.height, format, texture.format);
+        }
       }
     }
 

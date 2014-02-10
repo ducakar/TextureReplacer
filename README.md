@@ -4,17 +4,18 @@ TextureReplacer
 ===============
 * [GitHub page](http://github.com/ducakar/TextureReplacer).
 * [Forum page](http://forum.kerbalspaceprogram.com/threads/60961).
+* [SpacePort page](http://kerbalspaceport.com/texturereplacer-0-21/).
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise you Kerbals. More specifically, it can:
 * replace stock textures with custom ones,
-* generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
-* compress uncompressed textures from `GameData/` and reduce RAM usage,
-* change bilinear texture filter to trilinear to improve mipmap quality,
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
-* set helmet visor texture and
-* spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere.
+* set helmet visor texture,
+* spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
+* generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
+* compress uncompressed textures from `GameData/` and reduce RAM usage and
+* change bilinear texture filter to trilinear to improve mipmap quality.
 
 Special thanks to:
 * Tingle for Universe Replacer; studying his code helped me a lot while
@@ -93,7 +94,7 @@ Examples:
 
 ### Personalised Kerbal Textures ###
 Personalised Kerbal textures are bound to a specific Kerbal. Texture names are
-the same as for default textures, except that there is no `kerbalMain` texture
+the same as for the default textures except there is no `kerbalMain` texture
 (`kerbalMainGrey` replaces both veteran and standard suits):
 
     GameData/TextureReplacer/
@@ -112,7 +113,7 @@ the same as for default textures, except that there is no `kerbalMain` texture
 
 ### Generic Kerbal Textures ###
 Generic textures are assigned pseudo-randomly, based on the hash of a Kerbal's
-name. This ensures the same textures are always assigned to the given Kerbal.
+name, which ensures the same textures are always assigned to a given Kerbal.
 
 Generic head textures should be of the form
 
@@ -121,7 +122,7 @@ Generic head textures should be of the form
 i.e. head texture files should begin with `kerbalHead` and can optionally be
 inside a subdirectory.
 
-Suit textures' names are the same as for personalised Kerbals, but each suit
+Suit textures' names are identical as for the personalised Kerbals but each suit
 must reside in its own directory:
 
     GameData/TextureReplacer/
@@ -137,17 +138,16 @@ must reside in its own directory:
       GenericKerbals/<suit>/EVAjetpack       // EVA jetpack
       GenericKerbals/<suit>/EVAjetpackNRM    // EVA jetpack normal map
 
-In `GenericKerbals/`, heads are selected independently form suits, so any head
-texture can be paired with any of the suits. Such behaviour may not work well
-when one has gender-specific suits. This is resolved by moving the female
-textures to `GenericKermins/` while leaving the male ones in `GenericKerbals/`.
-The heads will be paired only with the suits from the same root directory.
+Heads are selected independently form suits so any head can be paired with any
+of the suits. Such behaviour may not work as desired when one has
+gender-specific suits. This is resolved by moving the female textures to
+`GenericKermins/` while leaving the male ones in `GenericKerbals/`. The heads
+will be paired only with the suits from the same root directory.
 
 Each generic head (from either `GenericKerbals/` or `GenericKermins/`) has equal
-chance for being selected.
+chance of being selected.
 
 ### Configuration File ###
-
 Configuration is located in
 
     GameData/TextureReplacer/PluginData/TextureReplacer/Config.cfg
@@ -155,6 +155,7 @@ Configuration is located in
 One can edit it to:
 * disable texture compression,
 * disable mipmap generation,
+* change list of substrings of paths where mipmap generation is allowed,
 * disable atmospheric IVA suit or
 * change air pressure required for atmospheric IVA suit.
 
@@ -169,13 +170,12 @@ Notes
   the surface those textures are slowly interpolated into the high-resolution
   ones that cannot be replaced by this plugin.
 * KSP never generates mipmaps for PNGs and JPEGs by itself. TextureReplacer
-  fixes this by generating mipmaps for all PNGs and JPEGs in (subdirectories of)
-  `TextureReplacer/` and those whose paths contain `/FX/`, `/Parts/` or
-  `/Spaces/` (ignoring case). Other images are excluded to prevent generating
-  mipmaps for UI icons used by various plugins and thus making them blurry when
-  not using the full texture quality.
+  fixes this by generating mipmaps for PNGs and JPEGs whose paths contain
+  substrings specified in the configuration file. Other images are omitted to
+  prevent generating mipmaps for UI icons used by various plugins and thus
+  making them blurry when not using the full texture quality.
 * If there is no IVA suit replacement the EVA suit texture is used for
-  atmospheric EVAs. Helmet and jetpack are still removed, though.
+  atmospheric EVAs. Helmet and jetpack are still removed though.
 * KSP can only load TGAs with RGB colours.
 * If you use Module Manager make sure it is updated to the latest version.
   TextureReplacer is known to conflict with Module Manager 1.0.
@@ -189,9 +189,13 @@ Known Issues
 
 Change Log
 ----------
+* 1.0
+    - non-power-of-two textures are never compressed to avoid curruption
+    - added option to configure paths where mipmaps may be generated
+    - fixed regeression form 0.21 loading JPEGs as entirely black
 * 0.21
     - fixed personalisation when a Kerbal is thrown from a seat
-    - when mipmaps are generated texture compression option is now respected
+    - texture compression option is now respected when mipmaps are generated
     - some smaller code tweaks
 * 0.20.1
     - fixed some external seat-related issues not properly setting personalised
