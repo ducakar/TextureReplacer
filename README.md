@@ -162,9 +162,9 @@ One can edit it to:
 
 Notes
 -----
-* Texture compression step is disabled if TextureCompressor is detected. Texture
-  compression is then left to TextureCompressor which is a more specialised mod
-  for that purpose.
+* Texture compression and mipmap generation are disabled if TextureCompressor is
+  detected. Those features are then left to TextureCompressor which is a more
+  specialised mod for that purpose.
 * The planet textures being replaced are the high-altitude textures, which are
   also used in the map mode and in the tracking station. When getting closer to
   the surface those textures are slowly interpolated into the high-resolution
@@ -189,6 +189,8 @@ Known Issues
 
 Change Log
 ----------
+* 1.0.1
+    - disabled mipmap generation when TextureCompressor is detected
 * 1.0
     - non-power-of-two textures are never compressed to avoid curruption
     - added option to configure paths where mipmaps may be generated

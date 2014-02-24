@@ -154,11 +154,17 @@ public class TextureReplacer : MonoBehaviour
   private bool isMipmapGenEnabled = true;
   private bool isInitialised = false;
 
+  /**
+   * Print a log entry for TextureReplacer. `String.Format()`-style formatting is supported.
+   */
   private static void log(string s, params object[] args)
   {
     Debug.Log("[TextureReplacer] " + String.Format(s, args));
   }
 
+  /**
+   * True iff `i` is a power of two.
+   */
   private static bool isPow2(int i)
   {
     return i > 0 && (i & (i - 1)) == 0;
@@ -744,8 +750,9 @@ public class TextureReplacer : MonoBehaviour
       // compression step will be skipped since TextureCompressor should handle it (better).
       if (assembly.name == "TextureCompressor")
       {
-        log("Detected TextureCompressor, disabling texture compression");
+        log("Detected TextureCompressor, disabling texture compression and mipmap generation");
         isCompressionEnabled = false;
+        isMipmapGenEnabled = false;
       }
       // Use the brute-force approach for Kerbal IVA texture replacement because the standard
       // approach doesn't work with the sfr pods.
