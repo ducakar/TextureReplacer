@@ -13,6 +13,7 @@ stock textures and customise you Kerbals. More specifically, it can:
 * set persistent random head and suit textures for other Kerbals,
 * set helmet visor texture,
 * spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
+* enable simple (fake) reflections,
 * generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
 * compress uncompressed textures from `GameData/` and reduce RAM usage and
 * change bilinear texture filter to trilinear to improve mipmap quality.
@@ -112,8 +113,9 @@ the same as for the default textures except there is no `kerbalMain` texture
       CustomKerbals/<kerbalName>/EVAjetpackNRM    // EVA jetpack normal map
 
 ### Generic Kerbal Textures ###
-Generic textures are assigned pseudo-randomly, based on the hash of a Kerbal's
-name, which ensures the same textures are always assigned to a given Kerbal.
+Generic head textures are assigned pseudo-randomly, based on the hash of a
+Kerbal's name, which ensures the same head is always assigned to a given Kerbal.
+Each head has equal chance of being selected.
 
 Generic head textures should be of the form
 
@@ -139,13 +141,32 @@ must reside in its own directory:
       GenericKerbals/<suit>/EVAjetpackNRM    // EVA jetpack normal map
 
 Heads are selected independently form suits so any head can be paired with any
-of the suits. Such behaviour may not work as desired when one has
-gender-specific suits. This is resolved by moving the female textures to
+of the suits. Such behaviour may not work as desired when one uses
+gender-specific suits. This is resolved by moving the female heads and suits to
 `GenericKermins/` while leaving the male ones in `GenericKerbals/`. The heads
 will be paired only with the suits from the same root directory.
 
-Each generic head (from either `GenericKerbals/` or `GenericKermins/`) has equal
-chance of being selected.
+A suit can be selected either pseudo-randomly (same as heads) or consecutively,
+based on a Kerbal's position in crew rooster. That behaviour can be controlled
+in the configuration file.
+
+### Environment Map ###
+Environmnet map cube texture for reflections is included with the plugin:
+
+    GameData/TextureReplacer/
+      EnvMap/PositiveX  // fake skybox +X
+      EnvMap/NegativeX  // fake skybox -X
+      EnvMap/PositiveY  // fake skybox +Y
+      EnvMap/NegativeY  // fake skybox -Y
+      EnvMap/PositiveZ  // fake skybox +Z
+      EnvMap/NegativeZ  // fake skybox -Z
+
+Note that cube map textures are slow, so keep these textures as low-res as
+possible. The other limitation is that Unity shader used for reflections does
+not support transparency.
+
+The reflection shader is automatically used for helmet visors with a
+non-transparent texture.
 
 ### Configuration File ###
 Configuration is located in
@@ -153,11 +174,14 @@ Configuration is located in
     GameData/TextureReplacer/PluginData/TextureReplacer/Config.cfg
 
 One can edit it to:
-* disable texture compression,
-* disable mipmap generation,
+* disable/force texture compression,
+* disable/force mipmap generation,
 * change list of substrings of paths where mipmap generation is allowed,
-* disable atmospheric IVA suit or
-* change air pressure required for atmospheric IVA suit.
+* disable atmospheric IVA suit,
+* change air pressure required for atmospheric IVA suit,
+* set fallback suit policy for custom Kerbals,
+* set generic suit selection policy and
+* reflection colour for helmet visor.
 
 
 Notes
@@ -189,6 +213,16 @@ Known Issues
 
 Change Log
 ----------
+* 1.1
+    - added fake reflections for helmet visor
+    - added new modes for assigning suits
+    - added several new options in configuration file:
+      - `auto`, `always` & `never` options for texture compression and mipmap
+        generation instead of `true` & `false`
+      - `fallbackSuit` setting that specifies whether the default or a generic
+        suit is used for a custom Kerbal with only a head texture
+      - `suitAssignment` setting to control how generic suits are assigned
+      - reflection colour for visor
 * 1.0.1
     - disabled mipmap generation when TextureCompressor is detected
 * 1.0
