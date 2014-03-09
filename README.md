@@ -22,7 +22,9 @@ Special thanks to:
 * Tingle for Universe Replacer; studying his code helped me a lot while
   developing this plugin,
 * rbray89 for TextureCompressor (a.k.a. Active Memory Reduction Mod) and Visual
-  Enhancements where some code has been borrowed from and
+  Enhancements where some code has been borrowed from,
+* Razchek and Starwaster for Reflection Plugin where I learnt how to implement
+  reflections in Unity and
 * therealcrow999 for testing and benchmarking this plugin.
 
 
@@ -53,12 +55,12 @@ Examples:
       Default/EVAjetpack              // default EVA jetpack
       Default/EVAjetpackNRM           // default EVA jetpack normal map
 
-      Default/GalaxyTex_NegativeX     // skybox -X
-      Default/GalaxyTex_PositiveX     // skybox +X
-      Default/GalaxyTex_NegativeY     // skybox -Y
-      Default/GalaxyTex_PositiveY     // skybox +Y
-      Default/GalaxyTex_NegativeZ     // skybox -Z
-      Default/GalaxyTex_PositiveZ     // skybox +Z
+      Default/GalaxyTex_PositiveX     // skybox right face
+      Default/GalaxyTex_NegativeX     // skybox left face
+      Default/GalaxyTex_PositiveY     // skybox bottom face, vertically flipped
+      Default/GalaxyTex_NegativeY     // skybox top face
+      Default/GalaxyTex_PositiveZ     // skybox front face
+      Default/GalaxyTex_NegativeZ     // skybox back face
 
       Default/moho00                  // Moho
       Default/moho01                  // Moho normal map
@@ -150,38 +152,35 @@ A suit can be selected either pseudo-randomly (same as heads) or consecutively,
 based on a Kerbal's position in crew rooster. That behaviour can be controlled
 in the configuration file.
 
-### Environment Map ###
+### Visor Reflections ###
 Environmnet map cube texture for reflections is included with the plugin:
 
     GameData/TextureReplacer/
-      EnvMap/PositiveX  // fake skybox +X
-      EnvMap/NegativeX  // fake skybox -X
-      EnvMap/PositiveY  // fake skybox +Y
-      EnvMap/NegativeY  // fake skybox -Y
-      EnvMap/PositiveZ  // fake skybox +Z
-      EnvMap/NegativeZ  // fake skybox -Z
+      EnvMap/PositiveX  // fake skybox right face, vertically flipped
+      EnvMap/NegativeX  // fake skybox left face, vertically flipped
+      EnvMap/PositiveY  // fake skybox top face, vertically flipped
+      EnvMap/NegativeY  // fake skybox bottom face, vertically flipped
+      EnvMap/PositiveZ  // fake skybox front face, vertically flipped
+      EnvMap/NegativeZ  // fake skybox back face, vertically flipped
 
-Note that cube map textures are slow, so keep these textures as low-res as
-possible. The other limitation is that Unity shader used for reflections does
-not support transparency.
+Note that all textures must be quadratic and have the same dimensions that are
+powers of two. Cube map textures are slow, so keep them as low-res as possible.
+
+Unfortunately, KSP reflective shader(s) do not support transparency. As a
+workaround for this one can put a custom shader into
+
+    GameData/TextureReplacer/PluginData/TextureReplacer/Visor.shader
+
+to override `Reflective/VertexLit` shader from KSP that is used by default.
 
 The reflection shader is automatically used for helmet visors with a
-non-transparent texture.
+non-transparent texture. This can be changed in the configuration file.
 
 ### Configuration File ###
-Configuration is located in
+Configuration file, where several features can be enabled/disabled or tweaked,
+is located in
 
     GameData/TextureReplacer/PluginData/TextureReplacer/Config.cfg
-
-One can edit it to:
-* disable/force texture compression,
-* disable/force mipmap generation,
-* change list of substrings of paths where mipmap generation is allowed,
-* disable atmospheric IVA suit,
-* change air pressure required for atmospheric IVA suit,
-* set fallback suit policy for custom Kerbals,
-* set generic suit selection policy and
-* reflection colour for helmet visor.
 
 
 Notes
@@ -200,9 +199,7 @@ Notes
   making them blurry when not using the full texture quality.
 * If there is no IVA suit replacement the EVA suit texture is used for
   atmospheric EVAs. Helmet and jetpack are still removed though.
-* KSP can only load TGAs with RGB colours.
-* If you use Module Manager make sure it is updated to the latest version.
-  TextureReplacer is known to conflict with Module Manager 1.0.
+* KSP can only load TGAs with RGB or RGBA colours.
 
 
 Known Issues
@@ -213,16 +210,20 @@ Known Issues
 
 Change Log
 ----------
+* 1.2
+    - added support for custom reflective shader
+    - fixed environment map textures
+    - code refactored, split into multiple smaller classes
 * 1.1
     - added fake reflections for helmet visor
     - added new modes for assigning suits
     - added several new options in configuration file:
-      - `auto`, `always` & `never` options for texture compression and mipmap
-        generation instead of `true` & `false`
-      - `fallbackSuit` setting that specifies whether the default or a generic
-        suit is used for a custom Kerbal with only a head texture
-      - `suitAssignment` setting to control how generic suits are assigned
-      - reflection colour for visor
+        + `auto`, `always` & `never` options for texture compression and mipmap
+          generation instead of `true` & `false`
+        + `fallbackSuit` setting that specifies whether the default or a generic
+          suit is used for a custom Kerbal with only a head texture
+        + `suitAssignment` setting to control how generic suits are assigned
+        + reflection colour for visor
 * 1.0.1
     - disabled mipmap generation when TextureCompressor is detected
 * 1.0
@@ -244,8 +245,8 @@ Change Log
     - added `GenericKermins/` directory to enable gender-specific suits
 * 0.18.1
     - jetpack logic for atmospheric IVA suit changed:
-      + EVA propellant is not removed any more
-      + no more jetpack removal setting, it is always removed now
+        + EVA propellant is not removed any more
+        + no more jetpack removal setting, it is always removed now
 * 0.18
     - added proper visor texture setting (not just colour)
     - added (optional) jetpack removal for atmospheric IVA suit
