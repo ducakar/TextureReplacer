@@ -31,17 +31,26 @@ namespace TextureReplacer
 {
   public class Replacer
   {
+    enum VisorReflection
+    {
+      NEVER,
+      ALWAYS,
+      EVA_ONLY
+    }
+
     private static readonly string DIR_TEXTURES = Main.DIR_PREFIX + "Default/";
     private static readonly string DIR_ENVMAP = Main.DIR_PREFIX + "EnvMap/";
     // General texture replacements.
     private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
-    // Environment map.
-    private Shader reflectionShader = null;
+    // Reflective shader/material.
+    private Shader reflectiveShader = null;
     private Material shaderMaterial = null;
+    // Environment map.
     private Cubemap envMap = null;
-    private bool forceVisorReflection = false;
+    // Reflective visor parameters.
+    private VisorReflection visorReflection = VisorReflection.EVA_ONLY;
     // Visor colour specifies intensity and colour of the reflection.
-    private Color visorReflectionColour = new Color(0.14f, 0.15f, 0.16f);
+    private Color visorReflectionColour = new Color(0.5f, 0.5f, 0.5f);
     // Generic texture replacement parameters.
     private int lastMaterialCount = 0;
     // General replacement has to be performed for more than one frame when a scene switch occurs
@@ -103,21 +112,23 @@ namespace TextureReplacer
       }
     }
 
-    public void applyReflection(Material material)
-    {
-      material.shader = reflectionShader;
-      material.SetColor("_ReflectColor", visorReflectionColour);
-      material.SetTexture("_Cube", envMap);
-    }
-
     /**
      * Read configuration and perform pre-load initialisation.
      */
     public Replacer(ConfigNode rootNode)
     {
-      string sForceVisorReflection = rootNode.GetValue("forceVisorReflection");
-      if (sForceVisorReflection != null)
-        bool.TryParse(sForceVisorReflection, out forceVisorReflection);
+      string sVisorReflection = rootNode.GetValue("visorReflection");
+      if (sVisorReflection != null)
+      {
+        if (sVisorReflection == "always")
+          visorReflection = VisorReflection.ALWAYS;
+        else if (sVisorReflection == "never")
+          visorReflection = VisorReflection.NEVER;
+        else if (sVisorReflection == "evaOnly")
+          visorReflection = VisorReflection.EVA_ONLY;
+        else
+          log("Invalid value for visorReflection: {0}", sVisorReflection);
+      }
 
       string sVisorReflectionColour = rootNode.GetValue("visorReflectionColour");
       if (sVisorReflectionColour != null)
@@ -133,6 +144,44 @@ namespace TextureReplacer
           float.TryParse(components[0], out visorReflectionColour.r);
           float.TryParse(components[1], out visorReflectionColour.g);
           float.TryParse(components[2], out visorReflectionColour.b);
+        }
+      }
+    }
+
+    private bool initialiseEnvMap(Texture2D[] envMapFaces)
+    {
+      if (envMapFaces.Any(t => t == null))
+      {
+        log("Some environment map faces are missing. Reflections disabled.");
+        return false;
+      }
+      else
+      {
+        int envMapSize = envMapFaces[0].width;
+
+        if (envMapFaces.Any(t => t.width != envMapSize || t.height != envMapSize))
+        {
+          log("Not all environment map faces are of the same dimension. Reflections disabled.");
+          return false;
+        }
+        else if (envMapFaces.Any(t => !Builder.isPow2(t.width) || !Builder.isPow2(t.height)))
+        {
+          log("Environment map dimensions are not powers of two. Reflections disabled.");
+          return false;
+        }
+        else
+        {
+          envMap = new Cubemap(envMapSize, TextureFormat.RGB24, true);
+          envMap.wrapMode = TextureWrapMode.Clamp;
+          envMap.SetPixels(envMapFaces[0].GetPixels(), CubemapFace.PositiveX);
+          envMap.SetPixels(envMapFaces[1].GetPixels(), CubemapFace.NegativeX);
+          envMap.SetPixels(envMapFaces[2].GetPixels(), CubemapFace.PositiveY);
+          envMap.SetPixels(envMapFaces[3].GetPixels(), CubemapFace.NegativeY);
+          envMap.SetPixels(envMapFaces[4].GetPixels(), CubemapFace.PositiveZ);
+          envMap.SetPixels(envMapFaces[5].GetPixels(), CubemapFace.NegativeZ);
+          envMap.Apply(true, true);
+
+          return true;
         }
       }
     }
@@ -238,45 +287,16 @@ namespace TextureReplacer
       {
         shaderSource = File.ReadAllText(shaderPath);
         shaderMaterial = new Material(shaderSource);
-        reflectionShader = shaderMaterial.shader;
+        reflectiveShader = shaderMaterial.shader;
       }
       catch (System.IO.IsolatedStorage.IsolatedStorageException)
       {
-        reflectionShader = Shader.Find("Reflective/VertexLit");
+        visorReflection = VisorReflection.NEVER;
+        log("Visor shader loading failed. Reflections disabled.");
       }
 
-      if (envMapFaces.Any(t => t == null))
-      {
-        reflectionShader = null;
-        log("Some environment map faces are missing!");
-      }
-      else
-      {
-        int envMapSize = envMapFaces[0].width;
-
-        if (envMapFaces.Any(t => t.width != envMapSize || t.height != envMapSize))
-        {
-          reflectionShader = null;
-          log("Not all environment map faces are of the same dimension!");
-        }
-        else if (envMapFaces.Any(t => !Builder.isPow2(t.width) || !Builder.isPow2(t.height)))
-        {
-          reflectionShader = null;
-          log("Environment map dimensions are not powers of two!");
-        }
-        else
-        {
-          envMap = new Cubemap(envMapSize, TextureFormat.RGB24, true);
-          envMap.wrapMode = TextureWrapMode.Clamp;
-          envMap.SetPixels(envMapFaces[0].GetPixels(), CubemapFace.PositiveX);
-          envMap.SetPixels(envMapFaces[1].GetPixels(), CubemapFace.NegativeX);
-          envMap.SetPixels(envMapFaces[2].GetPixels(), CubemapFace.PositiveY);
-          envMap.SetPixels(envMapFaces[3].GetPixels(), CubemapFace.NegativeY);
-          envMap.SetPixels(envMapFaces[4].GetPixels(), CubemapFace.PositiveZ);
-          envMap.SetPixels(envMapFaces[5].GetPixels(), CubemapFace.NegativeZ);
-          envMap.Apply(true, true);
-        }
-      }
+      if (!initialiseEnvMap(envMapFaces))
+        visorReflection = VisorReflection.NEVER;
 
       Texture2D ivaVisorTex = null, evaVisorTex = null;
       mappedTextures.TryGetValue("kerbalVisor", out ivaVisorTex);
@@ -289,9 +309,6 @@ namespace TextureReplacer
         if (smr.name != "visor")
           continue;
 
-        if (forceVisorReflection)
-          applyReflection(smr.sharedMaterial);
-
         bool isEVA = smr.transform.parent.parent.parent.parent == null;
         Texture2D newTexture = isEVA ? evaVisorTex : ivaVisorTex;
 
@@ -299,6 +316,13 @@ namespace TextureReplacer
         {
           smr.sharedMaterial.color = Color.white;
           smr.sharedMaterial.mainTexture = newTexture;
+        }
+        if (visorReflection == VisorReflection.ALWAYS
+            || (isEVA && visorReflection == VisorReflection.EVA_ONLY))
+        {
+          smr.sharedMaterial.shader = reflectiveShader;
+          smr.sharedMaterial.SetColor("_ReflectColor", visorReflectionColour);
+          smr.sharedMaterial.SetTexture("_Cube", envMap);
         }
       }
     }
@@ -309,10 +333,7 @@ namespace TextureReplacer
         Resources.UnloadAsset(envMap);
 
       if (shaderMaterial != null)
-      {
-        Resources.UnloadAsset(shaderMaterial.shader);
         Resources.UnloadAsset(shaderMaterial);
-      }
     }
 
     public void resetScene()

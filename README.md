@@ -12,20 +12,24 @@ stock textures and customise you Kerbals. More specifically, it can:
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
 * set helmet visor texture,
+* enable (fake) visor reflections,
 * spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
-* enable simple (fake) reflections,
 * generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
 * compress uncompressed textures from `GameData/` and reduce RAM usage and
 * change bilinear texture filter to trilinear to improve mipmap quality.
 
 Special thanks to:
+* rbray89 who contributed a reflective visor shader and for TextureCompressor
+  (a.k.a. Active Texture Management) and Visual Enhancements where some code has
+  been borrowed from,
 * Tingle for Universe Replacer; studying his code helped me a lot while
   developing this plugin,
-* rbray89 for TextureCompressor (a.k.a. Active Memory Reduction Mod) and Visual
-  Enhancements where some code has been borrowed from,
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
-  reflections in Unity and
-* therealcrow999 for testing and benchmarking this plugin.
+  reflections,
+* therealcrow999 for testing and benchmarking this plugin,
+* Proot, Green Skull and others for making texture packs for this plugin and
+* Sylith and scart91 for giving others permissions to make derivates of their
+  texture packs.
 
 
 Instructions
@@ -57,7 +61,7 @@ Examples:
 
       Default/GalaxyTex_PositiveX     // skybox right face
       Default/GalaxyTex_NegativeX     // skybox left face
-      Default/GalaxyTex_PositiveY     // skybox bottom face, vertically flipped
+      Default/GalaxyTex_PositiveY     // skybox bottom face, rotated for 180°
       Default/GalaxyTex_NegativeY     // skybox top face
       Default/GalaxyTex_PositiveZ     // skybox front face
       Default/GalaxyTex_NegativeZ     // skybox back face
@@ -153,7 +157,7 @@ based on a Kerbal's position in crew rooster. That behaviour can be controlled
 in the configuration file.
 
 ### Visor Reflections ###
-Environmnet map cube texture for reflections is included with the plugin:
+Environment map cube texture for reflections is included with the plugin:
 
     GameData/TextureReplacer/
       EnvMap/PositiveX  // fake skybox right face, vertically flipped
@@ -163,7 +167,7 @@ Environmnet map cube texture for reflections is included with the plugin:
       EnvMap/PositiveZ  // fake skybox front face, vertically flipped
       EnvMap/NegativeZ  // fake skybox back face, vertically flipped
 
-Note that all textures must be quadratic and have the same dimensions that are
+Note that all textures must be quares and have the same dimensions that are
 powers of two. Cube map textures are slow, so keep them as low-res as possible.
 
 Unfortunately, KSP reflective shader(s) do not support transparency. As a
@@ -185,20 +189,19 @@ is located in
 
 Notes
 -----
-* Texture compression and mipmap generation are disabled if TextureCompressor is
-  detected. Those features are then left to TextureCompressor which is a more
-  specialised mod for that purpose.
+* Try to keep widths and heights of all textures powers of two. Non-power-of-two
+  textures are not handled well in some cases and cannot be compressed.
+* By default, internal texture compression and mipmap generation is disabled
+  when TextureCompressor is detected. Those features are then left to
+  TextureCompressor which is a more specialised mod for those purposes.
 * The planet textures being replaced are the high-altitude textures, which are
   also used in the map mode and in the tracking station. When getting closer to
   the surface those textures are slowly interpolated into the high-resolution
   ones that cannot be replaced by this plugin.
-* KSP never generates mipmaps for PNGs and JPEGs by itself. TextureReplacer
-  fixes this by generating mipmaps for PNGs and JPEGs whose paths contain
-  substrings specified in the configuration file. Other images are omitted to
-  prevent generating mipmaps for UI icons used by various plugins and thus
-  making them blurry when not using the full texture quality.
-* If there is no IVA suit replacement the EVA suit texture is used for
-  atmospheric EVAs. Helmet and jetpack are still removed though.
+* KSP never generates mipmaps for PNGs and JPEGs. TextureReplacer fixes this by
+  generating mipmaps under paths specified in the configuration file. Other
+  images are omitted to avoid making UI icons of various plugins blurry when not
+  using the full texture quality.
 * KSP can only load TGAs with RGB or RGBA colours.
 
 
@@ -206,12 +209,15 @@ Known Issues
 ------------
 * When using sfr mod, personalised/generic Kerbal IVA textures are often not set
   in transparent pods of non-active vessels.
+* If there is no IVA suit replacement the stock EVA suit texture is used for the
+  atmospheric EVAs.
 
 
 Change Log
 ----------
 * 1.2
-    - added support for custom reflective shader
+    - added support for custom visor shader
+    - added reflective shader for visor that supports transparency
     - fixed environment map textures
     - code refactored, split into multiple smaller classes
 * 1.1
@@ -347,7 +353,7 @@ Change Log
 Licence
 -------
     Copyright © 2014 Davorin Učakar
-    Copyright © 2013 Ryan Bray
+    Copyright © 2014 Ryan Bray
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),

@@ -48,7 +48,6 @@ namespace TextureReplacer
         DontDestroyOnLoad(this);
 
         string configPath = KSP.IO.IOUtils.GetFilePathFor(GetType(), "Config.cfg");
-        log("{0}", configPath);
         ConfigNode config = ConfigNode.Load(configPath);
         if (config == null)
           return;

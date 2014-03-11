@@ -31,7 +31,7 @@ namespace TextureReplacer
   {
     enum SuitAssignment
     {
-      HASH,
+      RANDOM,
       CONSECUTIVE
     }
 
@@ -142,7 +142,7 @@ namespace TextureReplacer
     // Whether to use the default suit as custom suit fallback.
     private FallbackSuit fallbackSuit = FallbackSuit.DEFAULT;
     // Whether assignment of suits should be consecutive.
-    private SuitAssignment suitAssignment = SuitAssignment.HASH;
+    private SuitAssignment suitAssignment = SuitAssignment.RANDOM;
     // List of vessels for which Kerbal EVA has to be updated (either vessel is an EVA or has an EVA
     // on an external seat).
     private List<Vessel> kerbalVessels = new List<Vessel>();
@@ -199,7 +199,7 @@ namespace TextureReplacer
 
         if (nSuits != 0)
         {
-          if (suitAssignment == SuitAssignment.HASH)
+          if (suitAssignment == SuitAssignment.RANDOM)
           {
             // Here we must use a different prime to increase randomisation so that the same head is
             // not always combined with the same suit.
@@ -290,15 +290,7 @@ namespace TextureReplacer
               newTexture = isEva ? skin.evaVisor : skin.visor;
 
               if (newTexture != null)
-              {
                 smr.material.color = Color.white;
-
-                if (newTexture.format != TextureFormat.DXT5
-                    && newTexture.format != TextureFormat.RGBA32)
-                {
-                  Replacer.instance.applyReflection(smr.material);
-                }
-              }
             }
             break;
           }
@@ -420,8 +412,8 @@ namespace TextureReplacer
       string sSuitAssignment = rootNode.GetValue("suitAssignment");
       if (sSuitAssignment != null)
       {
-        if (sSuitAssignment == "hash")
-          suitAssignment = SuitAssignment.HASH;
+        if (sSuitAssignment == "random")
+          suitAssignment = SuitAssignment.RANDOM;
         else if (sSuitAssignment == "consecutive")
           suitAssignment = SuitAssignment.CONSECUTIVE;
         else

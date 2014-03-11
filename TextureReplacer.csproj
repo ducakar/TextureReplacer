@@ -42,6 +42,7 @@
     <None Include="README.md" />
     <None Include="Resources\Config.cfg" />
     <None Include="Resources\Visor.shader" />
+    <None Include="Resources\Visor-source.shader" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
