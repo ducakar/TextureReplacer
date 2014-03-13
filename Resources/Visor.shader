@@ -10,7 +10,22 @@ SubShader {
  LOD 100
  Tags { "QUEUE"="Transparent" "IGNOREPROJECTOR"="True" "RenderType"="Transparent" }
  Pass {
-  Name "BASE"
+  Tags { "LIGHTMODE"="Vertex" }
+  Lighting On
+  SeparateSpecular On
+  Material {
+   Ambient [_Color]
+   Diffuse [_Color]
+   Specular [_SpecColor]
+   Shininess [_Shininess]
+  }
+  ZWrite Off
+  Blend SrcAlpha OneMinusSrcAlpha
+  AlphaTest Greater 0
+  ColorMask RGB
+  SetTexture [_MainTex] { combine texture * primary double, texture alpha * primary alpha }
+ }
+ Pass {
   Tags { "LIGHTMODE"="Always" }
   ZWrite Off
   Blend One One
@@ -378,24 +393,8 @@ adaaaaaaaaaaaaaaapaaaaaafdfgfpfegbhcghgfheaaklkl"
 
 }
 
-#LINE 56
+#LINE 70
 
- }
- Pass {
-  Tags { "LIGHTMODE"="Vertex" }
-  Lighting On
-  SeparateSpecular On
-  Material {
-   Ambient [_Color]
-   Diffuse [_Color]
-   Specular [_SpecColor]
-   Shininess [_Shininess]
-  }
-  ZWrite Off
-  Blend SrcAlpha OneMinusSrcAlpha
-  AlphaTest Greater 0
-  ColorMask RGB
-  SetTexture [_MainTex] { combine texture * primary double, texture alpha * primary alpha }
  }
  Pass {
   Tags { "LIGHTMODE"="VertexLM" }

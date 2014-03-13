@@ -27,7 +27,7 @@ Special thanks to:
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
   reflections,
 * therealcrow999 for testing and benchmarking this plugin,
-* Proot, Green Skull and others for making texture packs for this plugin and
+* Proot and others for making texture packs for this plugin and
 * Sylith and scart91 for giving others permissions to make derivates of their
   texture packs.
 
@@ -215,6 +215,9 @@ Known Issues
 
 Change Log
 ----------
+* 1.2.1
+    - fixed visor shader, reflection is now correctly blended onto visor
+    - changed environment map for reflections
 * 1.2
     - added support for custom visor shader
     - added reflective shader for visor that supports transparency

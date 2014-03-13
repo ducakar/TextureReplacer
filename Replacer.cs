@@ -42,8 +42,7 @@ namespace TextureReplacer
     private static readonly string DIR_ENVMAP = Main.DIR_PREFIX + "EnvMap/";
     // General texture replacements.
     private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
-    // Reflective shader/material.
-    private Shader reflectiveShader = null;
+    // Reflective shader material.
     private Material shaderMaterial = null;
     // Environment map.
     private Cubemap envMap = null;
@@ -59,6 +58,8 @@ namespace TextureReplacer
     private int updateCounter = 0;
     // Instance.
     public static Replacer instance = null;
+    // Reflective shader.
+    public Shader reflectiveShader = null;
 
     /**
      * Print a log entry for TextureReplacer. `String.Format()`-style formatting is supported.

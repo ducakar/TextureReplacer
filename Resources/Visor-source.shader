@@ -10,7 +10,22 @@ SubShader {
  LOD 100
  Tags { "QUEUE"="Transparent" "IGNOREPROJECTOR"="True" "RenderType"="Transparent" }
  Pass {
-  Name "BASE"
+  Tags { "LIGHTMODE"="Vertex" }
+  Lighting On
+  SeparateSpecular On
+  Material {
+   Ambient [_Color]
+   Diffuse [_Color]
+   Specular [_SpecColor]
+   Shininess [_Shininess]
+  }
+  ZWrite Off
+  Blend SrcAlpha OneMinusSrcAlpha
+  AlphaTest Greater 0
+  ColorMask RGB
+  SetTexture [_MainTex] { combine texture * primary double, texture alpha * primary alpha }
+ }
+ Pass {
   Tags { "LIGHTMODE"="Always" }
   ZWrite Off
   Blend One One
@@ -45,31 +60,14 @@ v2f vert(appdata_tan v)
 }
 
 uniform fixed4      _ReflectColor;
-uniform sampler2D   _MainTex;
 uniform samplerCUBE _Cube;
 
 fixed4 frag (v2f i) : COLOR
 {
-  fixed3 reflection = _ReflectColor.xyz * texCUBE(_Cube, i.I).xyz;
+  fixed3 reflection = _ReflectColor.xyz * texCUBE(_Cube, i.I).rgb;
   return fixed4(reflection, 1.0);
 }
 ENDCG
- }
- Pass {
-  Tags { "LIGHTMODE"="Vertex" }
-  Lighting On
-  SeparateSpecular On
-  Material {
-   Ambient [_Color]
-   Diffuse [_Color]
-   Specular [_SpecColor]
-   Shininess [_Shininess]
-  }
-  ZWrite Off
-  Blend SrcAlpha OneMinusSrcAlpha
-  AlphaTest Greater 0
-  ColorMask RGB
-  SetTexture [_MainTex] { combine texture * primary double, texture alpha * primary alpha }
  }
  Pass {
   Tags { "LIGHTMODE"="VertexLM" }

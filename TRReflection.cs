@@ -29,5 +29,13 @@ namespace TextureReplacer
 {
   //  public class TRReflection : PartModule
   //  {
+  //    [KSPField(isPersistant = false)]
+  //    public string meshList = "";
+  //
+  //    public override void OnStart(StartState state)
+  //    {
+  //      if (Replacer.instance.reflectiveShader == null)
+  //        return;
+  //    }
   //  }
 }
