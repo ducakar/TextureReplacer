@@ -33,10 +33,11 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Compile Include="Builder.cs" />
-    <Compile Include="Main.cs" />
+    <Compile Include="Loader.cs" />
     <Compile Include="Personaliser.cs" />
+    <Compile Include="Reflections.cs" />
     <Compile Include="Replacer.cs" />
+    <Compile Include="TextureReplacer.cs" />
     <Compile Include="TRReflection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="README.md" />

@@ -29,13 +29,13 @@ namespace TextureReplacer
 {
   public class Personaliser
   {
-    enum SuitAssignment
+    private enum SuitAssignment
     {
       RANDOM,
       CONSECUTIVE
     }
 
-    enum FallbackSuit
+    private enum FallbackSuit
     {
       DEFAULT,
       GENERIC
@@ -122,10 +122,10 @@ namespace TextureReplacer
       }
     }
 
-    private static readonly string DIR_DEFAULT_KERBAL = Main.DIR_PREFIX + "Default/";
-    private static readonly string DIR_CUSTOM_KERBALS = Main.DIR_PREFIX + "CustomKerbals/";
-    private static readonly string DIR_GENERIC_KERBALS = Main.DIR_PREFIX + "GenericKerbals/";
-    private static readonly string DIR_GENERIC_KERMINS = Main.DIR_PREFIX + "GenericKermins/";
+    private static readonly string DIR_DEFAULT_KERBAL = TextureReplacer.DIR + "Default/";
+    private static readonly string DIR_CUSTOM_KERBALS = TextureReplacer.DIR + "CustomKerbals/";
+    private static readonly string DIR_GENERIC_KERBALS = TextureReplacer.DIR + "GenericKerbals/";
+    private static readonly string DIR_GENERIC_KERMINS = TextureReplacer.DIR + "GenericKermins/";
     // Personalised Kerbal textures.
     private Dictionary<string, Texture2D> customHeads = new Dictionary<string, Texture2D>();
     private Dictionary<string, KerbalSuit> customSuits = new Dictionary<string, KerbalSuit>();
@@ -328,10 +328,14 @@ namespace TextureReplacer
       if (ivaReplaceCounter == 0)
       {
         Kerbal[] kerbals = isSfrDetected ? (Kerbal[]) Kerbal.FindObjectsOfType(typeof(Kerbal)) :
-          InternalSpace.Instance.GetComponentsInChildren<Kerbal>();
+                           InternalSpace.Instance == null ? null :
+                           InternalSpace.Instance.GetComponentsInChildren<Kerbal>();
 
-        foreach (Kerbal kerbal in kerbals)
-          replaceKerbalSkin(kerbal, kerbal.protoCrewMember, false, false);
+        if (kerbals != null)
+        {
+          foreach (Kerbal kerbal in kerbals)
+            replaceKerbalSkin(kerbal, kerbal.protoCrewMember, false, false);
+        }
 
         ivaReplaceCounter = -1;
       }
@@ -365,7 +369,7 @@ namespace TextureReplacer
           else
           {
             // Vessel is a ship. Update Kerbals on external seats.
-            foreach (Part part in vessel.rootPart.FindChildParts<Part>())
+            foreach (Part part in vessel.parts)
             {
               KerbalSeat seat = part.GetComponent<KerbalSeat>();
               if (seat == null || seat.Occupant == null)
@@ -470,7 +474,7 @@ namespace TextureReplacer
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
-        if (texture == null || !texture.name.StartsWith(Main.DIR_PREFIX))
+        if (texture == null || !texture.name.StartsWith(TextureReplacer.DIR))
           continue;
 
         int lastSlash = texture.name.LastIndexOf('/');
@@ -488,6 +492,8 @@ namespace TextureReplacer
         {
           int kerbalNameLength = lastSlash - DIR_CUSTOM_KERBALS.Length;
           string kerbalName = texture.name.Substring(DIR_CUSTOM_KERBALS.Length, kerbalNameLength);
+
+          texture.wrapMode = TextureWrapMode.Clamp;
 
           if (originalName == "kerbalHead")
           {
@@ -525,6 +531,8 @@ namespace TextureReplacer
           string baseDir = isFemale ? DIR_GENERIC_KERMINS : DIR_GENERIC_KERBALS;
           int gender = isFemale ? 1 : 0;
           int dirNameLength = lastSlash - baseDir.Length;
+
+          texture.wrapMode = TextureWrapMode.Clamp;
 
           if (originalName.StartsWith("kerbalHead"))
           {
@@ -572,7 +580,8 @@ namespace TextureReplacer
         }
         else if (texture.name.StartsWith(DIR_DEFAULT_KERBAL))
         {
-          defaultSuit.setTexture(originalName, texture);
+          if (defaultSuit.setTexture(originalName, texture))
+            texture.wrapMode = TextureWrapMode.Clamp;
         }
 
         lastTextureName = texture.name;

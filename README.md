@@ -7,7 +7,7 @@ TextureReplacer
 * [SpacePort page](http://kerbalspaceport.com/texturereplacer-0-21/).
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
-stock textures and customise you Kerbals. More specifically, it can:
+stock textures and customise your Kerbals. More specifically, it can:
 * replace stock textures with custom ones,
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
@@ -27,8 +27,8 @@ Special thanks to:
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
   reflections,
 * therealcrow999 for testing and benchmarking this plugin,
-* Proot and others for making texture packs for this plugin and
-* Sylith and scart91 for giving others permissions to make derivates of their
+* Proot, Green Skull and others for making texture packs for this plugin and
+* Sylith and scart91 for giving others permissions to make derivatives of their
   texture packs.
 
 
@@ -170,16 +170,6 @@ Environment map cube texture for reflections is included with the plugin:
 Note that all textures must be quares and have the same dimensions that are
 powers of two. Cube map textures are slow, so keep them as low-res as possible.
 
-Unfortunately, KSP reflective shader(s) do not support transparency. As a
-workaround for this one can put a custom shader into
-
-    GameData/TextureReplacer/PluginData/TextureReplacer/Visor.shader
-
-to override `Reflective/VertexLit` shader from KSP that is used by default.
-
-The reflection shader is automatically used for helmet visors with a
-non-transparent texture. This can be changed in the configuration file.
-
 ### Configuration File ###
 Configuration file, where several features can be enabled/disabled or tweaked,
 is located in
@@ -191,9 +181,9 @@ Notes
 -----
 * Try to keep widths and heights of all textures powers of two. Non-power-of-two
   textures are not handled well in some cases and cannot be compressed.
-* By default, internal texture compression and mipmap generation is disabled
-  when TextureCompressor is detected. Those features are then left to
-  TextureCompressor which is a more specialised mod for those purposes.
+* By default, internal texture compression is disabled when TextureCompressor is
+  detected. Compression is then left to TextureCompressor which is a more
+  specialised mod for that purpose.
 * The planet textures being replaced are the high-altitude textures, which are
   also used in the map mode and in the tracking station. When getting closer to
   the surface those textures are slowly interpolated into the high-resolution
@@ -215,6 +205,13 @@ Known Issues
 
 Change Log
 ----------
+* 1.2.2
+    - changed texure wrapping mode for Kerbal textures to "clamp", which
+      eliminates the green patch at the top of heads
+    - changed default setting for mipmap generation to `always`, since TC
+      doesn't generate mipmaps for TR textures (and many others) by default
+    - fixed personalisation on ext. seats that are not attached to the root part
+    - refactored reflection code
 * 1.2.1
     - fixed visor shader, reflection is now correctly blended onto visor
     - changed environment map for reflections
@@ -355,23 +352,22 @@ Change Log
 
 Licence
 -------
-    Copyright © 2014 Davorin Učakar
-    Copyright © 2014 Ryan Bray
+Copyright © 2013-2014 Davorin Učakar, Ryan Bray
 
-    Permission is hereby granted, free of charge, to any person obtaining a
-    copy of this software and associated documentation files (the "Software"),
-    to deal in the Software without restriction, including without limitation
-    the rights to use, copy, modify, merge, publish, distribute, sublicense,
-    and/or sell copies of the Software, and to permit persons to whom the
-    Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-    DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

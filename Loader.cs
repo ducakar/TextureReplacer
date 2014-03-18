@@ -28,7 +28,7 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  public class Builder
+  public class Loader
   {
     // Texture compression and mipmap generation parameters.
     private int lastTextureCount = 0;
@@ -36,17 +36,17 @@ namespace TextureReplacer
     // List of substrings for paths where mipmap generating is enabled.
     private string[] mipmapDirSubstrings = null;
     // Features.
-    private bool? isMipmapGenEnabled = null;
     private bool? isCompressionEnabled = null;
+    private bool? isMipmapGenEnabled = null;
     // Instance.
-    public static Builder instance = null;
+    public static Loader instance = null;
 
     /**
      * Print a log entry for TextureReplacer. `String.Format()`-style formatting is supported.
      */
     private static void log(string s, params object[] args)
     {
-      Debug.Log("[TR.Builder] " + String.Format(s, args));
+      Debug.Log("[TR.Loader] " + String.Format(s, args));
     }
 
     /**
@@ -95,9 +95,6 @@ namespace TextureReplacer
         {
           TextureFormat format = texture.format;
 
-          // Set trilinear filter.
-          texture.filterMode = FilterMode.Trilinear;
-
           // `texture.GetPixel() throws an exception if the texture is not readable and hence it
           // cannot be compressed nor mipmaps generated.
           try
@@ -116,17 +113,15 @@ namespace TextureReplacer
               && mipmapDirSubstrings.Any(s => texture.name.IndexOf(s) >= 0))
           {
             int oldSize = textureSize(texture);
-            bool isTransparent = false;
             Color32[] pixels32 = texture.GetPixels32();
 
             // PNGs and JPEGs are always loaded as transparent, so we check if they actually contain
             // any transparent pixels. If not, they are converted to DXT1.
-            if (texture.format == TextureFormat.RGBA32 || texture.format == TextureFormat.DXT5)
-              isTransparent = pixels32.Any(p => p.a != 255);
+            bool hasAlpha = format == TextureFormat.RGBA32 || format == TextureFormat.DXT5;
+            bool isTransparent = hasAlpha && pixels32.Any(p => p.a != 255);
 
             // Rebuild texture. This time with mipmaps.
             TextureFormat newFormat = isTransparent ? TextureFormat.RGBA32 : TextureFormat.RGB24;
-
             texture.Resize(texture.width, texture.height, newFormat, true);
             texture.SetPixels32(pixels32);
             texture.Apply(true, false);
@@ -171,7 +166,7 @@ namespace TextureReplacer
     /**
      * Read configuration and perform pre-load initialisation.
      */
-    public Builder(ConfigNode rootNode)
+    public Loader(ConfigNode rootNode)
     {
       string sIsCompressionEnabled = rootNode.GetValue("isCompressionEnabled");
       if (sIsCompressionEnabled != null)

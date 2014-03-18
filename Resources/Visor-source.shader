@@ -1,4 +1,4 @@
-Shader "TR/VertexLit" {
+Shader "TR/Visor" {
 Properties {
  _Color ("Main Color", Color) = (1,1,1,1)
  _SpecColor ("Spec Color", Color) = (1,1,1,0)
@@ -51,7 +51,7 @@ v2f vert(appdata_tan v)
 
   // calculate world space reflection vector
   float3 viewDir = WorldSpaceViewDir(v.vertex);
-  float3 worldN  = mul((float3x3)_Object2World, v.normal * unity_Scale.w);
+  float3 worldN  = mul((float3x3) _Object2World, v.normal * unity_Scale.w);
 
   o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
   o.uv  = TRANSFORM_TEX(v.texcoord,_MainTex);
@@ -64,7 +64,7 @@ uniform samplerCUBE _Cube;
 
 fixed4 frag (v2f i) : COLOR
 {
-  fixed3 reflection = _ReflectColor.xyz * texCUBE(_Cube, i.I).rgb;
+  fixed3 reflection = _ReflectColor.rgb * texCUBE(_Cube, i.I).rgb;
   return fixed4(reflection, 1.0);
 }
 ENDCG

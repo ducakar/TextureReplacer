@@ -26,9 +26,9 @@ using UnityEngine;
 namespace TextureReplacer
 {
   [KSPAddon(KSPAddon.Startup.Instantly, true)]
-  public class Main : MonoBehaviour
+  public class TextureReplacer : MonoBehaviour
   {
-    public static readonly string DIR_PREFIX = "TextureReplacer/";
+    public static readonly string DIR = "TextureReplacer/";
     // Generic texture replacement parameters.
     private GameScenes lastScene = GameScenes.LOADING;
     private bool isInitialised = false;
@@ -38,7 +38,7 @@ namespace TextureReplacer
      */
     private static void log(string s, params object[] args)
     {
-      Debug.Log("[TR.Main] " + String.Format(s, args));
+      Debug.Log("[TR.TextureReplacer] " + String.Format(s, args));
     }
 
     public void Start()
@@ -56,8 +56,9 @@ namespace TextureReplacer
         if (config == null)
           return;
 
-        Builder.instance = new Builder(config);
+        Loader.instance = new Loader(config);
         Replacer.instance = new Replacer(config);
+        Reflections.instance = new Reflections(config);
         Personaliser.instance = new Personaliser(config);
       }
       catch (Exception e)
@@ -73,12 +74,13 @@ namespace TextureReplacer
         if (!isInitialised)
         {
           // Compress textures, generate mipmaps, convert DXT5 -> DXT1 if necessary etc.
-          Builder.instance.processTextures();
+          Loader.instance.processTextures();
 
           if (GameDatabase.Instance.IsReady())
           {
-            Builder.instance.initialise();
+            Loader.instance.initialise();
             Replacer.instance.initialise();
+            Reflections.instance.initialise();
             Personaliser.instance.initialise();
 
             isInitialised = true;
@@ -110,7 +112,7 @@ namespace TextureReplacer
 
     public void OnDestroy()
     {
-      Replacer.instance.destroy();
+      Reflections.instance.destroy();
     }
   }
 }

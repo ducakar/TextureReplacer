@@ -1,4 +1,4 @@
-Shader "TR/VertexLit" {
+Shader "TR/Visor" {
 Properties {
  _Color ("Main Color", Color) = (1,1,1,1)
  _SpecColor ("Spec Color", Color) = (1,1,1,0)
