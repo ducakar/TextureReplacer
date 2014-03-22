@@ -35,14 +35,9 @@ namespace TextureReplacer
       CONSECUTIVE
     }
 
-    private enum FallbackSuit
-    {
-      DEFAULT,
-      GENERIC
-    }
-
     private class KerbalSuit
     {
+      public string name;
       public Texture2D suit;
       public Texture2D suitNRM;
       public Texture2D helmet;
@@ -122,25 +117,19 @@ namespace TextureReplacer
       }
     }
 
-    private static readonly string DIR_DEFAULT_KERBAL = TextureReplacer.DIR + "Default/";
-    private static readonly string DIR_CUSTOM_KERBALS = TextureReplacer.DIR + "CustomKerbals/";
-    private static readonly string DIR_GENERIC_KERBALS = TextureReplacer.DIR + "GenericKerbals/";
-    private static readonly string DIR_GENERIC_KERMINS = TextureReplacer.DIR + "GenericKermins/";
+    private static readonly string DIR_DEFAULT = TextureReplacer.DIR + "Default/";
+    private static readonly string DIR_HEADS = TextureReplacer.DIR + "Heads/";
+    private static readonly string DIR_SUITS = TextureReplacer.DIR + "Suits/";
+    // Kerbal textures.
+    private KerbalSuit defaultSuit = new KerbalSuit() { name = "DEFAULT" };
+    private List<Texture2D> heads = new List<Texture2D>();
+    private List<KerbalSuit> suits = new List<KerbalSuit>();
     // Personalised Kerbal textures.
     private Dictionary<string, Texture2D> customHeads = new Dictionary<string, Texture2D>();
     private Dictionary<string, KerbalSuit> customSuits = new Dictionary<string, KerbalSuit>();
-    // Generic Kerbal textures (male on the beginning of the list, female on the end).
-    private KerbalSuit defaultSuit = new KerbalSuit();
-    private List<Texture2D> genericHeads = new List<Texture2D>();
-    private List<KerbalSuit> genericSuits = new List<KerbalSuit>();
-    // Indices of the first female face and suit.
-    private int firstKerminHead = 0;
-    private int firstKerminSuit = 0;
     // Atmospheric IVA suit parameters.
     private bool isAtmSuitEnabled = true;
     private double atmSuitPressure = 0.5;
-    // Whether to use the default suit as custom suit fallback.
-    private FallbackSuit fallbackSuit = FallbackSuit.DEFAULT;
     // Whether assignment of suits should be consecutive.
     private SuitAssignment suitAssignment = SuitAssignment.RANDOM;
     // List of vessels for which Kerbal EVA has to be updated (either vessel is an EVA or has an EVA
@@ -174,44 +163,32 @@ namespace TextureReplacer
     {
       Texture2D headTexture = null;
       KerbalSuit suitSkin = null;
-      bool isFemale = false;
 
       customHeads.TryGetValue(kerbal.name, out headTexture);
       customSuits.TryGetValue(kerbal.name, out suitSkin);
 
-      if (headTexture != null && suitSkin == null && fallbackSuit == FallbackSuit.DEFAULT)
-        suitSkin = defaultSuit;
-
-      if (headTexture == null && genericHeads.Count != 0)
+      if (headTexture == null && heads.Count != 0)
       {
         // Hash is multiplied with a large prime to increase randomisation, since hashes returned by
         // `GetHashCode()` are close together if strings only differ in the last (few) char(s).
-        int index = ((kerbal.name.GetHashCode() * 1021) & 0x7fffffff) % genericHeads.Count;
-
-        isFemale = index >= firstKerminHead;
-        headTexture = genericHeads[index];
+        int index = ((kerbal.name.GetHashCode() * 1021) & 0x7fffffff) % heads.Count;
+        headTexture = heads[index];
       }
 
-      if (suitSkin == null && genericSuits.Count != 0)
+      if (suitSkin == null && suits.Count != 0)
       {
-        int firstSuit = isFemale ? firstKerminSuit : 0;
-        int nSuits = isFemale ? genericSuits.Count - firstKerminSuit : firstKerminSuit;
-
-        if (nSuits != 0)
+        if (suitAssignment == SuitAssignment.RANDOM)
         {
-          if (suitAssignment == SuitAssignment.RANDOM)
-          {
-            // Here we must use a different prime to increase randomisation so that the same head is
-            // not always combined with the same suit.
-            int index = firstSuit + ((kerbal.name.GetHashCode() * 2053) & 0x7fffffff) % nSuits;
-            suitSkin = genericSuits[index];
-          }
-          else
-          {
-            // Assign the suit based on consecutive number of a Kerbal.
-            int index = firstSuit + HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal) % nSuits;
-            suitSkin = genericSuits[index];
-          }
+          // Here we must use a different prime to increase randomisation so that the same head is
+          // not always combined with the same suit.
+          int index = ((kerbal.name.GetHashCode() * 2053) & 0x7fffffff) % suits.Count;
+          suitSkin = suits[index];
+        }
+        else
+        {
+          // Assign the suit based on consecutive number of a Kerbal.
+          int index = HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal) % suits.Count;
+          suitSkin = suits[index];
         }
       }
 
@@ -390,6 +367,85 @@ namespace TextureReplacer
     }
 
     /**
+     * Fill config for custom Kerbal heads and suits.
+     */
+    private void readConfig()
+    {
+      ConfigNode rootNode = ConfigNode.Load(TextureReplacer.PATH + "/Kerbals.cfg");
+      if (rootNode == null)
+        return;
+
+      rootNode = rootNode.GetNode("TextureReplacer");
+      if (rootNode == null)
+        return;
+
+      ConfigNode customNode = rootNode.GetNode("CustomKerbals");
+      if (customNode != null)
+      {
+        foreach (ConfigNode.Value entry in customNode.values)
+        {
+          string[] tokens = TextureReplacer.splitConfigValue(entry.value);
+
+          if (tokens.Length >= 1)
+          {
+            string headName = tokens[0];
+
+            Texture2D headTex = heads.FirstOrDefault(h => h.name.EndsWith(headName));
+            if (headTex != null && !customHeads.ContainsKey(entry.name))
+            {
+              customHeads.Add(entry.name, headTex);
+              log("Mapped {0}'s head -> {1}", entry.name, headTex.name);
+            }
+          }
+
+          if (tokens.Length >= 2)
+          {
+            string suitName = tokens[1];
+
+            KerbalSuit suitSkin = suitName == "DEFAULT" ? defaultSuit :
+                                  suits.FirstOrDefault(s => s.name.EndsWith(suitName));
+            if (suitSkin != null && !customSuits.ContainsKey(entry.name))
+            {
+              customSuits.Add(entry.name, suitSkin);
+              log("Mapped {0}'s suit -> {1}", entry.name, suitSkin.name);
+            }
+          }
+        }
+      }
+
+      ConfigNode genericNode = rootNode.GetNode("GenericKerbals");
+      if (genericNode != null)
+      {
+        string sExcludedHeads = genericNode.GetValue("excludedHeads");
+        if (sExcludedHeads != null)
+        {
+          string[] excludedHeads = TextureReplacer.splitConfigValue(sExcludedHeads);
+          foreach (string headName in excludedHeads)
+            heads.RemoveAll(h => h.name.EndsWith(headName));
+        }
+
+        string sExcludedSuits = genericNode.GetValue("excludedSuits");
+        if (sExcludedSuits != null)
+        {
+          string[] excludedSuits = TextureReplacer.splitConfigValue(sExcludedSuits);
+          foreach (string suitName in excludedSuits)
+            suits.RemoveAll(s => s.name.EndsWith(suitName));
+        }
+
+        string sSuitAssignment = genericNode.GetValue("suitAssignment");
+        if (sSuitAssignment != null)
+        {
+          if (sSuitAssignment == "random")
+            suitAssignment = SuitAssignment.RANDOM;
+          else if (sSuitAssignment == "consecutive")
+            suitAssignment = SuitAssignment.CONSECUTIVE;
+          else
+            log("Invalid value for suitAssignment: {0}", sSuitAssignment);
+        }
+      }
+    }
+
+    /**
      * Read configuration and perform pre-load initialisation.
      */
     public Personaliser(ConfigNode rootNode)
@@ -402,29 +458,7 @@ namespace TextureReplacer
       if (sAtmSuitPressure != null)
         Double.TryParse(sAtmSuitPressure, out atmSuitPressure);
 
-      string sFallbackSuit = rootNode.GetValue("fallbackSuit");
-      if (sFallbackSuit != null)
-      {
-        if (sFallbackSuit == "default")
-          fallbackSuit = FallbackSuit.DEFAULT;
-        else if (sFallbackSuit == "generic")
-          fallbackSuit = FallbackSuit.GENERIC;
-        else
-          log("Invalid value for fallbackSuit: {0}", sFallbackSuit);
-      }
-
-      string sSuitAssignment = rootNode.GetValue("suitAssignment");
-      if (sSuitAssignment != null)
-      {
-        if (sSuitAssignment == "random")
-          suitAssignment = SuitAssignment.RANDOM;
-        else if (sSuitAssignment == "consecutive")
-          suitAssignment = SuitAssignment.CONSECUTIVE;
-        else
-          log("Invalid value for suitAssignment: {0}", sSuitAssignment);
-      }
-
-      // Check if srf mod is present.
+      // Check if the srf mod is present.
       isSfrDetected = AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("sfrPartModules"));
       if (isSfrDetected)
         log("Detected sfr mod, enabling alternative Kerbal IVA texture replacement");
@@ -465,10 +499,7 @@ namespace TextureReplacer
      */
     public void initialise()
     {
-      Dictionary<string, int>[] genericDirs = new Dictionary<string, int>[2] {
-        new Dictionary<string, int>(), new Dictionary<string, int>()
-      };
-      List<KerbalSuit> kerminSuits = new List<KerbalSuit>();
+      Dictionary<string, int> genericDirs = new Dictionary<string, int>();
       string lastTextureName = "";
 
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
@@ -487,98 +518,44 @@ namespace TextureReplacer
         {
           log("Corrupted GameDatabase! Problematic TGA? {0}", texture.name);
         }
-        // Add a presonalised Kerbal texture.
-        else if (texture.name.StartsWith(DIR_CUSTOM_KERBALS))
+        // Add a head texture.
+        else if (texture.name.StartsWith(DIR_HEADS))
         {
-          int kerbalNameLength = lastSlash - DIR_CUSTOM_KERBALS.Length;
-          string kerbalName = texture.name.Substring(DIR_CUSTOM_KERBALS.Length, kerbalNameLength);
+          texture.wrapMode = TextureWrapMode.Clamp;
+
+          heads.Add(texture);
+          log("Mapped head #{0} -> {1}", heads.Count - 1, texture.name);
+        }
+        // Add a suit texture.
+        else if (texture.name.StartsWith(DIR_SUITS))
+        {
+          int index = suits.Count;
+          int dirNameLength = lastSlash - DIR_HEADS.Length;
+          string dirName = texture.name.Substring(DIR_SUITS.Length, dirNameLength);
 
           texture.wrapMode = TextureWrapMode.Clamp;
 
-          if (originalName == "kerbalHead")
+          KerbalSuit suit = null;
+          if (genericDirs.ContainsKey(dirName))
           {
-            if (!customHeads.ContainsKey(kerbalName))
-            {
-              customHeads.Add(kerbalName, texture);
-
-              log("Mapped {0}'s {1} -> {2}", kerbalName, originalName, texture.name);
-            }
+            index = genericDirs[dirName];
+            suit = suits[index];
           }
           else
           {
-            // If the suit entry already exists, add the new texture to it, otherwise create a new
-            // suit entry.
-            KerbalSuit suit = null;
-            customSuits.TryGetValue(kerbalName, out suit);
+            genericDirs.Add(dirName, index);
 
-            if (suit == null)
-            {
-              suit = new KerbalSuit();
-              customSuits.Add(kerbalName, suit);
-            }
-
-            if (suit.setTexture(originalName, texture))
-              log("Mapped {0}'s {1} -> {2}", kerbalName, originalName, texture.name);
-            else
-              log("Unknown Kerbal texture {0}", texture.name);
+            index = suits.Count;
+            suit = new KerbalSuit { name = dirName };
+            suits.Add(suit);
           }
+
+          if (suit.setTexture(originalName, texture))
+            log("Mapped suit #{0}'s {1} -> {2}", suits.Count - 1, originalName, texture.name);
+          else
+            log("Unknown suit texture name {0}", texture.name);
         }
-        // Add a generic Kerbal/Kermin texture.
-        else if (texture.name.StartsWith(DIR_GENERIC_KERBALS)
-                 || texture.name.StartsWith(DIR_GENERIC_KERMINS))
-        {
-          bool isFemale = texture.name.StartsWith(DIR_GENERIC_KERMINS);
-          string baseDir = isFemale ? DIR_GENERIC_KERMINS : DIR_GENERIC_KERBALS;
-          int gender = isFemale ? 1 : 0;
-          int dirNameLength = lastSlash - baseDir.Length;
-
-          texture.wrapMode = TextureWrapMode.Clamp;
-
-          if (originalName.StartsWith("kerbalHead"))
-          {
-            // Male heads go to the beginning, female to the end of the list.
-            int index = isFemale ? genericHeads.Count : firstKerminHead;
-            genericHeads.Insert(index, texture);
-
-            if (!isFemale)
-              ++firstKerminHead;
-
-            log("Mapped generic {0} head #{1} kerbalHead -> {2}",
-                isFemale ? "Kermin" : "Kerbal", isFemale ? index - firstKerminHead : index,
-                texture.name);
-          }
-          else if (dirNameLength > 0)
-          {
-            KerbalSuit suit = new KerbalSuit();
-            string dirName = texture.name.Substring(baseDir.Length, dirNameLength);
-            int index;
-
-            // We use a special list for female suits: `kerminSuits`. At the end of initialisation
-            // it will be appended to `genericSuits`.
-            if (genericDirs[gender].ContainsKey(dirName))
-            {
-              index = genericDirs[gender][dirName];
-              suit = isFemale ? kerminSuits[index] : genericSuits[index];
-            }
-            else
-            {
-              index = isFemale ? kerminSuits.Count : genericSuits.Count;
-              genericDirs[gender].Add(dirName, index);
-
-              if (isFemale)
-                kerminSuits.Add(suit);
-              else
-                genericSuits.Add(suit);
-            }
-
-            if (suit.setTexture(originalName, texture))
-              log("Mapped generic {0} suit #{1} {2} -> {3}",
-                  isFemale ? "Kermin" : "Kerbal", index, originalName, texture.name);
-            else
-              log("Unknown Kerbal texture name {0}", texture.name);
-          }
-        }
-        else if (texture.name.StartsWith(DIR_DEFAULT_KERBAL))
+        else if (texture.name.StartsWith(DIR_DEFAULT))
         {
           if (defaultSuit.setTexture(originalName, texture))
             texture.wrapMode = TextureWrapMode.Clamp;
@@ -587,9 +564,7 @@ namespace TextureReplacer
         lastTextureName = texture.name;
       }
 
-      // Append female suits to the generic suits list.
-      firstKerminSuit = genericSuits.Count;
-      genericSuits.AddRange(kerminSuits);
+      readConfig();
     }
 
     public void resetScene()

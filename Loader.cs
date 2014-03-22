@@ -34,10 +34,10 @@ namespace TextureReplacer
     private int lastTextureCount = 0;
     private int memorySpared = 0;
     // List of substrings for paths where mipmap generating is enabled.
-    private string[] mipmapDirSubstrings = null;
+    private string[] mipmapDirSubstrings = { "/FX/", "/Parts/", "/Spaces/", "TextureReplacer/" };
     // Features.
     private bool? isCompressionEnabled = null;
-    private bool? isMipmapGenEnabled = null;
+    private bool? isMipmapGenEnabled = true;
     // Instance.
     public static Loader instance = null;
 
@@ -196,10 +196,7 @@ namespace TextureReplacer
 
       string sMipmapDirSubstrings = rootNode.GetValue("mipmapDirSubstrings");
       if (sMipmapDirSubstrings != null)
-      {
-        mipmapDirSubstrings = sMipmapDirSubstrings.Split(new char[] { ' ', ',' },
-                                                         StringSplitOptions.RemoveEmptyEntries);
-      }
+        mipmapDirSubstrings = TextureReplacer.splitConfigValue(sMipmapDirSubstrings);
 
       // Prevent conflicts with TextureCompressor. If it is found among loaded plugins, texture
       // compression step will be skipped since TextureCompressor should handle it (better).

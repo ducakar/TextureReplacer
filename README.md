@@ -100,61 +100,39 @@ Examples:
       Default/snowydwarfplanet01      // Eeloo normal map
 
 ### Personalised Kerbal Textures ###
-Personalised Kerbal textures are bound to a specific Kerbal. Texture names are
-the same as for the default textures except there is no `kerbalMain` texture
-(`kerbalMainGrey` replaces both veteran and standard suits):
+Head textures are assigned pseudo-randomly (based on a Kerbal's name's hash,
+which ensures the same head is always assigned to a given Kerbal) unless
+specified otherwise in the configuration file.
+
+Head textures reside in
+
+    GameData/TextureReplacer/Heads/
+
+Suit textures' names are identical as for the default texture replacement except
+that there is not `kerbalMain` texture (`kerbalMainGrey` replaces both). Each
+suit must reside in its own directory:
 
     GameData/TextureReplacer/
-      CustomKerbals/<kerbalName>/kerbalHead       // Kerbal head
-      CustomKerbals/<kerbalName>/kerbalMainGrey   // IVA suit
-      CustomKerbals/<kerbalName>/kerbalMainNRM    // IVA suit normal map
-      CustomKerbals/<kerbalName>/kerbalHelmetGrey // IVA helmet
-      CustomKerbals/<kerbalName>/kerbalHelmetNRM  // IVA & EVA helmet normal map
-      CustomKerbals/<kerbalName>/kerbalVisor      // IVA helmet visor
-      CustomKerbals/<kerbalName>/EVAtexture       // EVA suit
-      CustomKerbals/<kerbalName>/EVAtextureNRM    // EVA suit normal map
-      CustomKerbals/<kerbalName>/EVAhelmet        // EVA helmet
-      CustomKerbals/<kerbalName>/EVAvisor         // EVA helmet visor
-      CustomKerbals/<kerbalName>/EVAjetpack       // EVA jetpack
-      CustomKerbals/<kerbalName>/EVAjetpackNRM    // EVA jetpack normal map
-
-### Generic Kerbal Textures ###
-Generic head textures are assigned pseudo-randomly, based on the hash of a
-Kerbal's name, which ensures the same head is always assigned to a given Kerbal.
-Each head has equal chance of being selected.
-
-Generic head textures should be of the form
-
-    GameData/TextureReplacer/GenericKerbals/[<subDir>]/kerbalHead*
-
-i.e. head texture files should begin with `kerbalHead` and can optionally be
-inside a subdirectory.
-
-Suit textures' names are identical as for the personalised Kerbals but each suit
-must reside in its own directory:
-
-    GameData/TextureReplacer/
-      GenericKerbals/<suit>/kerbalMainGrey   // IVA suit
-      GenericKerbals/<suit>/kerbalMainNRM    // IVA suit normal map
-      GenericKerbals/<suit>/kerbalHelmetGrey // IVA helmet
-      GenericKerbals/<suit>/kerbalHelmetNRM  // IVA & EVA helmet normal map
-      GenericKerbals/<suit>/kerbalVisor      // IVA helmet visor
-      GenericKerbals/<suit>/EVAtexture       // EVA suit
-      GenericKerbals/<suit>/EVAtextureNRM    // EVA suit normal map
-      GenericKerbals/<suit>/EVAhelmet        // EVA helmet
-      GenericKerbals/<suit>/EVAvisor         // EVA helmet visor
-      GenericKerbals/<suit>/EVAjetpack       // EVA jetpack
-      GenericKerbals/<suit>/EVAjetpackNRM    // EVA jetpack normal map
+      Suits/<suit>/kerbalMainGrey   // IVA suit
+      Suits/<suit>/kerbalMainNRM    // IVA suit normal map
+      Suits/<suit>/kerbalHelmetGrey // IVA helmet
+      Suits/<suit>/kerbalHelmetNRM  // IVA & EVA helmet normal map
+      Suits/<suit>/kerbalVisor      // IVA helmet visor
+      Suits/<suit>/EVAtexture       // EVA suit
+      Suits/<suit>/EVAtextureNRM    // EVA suit normal map
+      Suits/<suit>/EVAhelmet        // EVA helmet
+      Suits/<suit>/EVAvisor         // EVA helmet visor
+      Suits/<suit>/EVAjetpack       // EVA jetpack
+      Suits/<suit>/EVAjetpackNRM    // EVA jetpack normal map
 
 Heads are selected independently form suits so any head can be paired with any
-of the suits. Such behaviour may not work as desired when one uses
-gender-specific suits. This is resolved by moving the female heads and suits to
-`GenericKermins/` while leaving the male ones in `GenericKerbals/`. The heads
-will be paired only with the suits from the same root directory.
+of the suits and each head has an equal chance of being selected.
 
 A suit can be selected either pseudo-randomly (same as heads) or consecutively,
-based on a Kerbal's position in crew rooster. That behaviour can be controlled
-in the configuration file.
+based on a Kerbal's position in crew rooster. One can also manually assign heads
+and suits to specific Kerbals. That can be controlled in
+
+    GameData/TextureReplacer/Kerbals.cfg
 
 ### Visor Reflections ###
 Environment map cube texture for reflections is included with the plugin:
@@ -171,10 +149,13 @@ Note that all textures must be quares and have the same dimensions that are
 powers of two. Cube map textures are slow, so keep them as low-res as possible.
 
 ### Configuration File ###
-Configuration file, where several features can be enabled/disabled or tweaked,
-is located in
+Configuration file where several features can be enabled/disabled or tweaked:
 
-    GameData/TextureReplacer/PluginData/TextureReplacer/Config.cfg
+    GameData/TextureReplacer/Config.cfg
+
+Configuration file where head and suit assignment can be controlled:
+
+    GameData/TextureReplacer/Kerbals.cfg
 
 
 Notes
@@ -205,6 +186,13 @@ Known Issues
 
 Change Log
 ----------
+* 1.2.80
+    - new directory layout:
+        + removed `CustomKerbals/`, `GenericKerbals/` and `GenericKermins/`
+        + all heads are in `Heads/`
+        + all suits are in `Suits/`
+        + `Config.cfg` moved to TextureReplacer's root
+    - assignment of head and suit textures is now defined in `Kerbals.cfg`
 * 1.2.2
     - changed texure wrapping mode for Kerbal textures to "clamp", which
       eliminates the green patch at the top of heads

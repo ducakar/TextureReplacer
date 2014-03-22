@@ -64,8 +64,7 @@ namespace TextureReplacer
       string sVisorReflectionColour = rootNode.GetValue("visorReflectionColour");
       if (sVisorReflectionColour != null)
       {
-        string[] components = sVisorReflectionColour.Split(new char[] { ' ', ',' },
-                                                           StringSplitOptions.RemoveEmptyEntries);
+        string[] components = TextureReplacer.splitConfigValue(sVisorReflectionColour);
         if (components.Length != 3)
         {
           log("visorReplectionColour must have exactly 3 components");

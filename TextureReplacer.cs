@@ -29,6 +29,8 @@ namespace TextureReplacer
   public class TextureReplacer : MonoBehaviour
   {
     public static readonly string DIR = "TextureReplacer/";
+    public static readonly string PATH = KSPUtil.ApplicationRootPath + "GameData/TextureReplacer";
+    private static readonly char[] DELIMITERS = { ' ', ',' };
     // Generic texture replacement parameters.
     private GameScenes lastScene = GameScenes.LOADING;
     private bool isInitialised = false;
@@ -41,20 +43,25 @@ namespace TextureReplacer
       Debug.Log("[TR.TextureReplacer] " + String.Format(s, args));
     }
 
+    /**
+     * Split a space- and/or comma-separated configuration file value into its tokens.
+     */
+    public static string[] splitConfigValue(string value)
+    {
+      return value.Split(DELIMITERS, StringSplitOptions.RemoveEmptyEntries);
+    }
+
     public void Start()
     {
       try
       {
         DontDestroyOnLoad(this);
 
-        string configPath = KSP.IO.IOUtils.GetFilePathFor(GetType(), "Config.cfg");
-        ConfigNode config = ConfigNode.Load(configPath);
+        ConfigNode config = ConfigNode.Load(PATH + "/Config.cfg");
+        if (config != null)
+          config = config.GetNode("TextureReplacer");
         if (config == null)
-          return;
-
-        config = config.GetNode("TextureReplacer");
-        if (config == null)
-          return;
+          config = new ConfigNode();
 
         Loader.instance = new Loader(config);
         Replacer.instance = new Replacer(config);
