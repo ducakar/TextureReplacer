@@ -120,6 +120,8 @@ namespace TextureReplacer
     private static readonly string DIR_DEFAULT = TextureReplacer.DIR + "Default/";
     private static readonly string DIR_HEADS = TextureReplacer.DIR + "Heads/";
     private static readonly string DIR_SUITS = TextureReplacer.DIR + "Suits/";
+    // Delay for IVA replacement (in seconds).
+    private static readonly float IVA_TIMER_DELAY = 0.5f;
     // Kerbal textures.
     private KerbalSuit defaultSuit = new KerbalSuit() { name = "DEFAULT" };
     private List<Texture2D> heads = new List<Texture2D>();
@@ -135,10 +137,10 @@ namespace TextureReplacer
     // List of vessels for which Kerbal EVA has to be updated (either vessel is an EVA or has an EVA
     // on an external seat).
     private List<Vessel> kerbalVessels = new List<Vessel>();
-    // Update counter for IVA replacement. It has to scheduled with a few frame lag to avoid race
+    // Update counter for IVA replacement. It has to scheduled with a little lag to avoid race
     // conditions with stock IVA texture replacement that sets orange suits to Jeb, Bill and Bob and
     // grey suits to other Kerbals.
-    private int ivaReplaceCounter = -1;
+    private float ivaReplaceTimer = -1.0f;
     // An alternative, more expensive, IVA replacement method must be used for sfr pods.
     private bool isSfrDetected = false;
     // Instance.
@@ -164,10 +166,7 @@ namespace TextureReplacer
       Texture2D headTexture = null;
       KerbalSuit suitSkin = null;
 
-      customHeads.TryGetValue(kerbal.name, out headTexture);
-      customSuits.TryGetValue(kerbal.name, out suitSkin);
-
-      if (headTexture == null && heads.Count != 0)
+      if (!customHeads.TryGetValue(kerbal.name, out headTexture) && heads.Count != 0)
       {
         // Hash is multiplied with a large prime to increase randomisation, since hashes returned by
         // `GetHashCode()` are close together if strings only differ in the last (few) char(s).
@@ -175,7 +174,7 @@ namespace TextureReplacer
         headTexture = heads[index];
       }
 
-      if (suitSkin == null && suits.Count != 0)
+      if (!customSuits.TryGetValue(kerbal.name, out suitSkin) && suits.Count != 0)
       {
         if (suitAssignment == SuitAssignment.RANDOM)
         {
@@ -212,9 +211,7 @@ namespace TextureReplacer
           case "upTeeth02":
           case "tongue":
           {
-            if (headTexture != null)
-              newTexture = headTexture;
-
+            newTexture = headTexture;
             break;
           }
           case "body01":
@@ -299,10 +296,10 @@ namespace TextureReplacer
      */
     private void replaceKerbalSkins()
     {
-      // IVA textures must be replaced with a little (2 frame) lag, otherwise we risk race
-      // conditions with KSP handler that resets IVA suits to the stock ones. The race condition
-      // issue always occurs when boarding an external seat.
-      if (ivaReplaceCounter == 0)
+      // IVA textures must be replaced with a little lag, otherwise we risk race conditions with KSP
+      // handler that resets IVA suits to the stock ones. The race condition issue always occurs
+      // when boarding an external seat.
+      if (ivaReplaceTimer == 0.0f)
       {
         Kerbal[] kerbals = isSfrDetected ? (Kerbal[]) Kerbal.FindObjectsOfType(typeof(Kerbal)) :
                            InternalSpace.Instance == null ? null :
@@ -314,7 +311,7 @@ namespace TextureReplacer
             replaceKerbalSkin(kerbal, kerbal.protoCrewMember, false, false);
         }
 
-        ivaReplaceCounter = -1;
+        ivaReplaceTimer = -1.0f;
       }
 
       if (kerbalVessels.Count != 0)
@@ -385,29 +382,27 @@ namespace TextureReplacer
         foreach (ConfigNode.Value entry in customNode.values)
         {
           string[] tokens = TextureReplacer.splitConfigValue(entry.value);
+          string kerbalName = entry.name;
+          string headName = tokens.Length >= 1 ? tokens[0] : null;
+          string suitName = tokens.Length >= 2 ? tokens[1] : null;
 
-          if (tokens.Length >= 1)
+          if (headName != null)
           {
-            string headName = tokens[0];
-
-            Texture2D headTex = heads.FirstOrDefault(h => h.name.EndsWith(headName));
-            if (headTex != null && !customHeads.ContainsKey(entry.name))
+            Texture2D head = heads.FirstOrDefault(h => h.name.EndsWith(headName));
+            if (!customHeads.ContainsKey(kerbalName))
             {
-              customHeads.Add(entry.name, headTex);
-              log("Mapped {0}'s head -> {1}", entry.name, headTex.name);
+              customHeads.Add(kerbalName, head);
+              log("Mapped {0}'s head -> {1}", kerbalName, head == null ? "DEFAULT" : head.name);
             }
           }
 
-          if (tokens.Length >= 2)
+          if (suitName != null)
           {
-            string suitName = tokens[1];
-
-            KerbalSuit suitSkin = suitName == "DEFAULT" ? defaultSuit :
-                                  suits.FirstOrDefault(s => s.name.EndsWith(suitName));
-            if (suitSkin != null && !customSuits.ContainsKey(entry.name))
+            KerbalSuit suit = suits.FirstOrDefault(s => s.name.EndsWith(suitName)) ?? defaultSuit;
+            if (!customSuits.ContainsKey(kerbalName))
             {
-              customSuits.Add(entry.name, suitSkin);
-              log("Mapped {0}'s suit -> {1}", entry.name, suitSkin.name);
+              customSuits.Add(kerbalName, suit);
+              log("Mapped {0}'s suit -> {1}", kerbalName, suit.name);
             }
           }
         }
@@ -466,7 +461,7 @@ namespace TextureReplacer
       // Update IVA textures on vessel switch.
       GameEvents.onVesselChange.Add(delegate(Vessel v) {
         if (!v.isEVA)
-          ivaReplaceCounter = 2;
+          ivaReplaceTimer = IVA_TIMER_DELAY;
       });
 
       // Update IVA textures when a new Kerbal enters. This should be unnecessary but we do it just
@@ -474,13 +469,13 @@ namespace TextureReplacer
       // is unnecessary it doesn't hurt performance since vessel switch occurs within the same
       // frame, so both events trigger only one texture replacement pass.
       GameEvents.onCrewBoardVessel.Add(delegate {
-        ivaReplaceCounter = 2;
+        ivaReplaceTimer = IVA_TIMER_DELAY;
       });
 
       // Update IVA textures on docking.
       GameEvents.onVesselWasModified.Add(delegate(Vessel v) {
         if (v.vesselName != null)
-          ivaReplaceCounter = 2;
+          ivaReplaceTimer = IVA_TIMER_DELAY;
       });
 
       // Update EVA textures when a new Kerbal is created.
@@ -569,7 +564,7 @@ namespace TextureReplacer
 
     public void resetScene()
     {
-      ivaReplaceCounter = -1;
+      ivaReplaceTimer = -1.0f;
     }
 
     public void updateScene()
@@ -577,11 +572,11 @@ namespace TextureReplacer
       // IVA/EVA texture replacement pass. It is scheduled via event callbacks.
       if (HighLogic.LoadedSceneIsFlight)
       {
-        if (ivaReplaceCounter == 0 || kerbalVessels.Count != 0)
+        if (ivaReplaceTimer == 0.0f || kerbalVessels.Count != 0)
           replaceKerbalSkins();
 
-        if (ivaReplaceCounter > 0)
-          --ivaReplaceCounter;
+        if (ivaReplaceTimer > 0)
+          ivaReplaceTimer = Math.Max(0.0f, ivaReplaceTimer - Time.deltaTime);
       }
     }
   }

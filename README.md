@@ -153,7 +153,7 @@ Configuration file where several features can be enabled/disabled or tweaked:
 
     GameData/TextureReplacer/Config.cfg
 
-Configuration file where head and suit assignment can be controlled:
+Configuration file where head and suit textures assignment can be controlled:
 
     GameData/TextureReplacer/Kerbals.cfg
 
@@ -186,13 +186,14 @@ Known Issues
 
 Change Log
 ----------
-* 1.2.80
+* 1.3
     - new directory layout:
         + removed `CustomKerbals/`, `GenericKerbals/` and `GenericKermins/`
         + all heads are in `Heads/`
         + all suits are in `Suits/`
         + `Config.cfg` moved to TextureReplacer's root
     - assignment of head and suit textures is now defined in `Kerbals.cfg`
+    - fixed IVA replacement that failed for suits sometimes when docking
 * 1.2.2
     - changed texure wrapping mode for Kerbal textures to "clamp", which
       eliminates the green patch at the top of heads
