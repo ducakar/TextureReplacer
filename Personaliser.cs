@@ -121,7 +121,7 @@ namespace TextureReplacer
     private static readonly string DIR_HEADS = TextureReplacer.DIR + "Heads/";
     private static readonly string DIR_SUITS = TextureReplacer.DIR + "Suits/";
     // Delay for IVA replacement (in seconds).
-    private static readonly float IVA_TIMER_DELAY = 0.5f;
+    private static readonly float IVA_TIMER_DELAY = 0.1f;
     // Kerbal textures.
     private KerbalSuit defaultSuit = new KerbalSuit() { name = "DEFAULT" };
     private List<Texture2D> heads = new List<Texture2D>();
@@ -368,74 +368,63 @@ namespace TextureReplacer
      */
     private void readConfig()
     {
-      ConfigNode rootNode = ConfigNode.Load(TextureReplacer.PATH + "/Kerbals.cfg");
-      if (rootNode == null)
-        return;
-
-      rootNode = rootNode.GetNode("TextureReplacer");
-      if (rootNode == null)
-        return;
-
-      ConfigNode customNode = rootNode.GetNode("CustomKerbals");
-      if (customNode != null)
+      foreach (UrlDir.UrlFile file in GameDatabase.Instance.root.AllFiles)
       {
-        foreach (ConfigNode.Value entry in customNode.values)
-        {
-          string[] tokens = TextureReplacer.splitConfigValue(entry.value);
-          string kerbalName = entry.name;
-          string headName = tokens.Length >= 1 ? tokens[0] : null;
-          string suitName = tokens.Length >= 2 ? tokens[1] : null;
+        if (!file.url.StartsWith(TextureReplacer.DIR) || file.fileExtension != "tcfg")
+          continue;
 
-          if (headName != null)
+        ConfigNode rootNode = ConfigNode.Load(file.fullPath);
+        if (rootNode == null)
+          continue;
+
+        rootNode = rootNode.GetNode("TextureReplacer");
+        if (rootNode == null)
+          continue;
+
+        ConfigNode customNode = rootNode.GetNode("CustomKerbals");
+        if (customNode != null)
+        {
+          foreach (ConfigNode.Value entry in customNode.values)
           {
-            Texture2D head = heads.FirstOrDefault(h => h.name.EndsWith(headName));
-            if (!customHeads.ContainsKey(kerbalName))
+            string[] tokens = TextureReplacer.splitConfigValue(entry.value);
+            string kerbalName = entry.name;
+            string headName = tokens.Length >= 1 ? tokens[0] : null;
+            string suitName = tokens.Length >= 2 ? tokens[1] : null;
+
+            if (headName != null)
             {
-              customHeads.Add(kerbalName, head);
+              Texture2D head = heads.FirstOrDefault(h => h.name.EndsWith(headName));
+              customHeads[kerbalName] = head;
               log("Mapped {0}'s head -> {1}", kerbalName, head == null ? "DEFAULT" : head.name);
             }
-          }
 
-          if (suitName != null)
-          {
-            KerbalSuit suit = suits.FirstOrDefault(s => s.name.EndsWith(suitName)) ?? defaultSuit;
-            if (!customSuits.ContainsKey(kerbalName))
+            if (suitName != null)
             {
-              customSuits.Add(kerbalName, suit);
+              KerbalSuit suit = suits.FirstOrDefault(s => s.name.EndsWith(suitName)) ?? defaultSuit;
+              customSuits[kerbalName] = suit;
               log("Mapped {0}'s suit -> {1}", kerbalName, suit.name);
             }
           }
         }
-      }
 
-      ConfigNode genericNode = rootNode.GetNode("GenericKerbals");
-      if (genericNode != null)
-      {
-        string sExcludedHeads = genericNode.GetValue("excludedHeads");
-        if (sExcludedHeads != null)
+        ConfigNode genericNode = rootNode.GetNode("GenericKerbals");
+        if (genericNode != null)
         {
-          string[] excludedHeads = TextureReplacer.splitConfigValue(sExcludedHeads);
-          foreach (string headName in excludedHeads)
-            heads.RemoveAll(h => h.name.EndsWith(headName));
-        }
+          string sExcludedHeads = genericNode.GetValue("excludedHeads");
+          if (sExcludedHeads != null)
+          {
+            string[] excludedHeads = TextureReplacer.splitConfigValue(sExcludedHeads);
+            foreach (string headName in excludedHeads)
+              heads.RemoveAll(h => h.name.EndsWith(headName));
+          }
 
-        string sExcludedSuits = genericNode.GetValue("excludedSuits");
-        if (sExcludedSuits != null)
-        {
-          string[] excludedSuits = TextureReplacer.splitConfigValue(sExcludedSuits);
-          foreach (string suitName in excludedSuits)
-            suits.RemoveAll(s => s.name.EndsWith(suitName));
-        }
-
-        string sSuitAssignment = genericNode.GetValue("suitAssignment");
-        if (sSuitAssignment != null)
-        {
-          if (sSuitAssignment == "random")
-            suitAssignment = SuitAssignment.RANDOM;
-          else if (sSuitAssignment == "consecutive")
-            suitAssignment = SuitAssignment.CONSECUTIVE;
-          else
-            log("Invalid value for suitAssignment: {0}", sSuitAssignment);
+          string sExcludedSuits = genericNode.GetValue("excludedSuits");
+          if (sExcludedSuits != null)
+          {
+            string[] excludedSuits = TextureReplacer.splitConfigValue(sExcludedSuits);
+            foreach (string suitName in excludedSuits)
+              suits.RemoveAll(s => s.name.EndsWith(suitName));
+          }
         }
       }
     }
@@ -452,6 +441,17 @@ namespace TextureReplacer
       string sAtmSuitPressure = rootNode.GetValue("atmSuitPressure");
       if (sAtmSuitPressure != null)
         Double.TryParse(sAtmSuitPressure, out atmSuitPressure);
+
+      string sSuitAssignment = rootNode.GetValue("suitAssignment");
+      if (sSuitAssignment != null)
+      {
+        if (sSuitAssignment == "random")
+          suitAssignment = SuitAssignment.RANDOM;
+        else if (sSuitAssignment == "consecutive")
+          suitAssignment = SuitAssignment.CONSECUTIVE;
+        else
+          log("Invalid value for suitAssignment: {0}", sSuitAssignment);
+      }
 
       // Check if the srf mod is present.
       isSfrDetected = AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("sfrPartModules"));

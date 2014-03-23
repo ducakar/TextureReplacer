@@ -41,10 +41,9 @@
     <Compile Include="TRReflection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="README.md" />
-    <None Include="Resources\Config.cfg" />
-    <None Include="Resources\Kerbals.cfg" />
     <None Include="Resources\Visor.shader" />
     <None Include="Resources\Visor-source.shader" />
+    <None Include="Resources\TextureReplacer.tcfg" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">

@@ -99,6 +99,20 @@ Examples:
       Default/snowydwarfplanet00      // Eeloo
       Default/snowydwarfplanet01      // Eeloo normal map
 
+### Visor Reflections ###
+Environment map cube texture for reflections is included with the plugin:
+
+    GameData/TextureReplacer/
+      EnvMap/PositiveX  // fake skybox right face, vertically flipped
+      EnvMap/NegativeX  // fake skybox left face, vertically flipped
+      EnvMap/PositiveY  // fake skybox top face, vertically flipped
+      EnvMap/NegativeY  // fake skybox bottom face, vertically flipped
+      EnvMap/PositiveZ  // fake skybox front face, vertically flipped
+      EnvMap/NegativeZ  // fake skybox back face, vertically flipped
+
+Note that all textures must be quares and have the same dimensions that are
+powers of two. Cube map textures are slow, so keep them as low-res as possible.
+
 ### Personalised Kerbal Textures ###
 Head textures are assigned pseudo-randomly (based on a Kerbal's name's hash,
 which ensures the same head is always assigned to a given Kerbal) unless
@@ -132,30 +146,23 @@ A suit can be selected either pseudo-randomly (same as heads) or consecutively,
 based on a Kerbal's position in crew rooster. One can also manually assign heads
 and suits to specific Kerbals. That can be controlled in
 
-    GameData/TextureReplacer/Kerbals.cfg
-
-### Visor Reflections ###
-Environment map cube texture for reflections is included with the plugin:
-
-    GameData/TextureReplacer/
-      EnvMap/PositiveX  // fake skybox right face, vertically flipped
-      EnvMap/NegativeX  // fake skybox left face, vertically flipped
-      EnvMap/PositiveY  // fake skybox top face, vertically flipped
-      EnvMap/NegativeY  // fake skybox bottom face, vertically flipped
-      EnvMap/PositiveZ  // fake skybox front face, vertically flipped
-      EnvMap/NegativeZ  // fake skybox back face, vertically flipped
-
-Note that all textures must be quares and have the same dimensions that are
-powers of two. Cube map textures are slow, so keep them as low-res as possible.
+    GameData/TextureReplacer/TextureReplacer.tcfg
 
 ### Configuration File ###
-Configuration file where several features can be enabled/disabled or tweaked:
+Main configurtion file:
 
-    GameData/TextureReplacer/Config.cfg
+    GameData/TextureReplacer/TextureReplacer.tcfg
 
-Configuration file where head and suit textures assignment can be controlled:
+Kerbal head and suit assignment can also be controlled in any `*.tcfg` file
+inside TextureReplacer's root directory:
 
-    GameData/TextureReplacer/Kerbals.cfg
+    GameData/TextureReplacer/*.tcfg
+
+This should prove useful to developers of texture packs so they can distibute
+pack-specific head/suit assignment rules in a separate file. Those files should
+follow the same format as `TextureReplacer.tcfg` but only containing
+`CustomKerbals` and `GenericKerbals` sections. All the `*.tcfg` files are
+processed in alphabetical order.
 
 
 Notes
@@ -191,8 +198,8 @@ Change Log
         + removed `CustomKerbals/`, `GenericKerbals/` and `GenericKermins/`
         + all heads are in `Heads/`
         + all suits are in `Suits/`
-        + `Config.cfg` moved to TextureReplacer's root
-    - assignment of head and suit textures is now defined in `Kerbals.cfg`
+        + `Config.cfg` moved to TR's root directory as `TextureReplacer.tcfg`
+    - assignment of head and suit textures is now defined in `*.tcfg`
     - fixed IVA replacement that failed for suits sometimes when docking
 * 1.2.2
     - changed texure wrapping mode for Kerbal textures to "clamp", which

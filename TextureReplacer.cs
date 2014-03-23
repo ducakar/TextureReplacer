@@ -57,7 +57,7 @@ namespace TextureReplacer
       {
         DontDestroyOnLoad(this);
 
-        ConfigNode config = ConfigNode.Load(PATH + "/Config.cfg");
+        ConfigNode config = ConfigNode.Load(PATH + "/TextureReplacer.tcfg");
         if (config != null)
           config = config.GetNode("TextureReplacer");
         if (config == null)
