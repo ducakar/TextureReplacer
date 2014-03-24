@@ -126,6 +126,7 @@ namespace TextureReplacer
     private KerbalSuit defaultSuit = new KerbalSuit() { name = "DEFAULT" };
     private List<Texture2D> heads = new List<Texture2D>();
     private List<KerbalSuit> suits = new List<KerbalSuit>();
+    private Dictionary<string, KerbalSuit> cabinSuits = new Dictionary<string, KerbalSuit>();
     // Personalised Kerbal textures.
     private Dictionary<string, Texture2D> customHeads = new Dictionary<string, Texture2D>();
     private Dictionary<string, KerbalSuit> customSuits = new Dictionary<string, KerbalSuit>();
@@ -160,21 +161,23 @@ namespace TextureReplacer
      * This is a helper method for `replaceKerbalSkins()`. It sets personalised or random textures
      * for an IVA or an EVA Kerbal.
      */
-    private void replaceKerbalSkin(Component component, ProtoCrewMember kerbal, bool isEva,
+    private void replaceKerbalSkin(Component component, ProtoCrewMember kerbal, Part inPart,
                                    bool isAtmSuit)
     {
       Texture2D headTexture = null;
       KerbalSuit suitSkin = null;
+      bool isEva = inPart == null;
 
       if (!customHeads.TryGetValue(kerbal.name, out headTexture) && heads.Count != 0)
       {
         // Hash is multiplied with a large prime to increase randomisation, since hashes returned by
         // `GetHashCode()` are close together if strings only differ in the last (few) char(s).
-        int index = ((kerbal.name.GetHashCode() * 1021) & 0x7fffffff) % heads.Count;
+        int index = ((kerbal.name.GetHashCode() * 4099) & 0x7fffffff) % heads.Count;
         headTexture = heads[index];
       }
 
-      if (!customSuits.TryGetValue(kerbal.name, out suitSkin) && suits.Count != 0)
+      if ((inPart == null || !cabinSuits.TryGetValue(inPart.partInfo.name, out suitSkin))
+          && !customSuits.TryGetValue(kerbal.name, out suitSkin) && suits.Count != 0)
       {
         if (suitAssignment == SuitAssignment.RANDOM)
         {
@@ -308,7 +311,7 @@ namespace TextureReplacer
         if (kerbals != null)
         {
           foreach (Kerbal kerbal in kerbals)
-            replaceKerbalSkin(kerbal, kerbal.protoCrewMember, false, false);
+            replaceKerbalSkin(kerbal, kerbal.protoCrewMember, kerbal.InPart, false);
         }
 
         ivaReplaceTimer = -1.0f;
@@ -338,7 +341,7 @@ namespace TextureReplacer
             // Vessel is a Kerbal.
             List<ProtoCrewMember> crew = vessel.rootPart.protoModuleCrew;
             if (crew.Count != 0)
-              replaceKerbalSkin(eva, crew[0], true, isAtmSuit);
+              replaceKerbalSkin(eva, crew[0], null, isAtmSuit);
           }
           else
           {
@@ -351,7 +354,7 @@ namespace TextureReplacer
 
               List<ProtoCrewMember> crew = seat.Occupant.protoModuleCrew;
               if (crew.Count != 0)
-                replaceKerbalSkin(seat.Occupant, crew[0], true, isAtmSuit);
+                replaceKerbalSkin(seat.Occupant, crew[0], null, isAtmSuit);
             }
           }
         }
@@ -368,6 +371,9 @@ namespace TextureReplacer
      */
     private void readConfig()
     {
+      List<string> excludedHeads = new List<string>();
+      List<string> excludedSuits = new List<string>();
+
       foreach (UrlDir.UrlFile file in GameDatabase.Instance.root.AllFiles)
       {
         if (!file.url.StartsWith(TextureReplacer.DIR) || file.fileExtension != "tcfg")
@@ -393,14 +399,15 @@ namespace TextureReplacer
 
             if (headName != null)
             {
-              Texture2D head = heads.FirstOrDefault(h => h.name.EndsWith(headName));
+              Texture2D head = heads.FirstOrDefault(
+                                 h => h.name.Substring(DIR_HEADS.Length) == headName);
               customHeads[kerbalName] = head;
               log("Mapped {0}'s head -> {1}", kerbalName, head == null ? "DEFAULT" : head.name);
             }
 
             if (suitName != null)
             {
-              KerbalSuit suit = suits.FirstOrDefault(s => s.name.EndsWith(suitName)) ?? defaultSuit;
+              KerbalSuit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
               customSuits[kerbalName] = suit;
               log("Mapped {0}'s suit -> {1}", kerbalName, suit.name);
             }
@@ -412,21 +419,36 @@ namespace TextureReplacer
         {
           string sExcludedHeads = genericNode.GetValue("excludedHeads");
           if (sExcludedHeads != null)
-          {
-            string[] excludedHeads = TextureReplacer.splitConfigValue(sExcludedHeads);
-            foreach (string headName in excludedHeads)
-              heads.RemoveAll(h => h.name.EndsWith(headName));
-          }
+            excludedHeads.AddRange(TextureReplacer.splitConfigValue(sExcludedHeads));
 
           string sExcludedSuits = genericNode.GetValue("excludedSuits");
           if (sExcludedSuits != null)
+            excludedSuits.AddRange(TextureReplacer.splitConfigValue(sExcludedSuits));
+        }
+
+        ConfigNode cabinNode = rootNode.GetNode("CabinSuits");
+        if (cabinNode != null)
+        {
+          foreach (ConfigNode.Value entry in cabinNode.values)
           {
-            string[] excludedSuits = TextureReplacer.splitConfigValue(sExcludedSuits);
-            foreach (string suitName in excludedSuits)
-              suits.RemoveAll(s => s.name.EndsWith(suitName));
+            string cabinName = entry.name;
+            string suitName = entry.value;
+
+            if (suitName.Length != 0)
+            {
+              KerbalSuit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
+              cabinSuits[cabinName] = suit;
+              log("Mapped {0} cabin suits -> {1}", cabinName, suit.name);
+            }
           }
         }
       }
+
+      foreach (string headName in excludedHeads)
+        heads.RemoveAll(h => h.name.Substring(DIR_HEADS.Length) == headName);
+
+      foreach (string suitName in excludedSuits)
+        suits.RemoveAll(s => s.name == suitName);
     }
 
     /**

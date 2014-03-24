@@ -11,6 +11,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * replace stock textures with custom ones,
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
+* set cockpit-specific IVA suit,
 * set helmet visor texture,
 * enable (fake) visor reflections,
 * spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
@@ -114,9 +115,9 @@ Note that all textures must be quares and have the same dimensions that are
 powers of two. Cube map textures are slow, so keep them as low-res as possible.
 
 ### Personalised Kerbal Textures ###
-Head textures are assigned pseudo-randomly (based on a Kerbal's name's hash,
-which ensures the same head is always assigned to a given Kerbal) unless
-specified otherwise in the configuration file.
+Head and suits are assigned either manually (custom Kerbals) or pseudo-randomly
+(generic Kerbals). Pseudo-random assignment is based on a Kerbal's name, which
+ensures the same head/suit is always assigned to a given Kerbal.
 
 Head textures reside in
 
@@ -139,30 +140,25 @@ suit must reside in its own directory:
       Suits/<suit>/EVAjetpack       // EVA jetpack
       Suits/<suit>/EVAjetpackNRM    // EVA jetpack normal map
 
-Heads are selected independently form suits so any head can be paired with any
-of the suits and each head has an equal chance of being selected.
+For generic Kerbals, heads are selected independently form suits so any head can 
+be paired with any of the suits and each head has an equal chance of being
+selected.
 
-A suit can be selected either pseudo-randomly (same as heads) or consecutively,
-based on a Kerbal's position in crew rooster. One can also manually assign heads
-and suits to specific Kerbals. That can be controlled in
-
-    GameData/TextureReplacer/TextureReplacer.tcfg
+One can manually assign heads and suits to specific Kerbals in the configuration
+file(s).
 
 ### Configuration File ###
-Main configurtion file:
+Main configuration file:
 
     GameData/TextureReplacer/TextureReplacer.tcfg
 
-Kerbal head and suit assignment can also be controlled in any `*.tcfg` file
-inside TextureReplacer's root directory:
-
-    GameData/TextureReplacer/*.tcfg
-
-This should prove useful to developers of texture packs so they can distibute
+Per-texture-pack Kerbal head and suit assignment can also be controlled in an
+arbitrary file with `.tcfg` extension inside TextureReplacer's root directory.
+This should prove useful to developers of texture packs so they can distribute
 pack-specific head/suit assignment rules in a separate file. Those files should
 follow the same format as `TextureReplacer.tcfg` but only containing
-`CustomKerbals` and `GenericKerbals` sections. All the `*.tcfg` files are
-processed in alphabetical order.
+`CustomKerbals`, `GenericKerbals` and `CabinSuits` sections. All the `.tcfg`
+files (including `TextureReplacer.tcfg`) are processed in alphabetical order.
 
 
 Notes
@@ -193,6 +189,9 @@ Known Issues
 
 Change Log
 ----------
+* 1.3.1
+    - added cabin-specific IVA suits
+    - fixed head/suit exclusions when using multiple config files
 * 1.3
     - new directory layout:
         + removed `CustomKerbals/`, `GenericKerbals/` and `GenericKermins/`

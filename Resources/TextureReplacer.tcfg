@@ -39,7 +39,7 @@ TextureReplacer
 
   CustomKerbals
   {
-    // Entries are of the form:
+    // Custom heads and suits for specific Kerbals. Entries are of the form:
     //
     //   Name = headTex [suitDir]
     //
@@ -67,5 +67,21 @@ TextureReplacer
     // Prevent the following suits from being assigned to generic Kerbals.
     // The list must be space- and/or comma-separated.
     excludedSuits =
+  }
+
+  CabinSuits
+  {
+    // Cabin-specific suits. These are enforced even if a Kerbal has a custom
+    // suit. Entries are of the form:
+    //
+    //   partName = suitDir
+    //
+    // E.g.
+    //
+    //   Mark1Cockpit = PilotSuit
+    //   crewCabin = DEFAULT
+    //
+    // where `partName` is the name of a part (`name = ...` in `part.cfg`) and
+    // `suitDir` is either a suit from `Suits/` or `DEFAULT`.
   }
 }
