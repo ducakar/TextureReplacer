@@ -89,11 +89,10 @@ namespace TextureReplacer
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
-        if (texture == null || !texture.name.StartsWith(TextureReplacer.DIR))
+        if (texture == null || !texture.name.StartsWith(DIR_ENVMAP))
           continue;
 
-        int lastSlash = texture.name.LastIndexOf('/');
-        string originalName = texture.name.Substring(lastSlash + 1);
+        string originalName = texture.name.Substring(DIR_ENVMAP.Length);
 
         // When a TGA loading fails, IndexOutOfBounds exception is thrown and GameDatabase gets
         // corrupted. The problematic TGA is duplicated in GameDatabase so that it also overrides
@@ -102,7 +101,7 @@ namespace TextureReplacer
         {
           log("Corrupted GameDatabase! Problematic TGA? {0}", texture.name);
         }
-        else if (texture.name.StartsWith(DIR_ENVMAP))
+        else
         {
           switch (originalName)
           {

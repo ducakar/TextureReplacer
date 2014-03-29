@@ -59,10 +59,6 @@ namespace TextureReplacer
         if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp"))
           continue;
 
-        // Set trilinear filter.
-        if (texture.filterMode == FilterMode.Bilinear)
-          texture.filterMode = FilterMode.Trilinear;
-
         Texture2D newTexture = null;
         mappedTextures.TryGetValue(texture.name, out newTexture);
 
@@ -70,7 +66,10 @@ namespace TextureReplacer
         {
           material.mainTexture = newTexture;
           Resources.UnloadAsset(texture);
+          texture = newTexture;
         }
+        if (texture.filterMode == FilterMode.Bilinear)
+          texture.filterMode = FilterMode.Trilinear;
 
         Texture normalMap = material.GetTexture("_BumpMap");
         if (normalMap == null)
@@ -83,7 +82,10 @@ namespace TextureReplacer
         {
           material.SetTexture("_BumpMap", newNormalMap);
           Resources.UnloadAsset(normalMap);
+          normalMap = newNormalMap;
         }
+        if (normalMap.filterMode == FilterMode.Bilinear)
+          normalMap.filterMode = FilterMode.Trilinear;
       }
     }
 
@@ -104,11 +106,10 @@ namespace TextureReplacer
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
-        if (texture == null || !texture.name.StartsWith(TextureReplacer.DIR))
+        if (texture == null || !texture.name.StartsWith(DIR_TEXTURES))
           continue;
 
-        int lastSlash = texture.name.LastIndexOf('/');
-        string originalName = texture.name.Substring(lastSlash + 1);
+        string originalName = texture.name.Substring(DIR_TEXTURES.Length);
 
         // When a TGA loading fails, IndexOutOfBounds exception is thrown and GameDatabase gets
         // corrupted. The problematic TGA is duplicated in GameDatabase so that it also overrides
@@ -118,7 +119,7 @@ namespace TextureReplacer
           log("Corrupted GameDatabase! Problematic TGA? {0}", texture.name);
         }
         // Add a general texture replacement.
-        else if (texture.name.StartsWith(DIR_TEXTURES))
+        else
         {
           // This in wrapped inside an 'if' clause just in case if corrupted GameDatabase contains
           // non-consecutive duplicated entries for some strange reason.

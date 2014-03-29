@@ -38,10 +38,10 @@ Instructions
 ### General Textures ###
 General replacement texture is of the form
 
-    GameData/TextureReplacer/Default/[<subDir>]/<internalName>
+    GameData/TextureReplacer/Default/<internalName>
 
-where `<internalName>` is the texture's internal name in KSP (plus .png/.jpg/
-.tga/.mbm extension, of course). The subdirectory is optional.
+where `<internalName>` is the texture's internal name in KSP or path of a
+texture inside `GameData/` (plus .png/.jpg/.tga/.mbm extension, of course).
 
 Examples:
 
@@ -100,6 +100,15 @@ Examples:
       Default/snowydwarfplanet00      // Eeloo
       Default/snowydwarfplanet01      // Eeloo normal map
 
+It's also possible to replace textures from `GameData/` if one specifies
+the full directory hierarchy:
+
+    GameData/TextureReplacer/
+      Default/Squad/Parts/Command/Mk1-2Pod/model000  // Mk1-2 pod texture
+      Default/Squad/Parts/Command/Mk1-2Pod/model001  // Mk1-2 pod normal map
+
+Note that all texture and directory names are case-sensitive!
+
 ### Visor Reflections ###
 Environment map cube texture for reflections is included with the plugin:
 
@@ -140,7 +149,7 @@ suit must reside in its own directory:
       Suits/<suit>/EVAjetpack       // EVA jetpack
       Suits/<suit>/EVAjetpackNRM    // EVA jetpack normal map
 
-For generic Kerbals, heads are selected independently form suits so any head can 
+For generic Kerbals, heads are selected independently form suits so any head can
 be paired with any of the suits and each head has an equal chance of being
 selected.
 
@@ -189,6 +198,10 @@ Known Issues
 
 Change Log
 ----------
+* 1.3.2
+    - added ability to replace arbitrary textures from `GameData/`, directory
+      hierarchy inside `Default/` matters now
+    - fixed trilinear filter that was not applied to normal maps
 * 1.3.1
     - added cabin-specific IVA suits
     - fixed head/suit exclusions when using multiple config files
@@ -201,7 +214,7 @@ Change Log
     - assignment of head and suit textures is now defined in `*.tcfg`
     - fixed IVA replacement that failed for suits sometimes when docking
 * 1.2.2
-    - changed texure wrapping mode for Kerbal textures to "clamp", which
+    - changed texture wrapping mode for Kerbal textures to "clamp", which
       eliminates the green patch at the top of heads
     - changed default setting for mipmap generation to `always`, since TC
       doesn't generate mipmaps for TR textures (and many others) by default

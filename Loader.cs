@@ -91,71 +91,71 @@ namespace TextureReplacer
       {
         Texture2D texture = texInfos[i].texture;
 
-        if (texture != null)
+        if (texture == null)
+          continue;
+
+        // `texture.GetPixel() throws an exception if the texture is not readable and hence it
+        // cannot be compressed nor mipmaps generated.
+        try
         {
-          TextureFormat format = texture.format;
+          texture.GetPixel(0, 0);
+        }
+        catch (UnityException)
+        {
+          continue;
+        }
 
-          // `texture.GetPixel() throws an exception if the texture is not readable and hence it
-          // cannot be compressed nor mipmaps generated.
-          try
-          {
-            texture.GetPixel(0, 0);
-          }
-          catch (UnityException)
-          {
-            continue;
-          }
+        TextureFormat format = texture.format;
 
-          // Generate mipmaps if necessary. Images that may be UI icons should be excluded to
-          // prevent blurriness when using less-than-full texture quality.
-          if (isMipmapGenEnabled.Value && texture.mipmapCount == 1
-              && (texture.width | texture.height) != 1 && mipmapDirSubstrings != null
-              && mipmapDirSubstrings.Any(s => texture.name.IndexOf(s) >= 0))
+        // Generate mipmaps if necessary. Images that may be UI icons should be excluded to prevent
+        // blurriness when using less-than-full texture quality.
+        if (isMipmapGenEnabled.Value && texture.mipmapCount == 1
+            && (texture.width | texture.height) != 1 && mipmapDirSubstrings != null
+            && mipmapDirSubstrings.Any(s => texture.name.IndexOf(s) >= 0))
+        {
+          int oldSize = textureSize(texture);
+          Color32[] pixels32 = texture.GetPixels32();
+
+          // PNGs and JPEGs are always loaded as transparent, so we check if they actually contain
+          // any transparent pixels. If not, they are converted to DXT1.
+          bool hasAlpha = format == TextureFormat.RGBA32 || format == TextureFormat.DXT5;
+          bool isTransparent = hasAlpha && pixels32.Any(p => p.a != 255);
+
+          // Rebuild texture. This time with mipmaps.
+          TextureFormat newFormat = isTransparent ? TextureFormat.RGBA32 : TextureFormat.RGB24;
+          texture.Resize(texture.width, texture.height, newFormat, true);
+          texture.SetPixels32(pixels32);
+          texture.Apply(true, false);
+
+          int newSize = textureSize(texture);
+          memorySpared += oldSize - newSize;
+
+          log("Generated mipmaps for {0} [{1}x{2} {3} -> {4}]",
+              texture.name, texture.width, texture.height, format, texture.format);
+
+          format = texture.format;
+        }
+
+        // Compress if necessary.
+        if (isCompressionEnabled.Value
+            && format != TextureFormat.DXT1 && format != TextureFormat.DXT5)
+        {
+          if (!isPow2(texture.width) || !isPow2(texture.height))
+          {
+            log("Failed to compress {0}, dimensions {1}x{2} are not powers of 2",
+                texture.name, texture.width, texture.height);
+          }
+          else
           {
             int oldSize = textureSize(texture);
-            Color32[] pixels32 = texture.GetPixels32();
 
-            // PNGs and JPEGs are always loaded as transparent, so we check if they actually contain
-            // any transparent pixels. If not, they are converted to DXT1.
-            bool hasAlpha = format == TextureFormat.RGBA32 || format == TextureFormat.DXT5;
-            bool isTransparent = hasAlpha && pixels32.Any(p => p.a != 255);
-
-            // Rebuild texture. This time with mipmaps.
-            TextureFormat newFormat = isTransparent ? TextureFormat.RGBA32 : TextureFormat.RGB24;
-            texture.Resize(texture.width, texture.height, newFormat, true);
-            texture.SetPixels32(pixels32);
-            texture.Apply(true, false);
+            texture.Compress(true);
 
             int newSize = textureSize(texture);
             memorySpared += oldSize - newSize;
 
-            log("Generated mipmaps for {0} [{1}x{2} {3} -> {4}]",
+            log("Compressed {0} [{1}x{2} {3} -> {4}]",
                 texture.name, texture.width, texture.height, format, texture.format);
-
-            format = texture.format;
-          }
-
-          // Compress if necessary.
-          if (isCompressionEnabled.Value
-              && format != TextureFormat.DXT1 && format != TextureFormat.DXT5)
-          {
-            if (!isPow2(texture.width) || !isPow2(texture.height))
-            {
-              log("Failed to compress {0}, dimensions {1}x{2} are not powers of 2",
-                  texture.name, texture.width, texture.height);
-            }
-            else
-            {
-              int oldSize = textureSize(texture);
-
-              texture.Compress(true);
-
-              int newSize = textureSize(texture);
-              memorySpared += oldSize - newSize;
-
-              log("Compressed {0} [{1}x{2} {3} -> {4}]",
-                  texture.name, texture.width, texture.height, format, texture.format);
-            }
           }
         }
       }

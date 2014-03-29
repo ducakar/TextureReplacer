@@ -516,7 +516,7 @@ namespace TextureReplacer
      */
     public void initialise()
     {
-      Dictionary<string, int> genericDirs = new Dictionary<string, int>();
+      Dictionary<string, int> suitDirs = new Dictionary<string, int>();
       string lastTextureName = "";
 
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
@@ -553,14 +553,14 @@ namespace TextureReplacer
           texture.wrapMode = TextureWrapMode.Clamp;
 
           KerbalSuit suit = null;
-          if (genericDirs.ContainsKey(dirName))
+          if (suitDirs.ContainsKey(dirName))
           {
-            index = genericDirs[dirName];
+            index = suitDirs[dirName];
             suit = suits[index];
           }
           else
           {
-            genericDirs.Add(dirName, index);
+            suitDirs.Add(dirName, index);
 
             index = suits.Count;
             suit = new KerbalSuit { name = dirName };
