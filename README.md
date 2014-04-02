@@ -198,6 +198,9 @@ Known Issues
 
 Change Log
 ----------
+* 1.3.3
+    - fixed jetpack flag showing for atmospheric suit in 0.23.5
+    - thruster jets and headlight flares are also hidden for atmospheric suit
 * 1.3.2
     - added ability to replace arbitrary textures from `GameData/`, directory
       hierarchy inside `Default/` matters now

@@ -244,7 +244,7 @@ namespace TextureReplacer
           {
             if (isAtmSuit)
             {
-              smr.sharedMesh = null;
+              smr.enabled = false;
             }
             else if (suitSkin != null)
             {
@@ -257,7 +257,7 @@ namespace TextureReplacer
           {
             if (isAtmSuit)
             {
-              smr.sharedMesh = null;
+              smr.enabled = false;
             }
             else
             {
@@ -267,7 +267,7 @@ namespace TextureReplacer
               newTexture = isEva ? skin.evaVisor : skin.visor;
 
               if (newTexture != null)
-                smr.material.color = Color.white;
+                material.color = Color.white;
             }
             break;
           }
@@ -275,7 +275,7 @@ namespace TextureReplacer
           {
             if (isAtmSuit)
             {
-              smr.sharedMesh = null;
+              smr.enabled = false;
             }
             else if (suitSkin != null)
             {
@@ -286,11 +286,21 @@ namespace TextureReplacer
           }
         }
 
-        if (newTexture != null && newTexture != smr.material.mainTexture)
-          smr.material.mainTexture = newTexture;
+        // Hide flag decals, thruster jets, headlight flares etc. for atmospheric suit.
+        if (isAtmSuit)
+        {
+          foreach (MeshRenderer mr in component.GetComponentsInChildren<MeshRenderer>())
+          {
+            if (mr.name != "screenMessage")
+              mr.enabled = false;
+          }
+        }
 
-        if (newNormalMap != null && newNormalMap != smr.material.GetTexture("_BumpMap"))
-          smr.material.SetTexture("_BumpMap", newNormalMap);
+        if (newTexture != null && newTexture != material.mainTexture)
+          material.mainTexture = newTexture;
+
+        if (newNormalMap != null && newNormalMap != material.GetTexture("_BumpMap"))
+          material.SetTexture("_BumpMap", newNormalMap);
       }
     }
 
