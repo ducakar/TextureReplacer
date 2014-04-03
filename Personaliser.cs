@@ -35,7 +35,14 @@ namespace TextureReplacer
       CONSECUTIVE
     }
 
-    private class KerbalSuit
+    private class Head
+    {
+      public string name;
+      public Texture2D head;
+      public Texture2D headNRM;
+    }
+
+    private class Suit
     {
       public string name;
       public Texture2D suit;
@@ -123,13 +130,13 @@ namespace TextureReplacer
     // Delay for IVA replacement (in seconds).
     private static readonly float IVA_TIMER_DELAY = 0.1f;
     // Kerbal textures.
-    private KerbalSuit defaultSuit = new KerbalSuit() { name = "DEFAULT" };
-    private List<Texture2D> heads = new List<Texture2D>();
-    private List<KerbalSuit> suits = new List<KerbalSuit>();
-    private Dictionary<string, KerbalSuit> cabinSuits = new Dictionary<string, KerbalSuit>();
+    private Suit defaultSuit = new Suit() { name = "DEFAULT" };
+    private List<Head> heads = new List<Head>();
+    private List<Suit> suits = new List<Suit>();
+    private Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
     // Personalised Kerbal textures.
-    private Dictionary<string, Texture2D> customHeads = new Dictionary<string, Texture2D>();
-    private Dictionary<string, KerbalSuit> customSuits = new Dictionary<string, KerbalSuit>();
+    private Dictionary<string, Head> customHeads = new Dictionary<string, Head>();
+    private Dictionary<string, Suit> customSuits = new Dictionary<string, Suit>();
     // Atmospheric IVA suit parameters.
     private bool isAtmSuitEnabled = true;
     private double atmSuitPressure = 0.5;
@@ -164,44 +171,45 @@ namespace TextureReplacer
     private void replaceKerbalSkin(Component component, ProtoCrewMember kerbal, Part inPart,
                                    bool isAtmSuit)
     {
-      Texture2D headTexture = null;
-      KerbalSuit suitSkin = null;
+      Head head = null;
+      Suit suit = null;
       bool isEva = inPart == null;
 
-      if (!customHeads.TryGetValue(kerbal.name, out headTexture) && heads.Count != 0)
+      if (!customHeads.TryGetValue(kerbal.name, out head) && heads.Count != 0)
       {
         // Hash is multiplied with a large prime to increase randomisation, since hashes returned by
         // `GetHashCode()` are close together if strings only differ in the last (few) char(s).
         int index = ((kerbal.name.GetHashCode() * 4099) & 0x7fffffff) % heads.Count;
-        headTexture = heads[index];
+        head = heads[index];
       }
 
-      if ((inPart == null || !cabinSuits.TryGetValue(inPart.partInfo.name, out suitSkin))
-          && !customSuits.TryGetValue(kerbal.name, out suitSkin) && suits.Count != 0)
+      if ((inPart == null || !cabinSuits.TryGetValue(inPart.partInfo.name, out suit))
+          && !customSuits.TryGetValue(kerbal.name, out suit) && suits.Count != 0)
       {
         if (suitAssignment == SuitAssignment.RANDOM)
         {
           // Here we must use a different prime to increase randomisation so that the same head is
           // not always combined with the same suit.
           int index = ((kerbal.name.GetHashCode() * 2053) & 0x7fffffff) % suits.Count;
-          suitSkin = suits[index];
+          suit = suits[index];
         }
         else
         {
           // Assign the suit based on consecutive number of a Kerbal.
           int index = HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal) % suits.Count;
-          suitSkin = suits[index];
+          suit = suits[index];
         }
       }
 
-      foreach (SkinnedMeshRenderer smr in component.GetComponentsInChildren<SkinnedMeshRenderer>())
+      foreach (Renderer renderer in component.GetComponentsInChildren<Renderer>())
       {
-        Material material = smr.material;
+        Material material = renderer.material;
         Texture2D newTexture = null;
         Texture2D newNormalMap = null;
 
-        switch (smr.name)
+        switch (renderer.name)
         {
+          case "screenMessage":
           case "eyeballLeft":
           case "eyeballRight":
           case "pupilLeft":
@@ -214,17 +222,18 @@ namespace TextureReplacer
           case "upTeeth02":
           case "tongue":
           {
-            newTexture = headTexture;
+            newTexture = head.head;
+            newNormalMap = head.headNRM;
             break;
           }
           case "body01":
           {
             bool isEvaSuit = isEva && !isAtmSuit;
 
-            if (suitSkin != null)
+            if (suit != null)
             {
-              newTexture = isEvaSuit ? suitSkin.evaSuit : suitSkin.suit;
-              newNormalMap = isEvaSuit ? suitSkin.evaSuitNRM : suitSkin.suitNRM;
+              newTexture = isEvaSuit ? suit.evaSuit : suit.suit;
+              newNormalMap = isEvaSuit ? suit.evaSuitNRM : suit.suitNRM;
             }
 
             // This required to fix IVA suits after KSP resetting them to the stock ones all the
@@ -244,12 +253,12 @@ namespace TextureReplacer
           {
             if (isAtmSuit)
             {
-              smr.enabled = false;
+              renderer.enabled = false;
             }
-            else if (suitSkin != null)
+            else if (suit != null)
             {
-              newTexture = isEva ? suitSkin.evaHelmet : suitSkin.helmet;
-              newNormalMap = suitSkin.helmetNRM;
+              newTexture = isEva ? suit.evaHelmet : suit.helmet;
+              newNormalMap = suit.helmetNRM;
             }
             break;
           }
@@ -257,13 +266,13 @@ namespace TextureReplacer
           {
             if (isAtmSuit)
             {
-              smr.enabled = false;
+              renderer.enabled = false;
             }
             else
             {
               // Visor texture must be set every time, because the replacement on proto-IVA Kerbal
               // doesn't seem to work.
-              KerbalSuit skin = suitSkin ?? defaultSuit;
+              Suit skin = suit ?? defaultSuit;
               newTexture = isEva ? skin.evaVisor : skin.visor;
 
               if (newTexture != null)
@@ -275,24 +284,14 @@ namespace TextureReplacer
           {
             if (isAtmSuit)
             {
-              smr.enabled = false;
+              renderer.enabled = false;
             }
-            else if (suitSkin != null)
+            else if (suit != null)
             {
-              newTexture = suitSkin.evaJetpack;
-              newNormalMap = suitSkin.evaJetpackNRM;
+              newTexture = suit.evaJetpack;
+              newNormalMap = suit.evaJetpackNRM;
             }
             break;
-          }
-        }
-
-        // Hide flag decals, thruster jets, headlight flares etc. for atmospheric suit.
-        if (isAtmSuit)
-        {
-          foreach (MeshRenderer mr in component.GetComponentsInChildren<MeshRenderer>())
-          {
-            if (mr.name != "screenMessage")
-              mr.enabled = false;
           }
         }
 
@@ -409,15 +408,14 @@ namespace TextureReplacer
 
             if (headName != null)
             {
-              Texture2D head = heads.FirstOrDefault(
-                                 h => h.name.Substring(DIR_HEADS.Length) == headName);
+              Head head = heads.FirstOrDefault(h => h.name == headName);
               customHeads[kerbalName] = head;
               log("Mapped {0}'s head -> {1}", kerbalName, head == null ? "DEFAULT" : head.name);
             }
 
             if (suitName != null)
             {
-              KerbalSuit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
+              Suit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
               customSuits[kerbalName] = suit;
               log("Mapped {0}'s suit -> {1}", kerbalName, suit.name);
             }
@@ -446,16 +444,16 @@ namespace TextureReplacer
 
             if (suitName.Length != 0)
             {
-              KerbalSuit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
+              Suit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
               cabinSuits[cabinName] = suit;
-              log("Mapped {0} cabin suits -> {1}", cabinName, suit.name);
+              log("Mapped {0}'s cabin suit -> {1}", cabinName, suit.name);
             }
           }
         }
       }
 
       foreach (string headName in excludedHeads)
-        heads.RemoveAll(h => h.name.Substring(DIR_HEADS.Length) == headName);
+        heads.RemoveAll(h => h.name == headName);
 
       foreach (string suitName in excludedSuits)
         suits.RemoveAll(s => s.name == suitName);
@@ -550,19 +548,35 @@ namespace TextureReplacer
         {
           texture.wrapMode = TextureWrapMode.Clamp;
 
-          heads.Add(texture);
-          log("Mapped head #{0} -> {1}", heads.Count - 1, texture.name);
+          string headName = texture.name.Substring(DIR_HEADS.Length);
+          if (headName.EndsWith("NRM"))
+          {
+            string baseName = headName.Substring(0, headName.Length - 3);
+
+            Head head = heads.Find(h => h.name == baseName);
+            if (head != null)
+            {
+              head.headNRM = texture;
+              log("Mapped head's normal map {0} -> {1}", head.name, texture.name);
+            }
+          }
+          else
+          {
+            Head head = new Head() { name = headName, head = texture };
+            heads.Add(head);
+            log("Mapped head {0} -> {1}", head.name, texture.name);
+          }
         }
         // Add a suit texture.
         else if (texture.name.StartsWith(DIR_SUITS))
         {
-          int index = suits.Count;
-          int dirNameLength = lastSlash - DIR_HEADS.Length;
-          string dirName = texture.name.Substring(DIR_SUITS.Length, dirNameLength);
-
           texture.wrapMode = TextureWrapMode.Clamp;
 
-          KerbalSuit suit = null;
+          int index = suits.Count;
+          int dirNameLength = lastSlash - DIR_SUITS.Length;
+          string dirName = texture.name.Substring(DIR_SUITS.Length, dirNameLength);
+
+          Suit suit = null;
           if (suitDirs.ContainsKey(dirName))
           {
             index = suitDirs[dirName];
@@ -573,7 +587,7 @@ namespace TextureReplacer
             suitDirs.Add(dirName, index);
 
             index = suits.Count;
-            suit = new KerbalSuit { name = dirName };
+            suit = new Suit() { name = dirName };
             suits.Add(suit);
           }
 

@@ -149,16 +149,20 @@ namespace TextureReplacer
       foreach (SkinnedMeshRenderer smr
                in Resources.FindObjectsOfTypeAll(typeof(SkinnedMeshRenderer)))
       {
-        if (smr.name != "visor")
-          continue;
-
-        bool isEVA = smr.transform.parent.parent.parent.parent == null;
-        Texture2D newTexture = isEVA ? evaVisorTex : ivaVisorTex;
-
-        if (newTexture != null)
+        if (smr.name == "headMesh01")
         {
-          smr.sharedMaterial.color = Color.white;
-          smr.sharedMaterial.mainTexture = newTexture;
+          smr.material.shader = Shader.Find("Bumped Diffuse");
+        }
+        else if (smr.name == "visor")
+        {
+          bool isEVA = smr.transform.parent.parent.parent.parent == null;
+          Texture2D newTexture = isEVA ? evaVisorTex : ivaVisorTex;
+
+          if (newTexture != null)
+          {
+            smr.sharedMaterial.color = Color.white;
+            smr.sharedMaterial.mainTexture = newTexture;
+          }
         }
       }
     }

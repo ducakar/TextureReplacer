@@ -12,9 +12,10 @@ stock textures and customise your Kerbals. More specifically, it can:
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
 * set cockpit-specific IVA suit,
-* set helmet visor texture,
-* enable (fake) visor reflections,
 * spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
+* add normal map for head texture,
+* add helmet visor texture,
+* enable (fake) visor reflections,
 * generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
 * compress uncompressed textures from `GameData/` and reduce RAM usage and
 * change bilinear texture filter to trilinear to improve mipmap quality.
@@ -128,9 +129,13 @@ Head and suits are assigned either manually (custom Kerbals) or pseudo-randomly
 (generic Kerbals). Pseudo-random assignment is based on a Kerbal's name, which
 ensures the same head/suit is always assigned to a given Kerbal.
 
-Head textures reside in
+Head textures reside in `Heads/` directory and have arbitrary names. Normal maps
+are optional. To provide a normal map, name it the same as the head texture but
+add "NRM" suffix.
 
-    GameData/TextureReplacer/Heads/
+    GameData/TextureReplacer/
+      Heads/<head>      // Head texture
+      Heads/<head>NRM   // Normal map for head texture <head> (optional)
 
 Suit textures' names are identical as for the default texture replacement except
 that there is not `kerbalMain` texture (`kerbalMainGrey` replaces both). Each
@@ -174,33 +179,42 @@ Notes
 -----
 * Try to keep widths and heights of all textures powers of two. Non-power-of-two
   textures are not handled well in some cases and cannot be compressed.
+* KSP can only load TGAs with RGB or RGBA colours. Paletteised 256-colour TGAs
+  cause doubled missing textures and other corruptions in the game database!
 * By default, internal texture compression is disabled when TextureCompressor is
   detected. Compression is then left to TextureCompressor which is a more
   specialised mod for that purpose.
-* The planet textures being replaced are the high-altitude textures, which are
-  also used in the map mode and in the tracking station. When getting closer to
-  the surface those textures are slowly interpolated into the high-resolution
-  ones that cannot be replaced by this plugin.
 * KSP never generates mipmaps for PNGs and JPEGs. TextureReplacer fixes this by
   generating mipmaps under paths specified in the configuration file. Other
   images are omitted to avoid making UI icons of various plugins blurry when not
   using the full texture quality.
-* KSP can only load TGAs with RGB or RGBA colours.
+* The planet textures being replaced are the high-altitude textures, which are
+  also used in the map mode and in the tracking station. When getting closer to
+  the surface those textures are slowly interpolated into the high-resolution
+  ones that cannot be replaced by this plugin.
 
 
 Known Issues
 ------------
-* When using sfr mod, personalised/generic Kerbal IVA textures are often not set
-  in transparent pods of non-active vessels.
 * If there is no IVA suit replacement the stock EVA suit texture is used for the
-  atmospheric EVAs.
+  atmospheric EVAs. [Won't fix. This mod is intended to replace suits.]
+* If a Kerbal rides to space on a rover seat he ends up in orbit in his IVA suit
+  without a helmet. [Won't fix. It would be too complicated to fix this.]
+* Replacement of textures from `GameData/` do not work for certain models.
+  [No known fix.]
+* When using sfr mod, personalised IVA textures are not set in transparent pods
+  of non-active vessels on scene load. [No known fix. Textures will be updated
+  as soon as you switch to the affected vessel.]
 
 
 Change Log
 ----------
+* 1.3.4
+    - added support for normal maps for head textures
+    - jetpack thruster jets are now (really) hidden for atmospheric suit
 * 1.3.3
     - fixed jetpack flag showing for atmospheric suit in 0.23.5
-    - thruster jets and headlight flares are also hidden for atmospheric suit
+    - headlight flares are now hidden for atmospheric suit
 * 1.3.2
     - added ability to replace arbitrary textures from `GameData/`, directory
       hierarchy inside `Default/` matters now
