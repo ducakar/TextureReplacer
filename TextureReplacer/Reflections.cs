@@ -55,7 +55,7 @@ namespace TextureReplacer
     /**
      * Read configuration and perform pre-load initialisation.
      */
-    public Reflections(ConfigNode rootNode)
+    public void readConfig(ConfigNode rootNode)
     {
       string sIsVisorReflectionEnabled = rootNode.GetValue("isVisorReflectionEnabled");
       if (sIsVisorReflectionEnabled != null)
@@ -165,7 +165,8 @@ namespace TextureReplacer
         {
           log("Not all environment map faces are of the same dimension. Reflections disabled.");
         }
-        else if (envMapFaces.Any(t => !Loader.isPow2(t.width) || !Loader.isPow2(t.height)))
+        else if (envMapFaces.Any(
+                   t => !TextureReplacer.isPow2(t.width) || !TextureReplacer.isPow2(t.height)))
         {
           log("Environment map dimensions are not powers of two. Reflections disabled.");
         }

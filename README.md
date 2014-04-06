@@ -138,7 +138,7 @@ add "NRM" suffix.
       Heads/<head>NRM   // Normal map for head texture <head> (optional)
 
 Suit textures' names are identical as for the default texture replacement except
-that there is not `kerbalMain` texture (`kerbalMainGrey` replaces both). Each
+that there is no `kerbalMain` texture (`kerbalMainGrey` replaces both). Each
 suit must reside in its own directory:
 
     GameData/TextureReplacer/
@@ -164,15 +164,15 @@ file(s).
 ### Configuration File ###
 Main configuration file:
 
-    GameData/TextureReplacer/TextureReplacer.tcfg
+    GameData/TextureReplacer/@Default.cfg
 
-Per-texture-pack Kerbal head and suit assignment can also be controlled in an
-arbitrary file with `.tcfg` extension inside TextureReplacer's root directory.
-This should prove useful to developers of texture packs so they can distribute
-pack-specific head/suit assignment rules in a separate file. Those files should
-follow the same format as `TextureReplacer.tcfg` but only containing
-`CustomKerbals`, `GenericKerbals` and `CabinSuits` sections. All the `.tcfg`
-files (including `TextureReplacer.tcfg`) are processed in alphabetical order.
+One can also use additional configuration files; configuration is merged from
+all `*.cfg` files that contain `TextureReplacer { ... }` as the root node. This
+should prove useful to developers of texture packs so they can distribute
+pack-specific head/suit assignment rules in a separate file. All the `*.cfg`
+files (including `@Default.cfg`) are processed in alphabetical order (the reason
+behind the leading "@" in the "Default" file is that it is processed first and
+is overridden by subsequent configuration files).
 
 
 Notes
@@ -200,15 +200,25 @@ Known Issues
   atmospheric EVAs. [Won't fix. This mod is intended to replace suits.]
 * If a Kerbal rides to space on a rover seat he ends up in orbit in his IVA suit
   without a helmet. [Won't fix. It would be too complicated to fix this.]
-* Replacement of textures from `GameData/` do not work for certain models.
+* Replacement of textures from `GameData/` does not work for certain models.
   [No known fix.]
 * When using sfr mod, personalised IVA textures are not set in transparent pods
   of non-active vessels on scene load. [No known fix. Textures will be updated
   as soon as you switch to the affected vessel.]
+* Kerbal personalisation does not work when crew members are transferred with
+  Crew or Ship Manifest. [Ideally, it should be fixed in those mods. Developers
+  have already been notified.]
 
 
 Change Log
 ----------
+* 1.4.0
+    - configuration files use `.cfg` extension again to avoid conflicts with ATM
+    - all configuration files are merged, all options can now be in any file
+    - re-added female-specific heads/suits functionality
+    - fixed issues with jetpack texture replacement for 0.23.5
+    - fixed several crashes
+    - built against 0.23.5
 * 1.3.4
     - added support for normal maps for head textures
     - jetpack thruster jets are now (really) hidden for atmospheric suit

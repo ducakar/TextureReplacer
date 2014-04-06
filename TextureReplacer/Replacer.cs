@@ -92,7 +92,7 @@ namespace TextureReplacer
     /**
      * Read configuration and perform pre-load initialisation.
      */
-    public Replacer(ConfigNode rootNode)
+    public void readConfig(ConfigNode rootNode)
     {
     }
 

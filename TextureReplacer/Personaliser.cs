@@ -38,6 +38,7 @@ namespace TextureReplacer
     private class Head
     {
       public string name;
+      public bool isFemale;
       public Texture2D head;
       public Texture2D headNRM;
     }
@@ -133,6 +134,7 @@ namespace TextureReplacer
     private Suit defaultSuit = new Suit() { name = "DEFAULT" };
     private List<Head> heads = new List<Head>();
     private List<Suit> suits = new List<Suit>();
+    private List<Suit> femaleSuits = new List<Suit>();
     private Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
     // Personalised Kerbal textures.
     private Dictionary<string, Head> customHeads = new Dictionary<string, Head>();
@@ -183,22 +185,19 @@ namespace TextureReplacer
         head = heads[index];
       }
 
+      bool isFemale = head == null ? false : head.isFemale;
+      List<Suit> genderSuits = isFemale ? femaleSuits : suits;
+
       if ((inPart == null || !cabinSuits.TryGetValue(inPart.partInfo.name, out suit))
-          && !customSuits.TryGetValue(kerbal.name, out suit) && suits.Count != 0)
+          && !customSuits.TryGetValue(kerbal.name, out suit) && genderSuits.Count != 0)
       {
-        if (suitAssignment == SuitAssignment.RANDOM)
-        {
-          // Here we must use a different prime to increase randomisation so that the same head is
-          // not always combined with the same suit.
-          int index = ((kerbal.name.GetHashCode() * 2053) & 0x7fffffff) % suits.Count;
-          suit = suits[index];
-        }
-        else
-        {
-          // Assign the suit based on consecutive number of a Kerbal.
-          int index = HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal) % suits.Count;
-          suit = suits[index];
-        }
+        // Here we must use a different prime to increase randomisation so that the same head is
+        // not always combined with the same suit.
+        int number = suitAssignment == SuitAssignment.RANDOM ?
+                       (kerbal.name.GetHashCode() * 2053) & 0x7fffffff :
+                       HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
+
+        suit = genderSuits[number % genderSuits.Count];
       }
 
       foreach (Renderer renderer in component.GetComponentsInChildren<Renderer>())
@@ -209,7 +208,6 @@ namespace TextureReplacer
 
         switch (renderer.name)
         {
-          case "screenMessage":
           case "eyeballLeft":
           case "eyeballRight":
           case "pupilLeft":
@@ -222,8 +220,11 @@ namespace TextureReplacer
           case "upTeeth02":
           case "tongue":
           {
-            newTexture = head.head;
-            newNormalMap = head.headNRM;
+            if (head != null)
+            {
+              newTexture = head.head;
+              newNormalMap = head.headNRM;
+            }
             break;
           }
           case "body01":
@@ -280,13 +281,14 @@ namespace TextureReplacer
             }
             break;
           }
-          default: // Jetpack.
+          default: // Jetpack, thruster jets, flag decals, headlight flares and monitor snow.
           {
             if (isAtmSuit)
             {
               renderer.enabled = false;
             }
-            else if (suit != null)
+            // The type check excludes jets, flags, flares and monitor snow.
+            else if (suit != null && renderer.GetType() == typeof(SkinnedMeshRenderer))
             {
               newTexture = suit.evaJetpack;
               newNormalMap = suit.evaJetpackNRM;
@@ -378,25 +380,16 @@ namespace TextureReplacer
     /**
      * Fill config for custom Kerbal heads and suits.
      */
-    private void readConfig()
+    private void readKerbalsConfigs()
     {
       List<string> excludedHeads = new List<string>();
       List<string> excludedSuits = new List<string>();
+      List<string> femaleHeads = new List<string>();
+      List<string> femaleSuits = new List<string>();
 
-      foreach (UrlDir.UrlFile file in GameDatabase.Instance.root.AllFiles)
+      foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
       {
-        if (!file.url.StartsWith(TextureReplacer.DIR) || file.fileExtension != "tcfg")
-          continue;
-
-        ConfigNode rootNode = ConfigNode.Load(file.fullPath);
-        if (rootNode == null)
-          continue;
-
-        rootNode = rootNode.GetNode("TextureReplacer");
-        if (rootNode == null)
-          continue;
-
-        ConfigNode customNode = rootNode.GetNode("CustomKerbals");
+        ConfigNode customNode = file.config.GetNode("CustomKerbals");
         if (customNode != null)
         {
           foreach (ConfigNode.Value entry in customNode.values)
@@ -410,19 +403,20 @@ namespace TextureReplacer
             {
               Head head = heads.FirstOrDefault(h => h.name == headName);
               customHeads[kerbalName] = head;
-              log("Mapped {0}'s head -> {1}", kerbalName, head == null ? "DEFAULT" : head.name);
+              log("Mapped head for \"{0}\" -> {1}", kerbalName,
+                  head == null ? "DEFAULT" : head.name);
             }
 
             if (suitName != null)
             {
               Suit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
               customSuits[kerbalName] = suit;
-              log("Mapped {0}'s suit -> {1}", kerbalName, suit.name);
+              log("Mapped suit for \"{0}\" -> {1}", kerbalName, suit.name);
             }
           }
         }
 
-        ConfigNode genericNode = rootNode.GetNode("GenericKerbals");
+        ConfigNode genericNode = file.config.GetNode("GenericKerbals");
         if (genericNode != null)
         {
           string sExcludedHeads = genericNode.GetValue("excludedHeads");
@@ -432,9 +426,28 @@ namespace TextureReplacer
           string sExcludedSuits = genericNode.GetValue("excludedSuits");
           if (sExcludedSuits != null)
             excludedSuits.AddRange(TextureReplacer.splitConfigValue(sExcludedSuits));
+
+          string sFemaleHeads = genericNode.GetValue("femaleHeads");
+          if (sFemaleHeads != null)
+            femaleHeads.AddRange(TextureReplacer.splitConfigValue(sFemaleHeads));
+
+          string sFemaleSuits = genericNode.GetValue("femaleSuits");
+          if (sFemaleSuits != null)
+            femaleSuits.AddRange(TextureReplacer.splitConfigValue(sFemaleSuits));
+
+          string sSuitAssignment = genericNode.GetValue("suitAssignment");
+          if (sSuitAssignment != null)
+          {
+            if (sSuitAssignment == "random")
+              suitAssignment = SuitAssignment.RANDOM;
+            else if (sSuitAssignment == "consecutive")
+              suitAssignment = SuitAssignment.CONSECUTIVE;
+            else
+              log("Invalid value for suitAssignment: {0}", sSuitAssignment);
+          }
         }
 
-        ConfigNode cabinNode = rootNode.GetNode("CabinSuits");
+        ConfigNode cabinNode = file.config.GetNode("CabinSuits");
         if (cabinNode != null)
         {
           foreach (ConfigNode.Value entry in cabinNode.values)
@@ -446,23 +459,29 @@ namespace TextureReplacer
             {
               Suit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
               cabinSuits[cabinName] = suit;
-              log("Mapped {0}'s cabin suit -> {1}", cabinName, suit.name);
+              log("Mapped cabin suit for \"{0}\" -> {1}", cabinName, suit.name);
             }
           }
         }
       }
 
-      foreach (string headName in excludedHeads)
-        heads.RemoveAll(h => h.name == headName);
+      // Remove excluded heads/suits.
+      heads.RemoveAll(h => excludedHeads.Contains(h.name));
+      suits.RemoveAll(s => excludedSuits.Contains(s.name));
 
-      foreach (string suitName in excludedSuits)
-        suits.RemoveAll(s => s.name == suitName);
+      // Tag female heads.
+      foreach (Head head in heads)
+        head.isFemale = femaleHeads.Contains(head.name);
+
+      // Create female suits list.
+      this.femaleSuits.AddRange(suits.Where(s => femaleSuits.Contains(s.name)));
+      this.suits.RemoveAll(s => femaleSuits.Contains(s.name));
     }
 
     /**
      * Read configuration and perform pre-load initialisation.
      */
-    public Personaliser(ConfigNode rootNode)
+    public void readConfig(ConfigNode rootNode)
     {
       string sIsAtmSuitEnabled = rootNode.GetValue("isAtmSuitEnabled");
       if (sIsAtmSuitEnabled != null)
@@ -471,52 +490,6 @@ namespace TextureReplacer
       string sAtmSuitPressure = rootNode.GetValue("atmSuitPressure");
       if (sAtmSuitPressure != null)
         Double.TryParse(sAtmSuitPressure, out atmSuitPressure);
-
-      string sSuitAssignment = rootNode.GetValue("suitAssignment");
-      if (sSuitAssignment != null)
-      {
-        if (sSuitAssignment == "random")
-          suitAssignment = SuitAssignment.RANDOM;
-        else if (sSuitAssignment == "consecutive")
-          suitAssignment = SuitAssignment.CONSECUTIVE;
-        else
-          log("Invalid value for suitAssignment: {0}", sSuitAssignment);
-      }
-
-      // Check if the srf mod is present.
-      isSfrDetected = AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("sfrPartModules"));
-      if (isSfrDetected)
-        log("Detected sfr mod, enabling alternative Kerbal IVA texture replacement");
-
-      // Update IVA textures on vessel switch.
-      GameEvents.onVesselChange.Add(delegate(Vessel v) {
-        if (!v.isEVA)
-          ivaReplaceTimer = IVA_TIMER_DELAY;
-      });
-
-      // Update IVA textures when a new Kerbal enters. This should be unnecessary but we do it just
-      // in case that some plugin (e.g. Crew Manifest) moves Kerbals across the vessel. Even when it
-      // is unnecessary it doesn't hurt performance since vessel switch occurs within the same
-      // frame, so both events trigger only one texture replacement pass.
-      GameEvents.onCrewBoardVessel.Add(delegate {
-        ivaReplaceTimer = IVA_TIMER_DELAY;
-      });
-
-      // Update IVA textures on docking.
-      GameEvents.onVesselWasModified.Add(delegate(Vessel v) {
-        if (v.vesselName != null)
-          ivaReplaceTimer = IVA_TIMER_DELAY;
-      });
-
-      // Update EVA textures when a new Kerbal is created.
-      GameEvents.onVesselCreate.Add(delegate(Vessel v) {
-        kerbalVessels.Add(v);
-      });
-
-      // Update EVA textures when a Kerbal comes into 2.4 km range.
-      GameEvents.onVesselLoaded.Add(delegate(Vessel v) {
-        kerbalVessels.Add(v);
-      });
     }
 
     /**
@@ -557,14 +530,14 @@ namespace TextureReplacer
             if (head != null)
             {
               head.headNRM = texture;
-              log("Mapped head's normal map {0} -> {1}", head.name, texture.name);
+              log("Mapped head \"{0}\" normal map -> {1}", head.name, texture.name);
             }
           }
           else
           {
             Head head = new Head() { name = headName, head = texture };
             heads.Add(head);
-            log("Mapped head {0} -> {1}", head.name, texture.name);
+            log("Mapped head \"{0}\" -> {1}", head.name, texture.name);
           }
         }
         // Add a suit texture.
@@ -574,27 +547,35 @@ namespace TextureReplacer
 
           int index = suits.Count;
           int dirNameLength = lastSlash - DIR_SUITS.Length;
-          string dirName = texture.name.Substring(DIR_SUITS.Length, dirNameLength);
 
-          Suit suit = null;
-          if (suitDirs.ContainsKey(dirName))
+          if (dirNameLength < 1)
           {
-            index = suitDirs[dirName];
-            suit = suits[index];
+            log("Suit texture should be inside a subdirectory: {0}", texture.name);
           }
           else
           {
-            suitDirs.Add(dirName, index);
+            string dirName = texture.name.Substring(DIR_SUITS.Length, dirNameLength);
 
-            index = suits.Count;
-            suit = new Suit() { name = dirName };
-            suits.Add(suit);
+            Suit suit = null;
+            if (suitDirs.ContainsKey(dirName))
+            {
+              index = suitDirs[dirName];
+              suit = suits[index];
+            }
+            else
+            {
+              suitDirs.Add(dirName, index);
+
+              index = suits.Count;
+              suit = new Suit() { name = dirName };
+              suits.Add(suit);
+            }
+
+            if (suit.setTexture(originalName, texture))
+              log("Mapped suit \"{0}\" {1} -> {2}", dirName, originalName, texture.name);
+            else
+              log("Unknown suit texture name {0}", texture.name);
           }
-
-          if (suit.setTexture(originalName, texture))
-            log("Mapped suit #{0}'s {1} -> {2}", suits.Count - 1, originalName, texture.name);
-          else
-            log("Unknown suit texture name {0}", texture.name);
         }
         else if (texture.name.StartsWith(DIR_DEFAULT))
         {
@@ -605,7 +586,42 @@ namespace TextureReplacer
         lastTextureName = texture.name;
       }
 
-      readConfig();
+      readKerbalsConfigs();
+
+      // Check if the srf mod is present.
+      isSfrDetected = AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("sfrPartModules"));
+      if (isSfrDetected)
+        log("Detected sfr mod, enabling alternative Kerbal IVA texture replacement");
+
+      // Update IVA textures on vessel switch.
+      GameEvents.onVesselChange.Add(delegate(Vessel v) {
+        if (!v.isEVA)
+          ivaReplaceTimer = IVA_TIMER_DELAY;
+      });
+
+      // Update IVA textures when a new Kerbal enters. This should be unnecessary but we do it just
+      // in case that some plugin (e.g. Crew Manifest) moves Kerbals across the vessel. Even when it
+      // is unnecessary it doesn't hurt performance since vessel switch occurs within the same
+      // frame, so both events trigger only one texture replacement pass.
+      GameEvents.onCrewBoardVessel.Add(delegate {
+        ivaReplaceTimer = IVA_TIMER_DELAY;
+      });
+
+      // Update IVA textures on docking.
+      GameEvents.onVesselWasModified.Add(delegate(Vessel v) {
+        if (v.vesselName != null)
+          ivaReplaceTimer = IVA_TIMER_DELAY;
+      });
+
+      // Update EVA textures when a new Kerbal is created.
+      GameEvents.onVesselCreate.Add(delegate(Vessel v) {
+        kerbalVessels.Add(v);
+      });
+
+      // Update EVA textures when a Kerbal comes into 2.4 km range.
+      GameEvents.onVesselLoaded.Add(delegate(Vessel v) {
+        kerbalVessels.Add(v);
+      });
     }
 
     public void resetScene()

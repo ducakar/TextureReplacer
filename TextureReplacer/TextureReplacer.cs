@@ -51,22 +51,36 @@ namespace TextureReplacer
       return value.Split(DELIMITERS, StringSplitOptions.RemoveEmptyEntries);
     }
 
+    /**
+     * True iff `i` is a power of two.
+     */
+    public static bool isPow2(int i)
+    {
+      return i > 0 && (i & (i - 1)) == 0;
+    }
+
     public void Start()
     {
       try
       {
         DontDestroyOnLoad(this);
 
-        ConfigNode config = ConfigNode.Load(PATH + "/TextureReplacer.tcfg");
-        if (config != null)
-          config = config.GetNode("TextureReplacer");
-        if (config == null)
-          config = new ConfigNode();
+        Loader.instance = new Loader();
+        Replacer.instance = new Replacer();
+        Reflections.instance = new Reflections();
+        Personaliser.instance = new Personaliser();
 
-        Loader.instance = new Loader(config);
-        Replacer.instance = new Replacer(config);
-        Reflections.instance = new Reflections(config);
-        Personaliser.instance = new Personaliser(config);
+        foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
+        {
+          log("Reading config file {0}", file.url);
+
+          Loader.instance.readConfig(file.config);
+          Replacer.instance.readConfig(file.config);
+          Reflections.instance.readConfig(file.config);
+          Personaliser.instance.readConfig(file.config);
+        }
+
+        Loader.instance.configure();
       }
       catch (Exception e)
       {

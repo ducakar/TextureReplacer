@@ -34,7 +34,7 @@ namespace TextureReplacer
     private int lastTextureCount = 0;
     private int memorySpared = 0;
     // List of substrings for paths where mipmap generating is enabled.
-    private string[] mipmapDirSubstrings = { "/FX/", "/Parts/", "/Spaces/", "TextureReplacer/" };
+    private List<string> mipmapDirSubstrings = new List<string>();
     // Features.
     private bool? isCompressionEnabled = null;
     private bool? isMipmapGenEnabled = true;
@@ -47,14 +47,6 @@ namespace TextureReplacer
     private static void log(string s, params object[] args)
     {
       Debug.Log("[TR.Loader] " + String.Format(s, args));
-    }
-
-    /**
-     * True iff `i` is a power of two.
-     */
-    public static bool isPow2(int i)
-    {
-      return i > 0 && (i & (i - 1)) == 0;
     }
 
     /**
@@ -76,6 +68,72 @@ namespace TextureReplacer
         size += size / 3;
 
       return size;
+    }
+
+    /**
+     * Read configuration and perform pre-load initialisation.
+     */
+    public void readConfig(ConfigNode rootNode)
+    {
+      string sIsCompressionEnabled = rootNode.GetValue("isCompressionEnabled");
+      if (sIsCompressionEnabled != null)
+      {
+        if (sIsCompressionEnabled == "always")
+          isCompressionEnabled = true;
+        else if (sIsCompressionEnabled == "never")
+          isCompressionEnabled = false;
+        else if (sIsCompressionEnabled == "auto")
+          isCompressionEnabled = null;
+        else
+          log("Invalid value for isCompressionEnabled: {0}", sIsCompressionEnabled);
+      }
+
+      string sIsMipmapGenEnabled = rootNode.GetValue("isMipmapGenEnabled");
+      if (sIsMipmapGenEnabled != null)
+      {
+        if (sIsMipmapGenEnabled == "always")
+          isMipmapGenEnabled = true;
+        else if (sIsMipmapGenEnabled == "never")
+          isMipmapGenEnabled = false;
+        else if (sIsMipmapGenEnabled == "auto")
+          isMipmapGenEnabled = null;
+        else
+          log("Invalid value for isMipmapGenEnabled: {0}", sIsMipmapGenEnabled);
+      }
+
+      string sMipmapDirSubstrings = rootNode.GetValue("mipmapDirSubstrings");
+      if (sMipmapDirSubstrings != null)
+        mipmapDirSubstrings.AddRange(TextureReplacer.splitConfigValue(sMipmapDirSubstrings));
+    }
+
+    /**
+     * This must be run only once after all configuration files are read.
+     */
+    public void configure()
+    {
+      // Prevent conflicts with TextureCompressor. If it is found among loaded plugins, texture
+      // compression step will be skipped since TextureCompressor should handle it (better).
+      bool isTextureCompressorDetected =
+        AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("TextureCompressor"));
+
+      if (isTextureCompressorDetected)
+      {
+        if (isCompressionEnabled == null)
+        {
+          log("Detected TextureCompressor, disabling texture compression");
+          isCompressionEnabled = false;
+        }
+        if (isMipmapGenEnabled == null)
+        {
+          log("Detected TextureCompressor, disabling mipmap generation");
+          isMipmapGenEnabled = false;
+        }
+      }
+
+      if (isCompressionEnabled == null)
+        isCompressionEnabled = true;
+      if (isMipmapGenEnabled == null)
+        isMipmapGenEnabled = true;
     }
 
     /**
@@ -140,7 +198,7 @@ namespace TextureReplacer
         if (isCompressionEnabled.Value
             && format != TextureFormat.DXT1 && format != TextureFormat.DXT5)
         {
-          if (!isPow2(texture.width) || !isPow2(texture.height))
+          if (!TextureReplacer.isPow2(texture.width) || !TextureReplacer.isPow2(texture.height))
           {
             log("Failed to compress {0}, dimensions {1}x{2} are not powers of 2",
                 texture.name, texture.width, texture.height);
@@ -161,66 +219,6 @@ namespace TextureReplacer
       }
 
       lastTextureCount = texInfos.Count;
-    }
-
-    /**
-     * Read configuration and perform pre-load initialisation.
-     */
-    public Loader(ConfigNode rootNode)
-    {
-      string sIsCompressionEnabled = rootNode.GetValue("isCompressionEnabled");
-      if (sIsCompressionEnabled != null)
-      {
-        if (sIsCompressionEnabled == "always")
-          isCompressionEnabled = true;
-        else if (sIsCompressionEnabled == "never")
-          isCompressionEnabled = false;
-        else if (sIsCompressionEnabled == "auto")
-          isCompressionEnabled = null;
-        else
-          log("Invalid value for isCompressionEnabled: {0}", sIsCompressionEnabled);
-      }
-
-      string sIsMipmapGenEnabled = rootNode.GetValue("isMipmapGenEnabled");
-      if (sIsMipmapGenEnabled != null)
-      {
-        if (sIsMipmapGenEnabled == "always")
-          isMipmapGenEnabled = true;
-        else if (sIsMipmapGenEnabled == "never")
-          isMipmapGenEnabled = false;
-        else if (sIsMipmapGenEnabled == "auto")
-          isMipmapGenEnabled = null;
-        else
-          log("Invalid value for isMipmapGenEnabled: {0}", sIsMipmapGenEnabled);
-      }
-
-      string sMipmapDirSubstrings = rootNode.GetValue("mipmapDirSubstrings");
-      if (sMipmapDirSubstrings != null)
-        mipmapDirSubstrings = TextureReplacer.splitConfigValue(sMipmapDirSubstrings);
-
-      // Prevent conflicts with TextureCompressor. If it is found among loaded plugins, texture
-      // compression step will be skipped since TextureCompressor should handle it (better).
-      bool isTextureCompressorDetected =
-        AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("TextureCompressor"));
-
-      if (isTextureCompressorDetected)
-      {
-        if (isCompressionEnabled == null)
-        {
-          log("Detected TextureCompressor, disabling texture compression");
-          isCompressionEnabled = false;
-        }
-        if (isMipmapGenEnabled == null)
-        {
-          log("Detected TextureCompressor, disabling mipmap generation");
-          isMipmapGenEnabled = false;
-        }
-      }
-
-      if (isCompressionEnabled == null)
-        isCompressionEnabled = true;
-      if (isMipmapGenEnabled == null)
-        isMipmapGenEnabled = true;
     }
 
     /**

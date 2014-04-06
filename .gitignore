@@ -1,6 +1,10 @@
-/*.userprefs
-/bin
-/obj
-/GameData
-/*.jpg
-/*.png
+/TextureReplacer.userprefs
+/TextureReplacer/bin
+/TextureReplacer/obj
+/GameData/TextureReplacer/README.md
+*.dll
+*.png
+*.gif
+*.jpg
+*.xcf
+*.zip
