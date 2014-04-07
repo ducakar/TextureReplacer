@@ -28,9 +28,6 @@ namespace TextureReplacer
   [KSPAddon(KSPAddon.Startup.Instantly, true)]
   public class TextureReplacer : MonoBehaviour
   {
-    public static readonly string DIR = "TextureReplacer/";
-    public static readonly string PATH = KSPUtil.ApplicationRootPath + "GameData/TextureReplacer";
-    private static readonly char[] DELIMITERS = { ' ', ',' };
     // Generic texture replacement parameters.
     private GameScenes lastScene = GameScenes.LOADING;
     private bool isInitialised = false;
@@ -41,22 +38,6 @@ namespace TextureReplacer
     private static void log(string s, params object[] args)
     {
       Debug.Log("[TR.TextureReplacer] " + String.Format(s, args));
-    }
-
-    /**
-     * Split a space- and/or comma-separated configuration file value into its tokens.
-     */
-    public static string[] splitConfigValue(string value)
-    {
-      return value.Split(DELIMITERS, StringSplitOptions.RemoveEmptyEntries);
-    }
-
-    /**
-     * True iff `i` is a power of two.
-     */
-    public static bool isPow2(int i)
-    {
-      return i > 0 && (i & (i - 1)) == 0;
     }
 
     public void Start()
@@ -72,7 +53,7 @@ namespace TextureReplacer
 
         foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
         {
-          log("Reading config file {0}", file.url);
+          log("Reading configuration: {0}", file.url);
 
           Loader.instance.readConfig(file.config);
           Replacer.instance.readConfig(file.config);

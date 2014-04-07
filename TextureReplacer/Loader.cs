@@ -103,7 +103,7 @@ namespace TextureReplacer
 
       string sMipmapDirSubstrings = rootNode.GetValue("mipmapDirSubstrings");
       if (sMipmapDirSubstrings != null)
-        mipmapDirSubstrings.AddRange(TextureReplacer.splitConfigValue(sMipmapDirSubstrings));
+        mipmapDirSubstrings.AddRange(Util.splitConfigValue(sMipmapDirSubstrings));
     }
 
     /**
@@ -152,6 +152,10 @@ namespace TextureReplacer
         if (texture == null)
           continue;
 
+        // Apply trilinear filter.
+        if (texture.filterMode == FilterMode.Bilinear)
+          texture.filterMode = FilterMode.Trilinear;
+
         // `texture.GetPixel() throws an exception if the texture is not readable and hence it
         // cannot be compressed nor mipmaps generated.
         try
@@ -198,7 +202,7 @@ namespace TextureReplacer
         if (isCompressionEnabled.Value
             && format != TextureFormat.DXT1 && format != TextureFormat.DXT5)
         {
-          if (!TextureReplacer.isPow2(texture.width) || !TextureReplacer.isPow2(texture.height))
+          if (!Util.isPow2(texture.width) || !Util.isPow2(texture.height))
           {
             log("Failed to compress {0}, dimensions {1}x{2} are not powers of 2",
                 texture.name, texture.width, texture.height);

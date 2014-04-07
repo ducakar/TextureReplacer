@@ -171,8 +171,8 @@ all `*.cfg` files that contain `TextureReplacer { ... }` as the root node. This
 should prove useful to developers of texture packs so they can distribute
 pack-specific head/suit assignment rules in a separate file. All the `*.cfg`
 files (including `@Default.cfg`) are processed in alphabetical order (the reason
-behind the leading "@" in the "Default" file is that it is processed first and
-is overridden by subsequent configuration files).
+behind the leading "@" in `@Default.cfg` is that it is processed first and can
+be overridden by subsequent configuration files).
 
 
 Notes
@@ -212,6 +212,14 @@ Known Issues
 
 Change Log
 ----------
+* 1.4.1
+    - better environment map textures, now with stars
+    - changed default `visorReflectionColour` to `1 1 1` to keep the original
+      environment map colour
+    - added `GENERIC` option for custom Kerbals' head and suit settings
+    - some improvements in log messages
+    - fixed trilinear filter not being applied to personalised Kerbal textures
+    - fixed texture clamp mode not being set for `Default/kerbalHead`
 * 1.4.0
     - configuration files use `.cfg` extension again to avoid conflicts with ATM
     - all configuration files are merged, all options can now be in any file
@@ -406,3 +414,7 @@ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
+
+
+Environment map textures are distributed under the terms of CC BY-NC-SA 4.0
+licence and are based on skybox from Proot's Pimp My Kerbals texture pack.

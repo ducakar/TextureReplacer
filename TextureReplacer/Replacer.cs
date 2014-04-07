@@ -28,7 +28,7 @@ namespace TextureReplacer
 {
   public class Replacer
   {
-    private static readonly string DIR_TEXTURES = TextureReplacer.DIR + "Default/";
+    private static readonly string DIR_TEXTURES = Util.DIR + "Default/";
     // General texture replacements.
     private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
     // Generic texture replacement parameters.
@@ -62,14 +62,20 @@ namespace TextureReplacer
         Texture2D newTexture = null;
         mappedTextures.TryGetValue(texture.name, out newTexture);
 
-        if (newTexture != null && newTexture != texture)
+        if (newTexture != null)
         {
-          material.mainTexture = newTexture;
-          Resources.UnloadAsset(texture);
-          texture = newTexture;
+          if (newTexture != texture)
+          {
+            material.mainTexture = newTexture;
+            Resources.UnloadAsset(texture);
+          }
         }
-        if (texture.filterMode == FilterMode.Bilinear)
+        // Trilinear filter have already been applied to replacement textures, here we apply it also
+        // to original textures that are not being replaced.
+        else if (texture.filterMode == FilterMode.Bilinear)
+        {
           texture.filterMode = FilterMode.Trilinear;
+        }
 
         Texture normalMap = material.GetTexture("_BumpMap");
         if (normalMap == null)
@@ -78,14 +84,18 @@ namespace TextureReplacer
         Texture2D newNormalMap = null;
         mappedTextures.TryGetValue(normalMap.name, out newNormalMap);
 
-        if (newNormalMap != null && newNormalMap != normalMap)
+        if (newNormalMap != null)
         {
-          material.SetTexture("_BumpMap", newNormalMap);
-          Resources.UnloadAsset(normalMap);
-          normalMap = newNormalMap;
+          if (newNormalMap != normalMap)
+          {
+            material.SetTexture("_BumpMap", newNormalMap);
+            Resources.UnloadAsset(normalMap);
+          }
         }
-        if (normalMap.filterMode == FilterMode.Bilinear)
+        else if (normalMap.filterMode == FilterMode.Bilinear)
+        {
           normalMap.filterMode = FilterMode.Trilinear;
+        }
       }
     }
 
@@ -130,7 +140,7 @@ namespace TextureReplacer
 
             mappedTextures.Add(originalName, texture);
 
-            log("Mapped {0} -> {1}", originalName, texture.name);
+            log("Mapped \"{0}\" -> {1}", originalName, texture.name);
           }
         }
 
@@ -141,17 +151,21 @@ namespace TextureReplacer
       // and kerbalMainGrey. Those will be replaced later.
       replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)));
 
+      // Bumpmapped version of diffuse shader for head.
+      Shader bumpedDiffuseShader = Shader.Find("Bumped Diffuse");
+
       Texture2D ivaVisorTex = null, evaVisorTex = null;
       mappedTextures.TryGetValue("kerbalVisor", out ivaVisorTex);
       mappedTextures.TryGetValue("EVAvisor", out evaVisorTex);
 
-      // Set visor texture and reflection on proto-IVA and -EVA Kerbal.
+      // Set normal-mapped shader for head and visor texture and reflection on proto-IVA and -EVA
+      // Kerbal.
       foreach (SkinnedMeshRenderer smr
                in Resources.FindObjectsOfTypeAll(typeof(SkinnedMeshRenderer)))
       {
         if (smr.name == "headMesh01")
         {
-          smr.material.shader = Shader.Find("Bumped Diffuse");
+          smr.material.shader = bumpedDiffuseShader;
         }
         else if (smr.name == "visor")
         {

@@ -52,6 +52,7 @@
     <Compile Include="Replacer.cs" />
     <Compile Include="TextureReplacer.cs" />
     <Compile Include="TRReflection.cs" />
+    <Compile Include="Util.cs" />
     <None Include="Visor-source.shader" />
   </ItemGroup>
   <ItemGroup>

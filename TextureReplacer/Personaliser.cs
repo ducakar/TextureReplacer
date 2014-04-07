@@ -125,9 +125,9 @@ namespace TextureReplacer
       }
     }
 
-    private static readonly string DIR_DEFAULT = TextureReplacer.DIR + "Default/";
-    private static readonly string DIR_HEADS = TextureReplacer.DIR + "Heads/";
-    private static readonly string DIR_SUITS = TextureReplacer.DIR + "Suits/";
+    private static readonly string DIR_DEFAULT = Util.DIR + "Default/";
+    private static readonly string DIR_HEADS = Util.DIR + "Heads/";
+    private static readonly string DIR_SUITS = Util.DIR + "Suits/";
     // Delay for IVA replacement (in seconds).
     private static readonly float IVA_TIMER_DELAY = 0.1f;
     // Kerbal textures.
@@ -394,24 +394,23 @@ namespace TextureReplacer
         {
           foreach (ConfigNode.Value entry in customNode.values)
           {
-            string[] tokens = TextureReplacer.splitConfigValue(entry.value);
-            string kerbalName = entry.name;
+            string[] tokens = Util.splitConfigValue(entry.value);
+            string name = entry.name;
             string headName = tokens.Length >= 1 ? tokens[0] : null;
             string suitName = tokens.Length >= 2 ? tokens[1] : null;
 
-            if (headName != null)
+            if (headName != null && headName != "GENERIC")
             {
               Head head = heads.FirstOrDefault(h => h.name == headName);
-              customHeads[kerbalName] = head;
-              log("Mapped head for \"{0}\" -> {1}", kerbalName,
-                  head == null ? "DEFAULT" : head.name);
+              customHeads[name] = head;
+              log("Mapped head for \"{0}\" -> {1}", name, head == null ? "DEFAULT" : head.name);
             }
 
-            if (suitName != null)
+            if (suitName != null && suitName != "GENERIC")
             {
-              Suit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
-              customSuits[kerbalName] = suit;
-              log("Mapped suit for \"{0}\" -> {1}", kerbalName, suit.name);
+              Suit suit = suits.FirstOrDefault(s => s.name == suitName);
+              customSuits[name] = suit;
+              log("Mapped suit for \"{0}\" -> {1}", name, suit == null ? "DEFAULT" : suit.name);
             }
           }
         }
@@ -421,19 +420,19 @@ namespace TextureReplacer
         {
           string sExcludedHeads = genericNode.GetValue("excludedHeads");
           if (sExcludedHeads != null)
-            excludedHeads.AddRange(TextureReplacer.splitConfigValue(sExcludedHeads));
+            excludedHeads.AddRange(Util.splitConfigValue(sExcludedHeads));
 
           string sExcludedSuits = genericNode.GetValue("excludedSuits");
           if (sExcludedSuits != null)
-            excludedSuits.AddRange(TextureReplacer.splitConfigValue(sExcludedSuits));
+            excludedSuits.AddRange(Util.splitConfigValue(sExcludedSuits));
 
           string sFemaleHeads = genericNode.GetValue("femaleHeads");
           if (sFemaleHeads != null)
-            femaleHeads.AddRange(TextureReplacer.splitConfigValue(sFemaleHeads));
+            femaleHeads.AddRange(Util.splitConfigValue(sFemaleHeads));
 
           string sFemaleSuits = genericNode.GetValue("femaleSuits");
           if (sFemaleSuits != null)
-            femaleSuits.AddRange(TextureReplacer.splitConfigValue(sFemaleSuits));
+            femaleSuits.AddRange(Util.splitConfigValue(sFemaleSuits));
 
           string sSuitAssignment = genericNode.GetValue("suitAssignment");
           if (sSuitAssignment != null)
@@ -503,7 +502,7 @@ namespace TextureReplacer
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
-        if (texture == null || !texture.name.StartsWith(TextureReplacer.DIR))
+        if (texture == null || !texture.name.StartsWith(Util.DIR))
           continue;
 
         int lastSlash = texture.name.LastIndexOf('/');
@@ -574,13 +573,19 @@ namespace TextureReplacer
             if (suit.setTexture(originalName, texture))
               log("Mapped suit \"{0}\" {1} -> {2}", dirName, originalName, texture.name);
             else
-              log("Unknown suit texture name {0}", texture.name);
+              log("Unknown suit texture name \"{0}\": {1}", originalName, texture.name);
           }
         }
         else if (texture.name.StartsWith(DIR_DEFAULT))
         {
-          if (defaultSuit.setTexture(originalName, texture))
+          if (originalName == "kerbalHead")
             texture.wrapMode = TextureWrapMode.Clamp;
+
+          if (defaultSuit.setTexture(originalName, texture))
+          {
+            texture.wrapMode = TextureWrapMode.Clamp;
+            log("Mapped default suit {0} -> {1}", originalName, texture.name);
+          }
         }
 
         lastTextureName = texture.name;

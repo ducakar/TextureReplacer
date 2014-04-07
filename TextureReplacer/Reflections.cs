@@ -30,13 +30,13 @@ namespace TextureReplacer
 {
   public class Reflections
   {
-    private static readonly string DIR_ENVMAP = TextureReplacer.DIR + "EnvMap/";
+    private static readonly string DIR_ENVMAP = Util.DIR + "EnvMap/";
     // Reflective shader material.
     private Material shaderMaterial = null;
     // Visor reflection feature.
     private bool isVisorReflectionEnabled = true;
     // Reflection colour.
-    private Color visorReflectionColour = new Color(0.5f, 0.5f, 0.5f);
+    private Color visorReflectionColour = new Color(1.0f, 1.0f, 1.0f);
     // Instance.
     public static Reflections instance = null;
     // Reflective shader.
@@ -64,7 +64,7 @@ namespace TextureReplacer
       string sVisorReflectionColour = rootNode.GetValue("visorReflectionColour");
       if (sVisorReflectionColour != null)
       {
-        string[] components = TextureReplacer.splitConfigValue(sVisorReflectionColour);
+        string[] components = Util.splitConfigValue(sVisorReflectionColour);
         if (components.Length != 3)
         {
           log("visorReplectionColour must have exactly 3 components");
@@ -165,8 +165,7 @@ namespace TextureReplacer
         {
           log("Not all environment map faces are of the same dimension. Reflections disabled.");
         }
-        else if (envMapFaces.Any(
-                   t => !TextureReplacer.isPow2(t.width) || !TextureReplacer.isPow2(t.height)))
+        else if (envMapFaces.Any(t => !Util.isPow2(t.width) || !Util.isPow2(t.height)))
         {
           log("Environment map dimensions are not powers of two. Reflections disabled.");
         }
@@ -181,6 +180,8 @@ namespace TextureReplacer
           envMap.SetPixels(envMapFaces[4].GetPixels(), CubemapFace.PositiveZ);
           envMap.SetPixels(envMapFaces[5].GetPixels(), CubemapFace.NegativeZ);
           envMap.Apply(true, true);
+
+          log("Environment map cube texture generated.");
         }
       }
 
@@ -198,6 +199,8 @@ namespace TextureReplacer
         shaderSource = File.ReadAllText(shaderPath);
         shaderMaterial = new Material(shaderSource);
         shader = shaderMaterial.shader;
+
+        log("Visor shader sucessfully compiled.");
       }
       catch (System.IO.IsolatedStorage.IsolatedStorageException)
       {
