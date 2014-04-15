@@ -39,6 +39,7 @@ namespace TextureReplacer
     {
       public string name;
       public bool isFemale;
+      public bool isEyeless;
       public Texture2D head;
       public Texture2D headNRM;
     }
@@ -135,10 +136,11 @@ namespace TextureReplacer
     private List<Head> heads = new List<Head>();
     private List<Suit> suits = new List<Suit>();
     private List<Suit> femaleSuits = new List<Suit>();
-    private Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
     // Personalised Kerbal textures.
     private Dictionary<string, Head> customHeads = new Dictionary<string, Head>();
     private Dictionary<string, Suit> customSuits = new Dictionary<string, Suit>();
+    // Cabin-specific suits.
+    private Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
     // Atmospheric IVA suit parameters.
     private bool isAtmSuitEnabled = true;
     private double atmSuitPressure = 0.5;
@@ -175,7 +177,6 @@ namespace TextureReplacer
     {
       Head head = null;
       Suit suit = null;
-      bool isEva = inPart == null;
 
       if (!customHeads.TryGetValue(kerbal.name, out head) && heads.Count != 0)
       {
@@ -185,10 +186,11 @@ namespace TextureReplacer
         head = heads[index];
       }
 
+      bool isEva = inPart == null;
       bool isFemale = head == null ? false : head.isFemale;
       List<Suit> genderSuits = isFemale ? femaleSuits : suits;
 
-      if ((inPart == null || !cabinSuits.TryGetValue(inPart.partInfo.name, out suit))
+      if ((isEva || !cabinSuits.TryGetValue(inPart.partInfo.name, out suit))
           && !customSuits.TryGetValue(kerbal.name, out suit) && genderSuits.Count != 0)
       {
         // Here we must use a different prime to increase randomisation so that the same head is
@@ -213,6 +215,9 @@ namespace TextureReplacer
           case "pupilLeft":
           case "pupilRight":
           {
+            if (head != null && head.isEyeless)
+              renderer.enabled = false;
+
             break;
           }
           case "headMesh01":
@@ -386,6 +391,7 @@ namespace TextureReplacer
       List<string> excludedSuits = new List<string>();
       List<string> femaleHeads = new List<string>();
       List<string> femaleSuits = new List<string>();
+      List<string> eyelessHeads = new List<string>();
 
       foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
       {
@@ -399,18 +405,46 @@ namespace TextureReplacer
             string headName = tokens.Length >= 1 ? tokens[0] : null;
             string suitName = tokens.Length >= 2 ? tokens[1] : null;
 
-            if (headName != null && headName != "GENERIC")
+            if (headName != null)
             {
-              Head head = heads.FirstOrDefault(h => h.name == headName);
-              customHeads[name] = head;
-              log("Mapped head for \"{0}\" -> {1}", name, head == null ? "DEFAULT" : head.name);
+              if (headName == "GENERIC")
+              {
+                if (customHeads.ContainsKey(name))
+                {
+                  customHeads.Remove(name);
+                  log("Unmapped head for \"{0}\"", name);
+                }
+              }
+              else
+              {
+                Head head = null;
+                if (headName != "DEFAULT")
+                  head = heads.FirstOrDefault(h => h.name == headName);
+
+                customHeads[name] = head;
+                log("Mapped head for \"{0}\" -> {1}", name, head == null ? "DEFAULT" : headName);
+              }
             }
 
-            if (suitName != null && suitName != "GENERIC")
+            if (suitName != null)
             {
-              Suit suit = suits.FirstOrDefault(s => s.name == suitName);
-              customSuits[name] = suit;
-              log("Mapped suit for \"{0}\" -> {1}", name, suit == null ? "DEFAULT" : suit.name);
+              if (suitName == "GENERIC")
+              {
+                if (customSuits.ContainsKey(name))
+                {
+                  customSuits.Remove(name);
+                  log("Unmapped suit for \"{0}\"", name);
+                }
+              }
+              else
+              {
+                Suit suit = null;
+                if (suitName != "DEFAULT")
+                  suit = suits.FirstOrDefault(s => s.name == suitName);
+
+                customSuits[name] = suit;
+                log("Mapped suit for \"{0}\" -> {1}", name, suit == null ? "DEFAULT" : suitName);
+              }
             }
           }
         }
@@ -433,6 +467,10 @@ namespace TextureReplacer
           string sFemaleSuits = genericNode.GetValue("femaleSuits");
           if (sFemaleSuits != null)
             femaleSuits.AddRange(Util.splitConfigValue(sFemaleSuits));
+
+          string sEyelessHeads = genericNode.GetValue("eyelessHeads");
+          if (sEyelessHeads != null)
+            eyelessHeads.AddRange(Util.splitConfigValue(sEyelessHeads));
 
           string sSuitAssignment = genericNode.GetValue("suitAssignment");
           if (sSuitAssignment != null)
@@ -464,13 +502,16 @@ namespace TextureReplacer
         }
       }
 
+      // Tag female and eye-less heads.
+      foreach (Head head in heads)
+      {
+        head.isFemale = femaleHeads.Contains(head.name);
+        head.isEyeless = eyelessHeads.Contains(head.name);
+      }
+
       // Remove excluded heads/suits.
       heads.RemoveAll(h => excludedHeads.Contains(h.name));
       suits.RemoveAll(s => excludedSuits.Contains(s.name));
-
-      // Tag female heads.
-      foreach (Head head in heads)
-        head.isFemale = femaleHeads.Contains(head.name);
 
       // Create female suits list.
       this.femaleSuits.AddRange(suits.Where(s => femaleSuits.Contains(s.name)));

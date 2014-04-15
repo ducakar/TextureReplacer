@@ -66,6 +66,9 @@ namespace TextureReplacer
         {
           if (newTexture != texture)
           {
+            newTexture.anisoLevel = texture.anisoLevel;
+            newTexture.wrapMode = texture.wrapMode;
+
             material.mainTexture = newTexture;
             Resources.UnloadAsset(texture);
           }
@@ -88,6 +91,9 @@ namespace TextureReplacer
         {
           if (newNormalMap != normalMap)
           {
+            newNormalMap.anisoLevel = normalMap.anisoLevel;
+            newNormalMap.wrapMode = normalMap.wrapMode;
+
             material.SetTexture("_BumpMap", newNormalMap);
             Resources.UnloadAsset(normalMap);
           }
@@ -146,10 +152,6 @@ namespace TextureReplacer
 
         lastTextureName = texture.name;
       }
-
-      // Replace textures (and apply trilinear filter). This doesn't reach some textures like skybox
-      // and kerbalMainGrey. Those will be replaced later.
-      replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)));
 
       // Bumpmapped version of diffuse shader for head.
       Shader bumpedDiffuseShader = Shader.Find("Bumped Diffuse");

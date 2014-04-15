@@ -15,7 +15,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
 * add normal map for head texture,
 * add helmet visor texture,
-* enable (fake) visor reflections,
+* enable (fake) visor reflection,
 * generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
 * compress uncompressed textures from `GameData/` and reduce RAM usage and
 * change bilinear texture filter to trilinear to improve mipmap quality.
@@ -197,9 +197,9 @@ Notes
 Known Issues
 ------------
 * If there is no IVA suit replacement the stock EVA suit texture is used for the
-  atmospheric EVAs. [Won't fix. This mod is intended to replace suits.]
-* If a Kerbal rides to space on a rover seat he ends up in orbit in his IVA suit
-  without a helmet. [Won't fix. It would be too complicated to fix this.]
+  atmospheric EVAs. [Won't fix, this mod is intended to replace suits.]
+* If a Kerbal rides to space on a rover seat he/she ends up in orbit in his/her
+  IVA suit without a helmet. [Won't fix, it would be too complicated.]
 * Replacement of textures from `GameData/` does not work for certain models.
   [No known fix.]
 * When using sfr mod, personalised IVA textures are not set in transparent pods
@@ -212,6 +212,10 @@ Known Issues
 
 Change Log
 ----------
+* 1.4.2
+    - added option to remove eyes for certain heads
+    - original texture's parameters are kept on replacement
+    - fixed several minor issues in reading configuration files
 * 1.4.1
     - better environment map textures, now with stars
     - changed default `visorReflectionColour` to `1 1 1` to keep the original
