@@ -21,9 +21,8 @@ stock textures and customise your Kerbals. More specifically, it can:
 * change bilinear texture filter to trilinear to improve mipmap quality.
 
 Special thanks to:
-* rbray89 who contributed a reflective visor shader and for TextureCompressor
-  (a.k.a. Active Texture Management) and Visual Enhancements where some code has
-  been borrowed from,
+* rbray89 who contributed a reflective visor shader and for Active Texture
+  Management and Visual Enhancements where some code has been borrowed from,
 * Tingle for Universe Replacer; studying his code helped me a lot while
   developing this plugin,
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
@@ -177,13 +176,13 @@ be overridden by subsequent configuration files).
 
 Notes
 -----
+* Use TGA for optimal quality of model textures as it is not compressed twice.
 * Try to keep widths and heights of all textures powers of two. Non-power-of-two
   textures are not handled well in some cases and cannot be compressed.
 * KSP can only load TGAs with RGB or RGBA colours. Paletteised 256-colour TGAs
-  cause doubled missing textures and other corruptions in the game database!
-* By default, internal texture compression is disabled when TextureCompressor is
-  detected. Compression is then left to TextureCompressor which is a more
-  specialised mod for that purpose.
+  cause corruptions in the game database!
+* By default, texture compression is handled by ATM when present rather than by
+  TextureReplacer.
 * KSP never generates mipmaps for PNGs and JPEGs. TextureReplacer fixes this by
   generating mipmaps under paths specified in the configuration file. Other
   images are omitted to avoid making UI icons of various plugins blurry when not
@@ -197,21 +196,30 @@ Notes
 Known Issues
 ------------
 * If there is no IVA suit replacement the stock EVA suit texture is used for the
-  atmospheric EVAs. [Won't fix, this mod is intended to replace suits.]
+  atmospheric EVAs. [Too complicated to fix. Just reload the scene to fix it.]
 * If a Kerbal rides to space on a rover seat he/she ends up in orbit in his/her
   IVA suit without a helmet. [Won't fix, it would be too complicated.]
 * Replacement of textures from `GameData/` does not work for certain models.
   [No known fix.]
 * When using sfr mod, personalised IVA textures are not set in transparent pods
-  of non-active vessels on scene load. [No known fix. Textures will be updated
-  as soon as you switch to the affected vessel.]
-* Kerbal personalisation does not work when crew members are transferred with
-  Crew or Ship Manifest. [Ideally, it should be fixed in those mods. Developers
-  have already been notified.]
+  of non-active vessels on scene load. [No fix yet. Textures will be updated as
+  soon as you switch to the affected vessel.]
+* Kerbal personalisation does not work when transferred with Crew Manifest.
+  [Switch to Skip Manifest or wait for Crew Manifest to be fixed.]
+* Jetpack flags re-appear after dismounting a KerbalQuest jetpack. [No fix.]
 
 
 Change Log
 ----------
+* 1.5.0
+    - textures are now (mostly) unloaded from RAM just before the main menu
+    - added configuration option to prevent textures from being unloaded
+    - changed compression and mipmap generation logic
+    - changed configuration file options for mipmap generation; RE supported
+    - changed general texture replacement to time-based
+    - reverted to the old way of removing (some) meshes to prevent helmets or
+      eyes from re-appearing when using certain mods
+    - added compatibility for ATM
 * 1.4.2
     - added option to remove eyes for certain heads
     - original texture's parameters are kept on replacement

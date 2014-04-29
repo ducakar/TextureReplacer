@@ -21,15 +21,15 @@
  */
 
 using System;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace TextureReplacer
 {
-  class Util
+  internal class Util
   {
     private static readonly char[] CONFIG_DELIMITERS = { ' ', ',' };
     public static readonly string DIR = typeof(Util).Namespace + "/";
-    public static readonly string PATH = KSPUtil.ApplicationRootPath + "GameData/" + DIR;
 
     /**
      * True iff `i` is a power of two.
@@ -45,6 +45,15 @@ namespace TextureReplacer
     public static string[] splitConfigValue(string value)
     {
       return value.Split(CONFIG_DELIMITERS, StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    /**
+     * Print a log entry for TextureReplacer. `String.Format()`-style formatting is supported.
+     */
+    public static void log(string s, params object[] args)
+    {
+      Type callerClass = new StackTrace(1, false).GetFrame(0).GetMethod().DeclaringType;
+      UnityEngine.Debug.Log("[TR." + callerClass.Name + "] " + String.Format(s, args));
     }
   }
 }

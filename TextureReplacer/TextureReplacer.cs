@@ -32,14 +32,6 @@ namespace TextureReplacer
     private GameScenes lastScene = GameScenes.LOADING;
     private bool isInitialised = false;
 
-    /**
-     * Print a log entry for TextureReplacer. `String.Format()`-style formatting is supported.
-     */
-    private static void log(string s, params object[] args)
-    {
-      Debug.Log("[TR.TextureReplacer] " + String.Format(s, args));
-    }
-
     public void Start()
     {
       try
@@ -48,15 +40,17 @@ namespace TextureReplacer
 
         Loader.instance = new Loader();
         Replacer.instance = new Replacer();
+//        Asteroids.instance = new Asteroids();
         Reflections.instance = new Reflections();
         Personaliser.instance = new Personaliser();
 
         foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
         {
-          log("Reading configuration: {0}", file.url);
+          Util.log("Reading configuration: {0}", file.url);
 
           Loader.instance.readConfig(file.config);
           Replacer.instance.readConfig(file.config);
+//          Asteroids.instance.readConfig(file.config);
           Reflections.instance.readConfig(file.config);
           Personaliser.instance.readConfig(file.config);
         }
@@ -65,7 +59,7 @@ namespace TextureReplacer
       }
       catch (Exception e)
       {
-        log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
+        Util.log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
       }
     }
 
@@ -82,6 +76,7 @@ namespace TextureReplacer
           {
             Loader.instance.initialise();
             Replacer.instance.initialise();
+//            Asteroids.instance.initialise();
             Reflections.instance.initialise();
             Personaliser.instance.initialise();
 
@@ -99,16 +94,18 @@ namespace TextureReplacer
             lastScene = HighLogic.LoadedScene;
 
             Replacer.instance.resetScene();
+//            Asteroids.instance.resetScene();
             Personaliser.instance.resetScene();
           }
 
           Replacer.instance.updateScene();
+//          Asteroids.instance.updateScene();
           Personaliser.instance.updateScene();
         }
       }
       catch (Exception e)
       {
-        log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
+        Util.log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
       }
     }
 

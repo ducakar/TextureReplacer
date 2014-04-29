@@ -54,10 +54,14 @@
     <Compile Include="TRReflection.cs" />
     <Compile Include="Util.cs" />
     <None Include="Visor-source.shader" />
+    <Compile Include="Asteroids.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\System.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\UnityEngine.dll</HintPath>

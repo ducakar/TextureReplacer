@@ -26,27 +26,16 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  public class Replacer
+  internal class Replacer
   {
     private static readonly string DIR_TEXTURES = Util.DIR + "Default/";
     // General texture replacements.
     private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
-    // Generic texture replacement parameters.
-    private int lastMaterialCount = 0;
     // General replacement has to be performed for more than one frame when a scene switch occurs
-    // since textures and models may also be loaded with a few frame lag. `updateCounter` specifies
-    // for how many frames it should run.
-    private int updateCounter = 0;
+    // since textures and models may also be loaded with a timed lag.
+    private float replaceTimer = -1.0f;
     // Instance.
     public static Replacer instance = null;
-
-    /**
-     * Print a log entry for TextureReplacer. `String.Format()`-style formatting is supported.
-     */
-    private static void log(string s, params object[] args)
-    {
-      Debug.Log("[TR.Replacer] " + String.Format(s, args));
-    }
 
     /**
      * General texture replacement step.
@@ -132,7 +121,7 @@ namespace TextureReplacer
         // the preceding texture.
         if (texture.name == lastTextureName)
         {
-          log("Corrupted GameDatabase! Problematic TGA? {0}", texture.name);
+          Util.log("Corrupted GameDatabase! Problematic TGA? {0}", texture.name);
         }
         // Add a general texture replacement.
         else
@@ -146,7 +135,7 @@ namespace TextureReplacer
 
             mappedTextures.Add(originalName, texture);
 
-            log("Mapped \"{0}\" -> {1}", originalName, texture.name);
+            Util.log("Mapped \"{0}\" -> {1}", originalName, texture.name);
           }
         }
 
@@ -185,21 +174,31 @@ namespace TextureReplacer
 
     public void resetScene()
     {
-      lastMaterialCount = 0;
-      updateCounter = HighLogic.LoadedScene == GameScenes.MAINMENU ? 64 : 16;
+      if (HighLogic.LoadedScene == GameScenes.MAINMENU
+          || HighLogic.LoadedScene == GameScenes.SPACECENTER)
+      {
+        replaceTimer = 2.0f;
+      }
+      else
+      {
+        replaceTimer = 0.1f;
+      }
     }
 
     public void updateScene()
     {
-      if (updateCounter > 0)
+      if (replaceTimer >= 0.0f)
       {
-        --updateCounter;
+        replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)));
 
-        Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
-        if (materials.Length != lastMaterialCount)
+        if (replaceTimer == 0.0f)
         {
-          replaceTextures(materials);
-          lastMaterialCount = materials.Length;
+          GC.Collect();
+          replaceTimer = -1.0f;
+        }
+        else
+        {
+          replaceTimer = Math.Max(0.0f, replaceTimer - Time.deltaTime);
         }
       }
     }
