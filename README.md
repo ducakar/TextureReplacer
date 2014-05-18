@@ -4,7 +4,7 @@ TextureReplacer
 ===============
 * [GitHub page](http://github.com/ducakar/TextureReplacer).
 * [Forum page](http://forum.kerbalspaceprogram.com/threads/60961).
-* [SpacePort page](http://kerbalspaceport.com/texturereplacer-0-21/).
+* [CurseForge page](http://kerbal.curseforge.com/plugins/220217-texturereplacer).
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
@@ -211,7 +211,10 @@ Known Issues
 
 Change Log
 ----------
-* 1.5.0
+* 1.5.1
+    - fixed unnecessary texture replacement passes on scene switches
+    - fixed default config for Lazor System and KSI MFDs compatibility
+* 1.5
     - textures are now (mostly) unloaded from RAM just before the main menu
     - added configuration option to prevent textures from being unloaded
     - changed compression and mipmap generation logic
@@ -232,7 +235,7 @@ Change Log
     - some improvements in log messages
     - fixed trilinear filter not being applied to personalised Kerbal textures
     - fixed texture clamp mode not being set for `Default/kerbalHead`
-* 1.4.0
+* 1.4
     - configuration files use `.cfg` extension again to avoid conflicts with ATM
     - all configuration files are merged, all options can now be in any file
     - re-added female-specific heads/suits functionality

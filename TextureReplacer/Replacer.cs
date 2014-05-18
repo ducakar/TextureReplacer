@@ -31,6 +31,8 @@ namespace TextureReplacer
     private static readonly string DIR_TEXTURES = Util.DIR + "Default/";
     // General texture replacements.
     private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
+    // Generic texture replacement parameters.
+    private int lastMaterialCount = 0;
     // General replacement has to be performed for more than one frame when a scene switch occurs
     // since textures and models may also be loaded with a timed lag.
     private float replaceTimer = -1.0f;
@@ -174,6 +176,8 @@ namespace TextureReplacer
 
     public void resetScene()
     {
+      lastMaterialCount = 0;
+
       if (HighLogic.LoadedScene == GameScenes.MAINMENU
           || HighLogic.LoadedScene == GameScenes.SPACECENTER)
       {
@@ -189,7 +193,12 @@ namespace TextureReplacer
     {
       if (replaceTimer >= 0.0f)
       {
-        replaceTextures((Material[]) Resources.FindObjectsOfTypeAll(typeof(Material)));
+        Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
+        if (materials.Length != lastMaterialCount)
+        {
+          replaceTextures(materials);
+          lastMaterialCount = materials.Length;
+        }
 
         if (replaceTimer == 0.0f)
         {
