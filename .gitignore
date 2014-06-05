@@ -3,6 +3,7 @@
 /TextureReplacer/obj
 /GameData/TextureReplacer/README.md
 *.dll
+*.tga
 *.png
 *.gif
 *.jpg

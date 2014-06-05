@@ -130,7 +130,7 @@ namespace TextureReplacer
     private static readonly string DIR_HEADS = Util.DIR + "Heads/";
     private static readonly string DIR_SUITS = Util.DIR + "Suits/";
     // Delay for IVA replacement (in seconds).
-    private static readonly float IVA_TIMER_DELAY = 0.1f;
+    private static readonly float IVA_TIMER_DELAY = 0.2f;
     // Kerbal textures.
     private Suit defaultSuit = new Suit() { name = "DEFAULT" };
     private List<Head> heads = new List<Head>();
@@ -261,7 +261,7 @@ namespace TextureReplacer
             {
               if (isAtmSuit)
               {
-                smr.sharedMesh = null;
+                smr.enabled = false;
               }
               else if (suit != null)
               {
@@ -274,7 +274,7 @@ namespace TextureReplacer
             {
               if (isAtmSuit)
               {
-                smr.sharedMesh = null;
+                smr.enabled = false;
               }
               else
               {
@@ -292,7 +292,7 @@ namespace TextureReplacer
             {
               if (isAtmSuit)
               {
-                smr.sharedMesh = null;
+                smr.enabled = false;
               }
               else if (suit != null)
               {
@@ -343,10 +343,10 @@ namespace TextureReplacer
             continue;
 
           double atmPressure = FlightGlobals.getStaticPressure();
-          // Workaround for a KSP bug that reports `FlightGlobals.getStaticPressure() == 1.0` and
-          // `vessel.staticPressure == 0.0` whenever a Kerbal leaves an external seat. But we don't
-          // need to personalise textures for Kerbals that leave a seat anyway.
-          if (atmPressure == 1.0 && vessel.staticPressure == 0.0)
+          // Workaround for a KSP bug that reports pressure the same as pressure on altitude 0
+          // whenever a Kerbal leaves an external seat. But we don't need to personalise textures
+          // for Kerbals that leave a seat anyway.
+          if (atmPressure == FlightGlobals.currentMainBody.atmosphereMultiplier)
             continue;
 
           bool isAtmSuit = isAtmSuitEnabled
@@ -651,14 +651,6 @@ namespace TextureReplacer
       GameEvents.onVesselChange.Add(delegate(Vessel v) {
         if (!v.isEVA)
           ivaReplaceTimer = IVA_TIMER_DELAY;
-      });
-
-      // Update IVA textures when a new Kerbal enters. This should be unnecessary but we do it just
-      // in case that some plugin (e.g. Crew Manifest) moves Kerbals across the vessel. Even when it
-      // is unnecessary it doesn't hurt performance since vessel switch occurs within the same
-      // frame, so both events trigger only one texture replacement pass.
-      GameEvents.onCrewBoardVessel.Add(delegate {
-        ivaReplaceTimer = IVA_TIMER_DELAY;
       });
 
       // Update IVA textures on docking.

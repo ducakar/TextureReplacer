@@ -121,16 +121,16 @@ Environment map cube texture for reflections is included with the plugin:
       EnvMap/NegativeZ  // fake skybox back face, vertically flipped
 
 Note that all textures must be quares and have the same dimensions that are
-powers of two. Cube map textures are slow, so keep them as low-res as possible.
+powers of two. Cube textures are slow, so keep them as low-res as possible.
 
 ### Personalised Kerbal Textures ###
-Head and suits are assigned either manually (custom Kerbals) or pseudo-randomly
+Heads and suits are assigned either manually (custom Kerbals) or pseudo-randomly
 (generic Kerbals). Pseudo-random assignment is based on a Kerbal's name, which
 ensures the same head/suit is always assigned to a given Kerbal.
 
-Head textures reside in `Heads/` directory and have arbitrary names. Normal maps
-are optional. To provide a normal map, name it the same as the head texture but
-add "NRM" suffix.
+Head textures reside inside `Heads/` directory and have arbitrary names. Normal
+maps are optional. To provide a normal map, name it the same as the head texture
+but add "NRM" suffix.
 
     GameData/TextureReplacer/
       Heads/<head>      // Head texture
@@ -157,8 +157,7 @@ For generic Kerbals, heads are selected independently form suits so any head can
 be paired with any of the suits and each head has an equal chance of being
 selected.
 
-One can manually assign heads and suits to specific Kerbals in the configuration
-file(s).
+See configuration file contents for how to configure head/suit assignment rules.
 
 ### Configuration File ###
 Main configuration file:
@@ -177,7 +176,7 @@ be overridden by subsequent configuration files).
 Notes
 -----
 * Use TGA for optimal quality of model textures as it is not compressed twice.
-* Try to keep widths and heights of all textures powers of two. Non-power-of-two
+* Try to keep dimensions of all textures powers of two. Non-power-of-two
   textures are not handled well in some cases and cannot be compressed.
 * KSP can only load TGAs with RGB or RGBA colours. Paletteised 256-colour TGAs
   cause corruptions in the game database!
@@ -195,22 +194,25 @@ Notes
 
 Known Issues
 ------------
-* If there is no IVA suit replacement the stock EVA suit texture is used for the
-  atmospheric EVAs. [Too complicated to fix. Just reload the scene to fix it.]
+* If there is no IVA suit replacement the default EVA suit texture is used for
+  the atmospheric EVAs. [Won't fix. Provide an IVA suit to fix it.]
 * If a Kerbal rides to space on a rover seat he/she ends up in orbit in his/her
-  IVA suit without a helmet. [Won't fix, it would be too complicated.]
+  IVA suit without a helmet. [Won't fix, it's too complicated. Just reload the
+  scene to repawn a Kerbal in his/her EVA suit.]
 * Replacement of textures from `GameData/` does not work for certain models.
   [No known fix.]
 * When using sfr mod, personalised IVA textures are not set in transparent pods
   of non-active vessels on scene load. [No fix yet. Textures will be updated as
   soon as you switch to the affected vessel.]
-* Kerbal personalisation does not work when transferred with Crew Manifest.
-  [Switch to Skip Manifest or wait for Crew Manifest to be fixed.]
-* Jetpack flags re-appear after dismounting a KerbalQuest jetpack. [No fix.]
+* Jetpack re-appears after dismounting a KerbalQuest jetpack. [No fix yet.]
 
 
 Change Log
 ----------
+* 1.5.2
+    - improved options for configuring texture unloading
+    - fixed spawning in IVA suit on Laythe and its orbit when leaving ext. seat
+    - removed ATM configuration, normal maps cannot be configured correctly
 * 1.5.1
     - fixed unnecessary texture replacement passes on scene switches
     - fixed default config for Lazor System and KSI MFDs compatibility
@@ -432,4 +434,4 @@ DEALINGS IN THE SOFTWARE.
 
 
 Environment map textures are distributed under the terms of CC BY-NC-SA 4.0
-licence and are based on skybox from Proot's Pimp My Kerbals texture pack.
+licence and are based on skybox from Proot's KSP Renaissance Compilation.

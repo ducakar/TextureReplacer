@@ -38,10 +38,11 @@ namespace TextureReplacer
     // List of substrings for paths where mipmap generating is enabled.
     private List<Regex> generateMipmaps = new List<Regex>();
     // List of substrings for paths where textures shouldn't be unloaded.
-    private List<Regex> keepReadable = new List<Regex>();
+    private List<Regex> keepLoaded = new List<Regex>();
     // Features.
     private bool? isCompressionEnabled = null;
-    private bool? isMipmapGenEnabled = true;
+    private bool? isMipmapGenEnabled = null;
+    private bool? isUnloadingEnabled = null;
     // Instance.
     public static Loader instance = null;
 
@@ -103,11 +104,24 @@ namespace TextureReplacer
           generateMipmaps.Add(new Regex(s));
       }
 
-      string sKeepReadable = rootNode.GetValue("keepReadable");
-      if (sKeepReadable != null)
+      string sIsUnloadingEnabled = rootNode.GetValue("isUnloadingEnabled");
+      if (sIsUnloadingEnabled != null)
       {
-        foreach (string s in Util.splitConfigValue(sKeepReadable))
-          keepReadable.Add(new Regex(s));
+        if (sIsUnloadingEnabled == "always")
+          isUnloadingEnabled = true;
+        else if (sIsUnloadingEnabled == "never")
+          isUnloadingEnabled = false;
+        else if (sIsUnloadingEnabled == "auto")
+          isUnloadingEnabled = null;
+        else
+          Util.log("Invalid value for isUnloadingEnabled: {0}", sIsUnloadingEnabled);
+      }
+
+      string sKeepLoaded = rootNode.GetValue("keepLoaded");
+      if (sKeepLoaded != null)
+      {
+        foreach (string s in Util.splitConfigValue(sKeepLoaded))
+          keepLoaded.Add(new Regex(s));
       }
     }
 
@@ -133,6 +147,11 @@ namespace TextureReplacer
           Util.log("Detected Active Texture Management, disabling mipmap generation.");
           isMipmapGenEnabled = false;
         }
+        if (isUnloadingEnabled == null)
+        {
+          Util.log("Detected Active Texture Management, disabling texture unloading.");
+          isUnloadingEnabled = false;
+        }
       }
       else
       {
@@ -140,6 +159,8 @@ namespace TextureReplacer
           isCompressionEnabled = true;
         if (isMipmapGenEnabled == null)
           isMipmapGenEnabled = true;
+        if (isUnloadingEnabled == null)
+          isUnloadingEnabled = true;
       }
     }
 
@@ -258,8 +279,8 @@ namespace TextureReplacer
         }
 
         // Unload texture from RAM (a.k.a. "make it unreadable") unless set otherwise.
-        if (!texture.name.StartsWith(Reflections.DIR_ENVMAP)
-            && !keepReadable.Any(r => r.IsMatch(texture.name)))
+        if (isUnloadingEnabled.Value && !texture.name.StartsWith(Reflections.DIR_ENVMAP)
+            && !keepLoaded.Any(r => r.IsMatch(texture.name)))
         {
           int size = textureSize(texture);
 
