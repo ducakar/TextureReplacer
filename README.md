@@ -12,6 +12,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
 * set cockpit-specific IVA suit,
+* remove IVA helmets in safe situations,
 * spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
 * add normal map for head texture,
 * add helmet visor texture,
@@ -209,6 +210,8 @@ Known Issues
 
 Change Log
 ----------
+* 1.5.10
+    - IVA helmets are removed is safe situations (landed/splashed, in orbit)
 * 1.5.2
     - improved options for configuring texture unloading
     - fixed spawning in IVA suit on Laythe and its orbit when leaving ext. seat

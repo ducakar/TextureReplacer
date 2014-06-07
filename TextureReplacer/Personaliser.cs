@@ -153,6 +153,10 @@ namespace TextureReplacer
     // conditions with stock IVA texture replacement that sets orange suits to Jeb, Bill and Bob and
     // grey suits to other Kerbals.
     private float ivaReplaceTimer = -1.0f;
+    // Helmet removal.
+    private Mesh helmetMesh = null;
+    private Mesh visorMesh = null;
+    private bool isHelmetRemovalEnabled = true;
     // An alternative, more expensive, IVA replacement method must be used for sfr pods.
     private bool isSfrDetected = false;
     // Instance.
@@ -245,9 +249,9 @@ namespace TextureReplacer
               }
 
               // This required to fix IVA suits after KSP resetting them to the stock ones all the
-              // time. If there is the default replacement for IVA suit texture and the current Kerbal
-              // skin contains no IVA suit, we must set it to the default replacement, otherwise the
-              // stock one will be used.
+              // time. If there is the default replacement for IVA suit texture and the current
+              // Kerbal skin contains no IVA suit, we must set it to the default replacement,
+              // otherwise the stock one will be used.
               if (!isEvaSuit)
               {
                 if (newTexture == null)
@@ -259,12 +263,15 @@ namespace TextureReplacer
             }
             case "helmet":
             {
-              if (isAtmSuit)
+              if (isEva && isAtmSuit)
               {
                 smr.enabled = false;
               }
               else if (suit != null)
               {
+                if (!isEva)
+                  smr.sharedMesh = isAtmSuit ? null : helmetMesh;
+
                 newTexture = isEva ? suit.evaHelmet : suit.helmet;
                 newNormalMap = suit.helmetNRM;
               }
@@ -272,12 +279,15 @@ namespace TextureReplacer
             }
             case "visor":
             {
-              if (isAtmSuit)
+              if (isEva && isAtmSuit)
               {
                 smr.enabled = false;
               }
               else
               {
+                if (!isEva)
+                  smr.sharedMesh = isAtmSuit ? null : visorMesh;
+
                 // Visor texture must be set every time, because the replacement on proto-IVA Kerbal
                 // doesn't seem to work.
                 Suit skin = suit ?? defaultSuit;
@@ -290,7 +300,7 @@ namespace TextureReplacer
             }
             default: // Jetpack.
             {
-              if (isAtmSuit)
+              if (isEva && isAtmSuit)
               {
                 smr.enabled = false;
               }
@@ -322,14 +332,20 @@ namespace TextureReplacer
       // when boarding an external seat.
       if (ivaReplaceTimer == 0.0f)
       {
+        Vessel vessel = FlightGlobals.ActiveVessel;
         Kerbal[] kerbals = isSfrDetected ? (Kerbal[]) Kerbal.FindObjectsOfType(typeof(Kerbal)) :
                            InternalSpace.Instance == null ? null :
                            InternalSpace.Instance.GetComponentsInChildren<Kerbal>();
 
-        if (kerbals != null)
+        if (vessel != null && kerbals != null)
         {
+          bool hideHelmets = isHelmetRemovalEnabled
+                             && vessel.situation != Vessel.Situations.FLYING
+                             && vessel.situation != Vessel.Situations.SUB_ORBITAL
+                             && vessel.situation != Vessel.Situations.PRELAUNCH;
+
           foreach (Kerbal kerbal in kerbals)
-            replaceKerbalSkin(kerbal, kerbal.protoCrewMember, kerbal.InPart, false);
+            replaceKerbalSkin(kerbal, kerbal.protoCrewMember, kerbal.InPart, hideHelmets);
         }
 
         ivaReplaceTimer = -1.0f;
@@ -381,6 +397,58 @@ namespace TextureReplacer
         // Prevent list capacity from growing too much.
         if (kerbalVessels.Capacity > 16)
           kerbalVessels.TrimExcess();
+      }
+    }
+
+    /**
+     * Update IVA textures on vessel switch or docking.
+     */
+    private void scheduleIVAUpdate(Vessel vessel)
+    {
+      if (!vessel.isEVA && vessel.vesselName != null)
+        ivaReplaceTimer = IVA_TIMER_DELAY;
+    }
+
+    /**
+     * Update EVA textures when a new Kerbal is created or when one comes into 2.3 km range.
+     */
+    private void scheduleEVAUpdate(Vessel vessel)
+    {
+      kerbalVessels.Add(vessel);
+    }
+
+    /**
+     * Enable/disable helmets in the current IVA space depending on situation.
+     */
+    private void updateHelmets(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> eventData)
+    {
+      Vessel vessel = FlightGlobals.ActiveVessel;
+
+      if (vessel == eventData.host && vessel != null)
+      {
+        Kerbal[] kerbals = InternalSpace.Instance == null ? null :
+                           InternalSpace.Instance.GetComponentsInChildren<Kerbal>();
+
+        bool hideHelmets = vessel.situation != Vessel.Situations.FLYING
+                           && vessel.situation != Vessel.Situations.SUB_ORBITAL
+                           && vessel.situation != Vessel.Situations.PRELAUNCH;
+
+        foreach (Kerbal kerbal in kerbals)
+        {
+          if (kerbal.showHelmet)
+          {
+            // Kerbal.ShowHelmet(false) irreversibly removes a helmet while Kerbal.ShowHelmet(true)
+            // has no effect at all. We need the following workaround.
+            foreach (SkinnedMeshRenderer smr
+                     in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+              if (smr.name == "helmet")
+                smr.sharedMesh = hideHelmets ? null : helmetMesh;
+              else if (smr.name == "visor")
+                smr.sharedMesh = hideHelmets ? null : visorMesh;
+            }
+          }
+        }
       }
     }
 
@@ -536,6 +604,10 @@ namespace TextureReplacer
       string sAtmSuitPressure = rootNode.GetValue("atmSuitPressure");
       if (sAtmSuitPressure != null)
         Double.TryParse(sAtmSuitPressure, out atmSuitPressure);
+
+      string sIsHelmetRemovalEnabled = rootNode.GetValue("isHelmetRemovalEnabled");
+      if (sIsHelmetRemovalEnabled != null)
+        Boolean.TryParse(sIsHelmetRemovalEnabled, out isHelmetRemovalEnabled);
     }
 
     /**
@@ -647,33 +719,42 @@ namespace TextureReplacer
       if (isSfrDetected)
         Util.log("Detected sfr mod, enabling alternative Kerbal IVA texture replacement");
 
-      // Update IVA textures on vessel switch.
-      GameEvents.onVesselChange.Add(delegate(Vessel v) {
-        if (!v.isEVA)
-          ivaReplaceTimer = IVA_TIMER_DELAY;
-      });
-
-      // Update IVA textures on docking.
-      GameEvents.onVesselWasModified.Add(delegate(Vessel v) {
-        if (v.vesselName != null)
-          ivaReplaceTimer = IVA_TIMER_DELAY;
-      });
-
-      // Update EVA textures when a new Kerbal is created.
-      GameEvents.onVesselCreate.Add(delegate(Vessel v) {
-        kerbalVessels.Add(v);
-      });
-
-      // Update EVA textures when a Kerbal comes into 2.4 km range.
-      GameEvents.onVesselLoaded.Add(delegate(Vessel v) {
-        kerbalVessels.Add(v);
-      });
+      // Save pointer to helmet & visor meshes so helmet removal can restore them.
+      foreach (SkinnedMeshRenderer smr
+               in Resources.FindObjectsOfTypeAll(typeof(SkinnedMeshRenderer)))
+      {
+        if (smr.name == "helmet")
+          helmetMesh = smr.sharedMesh;
+        else if (smr.name == "visor")
+          visorMesh = smr.sharedMesh;
+      }
     }
 
     public void resetScene()
     {
       ivaReplaceTimer = -1.0f;
       kerbalVessels.Clear();
+
+      if (HighLogic.LoadedSceneIsFlight)
+      {
+        GameEvents.onVesselChange.Add(scheduleIVAUpdate);
+        GameEvents.onVesselWasModified.Add(scheduleIVAUpdate);
+        GameEvents.onVesselCreate.Add(scheduleEVAUpdate);
+        GameEvents.onVesselLoaded.Add(scheduleEVAUpdate);
+
+        if (isHelmetRemovalEnabled)
+          GameEvents.onVesselSituationChange.Add(updateHelmets);
+      }
+      else
+      {
+        GameEvents.onVesselChange.Remove(scheduleIVAUpdate);
+        GameEvents.onVesselWasModified.Remove(scheduleIVAUpdate);
+        GameEvents.onVesselCreate.Remove(scheduleEVAUpdate);
+        GameEvents.onVesselLoaded.Remove(scheduleEVAUpdate);
+
+        if (isHelmetRemovalEnabled)
+          GameEvents.onVesselSituationChange.Remove(updateHelmets);
+      }
     }
 
     public void updateScene()
