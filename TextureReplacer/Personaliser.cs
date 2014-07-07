@@ -715,9 +715,10 @@ namespace TextureReplacer
       readKerbalsConfigs();
 
       // Check if the srf mod is present.
-      isSfrDetected = AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("sfrPartModules"));
+      isSfrDetected = AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("sfrPartModules")) || 
+                      AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("RasterPropMonitor")) ;
       if (isSfrDetected)
-        Util.log("Detected sfr mod, enabling alternative Kerbal IVA texture replacement");
+        Util.log("Detected sfr mod or RasterPropMonitor, enabling alternative Kerbal IVA texture replacement");
 
       // Save pointer to helmet & visor meshes so helmet removal can restore them.
       foreach (SkinnedMeshRenderer smr
