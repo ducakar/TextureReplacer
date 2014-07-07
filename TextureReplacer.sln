@@ -6,7 +6,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E639213F-418D-4B77-96C1-BB2EA653719D}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
-		TODO.md = TODO.md
 		GameData\TextureReplacer\%40Default.cfg = GameData\TextureReplacer\%40Default.cfg
 		GameData\TextureReplacer\Plugins\PluginData\TextureReplacer\Visor.shader = GameData\TextureReplacer\Plugins\PluginData\TextureReplacer\Visor.shader
 	EndProjectSection

@@ -157,18 +157,13 @@ namespace TextureReplacer
     private Mesh helmetMesh = null;
     private Mesh visorMesh = null;
     private bool isHelmetRemovalEnabled = true;
-    // An alternative, more expensive, IVA replacement method must be used for sfr pods.
-    private bool isSfrDetected = false;
     // Instance.
     public static Personaliser instance = null;
 
     /**
-     * Replace Kerbal textures.
-     *
-     * This is a helper method for `replaceKerbalSkins()`. It sets personalised or random textures
-     * for an IVA or an EVA Kerbal.
+     * Replace textures on a Kerbal model.
      */
-    private void replaceKerbalSkin(Component component, ProtoCrewMember kerbal, Part inPart,
+    private void personaliseKerbal(Component component, ProtoCrewMember kerbal, Part inPart,
                                    bool isAtmSuit)
     {
       Head head = null;
@@ -323,6 +318,65 @@ namespace TextureReplacer
     }
 
     /**
+     * Personalise Kerbals in an internal space.
+     */
+    private void personaliseIVA(InternalModel iva)
+    {
+      Kerbal[] kerbals = iva.GetComponentsInChildren<Kerbal>();
+      if (kerbals.Length != 0)
+      {
+        Vessel vessel = iva.vessel;
+        bool hideHelmets = isHelmetRemovalEnabled
+                           && vessel.situation != Vessel.Situations.FLYING
+                           && vessel.situation != Vessel.Situations.SUB_ORBITAL
+                           && vessel.situation != Vessel.Situations.PRELAUNCH;
+
+        foreach (Kerbal kerbal in kerbals)
+          personaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, hideHelmets);
+      }
+    }
+
+    /**
+     * Personalise Kerbal EVA model.
+     */
+    private void personaliseEVA(Vessel vessel)
+    {
+      double atmPressure = FlightGlobals.getStaticPressure();
+      // Workaround for a KSP bug that reports pressure the same as pressure on altitude 0 whenever
+      // a Kerbal leaves an external seat. But we don't need to personalise textures for Kerbals
+      // that leave a seat anyway.
+      if (atmPressure == FlightGlobals.currentMainBody.atmosphereMultiplier)
+        return;
+
+      bool isAtmSuit = isAtmSuitEnabled
+                       && atmPressure >= atmSuitPressure
+                       && FlightGlobals.currentMainBody.atmosphereContainsOxygen;
+
+      KerbalEVA eva = vessel.GetComponent<KerbalEVA>();
+      if (eva != null)
+      {
+        // Vessel is a Kerbal.
+        List<ProtoCrewMember> crew = vessel.rootPart.protoModuleCrew;
+        if (crew.Count != 0)
+          personaliseKerbal(eva, crew[0], null, isAtmSuit);
+      }
+      else
+      {
+        // Vessel is a ship. Update Kerbals on external seats.
+        foreach (Part part in vessel.parts)
+        {
+          KerbalSeat seat = part.GetComponent<KerbalSeat>();
+          if (seat == null || seat.Occupant == null)
+            continue;
+
+          List<ProtoCrewMember> crew = seat.Occupant.protoModuleCrew;
+          if (crew.Count != 0)
+            personaliseKerbal(seat.Occupant, crew[0], null, isAtmSuit);
+        }
+      }
+    }
+
+    /**
      * Set custom and random Kerbals' textures.
      */
     private void replaceKerbalSkins()
@@ -332,21 +386,8 @@ namespace TextureReplacer
       // when boarding an external seat.
       if (ivaReplaceTimer == 0.0f)
       {
-        Vessel vessel = FlightGlobals.ActiveVessel;
-        Kerbal[] kerbals = isSfrDetected ? (Kerbal[]) Kerbal.FindObjectsOfType(typeof(Kerbal)) :
-                           InternalSpace.Instance == null ? null :
-                           InternalSpace.Instance.GetComponentsInChildren<Kerbal>();
-
-        if (vessel != null && kerbals != null)
-        {
-          bool hideHelmets = isHelmetRemovalEnabled
-                             && vessel.situation != Vessel.Situations.FLYING
-                             && vessel.situation != Vessel.Situations.SUB_ORBITAL
-                             && vessel.situation != Vessel.Situations.PRELAUNCH;
-
-          foreach (Kerbal kerbal in kerbals)
-            replaceKerbalSkin(kerbal, kerbal.protoCrewMember, kerbal.InPart, hideHelmets);
-        }
+        foreach (InternalModel iva in InternalModel.FindObjectsOfType(typeof(InternalModel)))
+          personaliseIVA(iva);
 
         ivaReplaceTimer = -1.0f;
       }
@@ -358,39 +399,7 @@ namespace TextureReplacer
           if (vessel == null || !vessel.loaded || vessel.vesselName == null)
             continue;
 
-          double atmPressure = FlightGlobals.getStaticPressure();
-          // Workaround for a KSP bug that reports pressure the same as pressure on altitude 0
-          // whenever a Kerbal leaves an external seat. But we don't need to personalise textures
-          // for Kerbals that leave a seat anyway.
-          if (atmPressure == FlightGlobals.currentMainBody.atmosphereMultiplier)
-            continue;
-
-          bool isAtmSuit = isAtmSuitEnabled
-                           && atmPressure >= atmSuitPressure
-                           && FlightGlobals.currentMainBody.atmosphereContainsOxygen;
-
-          KerbalEVA eva = vessel.GetComponent<KerbalEVA>();
-          if (eva != null)
-          {
-            // Vessel is a Kerbal.
-            List<ProtoCrewMember> crew = vessel.rootPart.protoModuleCrew;
-            if (crew.Count != 0)
-              replaceKerbalSkin(eva, crew[0], null, isAtmSuit);
-          }
-          else
-          {
-            // Vessel is a ship. Update Kerbals on external seats.
-            foreach (Part part in vessel.parts)
-            {
-              KerbalSeat seat = part.GetComponent<KerbalSeat>();
-              if (seat == null || seat.Occupant == null)
-                continue;
-
-              List<ProtoCrewMember> crew = seat.Occupant.protoModuleCrew;
-              if (crew.Count != 0)
-                replaceKerbalSkin(seat.Occupant, crew[0], null, isAtmSuit);
-            }
-          }
+          personaliseEVA(vessel);
         }
 
         kerbalVessels.Clear();
@@ -405,7 +414,7 @@ namespace TextureReplacer
      */
     private void scheduleIVAUpdate(Vessel vessel)
     {
-      if (!vessel.isEVA && vessel.vesselName != null)
+      if (vessel.vesselName != null)
         ivaReplaceTimer = IVA_TIMER_DELAY;
     }
 
@@ -713,11 +722,6 @@ namespace TextureReplacer
       }
 
       readKerbalsConfigs();
-
-      // Check if the srf mod is present.
-      isSfrDetected = AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("sfrPartModules"));
-      if (isSfrDetected)
-        Util.log("Detected sfr mod, enabling alternative Kerbal IVA texture replacement");
 
       // Save pointer to helmet & visor meshes so helmet removal can restore them.
       foreach (SkinnedMeshRenderer smr

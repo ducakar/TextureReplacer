@@ -269,19 +269,19 @@ namespace TextureReplacer
         if (texture == null)
           continue;
 
-        try
-        {
-          texture.GetPixel(0, 0);
-        }
-        catch (UnityException)
-        {
-          continue;
-        }
-
         // Unload texture from RAM (a.k.a. "make it unreadable") unless set otherwise.
         if (isUnloadingEnabled.Value && !texture.name.StartsWith(Reflections.DIR_ENVMAP)
             && !keepLoaded.Any(r => r.IsMatch(texture.name)))
         {
+          try
+          {
+            texture.GetPixel(0, 0);
+          }
+          catch (UnityException)
+          {
+            continue;
+          }
+
           int size = textureSize(texture);
 
           texture.Apply(false, true);

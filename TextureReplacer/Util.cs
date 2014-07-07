@@ -28,7 +28,7 @@ namespace TextureReplacer
 {
   internal class Util
   {
-    private static readonly char[] CONFIG_DELIMITERS = { ' ', ',' };
+    private static readonly char[] CONFIG_DELIMITERS = { ' ', '\t', ',' };
     public static readonly string DIR = typeof(Util).Namespace + "/";
 
     /**
@@ -55,5 +55,18 @@ namespace TextureReplacer
       Type callerClass = new StackTrace(1, false).GetFrame(0).GetMethod().DeclaringType;
       UnityEngine.Debug.Log("[TR." + callerClass.Name + "] " + String.Format(s, args));
     }
+    #if false
+    public static void logUpHierarchy(Transform tf)
+    {
+      for (; tf != null; tf = tf.parent)
+      {
+        if (tf.gameObject != null)
+          UnityEngine.Debug.Log("- " + tf.gameObject.name + ": " + tf.gameObject.GetType());
+
+        foreach (Component c in tf.GetComponents<Component>())
+          UnityEngine.Debug.Log(" + " + c.name + ": " + c.GetType());
+      }
+    }
+    #endif
   }
 }

@@ -210,8 +210,12 @@ Known Issues
 
 Change Log
 ----------
+* 1.6
+    - changed the way how internal spaces are treated, it should now work fine
+      with transparent pods using JSITransparentPod and sfr mods
+    - tab characters can be used as list separators in configuration files
 * 1.5.10
-    - IVA helmets are removed is safe situations (landed/splashed, in orbit)
+    - IVA helmets are removed in safe situations (landed/splashed, in orbit)
 * 1.5.2
     - improved options for configuring texture unloading
     - fixed spawning in IVA suit on Laythe and its orbit when leaving ext. seat
