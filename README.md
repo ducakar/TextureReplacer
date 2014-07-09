@@ -202,9 +202,6 @@ Known Issues
   scene to repawn a Kerbal in his/her EVA suit.]
 * Replacement of textures from `GameData/` does not work for certain models.
   [No known fix.]
-* When using sfr mod, personalised IVA textures are not set in transparent pods
-  of non-active vessels on scene load. [No fix yet. Textures will be updated as
-  soon as you switch to the affected vessel.]
 * Jetpack re-appears after dismounting a KerbalQuest jetpack. [No fix yet.]
 
 
@@ -213,6 +210,7 @@ Change Log
 * 1.6
     - changed the way how internal spaces are treated, it should now work fine
       with transparent pods using JSITransparentPod and sfr mods
+    - helmets are also removed in pre-launch to handle rovers & stuff correctly
     - tab characters can be used as list separators in configuration files
 * 1.5.10
     - IVA helmets are removed in safe situations (landed/splashed, in orbit)
@@ -419,6 +417,8 @@ Change Log
 
 Licence
 -------
+Plugin code and binaries are distributed under the following licence:
+
 Copyright © 2013-2014 Davorin Učakar, Ryan Bray
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -440,5 +440,5 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 
-Environment map textures are distributed under the terms of CC BY-NC-SA 4.0
-licence and are based on skybox from Proot's KSP Renaissance Compilation.
+Environment map textures are based on skybox from Proot's KSP Renaissance
+Compilation and are distributed under the terms of CC BY-NC-SA 4.0 licence.
