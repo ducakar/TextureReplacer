@@ -207,6 +207,8 @@ Known Issues
 
 Change Log
 ----------
+* 1.6.1
+    - rebuilt for KSP 0.24
 * 1.6
     - changed the way how internal spaces are treated, it should now work fine
       with transparent pods using JSITransparentPod and sfr mods
