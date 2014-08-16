@@ -22,11 +22,10 @@
 
 using System;
 using System.Diagnostics;
-using UnityEngine;
 
 namespace TextureReplacer
 {
-  internal class Util
+  internal static class Util
   {
     private static readonly char[] CONFIG_DELIMITERS = { ' ', '\t', ',' };
     public static readonly string DIR = typeof(Util).Namespace + "/";

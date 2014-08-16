@@ -18,8 +18,9 @@ stock textures and customise your Kerbals. More specifically, it can:
 * add helmet visor texture,
 * enable (fake) visor reflection,
 * generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
-* compress uncompressed textures from `GameData/` and reduce RAM usage and
-* change bilinear texture filter to trilinear to improve mipmap quality.
+* compress uncompressed textures from `GameData/` and reduce RAM usage,
+* change bilinear texture filter to trilinear to improve mipmap quality and
+* unloads textures from RAM after KSP finishes loading.
 
 Special thanks to:
 * rbray89 who contributed a reflective visor shader and for Active Texture
@@ -207,6 +208,9 @@ Known Issues
 
 Change Log
 ----------
+* 1.6.2
+    - fixed merging of duplicated nodes in configuration files
+    - fixed `@Default.cfg` to be up-to-date with other mods
 * 1.6.1
     - rebuilt for KSP 0.24
 * 1.6

@@ -50,7 +50,7 @@ namespace TextureReplacer
         if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp"))
           continue;
 
-        Texture2D newTexture = null;
+        Texture2D newTexture;
         mappedTextures.TryGetValue(texture.name, out newTexture);
 
         if (newTexture != null)
@@ -75,7 +75,7 @@ namespace TextureReplacer
         if (normalMap == null)
           continue;
 
-        Texture2D newNormalMap = null;
+        Texture2D newNormalMap;
         mappedTextures.TryGetValue(normalMap.name, out newNormalMap);
 
         if (newNormalMap != null)
@@ -94,13 +94,6 @@ namespace TextureReplacer
           normalMap.filterMode = FilterMode.Trilinear;
         }
       }
-    }
-
-    /**
-     * Read configuration and perform pre-load initialisation.
-     */
-    public void readConfig(ConfigNode rootNode)
-    {
     }
 
     /**

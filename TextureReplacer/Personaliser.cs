@@ -64,64 +64,40 @@ namespace TextureReplacer
         switch (originalName)
         {
           case "kerbalMainGrey":
-          {
             suit = texture;
             return true;
-          }
           case "kerbalMainNRM":
-          {
             suitNRM = texture;
             return true;
-          }
           case "kerbalHelmetGrey":
-          {
             helmet = texture;
             return true;
-          }
           case "kerbalHelmetNRM":
-          {
             helmetNRM = texture;
             return true;
-          }
           case "kerbalVisor":
-          {
             visor = texture;
             return true;
-          }
           case "EVAtexture":
-          {
             evaSuit = texture;
             return true;
-          }
           case "EVAtextureNRM":
-          {
             evaSuitNRM = texture;
             return true;
-          }
           case "EVAhelmet":
-          {
             evaHelmet = texture;
             return true;
-          }
           case "EVAvisor":
-          {
             evaVisor = texture;
             return true;
-          }
           case "EVAjetpack":
-          {
             evaJetpack = texture;
             return true;
-          }
           case "EVAjetpackNRM":
-          {
             evaJetpackNRM = texture;
             return true;
-          }
           default:
-          {
             return false;
-          }
         }
       }
     }
@@ -135,7 +111,7 @@ namespace TextureReplacer
     private Suit defaultSuit = new Suit() { name = "DEFAULT" };
     private List<Head> heads = new List<Head>();
     private List<Suit> suits = new List<Suit>();
-    private List<Suit> femaleSuits = new List<Suit>();
+    private List<Suit> kerminSuits = new List<Suit>();
     // Personalised Kerbal textures.
     private Dictionary<string, Head> customHeads = new Dictionary<string, Head>();
     private Dictionary<string, Suit> customSuits = new Dictionary<string, Suit>();
@@ -173,8 +149,8 @@ namespace TextureReplacer
     private void personaliseKerbal(Component component, ProtoCrewMember kerbal, Part inPart,
                                    bool isAtmSuit)
     {
-      Head head = null;
-      Suit suit = null;
+      Head head;
+      Suit suit;
 
       if (!customHeads.TryGetValue(kerbal.name, out head) && heads.Count != 0)
       {
@@ -185,8 +161,8 @@ namespace TextureReplacer
       }
 
       bool isEva = inPart == null;
-      bool isFemale = head == null ? false : head.isFemale;
-      List<Suit> genderSuits = isFemale ? femaleSuits : suits;
+      bool isFemale = head != null && head.isFemale;
+      List<Suit> genderSuits = isFemale ? kerminSuits : suits;
 
       if ((isEva || !cabinSuits.TryGetValue(inPart.partInfo.name, out suit))
           && !customSuits.TryGetValue(kerbal.name, out suit) && genderSuits.Count != 0)
@@ -222,26 +198,23 @@ namespace TextureReplacer
             case "eyeballRight":
             case "pupilLeft":
             case "pupilRight":
-            {
               if (head != null && head.isEyeless)
                 smr.sharedMesh = null;
 
               break;
-            }
+
             case "headMesh01":
             case "upTeeth01":
             case "upTeeth02":
             case "tongue":
-            {
               if (head != null)
               {
                 newTexture = head.head;
                 newNormalMap = head.headNRM;
               }
               break;
-            }
+
             case "body01":
-            {
               bool isEvaSuit = isEva && !isAtmSuit;
 
               if (suit != null)
@@ -262,9 +235,8 @@ namespace TextureReplacer
                   newNormalMap = defaultSuit.suitNRM;
               }
               break;
-            }
+
             case "helmet":
-            {
               if (isEva && isAtmSuit)
               {
                 smr.enabled = false;
@@ -278,9 +250,8 @@ namespace TextureReplacer
                 newNormalMap = suit.helmetNRM;
               }
               break;
-            }
+
             case "visor":
-            {
               if (isEva && isAtmSuit)
               {
                 smr.enabled = false;
@@ -299,9 +270,8 @@ namespace TextureReplacer
                   material.color = Color.white;
               }
               break;
-            }
+
             default: // Jetpack.
-            {
               if (isEva && isAtmSuit)
               {
                 smr.enabled = false;
@@ -312,7 +282,6 @@ namespace TextureReplacer
                 newNormalMap = suit.evaJetpackNRM;
               }
               break;
-            }
           }
 
           if (newTexture != null && newTexture != material.mainTexture)
@@ -572,24 +541,19 @@ namespace TextureReplacer
         ConfigNode genericNode = file.config.GetNode("GenericKerbals");
         if (genericNode != null)
         {
-          string sExcludedHeads = genericNode.GetValue("excludedHeads");
-          if (sExcludedHeads != null)
+          foreach (string sExcludedHeads in genericNode.GetValues("excludedHeads"))
             excludedHeads.AddRange(Util.splitConfigValue(sExcludedHeads));
 
-          string sExcludedSuits = genericNode.GetValue("excludedSuits");
-          if (sExcludedSuits != null)
+          foreach (string sExcludedSuits in genericNode.GetValues("excludedSuits"))
             excludedSuits.AddRange(Util.splitConfigValue(sExcludedSuits));
 
-          string sFemaleHeads = genericNode.GetValue("femaleHeads");
-          if (sFemaleHeads != null)
+          foreach (string sFemaleHeads in genericNode.GetValues("femaleHeads"))
             femaleHeads.AddRange(Util.splitConfigValue(sFemaleHeads));
 
-          string sFemaleSuits = genericNode.GetValue("femaleSuits");
-          if (sFemaleSuits != null)
+          foreach (string sFemaleSuits in genericNode.GetValues("femaleSuits"))
             femaleSuits.AddRange(Util.splitConfigValue(sFemaleSuits));
 
-          string sEyelessHeads = genericNode.GetValue("eyelessHeads");
-          if (sEyelessHeads != null)
+          foreach (string sEyelessHeads in genericNode.GetValues("eyelessHeads"))
             eyelessHeads.AddRange(Util.splitConfigValue(sEyelessHeads));
 
           string sSuitAssignment = genericNode.GetValue("suitAssignment");
@@ -634,8 +598,8 @@ namespace TextureReplacer
       suits.RemoveAll(s => excludedSuits.Contains(s.name));
 
       // Create female suits list.
-      this.femaleSuits.AddRange(suits.Where(s => femaleSuits.Contains(s.name)));
-      this.suits.RemoveAll(s => femaleSuits.Contains(s.name));
+      kerminSuits.AddRange(suits.Where(s => femaleSuits.Contains(s.name)));
+      suits.RemoveAll(s => femaleSuits.Contains(s.name));
     }
 
     /**
@@ -707,7 +671,6 @@ namespace TextureReplacer
           texture.wrapMode = TextureWrapMode.Clamp;
 
           int lastSlash = texture.name.LastIndexOf('/');
-          int index = suits.Count;
           int dirNameLength = lastSlash - DIR_SUITS.Length;
           string originalName = texture.name.Substring(lastSlash + 1);
 
@@ -719,19 +682,19 @@ namespace TextureReplacer
           {
             string dirName = texture.name.Substring(DIR_SUITS.Length, dirNameLength);
 
-            Suit suit = null;
+            Suit suit;
             if (suitDirs.ContainsKey(dirName))
             {
-              index = suitDirs[dirName];
+              int index = suitDirs[dirName];
               suit = suits[index];
             }
             else
             {
-              suitDirs.Add(dirName, index);
-
-              index = suits.Count;
-              suit = new Suit() { name = dirName };
+              int index = suits.Count;
+              suit = new Suit { name = dirName };
               suits.Add(suit);
+
+              suitDirs.Add(dirName, index);
             }
 
             if (suit.setTexture(originalName, texture))

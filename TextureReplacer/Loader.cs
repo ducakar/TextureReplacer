@@ -21,11 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.IO;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -74,31 +72,44 @@ namespace TextureReplacer
       string sIsCompressionEnabled = rootNode.GetValue("isCompressionEnabled");
       if (sIsCompressionEnabled != null)
       {
-        if (sIsCompressionEnabled == "always")
-          isCompressionEnabled = true;
-        else if (sIsCompressionEnabled == "never")
-          isCompressionEnabled = false;
-        else if (sIsCompressionEnabled == "auto")
-          isCompressionEnabled = null;
-        else
-          Util.log("Invalid value for isCompressionEnabled: {0}", sIsCompressionEnabled);
+        switch (sIsCompressionEnabled)
+        {
+          case "always":
+            isCompressionEnabled = true;
+            break;
+          case "never":
+            isCompressionEnabled = false;
+            break;
+          case "auto":
+            isCompressionEnabled = null;
+            break;
+          default:
+            Util.log("Invalid value for isCompressionEnabled: {0}", sIsCompressionEnabled);
+            break;
+        }
       }
 
       string sIsMipmapGenEnabled = rootNode.GetValue("isMipmapGenEnabled");
       if (sIsMipmapGenEnabled != null)
       {
-        if (sIsMipmapGenEnabled == "always")
-          isMipmapGenEnabled = true;
-        else if (sIsMipmapGenEnabled == "never")
-          isMipmapGenEnabled = false;
-        else if (sIsMipmapGenEnabled == "auto")
-          isMipmapGenEnabled = null;
-        else
-          Util.log("Invalid value for isMipmapGenEnabled: {0}", sIsMipmapGenEnabled);
+        switch (sIsMipmapGenEnabled)
+        {
+          case "always":
+            isMipmapGenEnabled = true;
+            break;
+          case "never":
+            isMipmapGenEnabled = false;
+            break;
+          case "auto":
+            isMipmapGenEnabled = null;
+            break;
+          default:
+            Util.log("Invalid value for isMipmapGenEnabled: {0}", sIsMipmapGenEnabled);
+            break;
+        }
       }
 
-      string sGenerateMipmaps = rootNode.GetValue("generateMipmaps");
-      if (sGenerateMipmaps != null)
+      foreach (string sGenerateMipmaps in rootNode.GetValues("generateMipmaps"))
       {
         foreach (string s in Util.splitConfigValue(sGenerateMipmaps))
           generateMipmaps.Add(new Regex(s));
@@ -107,18 +118,24 @@ namespace TextureReplacer
       string sIsUnloadingEnabled = rootNode.GetValue("isUnloadingEnabled");
       if (sIsUnloadingEnabled != null)
       {
-        if (sIsUnloadingEnabled == "always")
-          isUnloadingEnabled = true;
-        else if (sIsUnloadingEnabled == "never")
-          isUnloadingEnabled = false;
-        else if (sIsUnloadingEnabled == "auto")
-          isUnloadingEnabled = null;
-        else
-          Util.log("Invalid value for isUnloadingEnabled: {0}", sIsUnloadingEnabled);
+        switch (sIsUnloadingEnabled)
+        {
+          case "always":
+            isUnloadingEnabled = true;
+            break;
+          case "never":
+            isUnloadingEnabled = false;
+            break;
+          case "auto":
+            isUnloadingEnabled = null;
+            break;
+          default:
+            Util.log("Invalid value for isUnloadingEnabled: {0}", sIsUnloadingEnabled);
+            break;
+        }
       }
 
-      string sKeepLoaded = rootNode.GetValue("keepLoaded");
-      if (sKeepLoaded != null)
+      foreach (string sKeepLoaded in rootNode.GetValues("keepLoaded"))
       {
         foreach (string s in Util.splitConfigValue(sKeepLoaded))
           keepLoaded.Add(new Regex(s));
