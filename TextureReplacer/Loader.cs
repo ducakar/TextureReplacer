@@ -28,19 +28,19 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  internal class Loader
+  class Loader
   {
     // Texture compression and mipmap generation parameters.
-    private int lastTextureCount = 0;
-    private int memorySpared = 0;
+    int lastTextureCount = 0;
+    int memorySpared = 0;
     // List of substrings for paths where mipmap generating is enabled.
-    private List<Regex> generateMipmaps = new List<Regex>();
+    readonly List<Regex> generateMipmaps = new List<Regex>();
     // List of substrings for paths where textures shouldn't be unloaded.
-    private List<Regex> keepLoaded = new List<Regex>();
+    readonly List<Regex> keepLoaded = new List<Regex>();
     // Features.
-    private bool? isCompressionEnabled = null;
-    private bool? isMipmapGenEnabled = null;
-    private bool? isUnloadingEnabled = null;
+    bool? isCompressionEnabled = null;
+    bool? isMipmapGenEnabled = null;
+    bool? isUnloadingEnabled = null;
     // Instance.
     public static Loader instance = null;
 
@@ -50,7 +50,7 @@ namespace TextureReplacer
      * This is only a rough estimate. It doesn't bother with details like the padding bytes or exact
      * mipmap size calculation.
      */
-    private static int textureSize(Texture2D texture)
+    static int textureSize(Texture2D texture)
     {
       int nPixels = texture.width * texture.height;
       int size = texture.format == TextureFormat.DXT1 ? nPixels * 4 / 6 :
@@ -309,6 +309,11 @@ namespace TextureReplacer
           Util.log("Unloaded {0}", texture.name);
         }
       }
+
+      generateMipmaps.Clear();
+      generateMipmaps.TrimExcess();
+      keepLoaded.Clear();
+      keepLoaded.TrimExcess();
 
       if (memorySpared > 0)
       {

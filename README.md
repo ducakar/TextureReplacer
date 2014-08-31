@@ -208,7 +208,8 @@ Known Issues
 
 Change Log
 ----------
-* 1.6.2
+* 1.7
+    - gender is determined form name
     - fixed merging of duplicated nodes in configuration files
     - fixed `@Default.cfg` to be up-to-date with other mods
 * 1.6.1

@@ -29,8 +29,8 @@ namespace TextureReplacer
   public class TextureReplacer : MonoBehaviour
   {
     // Generic texture replacement parameters.
-    private GameScenes lastScene = GameScenes.LOADING;
-    private bool isInitialised = false;
+    GameScenes lastScene = GameScenes.LOADING;
+    bool isInitialised = false;
 
     public void Start()
     {

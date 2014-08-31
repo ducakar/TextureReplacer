@@ -26,23 +26,23 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  internal class Replacer
+  class Replacer
   {
-    private static readonly string DIR_TEXTURES = Util.DIR + "Default/";
+    static readonly string DIR_TEXTURES = Util.DIR + "Default/";
     // General texture replacements.
-    private Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
+    readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
     // Generic texture replacement parameters.
-    private int lastMaterialCount = 0;
+    int lastMaterialCount = 0;
     // General replacement has to be performed for more than one frame when a scene switch occurs
     // since textures and models may also be loaded with a timed lag.
-    private float replaceTimer = -1.0f;
+    float replaceTimer = -1.0f;
     // Instance.
     public static Replacer instance = null;
 
     /**
      * General texture replacement step.
      */
-    private void replaceTextures(Material[] materials)
+    void replaceTextures(Material[] materials)
     {
       foreach (Material material in materials)
       {
@@ -186,7 +186,7 @@ namespace TextureReplacer
     {
       if (replaceTimer >= 0.0f)
       {
-        Material[] materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
+        var materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
         if (materials.Length != lastMaterialCount)
         {
           replaceTextures(materials);

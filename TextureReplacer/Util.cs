@@ -25,9 +25,9 @@ using System.Diagnostics;
 
 namespace TextureReplacer
 {
-  internal static class Util
+  static class Util
   {
-    private static readonly char[] CONFIG_DELIMITERS = { ' ', '\t', ',' };
+    static readonly char[] CONFIG_DELIMITERS = { ' ', '\t', ',' };
     public static readonly string DIR = typeof(Util).Namespace + "/";
 
     /**

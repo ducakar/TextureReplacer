@@ -23,19 +23,20 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace TextureReplacer
 {
-  internal class Personaliser
+  class Personaliser
   {
-    private enum SuitAssignment
+    enum SuitAssignment
     {
       RANDOM,
       CONSECUTIVE
     }
 
-    private class Head
+    class Head
     {
       public string name;
       public bool isFemale;
@@ -44,7 +45,7 @@ namespace TextureReplacer
       public Texture2D headNRM;
     }
 
-    private class Suit
+    class Suit
     {
       public string name;
       public Texture2D suit;
@@ -102,69 +103,75 @@ namespace TextureReplacer
       }
     }
 
-    private static readonly string DIR_DEFAULT = Util.DIR + "Default/";
-    private static readonly string DIR_HEADS = Util.DIR + "Heads/";
-    private static readonly string DIR_SUITS = Util.DIR + "Suits/";
+    static readonly string DIR_DEFAULT = Util.DIR + "Default/";
+    static readonly string DIR_HEADS = Util.DIR + "Heads/";
+    static readonly string DIR_SUITS = Util.DIR + "Suits/";
     // Delay for IVA replacement (in seconds).
-    private static readonly float IVA_TIMER_DELAY = 0.2f;
+    static readonly float IVA_TIMER_DELAY = 0.2f;
     // Kerbal textures.
-    private Suit defaultSuit = new Suit() { name = "DEFAULT" };
-    private List<Head> heads = new List<Head>();
-    private List<Suit> suits = new List<Suit>();
-    private List<Suit> kerminSuits = new List<Suit>();
+    readonly Suit defaultSuit = new Suit { name = "DEFAULT" };
+    readonly List<Head> heads = new List<Head>();
+    readonly List<Suit> suits = new List<Suit>();
+    readonly List<Head> kerminHeads = new List<Head>();
+    readonly List<Suit> kerminSuits = new List<Suit>();
+    // Female name REs.
+    readonly List<Regex> kerminNames = new List<Regex>();
     // Personalised Kerbal textures.
-    private Dictionary<string, Head> customHeads = new Dictionary<string, Head>();
-    private Dictionary<string, Suit> customSuits = new Dictionary<string, Suit>();
+    readonly Dictionary<string, Head> customHeads = new Dictionary<string, Head>();
+    readonly Dictionary<string, Suit> customSuits = new Dictionary<string, Suit>();
     // Cabin-specific suits.
-    private Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
+    readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
     // Atmospheric IVA suit parameters.
-    private bool isAtmSuitEnabled = true;
-    private double atmSuitPressure = 0.5;
+    bool isAtmSuitEnabled = true;
+    double atmSuitPressure = 0.5;
     // Whether assignment of suits should be consecutive.
-    private SuitAssignment suitAssignment = SuitAssignment.RANDOM;
+    SuitAssignment suitAssignment = SuitAssignment.RANDOM;
     // Update counter for IVA replacement. It has to scheduled with a little lag to avoid race
     // conditions with stock IVA texture replacement that sets orange suits to Jeb, Bill and Bob and
     // grey suits to other Kerbals.
-    private float ivaReplaceTimer = -1.0f;
+    float ivaReplaceTimer = -1.0f;
     // For transparent pods, previous vessel IVA has to be updated too on vessel switching since
     // textures are reset to stock on switch.
-    private Vessel previousVessel = null;
+    Vessel previousVessel = null;
     // List of vessels where IVA textures have to be updated. In stock game it suffices to only
     // perform this on the current vessel but not so if one uses transparent pods (JSITransparentPod
     // or sfr modules).
-    private List<Vessel> ivaVessels = new List<Vessel>();
+    readonly List<Vessel> ivaVessels = new List<Vessel>();
     // List of vessels for which Kerbal EVA has to be updated (either vessel is an EVA or has an EVA
     // on an external seat).
-    private List<Vessel> evaVessels = new List<Vessel>();
+    readonly List<Vessel> evaVessels = new List<Vessel>();
     // Helmet removal.
-    private Mesh helmetMesh = null;
-    private Mesh visorMesh = null;
-    private bool isHelmetRemovalEnabled = true;
+    Mesh helmetMesh = null;
+    Mesh visorMesh = null;
+    bool isHelmetRemovalEnabled = true;
     // Instance.
     public static Personaliser instance = null;
 
     /**
      * Replace textures on a Kerbal model.
      */
-    private void personaliseKerbal(Component component, ProtoCrewMember kerbal, Part inPart,
-                                   bool isAtmSuit)
+    void personaliseKerbal(Component component, ProtoCrewMember kerbal, Part cabin, bool isAtmSuit)
     {
+      int spaceIndex = kerbal.name.IndexOf(' ');
+      string name = spaceIndex > 0 ? kerbal.name.Substring(0, spaceIndex) : kerbal.name;
+
+      bool isFemale = kerminNames.Any(r => r.IsMatch(name));
+      bool isEva = cabin == null;
+
+      List<Head> genderHeads = isFemale && kerminHeads.Count != 0 ? kerminHeads : heads;
+      List<Suit> genderSuits = isFemale && kerminSuits.Count != 0 ? kerminSuits : suits;
+
       Head head;
       Suit suit;
 
-      if (!customHeads.TryGetValue(kerbal.name, out head) && heads.Count != 0)
+      if (!customHeads.TryGetValue(kerbal.name, out head) && genderHeads.Count != 0)
       {
         // Hash is multiplied with a large prime to increase randomisation, since hashes returned by
         // `GetHashCode()` are close together if strings only differ in the last (few) char(s).
-        int index = ((kerbal.name.GetHashCode() * 4099) & 0x7fffffff) % heads.Count;
-        head = heads[index];
+        int index = ((kerbal.name.GetHashCode() * 4099) & 0x7fffffff) % genderHeads.Count;
+        head = genderHeads[index];
       }
-
-      bool isEva = inPart == null;
-      bool isFemale = head != null && head.isFemale;
-      List<Suit> genderSuits = isFemale ? kerminSuits : suits;
-
-      if ((isEva || !cabinSuits.TryGetValue(inPart.partInfo.name, out suit))
+      if ((isEva || !cabinSuits.TryGetValue(cabin.partInfo.name, out suit))
           && !customSuits.TryGetValue(kerbal.name, out suit) && genderSuits.Count != 0)
       {
         // Here we must use a different prime to increase randomisation so that the same head is
@@ -178,7 +185,7 @@ namespace TextureReplacer
 
       foreach (Renderer renderer in component.GetComponentsInChildren<Renderer>())
       {
-        SkinnedMeshRenderer smr = renderer as SkinnedMeshRenderer;
+        var smr = renderer as SkinnedMeshRenderer;
 
         // Thruster jets, flag decals and headlight flares.
         if (smr == null)
@@ -296,7 +303,7 @@ namespace TextureReplacer
     /**
      * Personalise Kerbals in internal spaces.
      */
-    private void personaliseIVA(Vessel vessel)
+    void personaliseIVA(Vessel vessel)
     {
       foreach (Part part in vessel.parts)
       {
@@ -319,7 +326,7 @@ namespace TextureReplacer
     /**
      * Personalise Kerbal EVA model.
      */
-    private void personaliseEVA(Vessel vessel)
+    void personaliseEVA(Vessel vessel)
     {
       double atmPressure = FlightGlobals.getStaticPressure();
       // Workaround for a KSP bug that reports pressure the same as pressure on altitude 0 whenever
@@ -359,7 +366,7 @@ namespace TextureReplacer
     /**
      * Set custom and random Kerbals' textures.
      */
-    private void replaceKerbalSkins()
+    void replaceKerbalSkins()
     {
       // IVA textures must be replaced with a little lag, otherwise we risk race conditions with KSP
       // handler that resets IVA suits to the stock ones. The race condition issue always occurs
@@ -398,7 +405,7 @@ namespace TextureReplacer
     /**
      * Update IVA textures on vessel switch or docking.
      */
-    private void scheduleSwitchUpdate(Vessel vessel)
+    void scheduleSwitchUpdate(Vessel vessel)
     {
       if (previousVessel != null && previousVessel != vessel)
       {
@@ -416,7 +423,7 @@ namespace TextureReplacer
     /**
      * Update EVA textures when a new Kerbal is created or when one comes into 2.3 km range.
      */
-    private void scheduleSpawnUpdate(Vessel vessel)
+    void scheduleSpawnUpdate(Vessel vessel)
     {
       if (vessel != null)
       {
@@ -429,7 +436,7 @@ namespace TextureReplacer
     /**
      * Enable/disable helmets in the current IVA space depending on situation.
      */
-    private void updateHelmets(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> eventData)
+    void updateHelmets(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> eventData)
     {
       Vessel vessel = eventData.host;
       if (vessel == null)
@@ -470,13 +477,14 @@ namespace TextureReplacer
     /**
      * Fill config for custom Kerbal heads and suits.
      */
-    private void readKerbalsConfigs()
+    void readKerbalsConfigs()
     {
-      List<string> excludedHeads = new List<string>();
-      List<string> excludedSuits = new List<string>();
-      List<string> femaleHeads = new List<string>();
-      List<string> femaleSuits = new List<string>();
-      List<string> eyelessHeads = new List<string>();
+      var excludedHeads = new List<string>();
+      var excludedSuits = new List<string>();
+      var femaleHeads = new List<string>();
+      var femaleSuits = new List<string>();
+      var femaleNames = new List<string>();
+      var eyelessHeads = new List<string>();
 
       foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
       {
@@ -504,7 +512,10 @@ namespace TextureReplacer
               {
                 Head head = null;
                 if (headName != "DEFAULT")
-                  head = heads.FirstOrDefault(h => h.name == headName);
+                {
+                  string _headName = headName;
+                  head = heads.FirstOrDefault(h => h.name == _headName);
+                }
                 if (head == null)
                   headName = "DEFAULT";
 
@@ -527,7 +538,10 @@ namespace TextureReplacer
               {
                 Suit suit = null;
                 if (suitName != "DEFAULT")
-                  suit = suits.FirstOrDefault(s => s.name == suitName);
+                {
+                  string _suitName = suitName;
+                  suit = suits.FirstOrDefault(s => s.name == _suitName);
+                }
                 if (suit == null)
                   suitName = "DEFAULT";
 
@@ -552,6 +566,9 @@ namespace TextureReplacer
 
           foreach (string sFemaleSuits in genericNode.GetValues("femaleSuits"))
             femaleSuits.AddRange(Util.splitConfigValue(sFemaleSuits));
+
+          foreach (string sFemaleNames in genericNode.GetValues("femaleNames"))
+            femaleNames.AddRange(Util.splitConfigValue(sFemaleNames));
 
           foreach (string sEyelessHeads in genericNode.GetValues("eyelessHeads"))
             eyelessHeads.AddRange(Util.splitConfigValue(sEyelessHeads));
@@ -597,9 +614,22 @@ namespace TextureReplacer
       heads.RemoveAll(h => excludedHeads.Contains(h.name));
       suits.RemoveAll(s => excludedSuits.Contains(s.name));
 
-      // Create female suits list.
+      // Create lists of female heads and suits.
+      kerminHeads.AddRange(heads.Where(h => femaleHeads.Contains(h.name)));
       kerminSuits.AddRange(suits.Where(s => femaleSuits.Contains(s.name)));
+
+      heads.RemoveAll(h => femaleHeads.Contains(h.name));
       suits.RemoveAll(s => femaleSuits.Contains(s.name));
+
+      // Compile regular expressions for female names.
+      femaleNames.ForEach(n => kerminNames.Add(new Regex(n)));
+
+      // Trim lists.
+      heads.TrimExcess();
+      suits.TrimExcess();
+      kerminHeads.TrimExcess();
+      kerminSuits.TrimExcess();
+      kerminNames.TrimExcess();
     }
 
     /**
@@ -625,7 +655,7 @@ namespace TextureReplacer
      */
     public void initialise()
     {
-      Dictionary<string, int> suitDirs = new Dictionary<string, int>();
+      var suitDirs = new Dictionary<string, int>();
       string lastTextureName = "";
 
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
@@ -660,7 +690,7 @@ namespace TextureReplacer
           }
           else
           {
-            Head head = new Head() { name = headName, head = texture };
+            var head = new Head { name = headName, head = texture };
             heads.Add(head);
             Util.log("Mapped head \"{0}\" -> {1}", head.name, texture.name);
           }
