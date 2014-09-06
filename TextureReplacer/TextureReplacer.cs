@@ -40,7 +40,6 @@ namespace TextureReplacer
 
         Loader.instance = new Loader();
         Replacer.instance = new Replacer();
-//        Asteroids.instance = new Asteroids();
         Reflections.instance = new Reflections();
         Personaliser.instance = new Personaliser();
 
@@ -49,7 +48,6 @@ namespace TextureReplacer
           Util.log("Reading configuration: {0}", file.url);
 
           Loader.instance.readConfig(file.config);
-//          Asteroids.instance.readConfig(file.config);
           Reflections.instance.readConfig(file.config);
           Personaliser.instance.readConfig(file.config);
         }
@@ -75,7 +73,6 @@ namespace TextureReplacer
           {
             Loader.instance.initialise();
             Replacer.instance.initialise();
-//            Asteroids.instance.initialise();
             Reflections.instance.initialise();
             Personaliser.instance.initialise();
 
@@ -93,12 +90,10 @@ namespace TextureReplacer
             lastScene = HighLogic.LoadedScene;
 
             Replacer.instance.resetScene();
-//            Asteroids.instance.resetScene();
             Personaliser.instance.resetScene();
           }
 
           Replacer.instance.updateScene();
-//          Asteroids.instance.updateScene();
           Personaliser.instance.updateScene();
         }
       }
