@@ -70,37 +70,37 @@ Examples:
       Default/GalaxyTex_NegativeZ     // skybox back face
 
       Default/moho00                  // Moho
-      Default/moho01                  // Moho normal map
+      Default/moho01                  // Moho heightmap
       Default/Eve2_00                 // Eve
-      Default/Eve2_01                 // Eve normal map
+      Default/Eve2_01                 // Eve heightmap
       Default/evemoon100              // Gilly
-      Default/evemoon101              // Gilly normal map
+      Default/evemoon101              // Gilly heightmap
       Default/KerbinScaledSpace300    // Kerbin
-      Default/KerbinScaledSpace401    // Kerbin normal map
+      Default/KerbinScaledSpace401    // Kerbin heightmap
       Default/NewMunSurfaceMapDiffuse // Mün
-      Default/NewMunSurfaceMapNormals // Mün normal map
+      Default/NewMunSurfaceMapNormals // Mün heightmap
       Default/NewMunSurfaceMap00      // Minmus
-      Default/NewMunSurfaceMap01      // Minmus normal map
+      Default/NewMunSurfaceMap01      // Minmus heightmap
       Default/Duna5_00                // Duna
-      Default/Duna5_01                // Duna normal map
+      Default/Duna5_01                // Duna heightmap
       Default/desertplanetmoon00      // Ike
-      Default/desertplanetmoon01      // Ike normal map
+      Default/desertplanetmoon01      // Ike heightmap
       Default/dwarfplanet100          // Dres
-      Default/dwarfplanet101          // Dres normal map
+      Default/dwarfplanet101          // Dres heightmap
       Default/gas1_clouds             // Jool
-      Default/cloud_normal            // Jool normal map
+      Default/cloud_normal            // Jool heightmap
       Default/newoceanmoon00          // Laythe
-      Default/newoceanmoon01          // Laythe normal map
+      Default/newoceanmoon01          // Laythe heightmap
       Default/gp1icemoon00            // Vall
-      Default/gp1icemoon01            // Vall normal map
+      Default/gp1icemoon01            // Vall heightmap
       Default/rockyMoon00             // Tylo
-      Default/rockyMoon01             // Tylo normal map
+      Default/rockyMoon01             // Tylo heightmap
       Default/gp1minormoon100         // Bop
-      Default/gp1minormoon101         // Bop normal map
+      Default/gp1minormoon101         // Bop heightmap
       Default/gp1minormoon200         // Pol
-      Default/gp1minormoon201         // Pol normal map
+      Default/gp1minormoon201         // Pol heightmap
       Default/snowydwarfplanet00      // Eeloo
-      Default/snowydwarfplanet01      // Eeloo normal map
+      Default/snowydwarfplanet01      // Eeloo heightmap
 
 It's also possible to replace textures from `GameData/` if one specifies
 the full directory hierarchy:
@@ -208,6 +208,10 @@ Known Issues
 
 Change Log
 ----------
+* 1.7.2
+    - improved head/suit randomisation algorithm
+    - fixed Kerbal personalisation for stock crew transfer
+    - rebuilt for KSP 0.25
 * 1.7.1
     - default configuration tweaked to detect female names better
 * 1.7

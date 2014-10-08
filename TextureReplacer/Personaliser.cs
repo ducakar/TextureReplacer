@@ -168,7 +168,7 @@ namespace TextureReplacer
       {
         // Hash is multiplied with a large prime to increase randomisation, since hashes returned by
         // `GetHashCode()` are close together if strings only differ in the last (few) char(s).
-        int index = ((kerbal.name.GetHashCode() * 4099) & 0x7fffffff) % genderHeads.Count;
+        int index = ((name.GetHashCode() * 4099) & 0x7fffffff) % genderHeads.Count;
         head = genderHeads[index];
       }
       if ((isEva || !cabinSuits.TryGetValue(cabin.partInfo.name, out suit))
@@ -177,8 +177,8 @@ namespace TextureReplacer
         // Here we must use a different prime to increase randomisation so that the same head is
         // not always combined with the same suit.
         int number = suitAssignment == SuitAssignment.RANDOM ?
-                       (kerbal.name.GetHashCode() * 2053) & 0x7fffffff :
-                       HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
+                     ((name.GetHashCode() + name.Length) * 2053) & 0x7fffffff :
+                     HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
 
         suit = genderSuits[number % genderSuits.Count];
       }
@@ -418,6 +418,14 @@ namespace TextureReplacer
         ivaVessels.Add(vessel);
       }
       previousVessel = vessel;
+    }
+
+    /**
+     * Update IVA textures on crew transfer.
+     */
+    void scheduleTransferUpdate(GameEvents.HostedFromToAction<ProtoCrewMember, Part> action)
+    {
+      scheduleSwitchUpdate(action.to.vessel);
     }
 
     /**
@@ -775,6 +783,7 @@ namespace TextureReplacer
       {
         GameEvents.onVesselChange.Add(scheduleSwitchUpdate);
         GameEvents.onVesselWasModified.Add(scheduleSwitchUpdate);
+        GameEvents.onCrewTransferred.Add(scheduleTransferUpdate);
         GameEvents.onVesselCreate.Add(scheduleSpawnUpdate);
         GameEvents.onVesselLoaded.Add(scheduleSpawnUpdate);
 
@@ -785,6 +794,7 @@ namespace TextureReplacer
       {
         GameEvents.onVesselChange.Remove(scheduleSwitchUpdate);
         GameEvents.onVesselWasModified.Remove(scheduleSwitchUpdate);
+        GameEvents.onCrewTransferred.Remove(scheduleTransferUpdate);
         GameEvents.onVesselCreate.Remove(scheduleSpawnUpdate);
         GameEvents.onVesselLoaded.Remove(scheduleSpawnUpdate);
 
