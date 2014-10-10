@@ -208,6 +208,9 @@ Known Issues
 
 Change Log
 ----------
+* 1.7.3
+    - added `logTextures` config option to dump material/texture names
+    - added `TextureReplacer.version` file for KSP-AVC
 * 1.7.2
     - improved head/suit randomisation algorithm
     - fixed Kerbal personalisation for stock crew transfer

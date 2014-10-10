@@ -48,6 +48,7 @@ namespace TextureReplacer
           Util.log("Reading configuration: {0}", file.url);
 
           Loader.instance.readConfig(file.config);
+          Replacer.instance.readConfig(file.config);
           Reflections.instance.readConfig(file.config);
           Personaliser.instance.readConfig(file.config);
         }

@@ -36,6 +36,8 @@ namespace TextureReplacer
     // General replacement has to be performed for more than one frame when a scene switch occurs
     // since textures and models may also be loaded with a timed lag.
     float replaceTimer = -1.0f;
+    // Print material/texture names when performing texture replacement pass.
+    bool logTextures = false;
     // Instance.
     public static Replacer instance = null;
 
@@ -49,6 +51,9 @@ namespace TextureReplacer
         Texture texture = material.mainTexture;
         if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp"))
           continue;
+
+        if (logTextures)
+          Util.log("[{0}] {1}", material.name, texture.name);
 
         Texture2D newTexture;
         mappedTextures.TryGetValue(texture.name, out newTexture);
@@ -94,6 +99,16 @@ namespace TextureReplacer
           normalMap.filterMode = FilterMode.Trilinear;
         }
       }
+    }
+
+    /**
+     * Read configuration and perform pre-load initialisation.
+     */
+    public void readConfig(ConfigNode rootNode)
+    {
+      string sLogTextures = rootNode.GetValue("logTextures");
+      if (sLogTextures != null)
+        Boolean.TryParse(sLogTextures, out logTextures);
     }
 
     /**
