@@ -44,6 +44,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DDS.cs" />
     <Compile Include="Loader.cs" />
     <Compile Include="Personaliser.cs" />
     <Compile Include="Reflections.cs" />

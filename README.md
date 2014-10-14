@@ -17,6 +17,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * add normal map for head texture,
 * add helmet visor texture,
 * enable (fake) visor reflection,
+* load DDS textures directly into video memory,
 * generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
 * compress uncompressed textures from `GameData/` and reduce RAM usage,
 * change bilinear texture filter to trilinear to improve mipmap quality and
@@ -29,6 +30,8 @@ Special thanks to:
   developing this plugin,
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
   reflections,
+* sarbian for DDS loader where I learnt how to create an image loader for
+  GameDatabase,
 * therealcrow999 for testing and benchmarking this plugin,
 * Proot, Green Skull and others for making texture packs for this plugin and
 * Sylith and scart91 for giving others permissions to make derivatives of their
@@ -43,7 +46,7 @@ General replacement texture is of the form
     GameData/TextureReplacer/Default/<internalName>
 
 where `<internalName>` is the texture's internal name in KSP or path of a
-texture inside `GameData/` (plus .png/.jpg/.tga/.mbm extension, of course).
+texture inside `GameData/` (plus .dds/.png/.jpg/.tga extension, of course).
 
 Examples:
 
@@ -177,7 +180,9 @@ be overridden by subsequent configuration files).
 
 Notes
 -----
-* Use TGA for optimal quality of model textures as it is not compressed twice.
+* Use DDS for optimal loading times since they are already compressed and have
+  mipmaps generated.
+* DDS and TGA images are not suitable for normal maps.
 * Try to keep dimensions of all textures powers of two. Non-power-of-two
   textures are not handled well in some cases and cannot be compressed.
 * KSP can only load TGAs with RGB or RGBA colours. Paletteised 256-colour TGAs
@@ -208,6 +213,8 @@ Known Issues
 
 Change Log
 ----------
+* 1.8
+    - added DDS loader
 * 1.7.3
     - added `logTextures` config option to dump material/texture names
     - added `TextureReplacer.version` file for KSP-AVC
