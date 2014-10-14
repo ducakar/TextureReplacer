@@ -2,12 +2,14 @@
 
 TextureReplacer
 ===============
+
 * [GitHub page](http://github.com/ducakar/TextureReplacer).
 * [Forum page](http://forum.kerbalspaceprogram.com/threads/60961).
 * [CurseForge page](http://kerbal.curseforge.com/plugins/220217-texturereplacer).
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
+
 * replace stock textures with custom ones,
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
@@ -24,6 +26,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * unload textures from RAM after KSP finishes loading.
 
 Special thanks to:
+
 * rbray89 who contributed a reflective visor shader and for Active Texture
   Management and Visual Enhancements where some code has been borrowed from,
 * Tingle for Universe Replacer; studying his code helped me a lot while
@@ -40,7 +43,9 @@ Special thanks to:
 
 Instructions
 ------------
+
 ### General Textures ###
+
 General replacement texture is of the form
 
     GameData/TextureReplacer/Default/<internalName>
@@ -115,6 +120,7 @@ the full directory hierarchy:
 Note that all texture and directory names are case-sensitive!
 
 ### Visor Reflections ###
+
 Environment map cube texture for reflections is included with the plugin:
 
     GameData/TextureReplacer/
@@ -129,6 +135,7 @@ Note that all textures must be quares and have the same dimensions that are
 powers of two. Cube textures are slow, so keep them as low-res as possible.
 
 ### Personalised Kerbal Textures ###
+
 Heads and suits are assigned either manually (custom Kerbals) or pseudo-randomly
 (generic Kerbals). Pseudo-random assignment is based on a Kerbal's name, which
 ensures the same head/suit is always assigned to a given Kerbal.
@@ -165,6 +172,7 @@ selected.
 See configuration file contents for how to configure head/suit assignment rules.
 
 ### Configuration File ###
+
 Main configuration file:
 
     GameData/TextureReplacer/@Default.cfg
@@ -180,6 +188,7 @@ be overridden by subsequent configuration files).
 
 Notes
 -----
+
 * Use DDS for optimal loading times since they are already compressed and have
   mipmaps generated.
 * DDS and TGA images are not suitable for normal maps.
@@ -201,6 +210,7 @@ Notes
 
 Known Issues
 ------------
+
 * If there is no IVA suit replacement the default EVA suit texture is used for
   the atmospheric EVAs. [Won't fix. Provide an IVA suit to fix it.]
 * If a Kerbal rides to space on a rover seat he/she ends up in orbit in his/her
@@ -213,6 +223,7 @@ Known Issues
 
 Change Log
 ----------
+
 * 1.8
     - added DDS loader
 * 1.7.3
@@ -441,6 +452,7 @@ Change Log
 
 Licence
 -------
+
 Plugin code and binaries are distributed under the following licence:
 
 Copyright © 2013-2014 Davorin Učakar, Ryan Bray
