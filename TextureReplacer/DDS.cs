@@ -20,6 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#if true
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -123,11 +124,11 @@ namespace TextureReplacer
 
               for (int x = 0; x < mipmapWidth; ++x, pos += pixelSize)
               {
-                byte r = data[pos + 0];
-                byte b = data[pos + 2];
+                byte b = data[pos + 0];
+                byte r = data[pos + 2];
 
-                data[pos + 0] = b;
-                data[pos + 2] = r;
+                data[pos + 0] = r;
+                data[pos + 2] = b;
               }
             }
 
@@ -163,3 +164,4 @@ namespace TextureReplacer
     }
   }
 }
+#endif

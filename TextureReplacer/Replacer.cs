@@ -116,8 +116,6 @@ namespace TextureReplacer
      */
     public void initialise()
     {
-      string lastTextureName = "";
-
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
@@ -126,30 +124,17 @@ namespace TextureReplacer
 
         string originalName = texture.name.Substring(DIR_TEXTURES.Length);
 
-        // When a TGA loading fails, IndexOutOfBounds exception is thrown and GameDatabase gets
-        // corrupted. The problematic TGA is duplicated in GameDatabase so that it also overrides
-        // the preceding texture.
-        if (texture.name == lastTextureName)
+        // This in wrapped inside an 'if' clause just in case if corrupted GameDatabase contains
+        // non-consecutive duplicated entries for some strange reason.
+        if (!mappedTextures.ContainsKey(originalName))
         {
-          Util.log("Corrupted GameDatabase! Problematic TGA? {0}", texture.name);
+          if (originalName.StartsWith("GalaxyTex_"))
+            texture.wrapMode = TextureWrapMode.Clamp;
+
+          mappedTextures.Add(originalName, texture);
+
+          Util.log("Mapped \"{0}\" -> {1}", originalName, texture.name);
         }
-        // Add a general texture replacement.
-        else
-        {
-          // This in wrapped inside an 'if' clause just in case if corrupted GameDatabase contains
-          // non-consecutive duplicated entries for some strange reason.
-          if (!mappedTextures.ContainsKey(originalName))
-          {
-            if (originalName.StartsWith("GalaxyTex_"))
-              texture.wrapMode = TextureWrapMode.Clamp;
-
-            mappedTextures.Add(originalName, texture);
-
-            Util.log("Mapped \"{0}\" -> {1}", originalName, texture.name);
-          }
-        }
-
-        lastTextureName = texture.name;
       }
 
       // Bumpmapped version of diffuse shader for head.

@@ -672,15 +672,8 @@ namespace TextureReplacer
         if (texture == null || !texture.name.StartsWith(Util.DIR))
           continue;
 
-        // When a TGA loading fails, IndexOutOfBounds exception is thrown and GameDatabase gets
-        // corrupted. The problematic TGA is duplicated in GameDatabase so that it also overrides
-        // the preceding texture.
-        if (texture.name == lastTextureName)
-        {
-          Util.log("Corrupted GameDatabase! Problematic TGA? {0}", texture.name);
-        }
         // Add a head texture.
-        else if (texture.name.StartsWith(DIR_HEADS))
+        if (texture.name.StartsWith(DIR_HEADS))
         {
           texture.wrapMode = TextureWrapMode.Clamp;
 
@@ -696,7 +689,7 @@ namespace TextureReplacer
               Util.log("Mapped head \"{0}\" normal map -> {1}", head.name, texture.name);
             }
           }
-          else
+          else if (heads.All(h => h.name != headName))
           {
             var head = new Head { name = headName, head = texture };
             heads.Add(head);

@@ -74,7 +74,6 @@ namespace TextureReplacer
     public void initialise()
     {
       Texture2D[] envMapFaces = new Texture2D[6];
-      string lastTextureName = "";
 
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
@@ -84,62 +83,36 @@ namespace TextureReplacer
 
         string originalName = texture.name.Substring(DIR_ENVMAP.Length);
 
-        // When a TGA loading fails, IndexOutOfBounds exception is thrown and GameDatabase gets
-        // corrupted. The problematic TGA is duplicated in GameDatabase so that it also overrides
-        // the preceding texture.
-        if (texture.name == lastTextureName)
+        switch (originalName)
         {
-          Util.log("Corrupted GameDatabase! Problematic TGA? {0}", texture.name);
+          case "PositiveX":
+            envMapFaces[0] = texture;
+            Util.log("Environment map +x -> {0}", texture.name);
+            break;
+          case "NegativeX":
+            envMapFaces[1] = texture;
+            Util.log("Environment map -x -> {0}", texture.name);
+            break;
+          case "PositiveY":
+            envMapFaces[2] = texture;
+            Util.log("Environment map +y -> {0}", texture.name);
+            break;
+          case "NegativeY":
+            envMapFaces[3] = texture;
+            Util.log("Environment map -y -> {0}", texture.name);
+            break;
+          case "PositiveZ":
+            envMapFaces[4] = texture;
+            Util.log("Environment map +z -> {0}", texture.name);
+            break;
+          case "NegativeZ":
+            envMapFaces[5] = texture;
+            Util.log("Environment map -z -> {0}", texture.name);
+            break;
+          default:
+            Util.log("Invalid enironment map texture name {0}", texture.name);
+            break;
         }
-        else
-        {
-          switch (originalName)
-          {
-            case "PositiveX":
-            {
-              envMapFaces[0] = texture;
-              Util.log("Environment map +x -> {0}", texture.name);
-              break;
-            }
-            case "NegativeX":
-            {
-              envMapFaces[1] = texture;
-              Util.log("Environment map -x -> {0}", texture.name);
-              break;
-            }
-            case "PositiveY":
-            {
-              envMapFaces[2] = texture;
-              Util.log("Environment map +y -> {0}", texture.name);
-              break;
-            }
-            case "NegativeY":
-            {
-              envMapFaces[3] = texture;
-              Util.log("Environment map -y -> {0}", texture.name);
-              break;
-            }
-            case "PositiveZ":
-            {
-              envMapFaces[4] = texture;
-              Util.log("Environment map +z -> {0}", texture.name);
-              break;
-            }
-            case "NegativeZ":
-            {
-              envMapFaces[5] = texture;
-              Util.log("Environment map -z -> {0}", texture.name);
-              break;
-            }
-            default:
-            {
-              Util.log("Invalid enironment map texture name {0}", texture.name);
-              break;
-            }
-          }
-        }
-
-        lastTextureName = texture.name;
       }
 
       // Generate generic reflection cube map texture.
