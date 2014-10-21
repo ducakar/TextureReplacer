@@ -20,7 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#if true
+#if TR_DDS
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -139,7 +140,7 @@ namespace TextureReplacer
 
         Texture2D texture = new Texture2D(width, height, format, nMipmaps > 1);
         texture.LoadRawTextureData(data);
-        texture.Apply();
+        texture.Apply(false, true);
 
         return new GameDatabase.TextureInfo(texture, isNormalMap, false, isCompressed);
       }
@@ -164,4 +165,5 @@ namespace TextureReplacer
     }
   }
 }
+
 #endif

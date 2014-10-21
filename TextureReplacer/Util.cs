@@ -54,6 +54,7 @@ namespace TextureReplacer
       Type callerClass = new StackTrace(1, false).GetFrame(0).GetMethod().DeclaringType;
       UnityEngine.Debug.Log("[TR." + callerClass.Name + "] " + String.Format(s, args));
     }
+
     #if false
     public static void logUpHierarchy(Transform tf)
     {

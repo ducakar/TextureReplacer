@@ -32,7 +32,6 @@ namespace TextureReplacer
   {
     // Texture compression and mipmap generation parameters.
     int lastTextureCount = 0;
-    int memorySpared = 0;
     // List of substrings for paths where mipmap generating is enabled.
     readonly List<Regex> generateMipmaps = new List<Regex>();
     // List of substrings for paths where textures shouldn't be unloaded.
@@ -45,23 +44,15 @@ namespace TextureReplacer
     public static Loader instance = null;
 
     /**
-     * Estimate texture size in RAM.
+     * Estimate texture size in system RAM.
      *
-     * This is only a rough estimate. It doesn't bother with details like the padding bytes or exact
-     * mipmap size calculation.
+     * This is only a rough estimate. It doesn't bother with details like the padding bytes.
      */
     static int textureSize(Texture2D texture)
     {
       int nPixels = texture.width * texture.height;
-      int size = texture.format == TextureFormat.DXT1 ? nPixels * 4 / 6 :
-                 texture.format == TextureFormat.DXT5 ? nPixels * 4 / 4 :
-                 texture.format == TextureFormat.Alpha8 ? nPixels * 1 :
-                 texture.format == TextureFormat.RGB24 ? nPixels * 3 : nPixels * 4;
-
-      if (texture.mipmapCount != 1)
-        size += size / 3;
-
-      return size;
+      return texture.format == TextureFormat.DXT1 || texture.format == TextureFormat.RGB24 ?
+        nPixels * 3 : nPixels * 4;
     }
 
     /**
@@ -149,10 +140,10 @@ namespace TextureReplacer
     {
       // Prevent conflicts with TextureCompressor. If it is found among loaded plugins, texture
       // compression step will be skipped since TextureCompressor should handle it (better).
-      bool isACMDetected =
+      bool isATMDetected =
         AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("ActiveTextureManagement"));
 
-      if (isACMDetected)
+      if (isATMDetected)
       {
         if (isCompressionEnabled == null)
         {
@@ -192,7 +183,8 @@ namespace TextureReplacer
 
       for (int i = lastTextureCount; i < texInfos.Count; ++i)
       {
-        Texture2D texture = texInfos[i].texture;
+        GameDatabase.TextureInfo texInfo = texInfos[i];
+        Texture2D texture = texInfo.texture;
         TextureFormat format = texture.format;
 
         if (texture == null)
@@ -201,6 +193,9 @@ namespace TextureReplacer
         // Apply trilinear filter.
         if (texture.filterMode == FilterMode.Bilinear)
           texture.filterMode = FilterMode.Trilinear;
+
+        if (!texInfo.isReadable)
+          continue;
 
         // `texture.GetPixel() throws an exception if the texture is not readable and hence it
         // cannot be compressed nor mipmaps generated.
@@ -218,12 +213,11 @@ namespace TextureReplacer
 
         // Generate mipmaps if necessary. Images that may be UI icons should be excluded to prevent
         // blurriness when using less-than-full texture quality.
-        if (isMipmapGenEnabled.Value && texture.mipmapCount == 1 &&
-            (texture.width > 1 || texture.height > 1)
+        if (isMipmapGenEnabled.Value && texture.mipmapCount == 1
+            && (texture.width > 1 || texture.height > 1)
             && generateMipmaps.Any(r => r.IsMatch(texture.name)))
         {
           Color32[] pixels32 = texture.GetPixels32();
-          int oldSize = textureSize(texture);
 
           // PNGs are always loaded as transparent, so we check if they actually contain any
           // transparent pixels. Convert non-transparent PNGs to RGB.
@@ -236,25 +230,16 @@ namespace TextureReplacer
           texture.SetPixels32(pixels32);
           texture.Apply(true, false);
 
-          int newSize = textureSize(texture);
-          memorySpared += oldSize - newSize;
-
           hasGenMipmaps = true;
         }
 
         // Compress if necessary.
         if (isCompressionEnabled.Value
             && texture.format != TextureFormat.DXT1 && texture.format != TextureFormat.DXT5
-            && Util.isPow2(texture.width) && Util.isPow2(texture.height)
-            && (texture.width >= 4 || texture.height >= 4))
+            && texture.width % 4 == 0 && texture.height % 4 == 0)
         {
-          int oldSize = textureSize(texture);
-
           texture.Compress(true);
           texInfos[i].isCompressed = true;
-
-          int newSize = textureSize(texture);
-          memorySpared += oldSize - newSize;
 
           hasCompressed = true;
         }
@@ -277,13 +262,13 @@ namespace TextureReplacer
     public void initialise()
     {
       List<GameDatabase.TextureInfo> texInfos = GameDatabase.Instance.databaseTexture;
+      int memorySpared = 0;
 
-      for (int i = 0; i < texInfos.Count; ++i)
+      foreach (GameDatabase.TextureInfo texInfo in texInfos)
       {
-        GameDatabase.TextureInfo texInfo = texInfos[i];
         Texture2D texture = texInfo.texture;
 
-        if (texture == null)
+        if (texture == null || !texInfo.isReadable)
           continue;
 
         // Unload texture from RAM (a.k.a. "make it unreadable") unless set otherwise.
@@ -299,12 +284,10 @@ namespace TextureReplacer
             continue;
           }
 
-          int size = textureSize(texture);
+          memorySpared += textureSize(texture);
 
           texture.Apply(false, true);
-          texInfos[i].isReadable = false;
-
-          memorySpared += size;
+          texInfo.isReadable = false;
 
           Util.log("Unloaded {0}", texture.name);
         }
@@ -317,7 +300,7 @@ namespace TextureReplacer
 
       if (memorySpared > 0)
       {
-        Util.log("Texture compression & unloading spared approximately {0:0.0} MiB = {1:0.0} MB",
+        Util.log("Texture unloading freed approximately {0:0.0} MiB = {1:0.0} MB of system RAM",
                  memorySpared / 1024.0 / 1024.0, memorySpared / 1000.0 / 1000.0);
       }
     }

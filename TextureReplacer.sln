@@ -11,7 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		GameData\TextureReplacer\Plugins\PluginData\TextureReplacer\Visor.shader = GameData\TextureReplacer\Plugins\PluginData\TextureReplacer\Visor.shader
 		GameData\TextureReplacer\Diverse.cfg = GameData\TextureReplacer\Diverse.cfg
 		GameData\TextureReplacer\scart91.cfg = GameData\TextureReplacer\scart91.cfg
-		GameData\TextureReplacer\SylithExt.cfg = GameData\TextureReplacer\SylithExt.cfg
 	EndProjectSection
 EndProject
 Global

@@ -19,7 +19,6 @@ stock textures and customise your Kerbals. More specifically, it can:
 * add normal map for head texture,
 * add helmet visor texture,
 * enable (fake) visor reflection,
-* load DDS textures directly into video memory,
 * generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
 * compress uncompressed textures from `GameData/` and reduce RAM usage,
 * change bilinear texture filter to trilinear to improve mipmap quality and
@@ -36,6 +35,7 @@ Special thanks to:
 * sarbian for DDS loader where I learnt how to create an image loader for
   GameDatabase,
 * therealcrow999 for testing and benchmarking this plugin,
+* Ippo343 for contributing KSP-AVC configuration,
 * Proot, Green Skull and others for making texture packs for this plugin and
 * Sylith and scart91 for giving others permissions to make derivatives of their
   texture packs.
@@ -78,37 +78,37 @@ Examples:
       Default/GalaxyTex_NegativeZ     // skybox back face
 
       Default/moho00                  // Moho
-      Default/moho01                  // Moho heightmap
+      Default/moho01                  // Moho normal map
       Default/Eve2_00                 // Eve
-      Default/Eve2_01                 // Eve heightmap
+      Default/Eve2_01                 // Eve normal map
       Default/evemoon100              // Gilly
-      Default/evemoon101              // Gilly heightmap
+      Default/evemoon101              // Gilly normal map
       Default/KerbinScaledSpace300    // Kerbin
-      Default/KerbinScaledSpace401    // Kerbin heightmap
+      Default/KerbinScaledSpace401    // Kerbin normal map
       Default/NewMunSurfaceMapDiffuse // Mün
-      Default/NewMunSurfaceMapNormals // Mün heightmap
+      Default/NewMunSurfaceMapNormals // Mün normal map
       Default/NewMunSurfaceMap00      // Minmus
-      Default/NewMunSurfaceMap01      // Minmus heightmap
+      Default/NewMunSurfaceMap01      // Minmus normal map
       Default/Duna5_00                // Duna
-      Default/Duna5_01                // Duna heightmap
+      Default/Duna5_01                // Duna normal map
       Default/desertplanetmoon00      // Ike
-      Default/desertplanetmoon01      // Ike heightmap
+      Default/desertplanetmoon01      // Ike normal map
       Default/dwarfplanet100          // Dres
-      Default/dwarfplanet101          // Dres heightmap
+      Default/dwarfplanet101          // Dres normal map
       Default/gas1_clouds             // Jool
-      Default/cloud_normal            // Jool heightmap
+      Default/cloud_normal            // Jool normal map
       Default/newoceanmoon00          // Laythe
-      Default/newoceanmoon01          // Laythe heightmap
+      Default/newoceanmoon01          // Laythe normal map
       Default/gp1icemoon00            // Vall
-      Default/gp1icemoon01            // Vall heightmap
+      Default/gp1icemoon01            // Vall normal map
       Default/rockyMoon00             // Tylo
-      Default/rockyMoon01             // Tylo heightmap
+      Default/rockyMoon01             // Tylo normal map
       Default/gp1minormoon100         // Bop
-      Default/gp1minormoon101         // Bop heightmap
+      Default/gp1minormoon101         // Bop normal map
       Default/gp1minormoon200         // Pol
-      Default/gp1minormoon201         // Pol heightmap
+      Default/gp1minormoon201         // Pol normal map
       Default/snowydwarfplanet00      // Eeloo
-      Default/snowydwarfplanet01      // Eeloo heightmap
+      Default/snowydwarfplanet01      // Eeloo normal map
 
 It's also possible to replace textures from `GameData/` if one specifies
 the full directory hierarchy:
@@ -185,15 +185,32 @@ files (including `@Default.cfg`) are processed in alphabetical order (the reason
 behind the leading "@" in `@Default.cfg` is that it is processed first and can
 be overridden by subsequent configuration files).
 
+### Normal Maps ###
+
+Unity uses "grey" normal maps (RGBA = YYYX) to avoid artefacts when applying
+DXT5 texture compression on them. When a normal map has a "NRM" suffix Unity
+converts it from RGB = XYZ ("blue") to RGBA = YYYX ("grey") normal map unless
+DDSLoader is used to load it.
+
+In short: you should supply "blue" normal maps when image has "NRM" suffix
+and is in PNG format (JPEGs and TGAs are not recommended for normal maps)
+and "grey" normal map when DDS format is used or the texture doesn't have
+"NRM" suffix.
+
+"Grey" normal maps can be created by saving the standard "blue" normal map
+as a DDS with DXT5nm compression or by manually shuffling its colour
+channels RGBA -> GGGR.
+
 
 Notes
 -----
 
-* Use DDS for optimal loading times since they are already compressed and have
-  mipmaps generated.
-* DDS and TGA images are not suitable for normal maps.
+* Use DDS format (requires DDSLoader) for optimal RAM usage and loading times
+  since it is not shadowed in RAM and can be pre-compressed and can have
+  pre-generated mipmaps.
+* TGA and JPEG images are not suitable for normal maps.
 * Try to keep dimensions of all textures powers of two. Non-power-of-two
-  textures are not handled well in some cases and cannot be compressed.
+  textures are not handled well in some cases.
 * KSP can only load TGAs with RGB or RGBA colours. Paletteised 256-colour TGAs
   cause corruptions in the game database!
 * By default, texture compression is handled by ATM when present rather than by
@@ -224,11 +241,14 @@ Known Issues
 Change Log
 ----------
 
-* 1.8
-    - added DDS loader
+* 1.7.4
+    - better handling of DDS files
+    - updated documentation
+    - converted environment map textures to PNG format
+    - some code cleanups
 * 1.7.3
     - added `logTextures` config option to dump material/texture names
-    - added `TextureReplacer.version` file for KSP-AVC
+    - added `TextureReplacer.version` file for KSP-AVC (thanks to Ippo343)
 * 1.7.2
     - improved head/suit randomisation algorithm
     - fixed Kerbal personalisation for stock crew transfer
