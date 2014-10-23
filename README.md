@@ -70,6 +70,9 @@ Examples:
       Default/EVAjetpack              // default EVA jetpack
       Default/EVAjetpackNRM           // default EVA jetpack normal map
 
+      Default/HUDNavBall              // HUD NavBall
+      Default/IVANavBall              // IVA NavBall, horizontally flipped
+
       Default/GalaxyTex_PositiveX     // skybox right face
       Default/GalaxyTex_NegativeX     // skybox left face
       Default/GalaxyTex_PositiveY     // skybox bottom face, rotated for 180°
@@ -241,6 +244,10 @@ Known Issues
 Change Log
 ----------
 
+* 1.8
+    - added support for NavBall texture replacement
+    - added a configurable list of bodies with breathable atmospheres (since not
+      all atmospheres with oxygen are breathable, e.g. Laythe)
 * 1.7.4
     - better handling of DDS files
     - updated documentation

@@ -27,19 +27,19 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  internal class UI
+  class UI
   {
-    private const int WINDOW_ID = 107056;
-    private const Rect windowRect = new Rect(40, 40, 400, 400);
+    const int WINDOW_ID = 107056;
+    const Rect windowRect = new Rect(40, 40, 400, 400);
     // Instance.
     public static Replacer instance = null;
 
-    private void draw()
+    void draw()
     {
       GUILayout.Window(WINDOW_ID, windowRect, windowHandler, "TextureReplacer");
     }
 
-    private void windowHandler(int id)
+    void windowHandler(int id)
     {
       GUILayout.BeginVertical();
 

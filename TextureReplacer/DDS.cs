@@ -33,18 +33,18 @@ namespace TextureReplacer
   [DatabaseLoaderAttrib(new[] { "dds" })]
   public class DDS : DatabaseLoader<GameDatabase.TextureInfo>
   {
-    private const uint DDSD_MIPMAPCOUNT_BIT = 0x00020000;
-    private const uint DDPF_ALPHAPIXELS = 0x00000001;
-    private const uint DDPF_FOURCC = 0x00000004;
-    private const uint DDPF_RGB = 0x00000040;
-    private const uint DDPF_NORMAL = 0x80000000;
+    const uint DDSD_MIPMAPCOUNT_BIT = 0x00020000;
+    const uint DDPF_ALPHAPIXELS = 0x00000001;
+    const uint DDPF_FOURCC = 0x00000004;
+    const uint DDPF_RGB = 0x00000040;
+    const uint DDPF_NORMAL = 0x80000000;
 
-    private static bool fourCCEquals(IList<byte> bytes, string s)
+    static bool fourCCEquals(IList<byte> bytes, string s)
     {
       return bytes[0] == s[0] && bytes[1] == s[1] && bytes[2] == s[2] && bytes[3] == s[3];
     }
 
-    private static GameDatabase.TextureInfo loadDDS(UrlDir.UrlFile urlFile)
+    static GameDatabase.TextureInfo loadDDS(UrlDir.UrlFile urlFile)
     {
       try
       {

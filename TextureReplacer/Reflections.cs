@@ -26,15 +26,15 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  internal class Reflections
+  class Reflections
   {
     public static readonly string DIR_ENVMAP = Util.DIR + "EnvMap/";
     // Reflective shader material.
-    private Material shaderMaterial = null;
+    Material shaderMaterial = null;
     // Visor reflection feature.
-    private bool isVisorReflectionEnabled = true;
+    bool isVisorReflectionEnabled = true;
     // Reflection colour.
-    private Color visorReflectionColour = new Color(1.0f, 1.0f, 1.0f);
+    Color visorReflectionColour = new Color(1.0f, 1.0f, 1.0f);
     // Instance.
     public static Reflections instance = null;
     // Reflective shader.

@@ -31,6 +31,9 @@ namespace TextureReplacer
     static readonly string DIR_TEXTURES = Util.DIR + "Default/";
     // General texture replacements.
     readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
+    // NavBalls' textures.
+    Texture2D hudNavBallTexture = null;
+    Texture2D ivaNavBallTexture = null;
     // Generic texture replacement parameters.
     int lastMaterialCount = 0;
     // General replacement has to be performed for more than one frame when a scene switch occurs
@@ -102,6 +105,28 @@ namespace TextureReplacer
     }
 
     /**
+     * Replace NavBalls' textures.
+     */
+    void updateNavball(Vessel vessel)
+    {
+      if (hudNavBallTexture != null)
+      {
+        NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
+
+        if (hudNavball != null)
+          hudNavball.navBall.renderer.sharedMaterial.mainTexture = hudNavBallTexture;
+      }
+
+      if (ivaNavBallTexture != null)
+      {
+        InternalNavBall ivaNavball = UnityEngine.Object.FindObjectOfType<InternalNavBall>();
+
+        if (ivaNavball != null)
+          ivaNavball.navBall.renderer.sharedMaterial.mainTexture = ivaNavBallTexture;
+      }
+    }
+
+    /**
      * Read configuration and perform pre-load initialisation.
      */
     public void readConfig(ConfigNode rootNode)
@@ -165,20 +190,32 @@ namespace TextureReplacer
           }
         }
       }
+
+      // Find NavBall replacement textures if available.
+      if (mappedTextures.TryGetValue("HUDNavBall", out hudNavBallTexture))
+        mappedTextures.Remove("HUDNavBall");
+
+      if (mappedTextures.TryGetValue("IVANavBall", out ivaNavBallTexture))
+        mappedTextures.Remove("IVANavBall");
     }
 
     public void resetScene()
     {
       lastMaterialCount = 0;
 
-      if (HighLogic.LoadedScene == GameScenes.MAINMENU
-          || HighLogic.LoadedScene == GameScenes.SPACECENTER)
-      {
+      GameScenes scene = HighLogic.LoadedScene;
+
+      if (scene == GameScenes.MAINMENU || scene == GameScenes.SPACECENTER)
         replaceTimer = 2.0f;
-      }
       else
-      {
         replaceTimer = 0.1f;
+
+      if (hudNavBallTexture != null || ivaNavBallTexture != null)
+      {
+        if (HighLogic.LoadedSceneIsFlight)
+          GameEvents.onVesselChange.Add(updateNavball);
+        else
+          GameEvents.onVesselChange.Remove(updateNavball);
       }
     }
 

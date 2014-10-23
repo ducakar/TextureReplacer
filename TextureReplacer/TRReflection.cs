@@ -21,6 +21,7 @@
  */
 
 #if false
+
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -31,9 +32,9 @@ namespace TextureReplacer
   public class TRReflection : PartModule
   {
     // Shader.
-    private Shader shader = null;
+    Shader shader = null;
     // Reflection colour.
-    private Color colour = new Color(0.5f, 0.5f, 0.5f);
+    Color colour = new Color(0.5f, 0.5f, 0.5f);
     // Configuration file parameters.
     [KSPField(isPersistant = false)]
     public string reflectionShader = "Reflective/VertexLit";
@@ -45,7 +46,7 @@ namespace TextureReplacer
     /**
      * Print a log entry for TextureReplacer. `String.Format()`-style formatting is supported.
      */
-    private static void log(string s, params object[] args)
+    static void log(string s, params object[] args)
     {
       Debug.Log("[TR.TRReflection] " + String.Format(s, args));
     }
@@ -89,4 +90,5 @@ namespace TextureReplacer
     }
   }
 }
+
 #endif

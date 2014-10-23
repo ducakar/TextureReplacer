@@ -121,9 +121,14 @@ namespace TextureReplacer
     readonly Dictionary<string, Suit> customSuits = new Dictionary<string, Suit>();
     // Cabin-specific suits.
     readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
+    // Helmet removal.
+    Mesh helmetMesh = null;
+    Mesh visorMesh = null;
+    bool isHelmetRemovalEnabled = true;
     // Atmospheric IVA suit parameters.
     bool isAtmSuitEnabled = true;
     double atmSuitPressure = 0.5;
+    readonly HashSet<string> atmSuitBodies = new HashSet<string>();
     // Whether assignment of suits should be consecutive.
     SuitAssignment suitAssignment = SuitAssignment.RANDOM;
     // Update counter for IVA replacement. It has to scheduled with a little lag to avoid race
@@ -140,10 +145,6 @@ namespace TextureReplacer
     // List of vessels for which Kerbal EVA has to be updated (either vessel is an EVA or has an EVA
     // on an external seat).
     readonly List<Vessel> evaVessels = new List<Vessel>();
-    // Helmet removal.
-    Mesh helmetMesh = null;
-    Mesh visorMesh = null;
-    bool isHelmetRemovalEnabled = true;
     // Instance.
     public static Personaliser instance = null;
 
@@ -337,7 +338,7 @@ namespace TextureReplacer
 
       bool isAtmSuit = isAtmSuitEnabled
                        && atmPressure >= atmSuitPressure
-                       && FlightGlobals.currentMainBody.atmosphereContainsOxygen;
+                       && atmSuitBodies.Contains(FlightGlobals.currentMainBody.bodyName);
 
       KerbalEVA eva = vessel.GetComponent<KerbalEVA>();
       if (eva != null)
@@ -645,6 +646,10 @@ namespace TextureReplacer
      */
     public void readConfig(ConfigNode rootNode)
     {
+      string sIsHelmetRemovalEnabled = rootNode.GetValue("isHelmetRemovalEnabled");
+      if (sIsHelmetRemovalEnabled != null)
+        Boolean.TryParse(sIsHelmetRemovalEnabled, out isHelmetRemovalEnabled);
+
       string sIsAtmSuitEnabled = rootNode.GetValue("isAtmSuitEnabled");
       if (sIsAtmSuitEnabled != null)
         Boolean.TryParse(sIsAtmSuitEnabled, out isAtmSuitEnabled);
@@ -653,9 +658,11 @@ namespace TextureReplacer
       if (sAtmSuitPressure != null)
         Double.TryParse(sAtmSuitPressure, out atmSuitPressure);
 
-      string sIsHelmetRemovalEnabled = rootNode.GetValue("isHelmetRemovalEnabled");
-      if (sIsHelmetRemovalEnabled != null)
-        Boolean.TryParse(sIsHelmetRemovalEnabled, out isHelmetRemovalEnabled);
+      foreach (string sAtmSuitBodies in rootNode.GetValues("atmSuitBodies"))
+      {
+        foreach (string s in Util.splitConfigValue(sAtmSuitBodies))
+          atmSuitBodies.Add(s);
+      }
     }
 
     /**
