@@ -20,8 +20,14 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+//#define TR_LOG_HIERARCHY
+
 using System;
 using System.Diagnostics;
+
+#if TR_LOG_HIERARCHY
+using UnityEngine;
+#endif
 
 namespace TextureReplacer
 {
@@ -55,7 +61,26 @@ namespace TextureReplacer
       UnityEngine.Debug.Log("[TR." + callerClass.Name + "] " + String.Format(s, args));
     }
 
-    #if false
+    #if TR_LOG_HIERARCHY
+
+    /**
+     * Print hierarchy up from a transform.
+     */
+    public static void logDownHierarchy(Transform tf)
+    {
+      if (tf.gameObject != null)
+        UnityEngine.Debug.Log("- " + tf.gameObject.name + ": " + tf.gameObject.GetType());
+
+      foreach (Component c in tf.GetComponents<Component>())
+        UnityEngine.Debug.Log(" + " + c.name + ": " + c.GetType());
+
+      for (int i = 0; i < tf.childCount; ++i)
+        logDownHierarchy(tf.GetChild(i));
+    }
+
+    /**
+     * Print hierarchy up from a transform.
+     */
     public static void logUpHierarchy(Transform tf)
     {
       for (; tf != null; tf = tf.parent)
@@ -67,6 +92,7 @@ namespace TextureReplacer
           UnityEngine.Debug.Log(" + " + c.name + ": " + c.GetType());
       }
     }
+
     #endif
   }
 }

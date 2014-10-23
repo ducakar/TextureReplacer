@@ -117,9 +117,9 @@ namespace TextureReplacer
 
           for (int i = 0; i < nMipmaps; ++i)
           {
-            int mipmapPitch = ((mipmapWidth * pixelSize + 3) / 4) * 4;
+            int lineSize = mipmapWidth * pixelSize;
 
-            for (int y = 0; y < mipmapHeight; ++y, lineStart += mipmapPitch)
+            for (int y = 0; y < mipmapHeight; ++y, lineStart += lineSize)
             {
               int pos = lineStart;
 
