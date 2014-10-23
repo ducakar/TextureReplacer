@@ -33,21 +33,22 @@ namespace TextureReplacer
   [DatabaseLoaderAttrib(new[] { "dds" })]
   public class DDS : DatabaseLoader<GameDatabase.TextureInfo>
   {
-    private const int DDSD_MIPMAPCOUNT_BIT = 0x00020000;
-    private const int DDPF_ALPHAPIXELS = 0x00000001;
-    private const int DDPF_FOURCC = 0x00000004;
-    private const int DDPF_RGB = 0x00000040;
+    private const uint DDSD_MIPMAPCOUNT_BIT = 0x00020000;
+    private const uint DDPF_ALPHAPIXELS = 0x00000001;
+    private const uint DDPF_FOURCC = 0x00000004;
+    private const uint DDPF_RGB = 0x00000040;
+    private const uint DDPF_NORMAL = 0x80000000;
 
     private static bool fourCCEquals(IList<byte> bytes, string s)
     {
       return bytes[0] == s[0] && bytes[1] == s[1] && bytes[2] == s[2] && bytes[3] == s[3];
     }
 
-    private static GameDatabase.TextureInfo loadDDS(string path)
+    private static GameDatabase.TextureInfo loadDDS(UrlDir.UrlFile urlFile)
     {
       try
       {
-        FileStream file = File.Open(path, FileMode.Open, FileAccess.Read);
+        FileStream file = File.Open(urlFile.fullPath, FileMode.Open, FileAccess.Read);
         BinaryReader reader = new BinaryReader(file);
 
         if (!reader.BaseStream.CanRead)
@@ -83,7 +84,7 @@ namespace TextureReplacer
 
         TextureFormat format;
         bool isCompressed = false;
-        bool isNormalMap = Path.GetFileNameWithoutExtension(path).EndsWith("NRM");
+        bool isNormalMap = (pixelFlags & DDPF_NORMAL) != 0 || urlFile.name.EndsWith("NRM");
 
         if ((pixelFlags & DDPF_FOURCC) != 0)
         {
@@ -146,7 +147,7 @@ namespace TextureReplacer
       }
       catch (IOException e)
       {
-        Util.log("{0}: {1}", e.Message, path);
+        Util.log("{0}: {1}", e.Message, urlFile.url);
       }
       catch (Exception e)
       {
@@ -158,7 +159,7 @@ namespace TextureReplacer
 
     public override IEnumerator Load(UrlDir.UrlFile urlFile, FileInfo file)
     {
-      obj = loadDDS(file.FullName);
+      obj = loadDDS(urlFile);
       successful = obj != null;
 
       yield return null;
