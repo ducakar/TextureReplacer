@@ -20,8 +20,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System.Linq;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -29,24 +30,50 @@ namespace TextureReplacer
   class Reflections
   {
     public static readonly string DIR_ENVMAP = Util.DIR + "EnvMap/";
+    // Reflective shader map.
+    string[,] SHADER_MAP = {
+      { "KSP/Diffuse", "Reflective/VertexLit" },
+      { "KSP/Specular", "Reflective/VertexLit" },
+      { "KSP/Bumped", "Reflective/Bumped Diffuse" },
+      { "KSP/Bumped Specular", "Reflective/Bumped Diffuse" },
+      { "KSP/Alpha/Translucent", "TR/Visor" },
+      { "KSP/Alpha/Translucent Specular", "TR/Visor" }
+    };
+    Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflective shader material.
     Material shaderMaterial = null;
     // Visor reflection feature.
     bool isVisorReflectionEnabled = true;
     // Reflection colour.
     Color visorReflectionColour = new Color(1.0f, 1.0f, 1.0f);
-    // Instance.
-    public static Reflections instance = null;
+    // Print names of meshes and their shaders in parts with TRReflection module.
+    public bool logReflectiveMeshes = false;
     // Reflective shader.
     public Shader shader = null;
     // Environment map.
     public Cubemap envMap = null;
+    // Instance.
+    public static Reflections instance = null;
+
+    /**
+     * Get reflective version of a shader.
+     */
+    public Shader toReflective(Shader shader)
+    {
+      Shader newShader;
+      shaderMap.TryGetValue(shader, out newShader);
+      return newShader;
+    }
 
     /**
      * Read configuration and perform pre-load initialisation.
      */
     public void readConfig(ConfigNode rootNode)
     {
+      string sLogReflectiveMeshes = rootNode.GetValue("logReflectiveMeshes");
+      if (sLogReflectiveMeshes != null)
+        bool.TryParse(sLogReflectiveMeshes, out logReflectiveMeshes);
+
       string sIsVisorReflectionEnabled = rootNode.GetValue("isVisorReflectionEnabled");
       if (sIsVisorReflectionEnabled != null)
         bool.TryParse(sIsVisorReflectionEnabled, out isVisorReflectionEnabled);
@@ -172,8 +199,24 @@ namespace TextureReplacer
         return;
       }
 
+      for (int i = 0; i < SHADER_MAP.GetLength(0); ++i)
+      {
+        Shader original = Shader.Find(SHADER_MAP[i, 0]);
+        Shader reflective = Shader.Find(SHADER_MAP[i, 1]);
+
+        if (original == null)
+          Util.log("Shader \"{0}\" missing", SHADER_MAP[i, 0]);
+        else if (reflective == null)
+          Util.log("Shader \"{0}\" missing", SHADER_MAP[i, 1]);
+        else
+          shaderMap.Add(original, reflective);
+      }
+
       if (!isVisorReflectionEnabled)
         return;
+
+      // Set up camera to generate reflection cube map.
+      //GameObject go = new GameObject("ReflectionCamera", new[] { typeof(Camera) });
 
       // Set visor texture and reflection on proto-IVA and -EVA Kerbal.
       foreach (SkinnedMeshRenderer smr

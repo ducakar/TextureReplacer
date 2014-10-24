@@ -18,7 +18,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
 * add normal map for head texture,
 * add helmet visor texture,
-* enable (fake) visor reflection,
+* enable (fake) reflection on helmet visors and parts,
 * generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
 * compress uncompressed textures from `GameData/` and reduce RAM usage,
 * change bilinear texture filter to trilinear to improve mipmap quality and
@@ -122,9 +122,23 @@ the full directory hierarchy:
 
 Note that all texture and directory names are case-sensitive!
 
-### Visor Reflections ###
+### Reflections ###
 
-Environment map cube texture for reflections is included with the plugin:
+Reflections are shown on visors of Kerbal's helmets and on parts that include
+`TRReflection` module, e.g.:
+
+      MODULE
+      {
+        name = TRReflection
+        colour = 0.5 0.5 0.5
+        meshes = OuterShell FrontWindow SideWindow
+      }
+
+`colour` ("0.5 0.5 0.5" by default) and `meshes` (empty by default) parameters
+are optional. Reflection texture is multiplied by `colour` and applied on the
+meshes from `meshes` list or on whole part if `meshes` is empty or missing.
+
+Environment cube map texture for reflections is included with the plugin:
 
     GameData/TextureReplacer/
       EnvMap/PositiveX  // fake skybox right face, vertically flipped
@@ -135,7 +149,7 @@ Environment map cube texture for reflections is included with the plugin:
       EnvMap/NegativeZ  // fake skybox back face, vertically flipped
 
 Note that all textures must be quares and have the same dimensions that are
-powers of two. Cube textures are slow, so keep them as low-res as possible.
+powers of two. Cube map textures are slow, so keep them as low-res as possible.
 
 ### Personalised Kerbal Textures ###
 
@@ -245,6 +259,7 @@ Change Log
 ----------
 
 * 1.8
+    - added TRReflection part module for visor-like reflections on parts
     - added support for NavBall texture replacement
     - added a configurable list of bodies with breathable atmospheres (since not
       all atmospheres with oxygen are breathable, e.g. Laythe)

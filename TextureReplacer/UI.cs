@@ -21,6 +21,7 @@
  */
 
 #if false
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -63,4 +64,5 @@ namespace TextureReplacer
     }
   }
 }
+
 #endif

@@ -20,72 +20,68 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#if false
+#if TR_TRREFLECTION
 
-using System;
 using System.Linq;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace TextureReplacer
 {
   public class TRReflection : PartModule
   {
-    // Shader.
-    Shader shader = null;
-    // Reflection colour.
-    Color colour = new Color(0.5f, 0.5f, 0.5f);
     // Configuration file parameters.
     [KSPField(isPersistant = false)]
-    public string reflectionShader = "Reflective/VertexLit";
-    [KSPField(isPersistant = false)]
-    public string reflectionColour = "0.5 0.5 0.5";
+    public string colour = "0.5 0.5 0.5";
     [KSPField(isPersistant = false)]
     public string meshList = "";
 
-    /**
-     * Print a log entry for TextureReplacer. `String.Format()`-style formatting is supported.
-     */
-    static void log(string s, params object[] args)
-    {
-      Debug.Log("[TR.TRReflection] " + String.Format(s, args));
-    }
-
     public override void OnStart(StartState state)
     {
-      shader = Shader.Find(reflectionShader);
-      if (shader == null)
+      if (Reflections.instance.envMap == null)
         return;
 
-      string[] components = reflectionColour.Split(new char[] { ' ', ',' },
-                                                   StringSplitOptions.RemoveEmptyEntries);
+      Color reflectColour = new Color(0.5f, 0.5f, 0.5f);
+
+      string[] components = Util.splitConfigValue(colour);
       if (components.Length < 3 || 4 < components.Length)
       {
-        log("reflectionColour must have exactly 3 or 4 components");
+        Util.log("reflectionColour must have exactly 3 or 4 components");
       }
       else
       {
-        float.TryParse(components[0], out colour.r);
-        float.TryParse(components[1], out colour.g);
-        float.TryParse(components[2], out colour.b);
+        float.TryParse(components[0], out reflectColour.r);
+        float.TryParse(components[1], out reflectColour.g);
+        float.TryParse(components[2], out reflectColour.b);
 
         if (components.Length == 4)
-          float.TryParse(components[3], out colour.a);
+          float.TryParse(components[3], out reflectColour.a);
       }
 
-      string[] meshNames = meshList.Split(new char[] { ' ', ',' },
-                                          StringSplitOptions.RemoveEmptyEntries);
+      string[] meshNames = Util.splitConfigValue(meshList);
 
       foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
       {
-        if (meshNames.Length != 0 && meshNames.Contains(meshFilter.name))
+        if (meshFilter.renderer == null)
           continue;
 
-        meshFilter.renderer.material.shader = shader;
-        meshFilter.renderer.material.SetColor("_ReflectColor", colour);
+        if (Reflections.instance.logReflectiveMeshes)
+        {
+          Util.log("Part \"{0}\" mesh \"{1}\" shader \"{2}\"",
+                   part.name, meshFilter.name, meshFilter.renderer.material.shader.name);
+        }
 
-        if (Reflections.instance.envMap != null)
-          meshFilter.renderer.material.SetTexture("_Cube", Reflections.instance.envMap);
+        if (meshNames.Length != 0 && !meshNames.Contains(meshFilter.name))
+          continue;
+
+        Material material = meshFilter.renderer.material;
+        Shader newShader = Reflections.instance.toReflective(material.shader);
+
+        if (newShader != null)
+        {
+          material.shader = newShader;
+          material.SetColor("_ReflectColor", reflectColour);
+          material.SetTexture("_Cube", Reflections.instance.envMap);
+        }
       }
     }
   }
