@@ -81,8 +81,6 @@ namespace TextureReplacer
         byte[] formatFourCC = reader.ReadBytes(4);
         int pixelSize = reader.ReadInt32() / 8;
 
-        reader.BaseStream.Seek(128, SeekOrigin.Begin);
-
         TextureFormat format;
         bool isCompressed = false;
         bool isNormalMap = (pixelFlags & DDPF_NORMAL) != 0 || urlFile.name.EndsWith("NRM");
@@ -108,43 +106,13 @@ namespace TextureReplacer
           throw new IOException("Invalid DDS pixelformat");
         }
 
-        byte[] data = reader.ReadBytes((int) (reader.BaseStream.Length - 128));
+        int dataBias = 128;
 
-        // Swap red and blue.
-        if (!isCompressed)
-        {
-          int mipmapWidth = width;
-          int mipmapHeight = height;
-          int lineStart = 0;
-
-          for (int i = 0; i < nMipmaps; ++i)
-          {
-            int lineSize = mipmapWidth * pixelSize;
-
-            for (int y = 0; y < mipmapHeight; ++y, lineStart += lineSize)
-            {
-              int pos = lineStart;
-
-              for (int x = 0; x < mipmapWidth; ++x, pos += pixelSize)
-              {
-                byte b = data[pos + 0];
-                byte r = data[pos + 2];
-
-                data[pos + 0] = r;
-                data[pos + 2] = b;
-              }
-            }
-
-            mipmapWidth = Math.Max(1, mipmapWidth / 2);
-            mipmapHeight = Math.Max(1, mipmapHeight / 2);
-          }
-        }
-
-        if (Loader.instance.mipmapBias != 0)
+        if (Loader.instance.mipmapBias != 0 || Loader.instance.normalMipmapBias != 0)
         {
           int blockSize = format == TextureFormat.DXT1 ? 8 : 16;
-          int max = Math.Min(nMipmaps - 1, Loader.instance.mipmapBias);
-          int dataBias = 0;
+          int max = Math.Min(nMipmaps - 1, isNormalMap ? Loader.instance.normalMipmapBias :
+                                                         Loader.instance.mipmapBias);
 
           for (int i = 0; i < max; ++i)
           {
@@ -154,8 +122,22 @@ namespace TextureReplacer
             width = Math.Max(1, width / 2);
             height = Math.Max(1, height / 2);
           }
+        }
 
-          data = data.Skip(dataBias).ToArray();
+        reader.BaseStream.Seek(dataBias, SeekOrigin.Begin);
+        byte[] data = reader.ReadBytes((int) (reader.BaseStream.Length - dataBias));
+
+        // Swap red and blue.
+        if (!isCompressed)
+        {
+          for (int i = 0; i < data.Length; i += pixelSize)
+          {
+            byte b = data[i + 0];
+            byte r = data[i + 2];
+
+            data[i + 0] = r;
+            data[i + 2] = b;
+          }
         }
 
         Texture2D texture = new Texture2D(width, height, format, nMipmaps > 1);
