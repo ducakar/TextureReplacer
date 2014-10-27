@@ -249,7 +249,7 @@ Known Issues
   the atmospheric EVAs. [Won't fix. Provide an IVA suit to fix it.]
 * If a Kerbal rides to space on a rover seat he/she ends up in orbit in his/her
   IVA suit without a helmet. [Won't fix, it's too complicated. Just reload the
-  scene to repawn a Kerbal in his/her EVA suit.]
+  scene to respawn the Kerbal in his/her EVA suit.]
 * Replacement of textures from `GameData/` does not work for certain models.
   [No known fix.]
 * Jetpack re-appears after dismounting a KerbalQuest jetpack. [No fix yet.]

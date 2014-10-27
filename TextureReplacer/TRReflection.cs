@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#if TR_TRREFLECTION
+#if TR_REFLECTION
 
 using System.Linq;
 using UnityEngine;
@@ -33,7 +33,7 @@ namespace TextureReplacer
     [KSPField(isPersistant = false)]
     public string colour = "0.5 0.5 0.5";
     [KSPField(isPersistant = false)]
-    public string meshList = "";
+    public string meshes = "";
 
     public override void OnStart(StartState state)
     {
@@ -57,7 +57,10 @@ namespace TextureReplacer
           float.TryParse(components[3], out reflectColour.a);
       }
 
-      string[] meshNames = Util.splitConfigValue(meshList);
+      string[] meshNames = Util.splitConfigValue(meshes);
+
+      if (Reflections.instance.logReflectiveMeshes)
+        Util.log("Part \"{0}\"", part.name);
 
       foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
       {
@@ -65,10 +68,7 @@ namespace TextureReplacer
           continue;
 
         if (Reflections.instance.logReflectiveMeshes)
-        {
-          Util.log("Part \"{0}\" mesh \"{1}\" shader \"{2}\"",
-                   part.name, meshFilter.name, meshFilter.renderer.material.shader.name);
-        }
+          Util.log("+ {0} [{1}]", meshFilter.name, meshFilter.renderer.material.shader.name);
 
         if (meshNames.Length != 0 && !meshNames.Contains(meshFilter.name))
           continue;

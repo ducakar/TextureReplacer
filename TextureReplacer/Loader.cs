@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -40,6 +41,9 @@ namespace TextureReplacer
     bool? isCompressionEnabled = null;
     bool? isMipmapGenEnabled = null;
     bool? isUnloadingEnabled = null;
+    // Mipmap bias for DDS loader.
+    public int mipmapBias = 0;
+    public int normalMipmapBias = 0;
     // Instance.
     public static Loader instance = null;
 
@@ -60,6 +64,17 @@ namespace TextureReplacer
      */
     public void readConfig(ConfigNode rootNode)
     {
+      string sMipmapBias = rootNode.GetValue("mipmapBias");
+      if (sMipmapBias != null)
+        Int32.TryParse(sMipmapBias, out mipmapBias);
+
+      string sNormalMipmapBias = rootNode.GetValue("normalMipmapBias");
+      if (sNormalMipmapBias != null)
+        Int32.TryParse(sNormalMipmapBias, out normalMipmapBias);
+
+      mipmapBias = Math.Max(mipmapBias, 0);
+      normalMipmapBias = Math.Max(normalMipmapBias, 0);
+
       string sIsCompressionEnabled = rootNode.GetValue("isCompressionEnabled");
       if (sIsCompressionEnabled != null)
       {

@@ -26,6 +26,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -137,6 +138,24 @@ namespace TextureReplacer
             mipmapWidth = Math.Max(1, mipmapWidth / 2);
             mipmapHeight = Math.Max(1, mipmapHeight / 2);
           }
+        }
+
+        if (Loader.instance.mipmapBias != 0)
+        {
+          int blockSize = format == TextureFormat.DXT1 ? 8 : 16;
+          int max = Math.Min(nMipmaps - 1, Loader.instance.mipmapBias);
+          int dataBias = 0;
+
+          for (int i = 0; i < max; ++i)
+          {
+            dataBias += isCompressed ? ((width + 3) / 4) * ((height + 3) / 4) * blockSize :
+                                       width * height * pixelSize;
+
+            width = Math.Max(1, width / 2);
+            height = Math.Max(1, height / 2);
+          }
+
+          data = data.Skip(dataBias).ToArray();
         }
 
         Texture2D texture = new Texture2D(width, height, format, nMipmaps > 1);

@@ -31,9 +31,9 @@ namespace TextureReplacer
   {
     public static readonly string DIR_ENVMAP = Util.DIR + "EnvMap/";
     // Reflective shader map.
-    string[,] SHADER_MAP = {
-      { "KSP/Diffuse", "Reflective/VertexLit" },
-      { "KSP/Specular", "Reflective/VertexLit" },
+    static readonly string[,] SHADER_MAP = {
+      { "KSP/Diffuse", "Reflective/Bumped Diffuse" },
+      { "KSP/Specular", "Reflective/Bumped Diffuse" },
       { "KSP/Bumped", "Reflective/Bumped Diffuse" },
       { "KSP/Bumped Specular", "Reflective/Bumped Diffuse" },
       { "KSP/Alpha/Translucent", "TR/Visor" },
@@ -175,6 +175,9 @@ namespace TextureReplacer
         }
       }
 
+      foreach (Texture2D face in envMapFaces)
+        GameDatabase.Instance.RemoveTexture(face.name);
+
       if (envMap == null)
       {
         destroy();
@@ -199,10 +202,30 @@ namespace TextureReplacer
         return;
       }
 
+      if (isVisorReflectionEnabled)
+      {
+        // Set visor texture and reflection on proto-IVA and -EVA Kerbal.
+        foreach (SkinnedMeshRenderer smr
+                 in Resources.FindObjectsOfTypeAll(typeof(SkinnedMeshRenderer)))
+        {
+          if (smr.name != "visor")
+            continue;
+
+          bool isEva = smr.transform.parent.parent.parent.parent == null;
+          if (isEva)
+          {
+            smr.sharedMaterial.shader = shader;
+            smr.sharedMaterial.SetColor("_ReflectColor", visorReflectionColour);
+            smr.sharedMaterial.SetTexture("_Cube", envMap);
+          }
+        }
+      }
+
       for (int i = 0; i < SHADER_MAP.GetLength(0); ++i)
       {
         Shader original = Shader.Find(SHADER_MAP[i, 0]);
-        Shader reflective = Shader.Find(SHADER_MAP[i, 1]);
+        Shader reflective = SHADER_MAP[i, 1] == shader.name ?
+                            shader : Shader.Find(SHADER_MAP[i, 1]);
 
         if (original == null)
           Util.log("Shader \"{0}\" missing", SHADER_MAP[i, 0]);
@@ -210,28 +233,6 @@ namespace TextureReplacer
           Util.log("Shader \"{0}\" missing", SHADER_MAP[i, 1]);
         else
           shaderMap.Add(original, reflective);
-      }
-
-      if (!isVisorReflectionEnabled)
-        return;
-
-      // Set up camera to generate reflection cube map.
-      //GameObject go = new GameObject("ReflectionCamera", new[] { typeof(Camera) });
-
-      // Set visor texture and reflection on proto-IVA and -EVA Kerbal.
-      foreach (SkinnedMeshRenderer smr
-               in Resources.FindObjectsOfTypeAll(typeof(SkinnedMeshRenderer)))
-      {
-        if (smr.name != "visor")
-          continue;
-
-        bool isEva = smr.transform.parent.parent.parent.parent == null;
-        if (isEva)
-        {
-          smr.sharedMaterial.shader = shader;
-          smr.sharedMaterial.SetColor("_ReflectColor", visorReflectionColour);
-          smr.sharedMaterial.SetTexture("_Cube", envMap);
-        }
       }
     }
 
