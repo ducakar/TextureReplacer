@@ -263,6 +263,8 @@ Change Log
     - added support for NavBall texture replacement
     - added a configurable list of bodies with breathable atmospheres (since not
       all atmospheres with oxygen are breathable, e.g. Laythe)
+    - added extras: low-res environment map textures, Module Manager script to
+      add the new reflections to some stock parts
 * 1.7.4
     - better handling of DDS files
     - updated documentation

@@ -26,7 +26,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -106,7 +105,7 @@ namespace TextureReplacer
           throw new IOException("Invalid DDS pixelformat");
         }
 
-        int dataBias = 128;
+        int dataoffset = 128;
 
         if (Loader.instance.mipmapBias != 0 || Loader.instance.normalMipmapBias != 0)
         {
@@ -116,16 +115,16 @@ namespace TextureReplacer
 
           for (int i = 0; i < max; ++i)
           {
-            dataBias += isCompressed ? ((width + 3) / 4) * ((height + 3) / 4) * blockSize :
-                                       width * height * pixelSize;
+            dataoffset += isCompressed ? ((width + 3) / 4) * ((height + 3) / 4) * blockSize :
+                                         width * height * pixelSize;
 
             width = Math.Max(1, width / 2);
             height = Math.Max(1, height / 2);
           }
         }
 
-        reader.BaseStream.Seek(dataBias, SeekOrigin.Begin);
-        byte[] data = reader.ReadBytes((int) (reader.BaseStream.Length - dataBias));
+        reader.BaseStream.Seek(dataoffset, SeekOrigin.Begin);
+        byte[] data = reader.ReadBytes((int) (reader.BaseStream.Length - dataoffset));
 
         // Swap red and blue.
         if (!isCompressed)
