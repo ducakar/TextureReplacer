@@ -176,7 +176,10 @@ namespace TextureReplacer
       }
 
       foreach (Texture2D face in envMapFaces)
-        GameDatabase.Instance.RemoveTexture(face.name);
+      {
+        if (face != null)
+          GameDatabase.Instance.RemoveTexture(face.name);
+      }
 
       if (envMap == null)
       {

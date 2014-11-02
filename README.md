@@ -6,6 +6,7 @@ TextureReplacer
 * [GitHub page](http://github.com/ducakar/TextureReplacer).
 * [Forum page](http://forum.kerbalspaceprogram.com/threads/60961).
 * [CurseForge page](http://kerbal.curseforge.com/plugins/220217-texturereplacer).
+* [Kerbal Stuff page](https://kerbalstuff.com/mod/150/TextureReplacer).
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
@@ -258,6 +259,8 @@ Known Issues
 Change Log
 ----------
 
+* 1.8.1
+    - fixed crash when environment map is missing
 * 1.8
     - added TRReflection part module for visor-like reflections on parts
     - added support for NavBall texture replacement
