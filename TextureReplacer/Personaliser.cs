@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -121,6 +122,12 @@ namespace TextureReplacer
     readonly Dictionary<string, Suit> customSuits = new Dictionary<string, Suit>();
     // Cabin-specific suits.
     readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
+    // Role-specific suits.
+    bool hasRoleBasedSuits = false;
+    Suit commanderSuit = null;
+    Suit pilotSuit = null;
+    Suit scientistSuit = null;
+    Suit passengerSuit = null;
     // Helmet removal.
     Mesh helmetMesh = null;
     Mesh visorMesh = null;
@@ -145,43 +152,115 @@ namespace TextureReplacer
     // List of vessels for which Kerbal EVA has to be updated (either vessel is an EVA or has an EVA
     // on an external seat).
     readonly List<Vessel> evaVessels = new List<Vessel>();
+    // KerbalStats "Get" method.
+    MethodInfo ksGetMethod = null;
     // Instance.
     public static Personaliser instance = null;
+
+    bool ksIsFemale(object kerbal)
+    {
+      return (string) ksGetMethod.Invoke(null, new object[] { kerbal, "gender" }) == "F";
+    }
+
+    double ksGetExperience(object kerbal, string task)
+    {
+      object ret = ksGetMethod.Invoke(null, new object[] { kerbal, "experience:task=" + task });
+      return double.Parse((string) ret);
+    }
+
+    /*
+     * Determine gender based on Kerbal's name.
+     */
+    bool isKerbalFemale(ProtoCrewMember kerbal)
+    {
+      if (ksGetMethod != null)
+      {
+        return ksIsFemale(kerbal);
+      }
+      else
+      {
+        int spaceIndex = kerbal.name.IndexOf(' ');
+        string name = spaceIndex > 0 ? kerbal.name.Substring(0, spaceIndex) : kerbal.name;
+        return kerminNames.Any(r => r.IsMatch(name));
+      }
+    }
+
+    /*
+     * Select suit based on experience reported by KerbalStats.
+     */
+    Suit getRoleBasedSuit(object kerbal)
+    {
+      if (ksGetMethod == null || !hasRoleBasedSuits)
+        return null;
+
+      double commanderExp = ksGetExperience(kerbal, "Command");
+      double pilotExp = ksGetExperience(kerbal, "Pilot");
+      double scientistExperience = ksGetExperience(kerbal, "Science");
+      double passengerExp = ksGetExperience(kerbal, "Passenger");
+
+      Suit suit = commanderSuit;
+      double experience = commanderExp;
+
+      if (pilotExp > experience)
+      {
+        suit = pilotSuit;
+        experience = pilotExp;
+      }
+      if (scientistExperience > experience)
+      {
+        suit = scientistSuit;
+        experience = scientistExperience;
+      }
+      if (passengerExp > experience)
+        suit = passengerSuit;
+
+      return suit;
+    }
 
     /**
      * Replace textures on a Kerbal model.
      */
     void personaliseKerbal(Component component, ProtoCrewMember kerbal, Part cabin, bool isAtmSuit)
     {
-      int spaceIndex = kerbal.name.IndexOf(' ');
-      string name = spaceIndex > 0 ? kerbal.name.Substring(0, spaceIndex) : kerbal.name;
-
-      bool isFemale = kerminNames.Any(r => r.IsMatch(name));
+      bool isFemale = isKerbalFemale(kerbal);
       bool isEva = cabin == null;
-
-      List<Head> genderHeads = isFemale && kerminHeads.Count != 0 ? kerminHeads : heads;
-      List<Suit> genderSuits = isFemale && kerminSuits.Count != 0 ? kerminSuits : suits;
 
       Head head;
       Suit suit;
 
-      if (!customHeads.TryGetValue(kerbal.name, out head) && genderHeads.Count != 0)
+      if (!customHeads.TryGetValue(kerbal.name, out head))
       {
-        // Hash is multiplied with a large prime to increase randomisation, since hashes returned by
-        // `GetHashCode()` are close together if strings only differ in the last (few) char(s).
-        int index = ((name.GetHashCode() * 4099) & 0x7fffffff) % genderHeads.Count;
-        head = genderHeads[index];
-      }
-      if ((isEva || !cabinSuits.TryGetValue(cabin.partInfo.name, out suit))
-          && !customSuits.TryGetValue(kerbal.name, out suit) && genderSuits.Count != 0)
-      {
-        // Here we must use a different prime to increase randomisation so that the same head is
-        // not always combined with the same suit.
-        int number = suitAssignment == SuitAssignment.RANDOM ?
-                     ((name.GetHashCode() + name.Length) * 2053) & 0x7fffffff :
-                     HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
+        List<Head> genderHeads = isFemale && kerminHeads.Count != 0 ? kerminHeads : heads;
 
-        suit = genderSuits[number % genderSuits.Count];
+        if (genderHeads.Count != 0)
+        {
+          // Hash is multiplied with a large prime to increase randomisation, since hashes returned
+          // by `GetHashCode()` are close together if strings only differ in the last (few) char(s).
+          int index = ((kerbal.name.GetHashCode() * 4099) & 0x7fffffff) % genderHeads.Count;
+          head = genderHeads[index];
+        }
+      }
+
+      if ((isEva || !cabinSuits.TryGetValue(cabin.partInfo.name, out suit))
+          && !customSuits.TryGetValue(kerbal.name, out suit))
+      {
+        suit = getRoleBasedSuit(kerbal);
+
+        if (suit == null)
+        {
+          List<Suit> genderSuits = isFemale && kerminSuits.Count != 0 ? kerminSuits : suits;
+
+          if (genderSuits != null)
+          {
+            // Here we must use a different prime to increase randomisation so that the same head is
+            // not always combined with the same suit.
+            int number = suitAssignment == SuitAssignment.RANDOM ?
+                         ((kerbal.name.GetHashCode() + kerbal.name.Length) * 2053) & 0x7fffffff :
+                         HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
+
+            suit = genderSuits[number % genderSuits.Count];
+          }
+        }
       }
 
       foreach (Renderer renderer in component.GetComponentsInChildren<Renderer>())
@@ -592,6 +671,34 @@ namespace TextureReplacer
             else
               Util.log("Invalid value for suitAssignment: {0}", sSuitAssignment);
           }
+
+          string sCommanderSuit = genericNode.GetValue("commanderSuit");
+          if (sCommanderSuit != null)
+          {
+            commanderSuit = suits.FirstOrDefault(s => s.name == sCommanderSuit);
+            hasRoleBasedSuits |= commanderSuit != null;
+          }
+
+          string sPilotSuit = genericNode.GetValue("pilotSuit");
+          if (sPilotSuit != null)
+          {
+            pilotSuit = suits.FirstOrDefault(s => s.name == sPilotSuit);
+            hasRoleBasedSuits |= pilotSuit != null;
+          }
+
+          string sScientistSuit = genericNode.GetValue("scientistSuit");
+          if (sScientistSuit != null)
+          {
+            scientistSuit = suits.FirstOrDefault(s => s.name == sScientistSuit);
+            hasRoleBasedSuits |= scientistSuit != null;
+          }
+
+          string sPassengerSuit = genericNode.GetValue("passengerSuit");
+          if (sPassengerSuit != null)
+          {
+            passengerSuit = suits.FirstOrDefault(s => s.name == sPassengerSuit);
+            hasRoleBasedSuits |= passengerSuit != null;
+          }
         }
 
         ConfigNode cabinNode = file.config.GetNode("CabinSuits");
@@ -770,6 +877,23 @@ namespace TextureReplacer
         else if (smr.name == "visor")
           visorMesh = smr.sharedMesh;
       }
+
+      // Link to KerbalStats if available.
+      foreach (AssemblyLoader.LoadedAssembly assembly in AssemblyLoader.loadedAssemblies)
+      {
+        foreach (Type type in assembly.assembly.GetExportedTypes())
+        {
+          if (type.FullName == "KerbalStats.KerbalExt")
+          {
+            ksGetMethod = type.GetMethod("Get", BindingFlags.Public | BindingFlags.Static);
+            break;
+          }
+        }
+      }
+
+      Util.log(ksGetMethod != null ?
+               "KerbalStats will be used Kerbal gender determination and experience based suit assignment." :
+               "KerbalStats not found. TextureReplacer will determine Kerbal gender.");
     }
 
     public void resetScene()

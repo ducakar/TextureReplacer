@@ -14,6 +14,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * replace stock textures with custom ones,
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
+* set suits based on Kerbals' experiences,
 * set cockpit-specific IVA suit,
 * remove IVA helmets in safe situations,
 * spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
@@ -31,6 +32,8 @@ Special thanks to:
   Management and Visual Enhancements where some code has been borrowed from,
 * Tingle for Universe Replacer; studying his code helped me a lot while
   developing this plugin,
+* taniwha for KerbalStats that is optionally used by this plugin for gender
+  determination and role-based suit assignment,
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
   reflections,
 * sarbian for DDS loader where I learnt how to create an image loader for
@@ -156,7 +159,9 @@ powers of two. Cube map textures are slow, so keep them as low-res as possible.
 
 Heads and suits are assigned either manually (custom Kerbals) or pseudo-randomly
 (generic Kerbals). Pseudo-random assignment is based on a Kerbal's name, which
-ensures the same head/suit is always assigned to a given Kerbal.
+ensures the same head/suit is always assigned to a given Kerbal. Additionally it
+is also possible to assign suits consecutively, based on rooster index, or based
+on Kerbal experience if KerbalStats plugin is present.
 
 Head textures reside inside `Heads/` directory and have arbitrary names. Normal
 maps are optional. To provide a normal map, name it the same as the head texture
@@ -259,6 +264,9 @@ Known Issues
 Change Log
 ----------
 
+* 1.9
+    - added integration with KerbalStats (optional) for gender determination and
+      experience-based suit assignment
 * 1.8.1
     - fixed crash when environment map is missing
 * 1.8
