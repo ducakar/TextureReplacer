@@ -165,9 +165,18 @@ namespace TextureReplacer
       // Bumpmapped version of diffuse shader for head.
       Shader bumpedDiffuseShader = Shader.Find("Bumped Diffuse");
 
-      Texture2D ivaVisorTex = null, evaVisorTex = null;
-      mappedTextures.TryGetValue("kerbalVisor", out ivaVisorTex);
-      mappedTextures.TryGetValue("EVAvisor", out evaVisorTex);
+      Texture2D headNormalMap = null;
+      Texture2D ivaVisorTexture = null;
+      Texture2D evaVisorTexture = null;
+
+      if (mappedTextures.TryGetValue("kerbalHeadNRM", out headNormalMap))
+        mappedTextures.Remove("kerbalHeadNRM");
+
+      if (mappedTextures.TryGetValue("kerbalVisor", out ivaVisorTexture))
+        mappedTextures.Remove("kerbalVisor");
+
+      if (mappedTextures.TryGetValue("EVAvisor", out evaVisorTexture))
+        mappedTextures.Remove("EVAvisor");
 
       // Set normal-mapped shader for head and visor texture and reflection on proto-IVA and -EVA
       // Kerbal.
@@ -177,11 +186,14 @@ namespace TextureReplacer
         if (smr.name == "headMesh01")
         {
           smr.material.shader = bumpedDiffuseShader;
+
+          if (headNormalMap != null)
+            smr.material.SetTexture("_BumpMap", headNormalMap);
         }
         else if (smr.name == "visor")
         {
           bool isEVA = smr.transform.parent.parent.parent.parent == null;
-          Texture2D newTexture = isEVA ? evaVisorTex : ivaVisorTex;
+          Texture2D newTexture = isEVA ? evaVisorTexture : ivaVisorTexture;
 
           if (newTexture != null)
           {

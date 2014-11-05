@@ -122,6 +122,9 @@ namespace TextureReplacer
     readonly Dictionary<string, Suit> customSuits = new Dictionary<string, Suit>();
     // Cabin-specific suits.
     readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
+    // Coefficients for "random" head and suit assignment.
+    int headMultiplier = 4099;
+    int suitMultiplier = 2053;
     // Role-specific suits.
     bool hasRoleBasedSuits = false;
     Suit commanderSuit = null;
@@ -236,8 +239,8 @@ namespace TextureReplacer
         {
           // Hash is multiplied with a large prime to increase randomisation, since hashes returned
           // by `GetHashCode()` are close together if strings only differ in the last (few) char(s).
-          int index = ((kerbal.name.GetHashCode() * 4099) & 0x7fffffff) % genderHeads.Count;
-          head = genderHeads[index];
+          int number = (kerbal.name.GetHashCode() * headMultiplier) & 0x7fffffff;
+          head = genderHeads[number % genderHeads.Count];
         }
       }
 
@@ -254,9 +257,10 @@ namespace TextureReplacer
           {
             // Here we must use a different prime to increase randomisation so that the same head is
             // not always combined with the same suit.
-            int number = suitAssignment == SuitAssignment.RANDOM ?
-                         ((kerbal.name.GetHashCode() + kerbal.name.Length) * 2053) & 0x7fffffff :
-                         HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
+            int number =
+              suitAssignment == SuitAssignment.RANDOM ?
+              ((kerbal.name.GetHashCode() + kerbal.name.Length) * suitMultiplier) & 0x7fffffff :
+              HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
 
             suit = genderSuits[number % genderSuits.Count];
           }
@@ -328,13 +332,16 @@ namespace TextureReplacer
               {
                 smr.enabled = false;
               }
-              else if (suit != null)
+              else
               {
                 if (!isEva)
                   smr.sharedMesh = isAtmSuit ? null : helmetMesh;
 
-                newTexture = isEva ? suit.evaHelmet : suit.helmet;
-                newNormalMap = suit.helmetNRM;
+                if (suit != null)
+                {
+                  newTexture = isEva ? suit.evaHelmet : suit.helmet;
+                  newNormalMap = suit.helmetNRM;
+                }
               }
               break;
 
@@ -671,6 +678,14 @@ namespace TextureReplacer
             else
               Util.log("Invalid value for suitAssignment: {0}", sSuitAssignment);
           }
+
+          string sHeadMultiplier = genericNode.GetValue("headMultiplier");
+          if (sHeadMultiplier != null)
+            int.TryParse(sHeadMultiplier, out headMultiplier);
+
+          string sSuitMultiplier = genericNode.GetValue("suitMultiplier");
+          if (sSuitMultiplier != null)
+            int.TryParse(sSuitMultiplier, out suitMultiplier);
 
           string sCommanderSuit = genericNode.GetValue("commanderSuit");
           if (sCommanderSuit != null)

@@ -200,7 +200,6 @@ namespace TextureReplacer
       {
         GameDatabase.TextureInfo texInfo = texInfos[i];
         Texture2D texture = texInfo.texture;
-        TextureFormat format = texture.format;
 
         if (texture == null)
           continue;
@@ -223,6 +222,7 @@ namespace TextureReplacer
           continue;
         }
 
+        TextureFormat format = texture.format;
         bool hasGenMipmaps = false;
         bool hasCompressed = false;
 

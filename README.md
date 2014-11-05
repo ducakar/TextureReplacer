@@ -61,6 +61,7 @@ Examples:
 
     GameData/TextureReplacer/
       Default/kerbalHead              // default Kerbal head
+      Default/kerbalHeadNRM           // default Kerbal head normal map
       Default/kerbalMain              // default IVA suit (veteran/orange)
       Default/kerbalMainGrey          // default IVA suit (standard/grey)
       Default/kerbalMainNRM           // default IVA suit normal map
@@ -267,6 +268,13 @@ Change Log
 * 1.9
     - added integration with KerbalStats (optional) for gender determination and
       experience-based suit assignment
+    - new `commanderSuit`, `pilotSuit`, `scientistSuit`, `passengerSuit` config
+      options for experience-based suits
+    - new `headMultiplier` and `suitMultiplier` options for tweaking randomisation
+      algorithm for head and suit assignment
+    - added support for setting normal map of the default head
+    - fixed IVA helmet removal when using the default suit
+    - fixed a crash which might occur when rebuilding game database
 * 1.8.1
     - fixed crash when environment map is missing
 * 1.8
