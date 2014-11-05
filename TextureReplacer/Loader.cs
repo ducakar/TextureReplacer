@@ -250,8 +250,7 @@ namespace TextureReplacer
 
         // Compress if necessary.
         if (isCompressionEnabled.Value
-            && texture.format != TextureFormat.DXT1 && texture.format != TextureFormat.DXT5
-            && texture.width % 4 == 0 && texture.height % 4 == 0)
+            && texture.format != TextureFormat.DXT1 && texture.format != TextureFormat.DXT5)
         {
           texture.Compress(true);
           texInfos[i].isCompressed = true;
