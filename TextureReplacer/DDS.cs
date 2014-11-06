@@ -38,6 +38,7 @@ namespace TextureReplacer
     const uint DDPF_FOURCC = 0x00000004;
     const uint DDPF_RGB = 0x00000040;
     const uint DDPF_NORMAL = 0x80000000;
+    const uint DDPF_READABLE = 0x08000000;
 
     static bool fourCCEquals(IList<byte> bytes, string s)
     {
@@ -83,6 +84,7 @@ namespace TextureReplacer
         TextureFormat format;
         bool isCompressed = false;
         bool isNormalMap = (pixelFlags & DDPF_NORMAL) != 0 || urlFile.name.EndsWith("NRM");
+        bool isReadable = (pixelFlags & DDPF_READABLE) != 0;
 
         if ((pixelFlags & DDPF_FOURCC) != 0)
         {
@@ -141,9 +143,9 @@ namespace TextureReplacer
 
         Texture2D texture = new Texture2D(width, height, format, nMipmaps > 1);
         texture.LoadRawTextureData(data);
-        texture.Apply(false, true);
+        texture.Apply(false, !isReadable);
 
-        return new GameDatabase.TextureInfo(texture, isNormalMap, false, isCompressed);
+        return new GameDatabase.TextureInfo(texture, isNormalMap, isReadable, isCompressed);
       }
       catch (IOException e)
       {
