@@ -207,15 +207,20 @@ namespace TextureReplacer
 
       // Find NavBall replacement textures if available.
       if (mappedTextures.TryGetValue(HUD_NAVBALL, out hudNavBallTexture))
+      {
         mappedTextures.Remove(HUD_NAVBALL);
 
+        if (hudNavBallTexture.mipmapCount != 1)
+          Util.log("HUDNavBall texture shouldn't have mipmaps!");
+      }
+
       if (mappedTextures.TryGetValue(IVA_NAVBALL, out ivaNavBallTexture))
+      {
         mappedTextures.Remove(IVA_NAVBALL);
 
-      if (hudNavBallTexture.mipmapCount != 1)
-        Util.log("HUDNavBall texture shouldn't have mipmaps!");
-      if (ivaNavBallTexture.mipmapCount != 1)
-        Util.log("IVANavBall texture shouldn't have mipmaps!");
+        if (ivaNavBallTexture.mipmapCount != 1)
+          Util.log("IVANavBall texture shouldn't have mipmaps!");
+      }
     }
 
     public void resetScene()

@@ -265,6 +265,8 @@ Known Issues
 Change Log
 ----------
 
+* 1.9.2
+    - fixed crash when there is no navball replacement texture
 * 1.9.1
     - updated configuration to cover more mods
     - omitted navballs from mipmap generation
