@@ -28,7 +28,9 @@ namespace TextureReplacer
 {
   class Replacer
   {
-    static readonly string DIR_TEXTURES = Util.DIR + "Default/";
+    public static readonly string DIR_TEXTURES = Util.DIR + "Default/";
+    public static readonly string HUD_NAVBALL = "HUDNavBall";
+    public static readonly string IVA_NAVBALL = "IVANavBall";
     // General texture replacements.
     readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
     // NavBalls' textures.
@@ -204,11 +206,16 @@ namespace TextureReplacer
       }
 
       // Find NavBall replacement textures if available.
-      if (mappedTextures.TryGetValue("HUDNavBall", out hudNavBallTexture))
-        mappedTextures.Remove("HUDNavBall");
+      if (mappedTextures.TryGetValue(HUD_NAVBALL, out hudNavBallTexture))
+        mappedTextures.Remove(HUD_NAVBALL);
 
-      if (mappedTextures.TryGetValue("IVANavBall", out ivaNavBallTexture))
-        mappedTextures.Remove("IVANavBall");
+      if (mappedTextures.TryGetValue(IVA_NAVBALL, out ivaNavBallTexture))
+        mappedTextures.Remove(IVA_NAVBALL);
+
+      if (hudNavBallTexture.mipmapCount != 1)
+        Util.log("HUDNavBall texture shouldn't have mipmaps!");
+      if (ivaNavBallTexture.mipmapCount != 1)
+        Util.log("IVANavBall texture shouldn't have mipmaps!");
     }
 
     public void resetScene()

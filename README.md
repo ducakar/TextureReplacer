@@ -15,7 +15,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
 * set suits based on Kerbals' experiences,
-* set cockpit-specific IVA suit,
+* set cockpit-specific IVA suits,
 * remove IVA helmets in safe situations,
 * spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
 * add normal map for head texture,
@@ -265,6 +265,11 @@ Known Issues
 Change Log
 ----------
 
+* 1.9.1
+    - updated configuration to cover more mods
+    - omitted navballs from mipmap generation
+    - fixed crash when there are no Kerbal suits
+    - fixed crash when environment map textures are not readable
 * 1.9
     - added integration with KerbalStats (optional) for gender determination and
       experience-based suit assignment

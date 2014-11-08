@@ -34,9 +34,12 @@ namespace TextureReplacer
     // Texture compression and mipmap generation parameters.
     int lastTextureCount = 0;
     // List of substrings for paths where mipmap generating is enabled.
-    readonly List<Regex> generateMipmaps = new List<Regex>();
+    readonly List<Regex> generateMipmaps = new List<Regex> { new Regex("^" + Util.DIR) };
     // List of substrings for paths where textures shouldn't be unloaded.
-    readonly List<Regex> keepLoaded = new List<Regex>();
+    readonly List<Regex> keepLoaded = new List<Regex> { new Regex("^" + Reflections.DIR_ENVMAP) };
+    // NavBall textures.
+    static readonly string HUD_NAVBALL = Replacer.DIR_TEXTURES + Replacer.HUD_NAVBALL;
+    static readonly string IVA_NAVBALL = Replacer.DIR_TEXTURES + Replacer.IVA_NAVBALL;
     // Features.
     bool? isCompressionEnabled = null;
     bool? isMipmapGenEnabled = null;
@@ -230,7 +233,9 @@ namespace TextureReplacer
         // blurriness when using less-than-full texture quality.
         if (isMipmapGenEnabled.Value && texture.mipmapCount == 1
             && (texture.width > 1 || texture.height > 1)
-            && generateMipmaps.Any(r => r.IsMatch(texture.name)))
+            && generateMipmaps.Any(r => r.IsMatch(texture.name))
+            && texture.name != HUD_NAVBALL
+            && texture.name != IVA_NAVBALL)
         {
           Color32[] pixels32 = texture.GetPixels32();
 
@@ -271,7 +276,7 @@ namespace TextureReplacer
     }
 
     /**
-     * Post-load initialisation.
+     * Unload textures.
      */
     public void initialise()
     {
@@ -286,8 +291,7 @@ namespace TextureReplacer
           continue;
 
         // Unload texture from RAM (a.k.a. "make it unreadable") unless set otherwise.
-        if (isUnloadingEnabled.Value && !texture.name.StartsWith(Reflections.DIR_ENVMAP)
-            && !keepLoaded.Any(r => r.IsMatch(texture.name)))
+        if (isUnloadingEnabled.Value && !keepLoaded.Any(r => r.IsMatch(texture.name)))
         {
           try
           {

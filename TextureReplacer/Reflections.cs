@@ -161,17 +161,25 @@ namespace TextureReplacer
         }
         else
         {
-          envMap = new Cubemap(envMapSize, TextureFormat.RGB24, true);
-          envMap.wrapMode = TextureWrapMode.Clamp;
-          envMap.SetPixels(envMapFaces[0].GetPixels(), CubemapFace.PositiveX);
-          envMap.SetPixels(envMapFaces[1].GetPixels(), CubemapFace.NegativeX);
-          envMap.SetPixels(envMapFaces[2].GetPixels(), CubemapFace.PositiveY);
-          envMap.SetPixels(envMapFaces[3].GetPixels(), CubemapFace.NegativeY);
-          envMap.SetPixels(envMapFaces[4].GetPixels(), CubemapFace.PositiveZ);
-          envMap.SetPixels(envMapFaces[5].GetPixels(), CubemapFace.NegativeZ);
-          envMap.Apply(true, true);
+          try
+          {
+            envMap = new Cubemap(envMapSize, TextureFormat.RGB24, true);
+            envMap.wrapMode = TextureWrapMode.Clamp;
+            envMap.SetPixels(envMapFaces[0].GetPixels(), CubemapFace.PositiveX);
+            envMap.SetPixels(envMapFaces[1].GetPixels(), CubemapFace.NegativeX);
+            envMap.SetPixels(envMapFaces[2].GetPixels(), CubemapFace.PositiveY);
+            envMap.SetPixels(envMapFaces[3].GetPixels(), CubemapFace.NegativeY);
+            envMap.SetPixels(envMapFaces[4].GetPixels(), CubemapFace.PositiveZ);
+            envMap.SetPixels(envMapFaces[5].GetPixels(), CubemapFace.NegativeZ);
+            envMap.Apply(true, true);
 
-          Util.log("Environment map cube texture generated.");
+            Util.log("Environment map cube texture generated.");
+          }
+          catch (UnityException)
+          {
+            envMap = null;
+            Util.log("Environment map texture is not readable. Reflections disabled.");
+          }
         }
       }
 

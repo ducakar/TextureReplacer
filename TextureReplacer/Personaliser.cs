@@ -253,7 +253,7 @@ namespace TextureReplacer
         {
           List<Suit> genderSuits = isFemale && kerminSuits.Count != 0 ? kerminSuits : suits;
 
-          if (genderSuits != null)
+          if (genderSuits.Count != 0)
           {
             // Here we must use a different prime to increase randomisation so that the same head is
             // not always combined with the same suit.
