@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -40,7 +40,7 @@
         <Command type="AfterBuild" command="cp ${TargetFile} &quot;/run/media/davorin/Windows 7/KSP-test/GameData/TextureReplacer/Plugins&quot;" workingdir="${ProjectDir}" />
       </CustomCommands>
     </CustomCommands>
-    <DefineConstants>TR_REFLECTION</DefineConstants>
+    <DefineConstants>TR_DDS TR_REFLECTION</DefineConstants>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -55,6 +55,7 @@
     <Compile Include="UI.cs" />
     <Compile Include="Util.cs" />
     <None Include="Visor-source.shader" />
+    <Compile Include="TREvaSuitModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">

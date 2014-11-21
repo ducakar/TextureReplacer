@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 
 [assembly: AssemblyTitle("TextureReplacer")]
 [assembly: AssemblyDescription("")]
@@ -8,4 +8,4 @@ using System.Reflection;
 [assembly: AssemblyCopyright("© 2014 Davorin Učakar, Ryan Bray")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("1.9.2.*")]
+[assembly: AssemblyVersion("1.9.80.*")]

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2014 Davorin Učakar
  * Copyright © 2013 Ryan Bray
  *

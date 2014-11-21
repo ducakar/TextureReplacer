@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2014 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -139,6 +139,7 @@ namespace TextureReplacer
     bool isAtmSuitEnabled = true;
     double atmSuitPressure = 0.5;
     readonly HashSet<string> atmSuitBodies = new HashSet<string>();
+    bool isEvaSuitToggleEnabled = true;
     // Whether assignment of suits should be consecutive.
     SuitAssignment suitAssignment = SuitAssignment.RANDOM;
     // Update counter for IVA replacement. It has to scheduled with a little lag to avoid race
@@ -159,6 +160,24 @@ namespace TextureReplacer
     MethodInfo ksGetMethod = null;
     // Instance.
     public static Personaliser instance = null;
+
+    bool isSituationSafe(Vessel vessel)
+    {
+      bool value =
+        isHelmetRemovalEnabled
+        && vessel.situation != Vessel.Situations.FLYING
+        && vessel.situation != Vessel.Situations.SUB_ORBITAL;
+      return value;
+    }
+
+    bool isAtmBreathable(double atmPressure)
+    {
+      bool value =
+        isAtmSuitEnabled
+        && atmPressure >= atmSuitPressure
+        && atmSuitBodies.Contains(FlightGlobals.currentMainBody.bodyName);
+      return value;
+    }
 
     bool ksIsFemale(object kerbal)
     {
@@ -328,33 +347,26 @@ namespace TextureReplacer
               break;
 
             case "helmet":
-              if (isEva && isAtmSuit)
-              {
-                smr.enabled = false;
-              }
+              if (isEva)
+                smr.enabled = !isAtmSuit;
               else
-              {
-                if (!isEva)
-                  smr.sharedMesh = isAtmSuit ? null : helmetMesh;
+                smr.sharedMesh = isAtmSuit ? null : helmetMesh;
 
-                if (suit != null)
-                {
-                  newTexture = isEva ? suit.evaHelmet : suit.helmet;
-                  newNormalMap = suit.helmetNRM;
-                }
+              if (!isAtmSuit && suit != null)
+              {
+                newTexture = isEva ? suit.evaHelmet : suit.helmet;
+                newNormalMap = suit.helmetNRM;
               }
               break;
 
             case "visor":
-              if (isEva && isAtmSuit)
-              {
-                smr.enabled = false;
-              }
+              if (isEva)
+                smr.enabled = !isAtmSuit;
               else
-              {
-                if (!isEva)
-                  smr.sharedMesh = isAtmSuit ? null : visorMesh;
+                smr.sharedMesh = isAtmSuit ? null : visorMesh;
 
+              if (!isAtmSuit)
+              {
                 // Visor texture must be set every time, because the replacement on proto-IVA Kerbal
                 // doesn't seem to work.
                 Suit skin = suit ?? defaultSuit;
@@ -366,11 +378,9 @@ namespace TextureReplacer
               break;
 
             default: // Jetpack.
-              if (isEva && isAtmSuit)
-              {
-                smr.enabled = false;
-              }
-              else if (suit != null)
+              smr.enabled = !isAtmSuit;
+
+              if (!isAtmSuit && suit != null)
               {
                 newTexture = suit.evaJetpack;
                 newNormalMap = suit.evaJetpackNRM;
@@ -399,9 +409,7 @@ namespace TextureReplacer
           Kerbal[] kerbals = part.internalModel.GetComponentsInChildren<Kerbal>();
           if (kerbals.Length != 0)
           {
-            bool hideHelmets = isHelmetRemovalEnabled
-                               && vessel.situation != Vessel.Situations.FLYING
-                               && vessel.situation != Vessel.Situations.SUB_ORBITAL;
+            bool hideHelmets = isSituationSafe(vessel);
 
             foreach (Kerbal kerbal in kerbals)
               personaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, hideHelmets);
@@ -422,17 +430,15 @@ namespace TextureReplacer
       if (atmPressure == FlightGlobals.currentMainBody.atmosphereMultiplier)
         return;
 
-      bool isAtmSuit = isAtmSuitEnabled
-                       && atmPressure >= atmSuitPressure
-                       && atmSuitBodies.Contains(FlightGlobals.currentMainBody.bodyName);
+      bool isAtmSuit = isAtmBreathable(atmPressure);
 
       KerbalEVA eva = vessel.GetComponent<KerbalEVA>();
       if (eva != null)
       {
         // Vessel is a Kerbal.
-        List<ProtoCrewMember> crew = vessel.rootPart.protoModuleCrew;
+        List<ProtoCrewMember> crew = eva.part.protoModuleCrew;
         if (crew.Count != 0)
-          personaliseKerbal(eva, crew[0], null, isAtmSuit);
+          personaliseKerbal(eva.part, crew[0], null, isAtmSuit);
       }
       else
       {
@@ -544,9 +550,7 @@ namespace TextureReplacer
           Kerbal[] kerbals = part.internalModel.GetComponentsInChildren<Kerbal>();
           if (kerbals.Length != 0)
           {
-            bool hideHelmets = isHelmetRemovalEnabled
-                               && vessel.situation != Vessel.Situations.FLYING
-                               && vessel.situation != Vessel.Situations.SUB_ORBITAL;
+            bool hideHelmets = isSituationSafe(vessel);
 
             foreach (Kerbal kerbal in kerbals)
             {
@@ -785,6 +789,10 @@ namespace TextureReplacer
         foreach (string s in Util.splitConfigValue(sAtmSuitBodies))
           atmSuitBodies.Add(s);
       }
+
+      string sIsEvaSuitToggleEnabled = rootNode.GetValue("isEVASuitToggleEnabled");
+      if (sIsEvaSuitToggleEnabled != null)
+        Boolean.TryParse(sIsEvaSuitToggleEnabled, out isEvaSuitToggleEnabled);
     }
 
     /**
@@ -893,6 +901,20 @@ namespace TextureReplacer
           visorMesh = smr.sharedMesh;
       }
 
+      // Install module for KerbalEVA part to enable EVA suit toggle.
+      if (isEvaSuitToggleEnabled)
+      {
+        ConfigNode moduleConfig = new ConfigNode("MODULE");
+        moduleConfig.AddValue("name", "TREvaSuitModule");
+        try
+        {
+          PartLoader.getPartInfoByName("kerbalEVA").partPrefab.AddModule(moduleConfig);
+        }
+        catch (NullReferenceException)
+        {
+        }
+      }
+
       // Link to KerbalStats if available.
       foreach (AssemblyLoader.LoadedAssembly assembly in AssemblyLoader.loadedAssemblies)
       {
@@ -907,8 +929,8 @@ namespace TextureReplacer
       }
 
       Util.log(ksGetMethod != null ?
-               "KerbalStats will be used Kerbal gender determination and experience based suit assignment." :
-               "KerbalStats not found. TextureReplacer will determine Kerbal gender.");
+               "KerbalStats will determine Kerbals' genders and experience-based suit assignment." :
+               "KerbalStats not found. TextureReplacer will determine Kerbals' genders.");
     }
 
     public void resetScene()
@@ -953,6 +975,34 @@ namespace TextureReplacer
         if (ivaReplaceTimer > 0)
           ivaReplaceTimer = Math.Max(0.0f, ivaReplaceTimer - Time.deltaTime);
       }
+    }
+
+    /**
+     * Toggle external EVA/IVA suit. Fails and return false iff trying to remove EVA suit outside of
+     * breathable atmosphere.
+     */
+    public bool toggleEva(Part evaPart)
+    {
+      List<ProtoCrewMember> crew = evaPart.protoModuleCrew;
+      if (crew.Count != 0)
+      {
+        bool isAtmSuit = false;
+        foreach (SkinnedMeshRenderer smr
+                 in evaPart.GetComponentsInChildren<SkinnedMeshRenderer>())
+        {
+          if (smr.name == "helmet")
+          {
+            isAtmSuit = !smr.enabled;
+            break;
+          }
+        }
+
+        if (!isAtmSuit && !isAtmBreathable(FlightGlobals.getStaticPressure()))
+          return false;
+
+        personaliseKerbal(evaPart, crew[0], null, !isAtmSuit);
+      }
+      return true;
     }
   }
 }

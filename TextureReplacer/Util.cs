@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2014 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -66,16 +66,20 @@ namespace TextureReplacer
     /**
      * Print hierarchy up from a transform.
      */
-    public static void logDownHierarchy(Transform tf)
+    public static void logDownHierarchy(Transform tf, int indent = 0)
     {
+      string sIndent = "";
+      for (int i = 0; i < indent; ++i)
+        sIndent += "  ";
+
       if (tf.gameObject != null)
-        UnityEngine.Debug.Log("- " + tf.gameObject.name + ": " + tf.gameObject.GetType());
+        UnityEngine.Debug.Log(sIndent + "- " + tf.gameObject.name + ": " + tf.gameObject.GetType());
 
       foreach (Component c in tf.GetComponents<Component>())
-        UnityEngine.Debug.Log(" + " + c.name + ": " + c.GetType());
+        UnityEngine.Debug.Log(sIndent + " * " + c.name + ": " + c.GetType());
 
       for (int i = 0; i < tf.childCount; ++i)
-        logDownHierarchy(tf.GetChild(i));
+        logDownHierarchy(tf.GetChild(i), indent + 1);
     }
 
     /**
@@ -86,10 +90,10 @@ namespace TextureReplacer
       for (; tf != null; tf = tf.parent)
       {
         if (tf.gameObject != null)
-          UnityEngine.Debug.Log("- " + tf.gameObject.name + ": " + tf.gameObject.GetType());
+          UnityEngine.Debug.Log("+ " + tf.gameObject.name + ": " + tf.gameObject.GetType());
 
         foreach (Component c in tf.GetComponents<Component>())
-          UnityEngine.Debug.Log(" + " + c.name + ": " + c.GetType());
+          UnityEngine.Debug.Log(" * " + c.name + ": " + c.GetType());
       }
     }
 

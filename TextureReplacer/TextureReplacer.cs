@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2014 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -28,7 +28,6 @@ namespace TextureReplacer
   [KSPAddon(KSPAddon.Startup.Instantly, true)]
   public class TextureReplacer : MonoBehaviour
   {
-    // Generic texture replacement parameters.
     GameScenes lastScene = GameScenes.LOADING;
     bool isInitialised = false;
 

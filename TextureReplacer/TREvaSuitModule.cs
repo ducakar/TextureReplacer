@@ -20,49 +20,17 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#if false
-
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace TextureReplacer
 {
-  class UI
+  public class TREvaSuitModule : PartModule
   {
-    const int WINDOW_ID = 107056;
-    const Rect windowRect = new Rect(40, 40, 400, 400);
-    // Instance.
-    public static Replacer instance = null;
-
-    void draw()
+    [KSPEvent(guiActive = true, guiName = "Toggle EVA Suit", active = true)]
+    public void toggleHelmet()
     {
-      GUILayout.Window(WINDOW_ID, windowRect, windowHandler, "TextureReplacer");
-    }
-
-    void windowHandler(int id)
-    {
-      GUILayout.BeginVertical();
-
-      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster)
-      {
-        Color colour = new Color(1.0f, 0.0f, 0.0f);
-        bool isChangeable = false;
-
-        if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.AVAILABLE)
-        {
-          colour = new Color(1.0f, 1.0f, 1.0f);
-          isChangeable = true;
-        }
-        else if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.ASSIGNED)
-        {
-          colour = new Color(1.0f, 1.0f, 0.0f);
-        }
-      }
-
-      GUILayout.EndVertical();
+      if (!Personaliser.instance.toggleEva(part))
+        ScreenMessages.PostScreenMessage("Kerbals ARE crazy, but not suicidal!", 5.0f,
+                                         ScreenMessageStyle.UPPER_CENTER);
     }
   }
 }
 
-#endif

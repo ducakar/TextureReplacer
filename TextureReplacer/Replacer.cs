@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2014 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -39,7 +39,7 @@ namespace TextureReplacer
     // Generic texture replacement parameters.
     int lastMaterialCount = 0;
     // General replacement has to be performed for more than one frame when a scene switch occurs
-    // since textures and models may also be loaded with a timed lag.
+    // since textures and models may also be loaded with a lag.
     float replaceTimer = -1.0f;
     // Print material/texture names when performing texture replacement pass.
     bool logTextures = false;
@@ -71,7 +71,7 @@ namespace TextureReplacer
             newTexture.wrapMode = texture.wrapMode;
 
             material.mainTexture = newTexture;
-            Resources.UnloadAsset(texture);
+            UnityEngine.Object.Destroy(texture);
           }
         }
         // Trilinear filter have already been applied to replacement textures, here we apply it also
@@ -96,7 +96,7 @@ namespace TextureReplacer
             newNormalMap.wrapMode = normalMap.wrapMode;
 
             material.SetTexture("_BumpMap", newNormalMap);
-            Resources.UnloadAsset(normalMap);
+            UnityEngine.Object.Destroy(normalMap);
           }
         }
         else if (normalMap.filterMode == FilterMode.Bilinear)
@@ -104,6 +104,19 @@ namespace TextureReplacer
           normalMap.filterMode = FilterMode.Trilinear;
         }
       }
+    }
+
+    /**
+     * Replace planets' surface textures.
+     */
+    static void replaceSurfaceTextures()
+    {
+//      foreach (var vcm in Resources.FindObjectsOfTypeAll<CelestialBody>())
+//      {
+//        Util.log(vcm.transform.name);
+//        Util.logDownHierarchy(vcm.transform);
+//        vcm.vertexColorMap.CreateMap(MapSO.MapDepth.RGB, mappedTextures["evemoon100"]);
+//      }
     }
 
     /**
@@ -232,7 +245,7 @@ namespace TextureReplacer
       if (scene == GameScenes.MAINMENU || scene == GameScenes.SPACECENTER)
         replaceTimer = 2.0f;
       else
-        replaceTimer = 0.1f;
+        replaceTimer = 0.2f;
 
       if (hudNavBallTexture != null || ivaNavBallTexture != null)
       {
@@ -241,6 +254,9 @@ namespace TextureReplacer
         else
           GameEvents.onVesselChange.Remove(updateNavball);
       }
+
+      if (scene == GameScenes.MAINMENU)
+        replaceSurfaceTextures();
     }
 
     public void updateScene()
@@ -254,15 +270,7 @@ namespace TextureReplacer
           lastMaterialCount = materials.Length;
         }
 
-        if (replaceTimer == 0.0f)
-        {
-          GC.Collect();
-          replaceTimer = -1.0f;
-        }
-        else
-        {
-          replaceTimer = Math.Max(0.0f, replaceTimer - Time.deltaTime);
-        }
+        replaceTimer = replaceTimer == 0.0f ? -1.0f : Math.Max(0.0f, replaceTimer - Time.deltaTime);
       }
     }
   }

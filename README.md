@@ -265,6 +265,10 @@ Known Issues
 Change Log
 ----------
 
+* 1.9.80
+    - "Toggle EVA Suit" option in Kerbal context menu
+    - original textures are unloaded when replaced by a texture from `Default/`
+    - updated default configuration for new mods
 * 1.9.2
     - fixed crash when there is no navball replacement texture
 * 1.9.1
