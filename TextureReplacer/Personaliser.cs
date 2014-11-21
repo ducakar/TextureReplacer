@@ -286,7 +286,9 @@ namespace TextureReplacer
         }
       }
 
-      foreach (Renderer renderer in component.GetComponentsInChildren<Renderer>())
+      // We must include hidden meshes, since flares are hidden when light is turned off.
+      // All other meshes are always visible, so no performance hit here.
+      foreach (Renderer renderer in component.GetComponentsInChildren<Renderer>(true))
       {
         var smr = renderer as SkinnedMeshRenderer;
 
@@ -493,19 +495,20 @@ namespace TextureReplacer
     }
 
     /**
-     * Update IVA textures on vessel switch or docking.
+     * Update IVA textures on vessel switch or docking. For transparent pods to work correctly,
+     * this also has to be performed for the old vessel.
      */
     void scheduleSwitchUpdate(Vessel vessel)
     {
       if (previousVessel != null && previousVessel != vessel)
       {
         ivaReplaceTimer = IVA_TIMER_DELAY;
-        ivaVessels.Add(previousVessel);
+        ivaVessels.AddUnique(previousVessel);
       }
       if (vessel != null)
       {
         ivaReplaceTimer = IVA_TIMER_DELAY;
-        ivaVessels.Add(vessel);
+        ivaVessels.AddUnique(vessel);
       }
       previousVessel = vessel;
     }
@@ -520,14 +523,21 @@ namespace TextureReplacer
 
     /**
      * Update EVA textures when a new Kerbal is created or when one comes into 2.3 km range.
+     * If the vessel is not an EVA, update IVA textures (for transparent pods).
      */
     void scheduleSpawnUpdate(Vessel vessel)
     {
-      if (vessel != null)
+      if (vessel != null && vessel.rootPart != null)
       {
-        ivaReplaceTimer = IVA_TIMER_DELAY;
-        ivaVessels.Add(vessel);
-        evaVessels.Add(vessel);
+        if (vessel.rootPart.GetComponent<KerbalEVA>() != null)
+        {
+          evaVessels.Add(vessel);
+        }
+        else
+        {
+          ivaReplaceTimer = IVA_TIMER_DELAY;
+          ivaVessels.AddUnique(vessel);
+        }
       }
     }
 
