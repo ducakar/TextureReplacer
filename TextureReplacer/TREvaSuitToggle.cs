@@ -22,15 +22,16 @@
 
 namespace TextureReplacer
 {
-  public class TREvaSuitModule : PartModule
+  public class TREvaSuitToggle : PartModule
   {
     [KSPEvent(guiActive = true, guiName = "Toggle EVA Suit", active = true)]
     public void toggleHelmet()
     {
       if (!Personaliser.instance.toggleEva(part))
-        ScreenMessages.PostScreenMessage("Kerbals ARE crazy, but not suicidal!", 5.0f,
+      {
+        ScreenMessages.PostScreenMessage("No breathable atmosphere", 5.0f,
                                          ScreenMessageStyle.UPPER_CENTER);
+      }
     }
   }
 }
-

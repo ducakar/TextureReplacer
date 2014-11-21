@@ -293,8 +293,8 @@ namespace TextureReplacer
         // Thruster jets, flag decals and headlight flares.
         if (smr == null)
         {
-          if (isAtmSuit && renderer.name != "screenMessage")
-            renderer.enabled = false;
+          if (renderer.name != "screenMessage")
+            renderer.enabled = !isAtmSuit;
         }
         else
         {
@@ -333,17 +333,14 @@ namespace TextureReplacer
                 newNormalMap = isEvaSuit ? suit.evaSuitNRM : suit.suitNRM;
               }
 
-              // This required to fix IVA suits after KSP resetting them to the stock ones all the
-              // time. If there is the default replacement for IVA suit texture and the current
-              // Kerbal skin contains no IVA suit, we must set it to the default replacement,
-              // otherwise the stock one will be used.
-              if (!isEvaSuit)
-              {
-                if (newTexture == null)
-                  newTexture = defaultSuit.suit;
-                if (newNormalMap == null)
-                  newNormalMap = defaultSuit.suitNRM;
-              }
+              // This required for two reasons: to fix IVA suits after KSP resetting them to the
+              // stock ones all the time and to fix the switch from non-default to default texture
+              // during EVA suit toggle.
+              if (newTexture == null)
+                newTexture = isEvaSuit ? defaultSuit.evaSuit : defaultSuit.suit;
+              if (newNormalMap == null)
+                newNormalMap = isEvaSuit ? defaultSuit.evaSuitNRM : defaultSuit.suitNRM;
+
               break;
 
             case "helmet":
@@ -877,9 +874,11 @@ namespace TextureReplacer
           string originalName = texture.name.Substring(lastSlash + 1);
 
           if (originalName == "kerbalHead")
+          {
             texture.wrapMode = TextureWrapMode.Clamp;
-
-          if (defaultSuit.setTexture(originalName, texture))
+            Util.log("Mapped default head -> {1}", texture.name);
+          }
+          else if (defaultSuit.setTexture(originalName, texture))
           {
             texture.wrapMode = TextureWrapMode.Clamp;
             Util.log("Mapped default suit {0} -> {1}", originalName, texture.name);
@@ -905,7 +904,7 @@ namespace TextureReplacer
       if (isEvaSuitToggleEnabled)
       {
         ConfigNode moduleConfig = new ConfigNode("MODULE");
-        moduleConfig.AddValue("name", "TREvaSuitModule");
+        moduleConfig.AddValue("name", "TREvaSuitToggle");
         try
         {
           PartLoader.getPartInfoByName("kerbalEVA").partPrefab.AddModule(moduleConfig);

@@ -20,8 +20,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#if TR_REFLECTION
-
 using System.Linq;
 using UnityEngine;
 
@@ -86,5 +84,3 @@ namespace TextureReplacer
     }
   }
 }
-
-#endif
