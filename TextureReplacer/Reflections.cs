@@ -195,7 +195,7 @@ namespace TextureReplacer
         return;
       }
 
-      string shaderPath = Util.DIR + "Plugins/Visor.shader";
+      string shaderPath = KSP.IO.IOUtils.GetFilePathFor(GetType(), "Visor.shader");
       string shaderSource = null;
 
       try

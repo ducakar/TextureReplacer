@@ -62,8 +62,7 @@ Examples:
     GameData/TextureReplacer/
       Default/kerbalHead              // default Kerbal head
       Default/kerbalHeadNRM           // default Kerbal head normal map
-      Default/kerbalMain              // default IVA suit (veteran/orange)
-      Default/kerbalMainGrey          // default IVA suit (standard/grey)
+      Default/kerbalMainGrey          // default IVA suit
       Default/kerbalMainNRM           // default IVA suit normal map
       Default/kerbalHelmetGrey        // default IVA helmet
       Default/kerbalHelmetNRM         // default IVA & EVA helmet normal map
@@ -262,6 +261,8 @@ Known Issues
 Change Log
 ----------
 
+* 1.10.2
+    - fixed visor shader loading
 * 1.10.1
     - changed the way how texture replacements for KerbalEVA are triggered
     - further optimised personalised IVA replacements
