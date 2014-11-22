@@ -254,9 +254,6 @@ Known Issues
 
 * If there is no IVA suit replacement the default EVA suit texture is used for
   the atmospheric EVAs. [Won't fix. Provide an IVA suit to fix it.]
-* If a Kerbal rides to space on a rover seat he/she ends up in orbit in his/her
-  IVA suit without a helmet. [Won't fix, it's too complicated. Just toggle EVA
-  suit or reload the scene.]
 * Replacement of textures from `GameData/` does not work for certain models.
   [No known fix.]
 * Jetpack re-appears after dismounting a KerbalQuest jetpack. [No fix yet.]
@@ -265,6 +262,14 @@ Known Issues
 Change Log
 ----------
 
+* 1.10.1
+    - changed the way how texture replacements for KerbalEVA are triggered
+    - further optimised personalised IVA replacements
+    - the state of EVA suit is saved for Kerbals on EVA
+    - when conditions for IVA suit are not met any more, a Kerbal on EVA
+      automatically wears EVA suit
+    - removed `isToggleEvaSuitEnabled` config option, the EVA PartModule is now
+      mandatory for texture replacement to work
 * 1.10
     - added "Toggle EVA Suit" option to Kerbal context menu
     - optimised Kerbal personalisation by removing many redundant replacements

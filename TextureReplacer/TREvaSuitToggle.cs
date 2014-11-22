@@ -22,15 +22,38 @@
 
 namespace TextureReplacer
 {
-  public class TREvaSuitToggle : PartModule
+  public class TREvaModule : PartModule
   {
+    [KSPField(isPersistant = true)]
+    public bool hasEvaSuit = false;
+
     [KSPEvent(guiActive = true, guiName = "Toggle EVA Suit", active = true)]
-    public void toggleHelmet()
+    public void toggleEvaSuit()
     {
-      if (!Personaliser.instance.toggleEva(part))
+      if (Personaliser.instance.changeSuit(part, !hasEvaSuit))
       {
+        hasEvaSuit = !hasEvaSuit;
+      }
+      else
+      {
+        hasEvaSuit = true;
         ScreenMessages.PostScreenMessage("No breathable atmosphere", 5.0f,
                                          ScreenMessageStyle.UPPER_CENTER);
+      }
+    }
+
+    public override void OnStart(StartState state)
+    {
+      if (!Personaliser.instance.changeSuit(part, hasEvaSuit))
+        hasEvaSuit = true;
+    }
+
+    public override void OnUpdate()
+    {
+      if (!hasEvaSuit && !Personaliser.instance.isAtmBreathable())
+      {
+        Personaliser.instance.changeSuit(part, true);
+        hasEvaSuit = true;
       }
     }
   }
