@@ -781,15 +781,15 @@ namespace TextureReplacer
     {
       string sIsHelmetRemovalEnabled = rootNode.GetValue("isHelmetRemovalEnabled");
       if (sIsHelmetRemovalEnabled != null)
-        Boolean.TryParse(sIsHelmetRemovalEnabled, out isHelmetRemovalEnabled);
+        bool.TryParse(sIsHelmetRemovalEnabled, out isHelmetRemovalEnabled);
 
       string sIsAtmSuitEnabled = rootNode.GetValue("isAtmSuitEnabled");
       if (sIsAtmSuitEnabled != null)
-        Boolean.TryParse(sIsAtmSuitEnabled, out isAtmSuitEnabled);
+        bool.TryParse(sIsAtmSuitEnabled, out isAtmSuitEnabled);
 
       string sAtmSuitPressure = rootNode.GetValue("atmSuitPressure");
       if (sAtmSuitPressure != null)
-        Double.TryParse(sAtmSuitPressure, out atmSuitPressure);
+        double.TryParse(sAtmSuitPressure, out atmSuitPressure);
 
       foreach (string sAtmSuitBodies in rootNode.GetValues("atmSuitBodies"))
       {
@@ -799,7 +799,7 @@ namespace TextureReplacer
 
       string sIsEvaSuitToggleEnabled = rootNode.GetValue("isEVASuitToggleEnabled");
       if (sIsEvaSuitToggleEnabled != null)
-        Boolean.TryParse(sIsEvaSuitToggleEnabled, out isEvaSuitToggleEnabled);
+        bool.TryParse(sIsEvaSuitToggleEnabled, out isEvaSuitToggleEnabled);
     }
 
     /**

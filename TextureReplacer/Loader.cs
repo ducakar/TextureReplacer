@@ -69,11 +69,11 @@ namespace TextureReplacer
     {
       string sMipmapBias = rootNode.GetValue("mipmapBias");
       if (sMipmapBias != null)
-        Int32.TryParse(sMipmapBias, out mipmapBias);
+        int.TryParse(sMipmapBias, out mipmapBias);
 
       string sNormalMipmapBias = rootNode.GetValue("normalMipmapBias");
       if (sNormalMipmapBias != null)
-        Int32.TryParse(sNormalMipmapBias, out normalMipmapBias);
+        int.TryParse(sNormalMipmapBias, out normalMipmapBias);
 
       mipmapBias = Math.Max(mipmapBias, 0);
       normalMipmapBias = Math.Max(normalMipmapBias, 0);

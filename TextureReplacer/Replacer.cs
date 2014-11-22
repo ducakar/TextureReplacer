@@ -148,7 +148,7 @@ namespace TextureReplacer
     {
       string sLogTextures = rootNode.GetValue("logTextures");
       if (sLogTextures != null)
-        Boolean.TryParse(sLogTextures, out logTextures);
+        bool.TryParse(sLogTextures, out logTextures);
     }
 
     /**
