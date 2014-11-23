@@ -37,7 +37,7 @@ namespace TextureReplacer
       CONSECUTIVE
     }
 
-    class Head
+    public class Head
     {
       public string name;
       public bool isFemale;
@@ -46,9 +46,10 @@ namespace TextureReplacer
       public Texture2D headNRM;
     }
 
-    class Suit
+    public class Suit
     {
       public string name;
+      public bool isFemale;
       public Texture2D suit;
       public Texture2D suitNRM;
       public Texture2D helmet;
@@ -109,17 +110,27 @@ namespace TextureReplacer
     static readonly string DIR_SUITS = Util.DIR + "Suits/";
     // Delay for IVA replacement (in seconds).
     static readonly float IVA_TIMER_DELAY = 0.2f;
-    // Kerbal textures.
-    readonly Suit defaultSuit = new Suit { name = "DEFAULT" };
-    readonly List<Head> heads = new List<Head>();
-    readonly List<Suit> suits = new List<Suit>();
-    readonly List<Head> kerminHeads = new List<Head>();
-    readonly List<Suit> kerminSuits = new List<Suit>();
+    // Default textures (from `Default/`).
+    public readonly Head defaultHead = new Head { name = "DEFAULT" };
+    public readonly Suit defaultSuit = new Suit { name = "DEFAULT" };
+    // All Kerbal textures, including excluded by configuration.
+    public readonly List<Head> heads = new List<Head>();
+    public readonly List<Suit> suits = new List<Suit>();
+    // Male textures (minus excluded).
+    public readonly List<Head> kerbalHeads = new List<Head>();
+    public readonly List<Suit> kerbalSuits = new List<Suit>();
+    // Female textures (minus excluded).
+    public readonly List<Head> kerminHeads = new List<Head>();
+    public readonly List<Suit> kerminSuits = new List<Suit>();
     // Female name REs.
     readonly List<Regex> kerminNames = new List<Regex>();
     // Personalised Kerbal textures.
-    readonly Dictionary<string, Head> customHeads = new Dictionary<string, Head>();
-    readonly Dictionary<string, Suit> customSuits = new Dictionary<string, Suit>();
+    public readonly Dictionary<string, Head> customHeads = new Dictionary<string, Head>();
+    public readonly Dictionary<string, Suit> customSuits = new Dictionary<string, Suit>();
+    // Backed-up personalised textures from main configuration files. These are used to initialise
+    // `customHeads` and `customSuits` if a saved game doesn't contain `TRScenario`.
+    public readonly Dictionary<string, Head> defaultCustomHeads = new Dictionary<string, Head>();
+    public readonly Dictionary<string, Suit> defaultCustomSuits = new Dictionary<string, Suit>();
     // Cabin-specific suits.
     readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
     // Coefficients for "random" head and suit assignment.
@@ -251,7 +262,7 @@ namespace TextureReplacer
 
       if (!customHeads.TryGetValue(kerbal.name, out head))
       {
-        List<Head> genderHeads = isFemale && kerminHeads.Count != 0 ? kerminHeads : heads;
+        List<Head> genderHeads = isFemale && kerminHeads.Count != 0 ? kerminHeads : kerbalHeads;
 
         if (genderHeads.Count != 0)
         {
@@ -269,7 +280,7 @@ namespace TextureReplacer
 
         if (suit == null)
         {
-          List<Suit> genderSuits = isFemale && kerminSuits.Count != 0 ? kerminSuits : suits;
+          List<Suit> genderSuits = isFemale && kerminSuits.Count != 0 ? kerminSuits : kerbalSuits;
 
           if (genderSuits.Count != 0)
           {
@@ -510,6 +521,96 @@ namespace TextureReplacer
     }
 
     /**
+     * Read custom Kerbals mapping.
+     */
+    public void readCustomKerbals(ConfigNode node)
+    {
+      foreach (ConfigNode.Value entry in node.values)
+      {
+        string[] tokens = Util.splitConfigValue(entry.value);
+        string name = entry.name;
+        string headName = tokens.Length >= 1 ? tokens[0] : null;
+        string suitName = tokens.Length >= 2 ? tokens[1] : null;
+
+        if (headName != null)
+        {
+          if (headName == "GENERIC")
+          {
+            if (customHeads.ContainsKey(name))
+            {
+              customHeads.Remove(name);
+//              Util.log("Unmapped head for \"{0}\"", name);
+            }
+          }
+          else
+          {
+            Head head = null;
+            if (headName != "DEFAULT")
+            {
+              string _headName = headName;
+              head = heads.FirstOrDefault(h => h.name == _headName);
+            }
+            if (head == null)
+              headName = "DEFAULT";
+
+            customHeads[name] = head;
+//            Util.log("Mapped head for \"{0}\" -> {1}", name, headName);
+          }
+        }
+
+        if (suitName != null)
+        {
+          if (suitName == "GENERIC")
+          {
+            if (customSuits.ContainsKey(name))
+            {
+              customSuits.Remove(name);
+//              Util.log("Unmapped suit for \"{0}\"", name);
+            }
+          }
+          else
+          {
+            Suit suit = null;
+            if (suitName != "DEFAULT")
+            {
+              string _suitName = suitName;
+              suit = suits.FirstOrDefault(s => s.name == _suitName);
+            }
+            if (suit == null)
+              suitName = "DEFAULT";
+
+            customSuits[name] = suit;
+//            Util.log("Mapped suit for \"{0}\" -> {1}", name, suitName);
+          }
+        }
+      }
+    }
+
+    /**
+     * Save custom Kerbals mapping.
+     */
+    public void saveCustomKerbals(ConfigNode node)
+    {
+      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew)
+      {
+        string headName = "GENERIC";
+        string suitName = "GENERIC";
+
+        Head head;
+        Suit suit;
+
+        if (customHeads.TryGetValue(kerbal.name, out head))
+          headName = head == null ? "DEFAULT" : head.name;
+
+        if (customSuits.TryGetValue(kerbal.name, out suit))
+          suitName = suit == null ? "DEFAULT" : suit.name;
+
+        if (headName != "GENERIC" || suitName != "GENERIC")
+          node.AddValue(kerbal.name, headName + " " + suitName);
+      }
+    }
+
+    /**
      * Fill config for custom Kerbal heads and suits.
      */
     void readKerbalsConfigs()
@@ -525,67 +626,7 @@ namespace TextureReplacer
       {
         ConfigNode customNode = file.config.GetNode("CustomKerbals");
         if (customNode != null)
-        {
-          foreach (ConfigNode.Value entry in customNode.values)
-          {
-            string[] tokens = Util.splitConfigValue(entry.value);
-            string name = entry.name;
-            string headName = tokens.Length >= 1 ? tokens[0] : null;
-            string suitName = tokens.Length >= 2 ? tokens[1] : null;
-
-            if (headName != null)
-            {
-              if (headName == "GENERIC")
-              {
-                if (customHeads.ContainsKey(name))
-                {
-                  customHeads.Remove(name);
-                  Util.log("Unmapped head for \"{0}\"", name);
-                }
-              }
-              else
-              {
-                Head head = null;
-                if (headName != "DEFAULT")
-                {
-                  string _headName = headName;
-                  head = heads.FirstOrDefault(h => h.name == _headName);
-                }
-                if (head == null)
-                  headName = "DEFAULT";
-
-                customHeads[name] = head;
-                Util.log("Mapped head for \"{0}\" -> {1}", name, headName);
-              }
-            }
-
-            if (suitName != null)
-            {
-              if (suitName == "GENERIC")
-              {
-                if (customSuits.ContainsKey(name))
-                {
-                  customSuits.Remove(name);
-                  Util.log("Unmapped suit for \"{0}\"", name);
-                }
-              }
-              else
-              {
-                Suit suit = null;
-                if (suitName != "DEFAULT")
-                {
-                  string _suitName = suitName;
-                  suit = suits.FirstOrDefault(s => s.name == _suitName);
-                }
-                if (suit == null)
-                  suitName = "DEFAULT";
-
-                customSuits[name] = suit;
-                Util.log("Mapped suit for \"{0}\" -> {1}", name, suitName);
-              }
-            }
-          }
-        }
+          readCustomKerbals(customNode);
 
         ConfigNode genericNode = file.config.GetNode("GenericKerbals");
         if (genericNode != null)
@@ -668,7 +709,7 @@ namespace TextureReplacer
             {
               Suit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
               cabinSuits[cabinName] = suit;
-              Util.log("Mapped cabin suit for \"{0}\" -> {1}", cabinName, suit.name);
+//              Util.log("Mapped cabin suit for \"{0}\" -> {1}", cabinName, suit.name);
             }
           }
         }
@@ -680,17 +721,23 @@ namespace TextureReplacer
         head.isFemale = femaleHeads.Contains(head.name);
         head.isEyeless = eyelessHeads.Contains(head.name);
       }
+      // Tag female suits.
+      foreach (Suit suit in suits)
+        suit.isFemale = femaleSuits.Contains(suit.name);
 
-      // Remove excluded heads/suits.
-      heads.RemoveAll(h => excludedHeads.Contains(h.name));
-      suits.RemoveAll(s => excludedSuits.Contains(s.name));
+      foreach (var entry in customHeads)
+        defaultCustomHeads.Add(entry.Key, entry.Value);
+
+      foreach (var entry in customSuits)
+        defaultCustomSuits.Add(entry.Key, entry.Value);
+
+      // Create lists of male heads and suits.
+      kerbalHeads.AddRange(heads.Where(h => !h.isFemale && !excludedHeads.Contains(h.name)));
+      kerbalSuits.AddRange(suits.Where(s => !s.isFemale && !excludedSuits.Contains(s.name)));
 
       // Create lists of female heads and suits.
-      kerminHeads.AddRange(heads.Where(h => femaleHeads.Contains(h.name)));
-      kerminSuits.AddRange(suits.Where(s => femaleSuits.Contains(s.name)));
-
-      heads.RemoveAll(h => femaleHeads.Contains(h.name));
-      suits.RemoveAll(s => femaleSuits.Contains(s.name));
+      kerminHeads.AddRange(heads.Where(h => h.isFemale && !excludedHeads.Contains(h.name)));
+      kerminSuits.AddRange(suits.Where(s => s.isFemale && !excludedSuits.Contains(s.name)));
 
       // Compile regular expressions for female names.
       femaleNames.ForEach(n => kerminNames.Add(new Regex(n)));
@@ -698,6 +745,8 @@ namespace TextureReplacer
       // Trim lists.
       heads.TrimExcess();
       suits.TrimExcess();
+      kerbalHeads.TrimExcess();
+      kerbalSuits.TrimExcess();
       kerminHeads.TrimExcess();
       kerminSuits.TrimExcess();
       kerminNames.TrimExcess();
@@ -755,14 +804,14 @@ namespace TextureReplacer
             if (head != null)
             {
               head.headNRM = texture;
-              Util.log("Mapped head \"{0}\" normal map -> {1}", head.name, texture.name);
+//              Util.log("Mapped head \"{0}\" normal map -> {1}", head.name, texture.name);
             }
           }
           else if (heads.All(h => h.name != headName))
           {
             var head = new Head { name = headName, head = texture };
             heads.Add(head);
-            Util.log("Mapped head \"{0}\" -> {1}", head.name, texture.name);
+//            Util.log("Mapped head \"{0}\" -> {1}", head.name, texture.name);
           }
         }
         // Add a suit texture.
@@ -797,9 +846,10 @@ namespace TextureReplacer
               suitDirs.Add(dirName, index);
             }
 
-            if (suit.setTexture(originalName, texture))
-              Util.log("Mapped suit \"{0}\" {1} -> {2}", dirName, originalName, texture.name);
-            else
+            if (!suit.setTexture(originalName, texture))
+//            if (suit.setTexture(originalName, texture))
+//              Util.log("Mapped suit \"{0}\" {1} -> {2}", dirName, originalName, texture.name);
+//            else
               Util.log("Unknown suit texture name \"{0}\": {1}", originalName, texture.name);
           }
         }
@@ -810,13 +860,22 @@ namespace TextureReplacer
 
           if (originalName == "kerbalHead")
           {
+            defaultHead.head = texture;
+
             texture.wrapMode = TextureWrapMode.Clamp;
-            Util.log("Mapped default head -> {0}", texture.name);
+//            Util.log("Mapped default kerbalHead -> {0}", texture.name);
+          }
+          else if (originalName == "kerbalHeadNRM")
+          {
+            defaultHead.headNRM = texture;
+
+            texture.wrapMode = TextureWrapMode.Clamp;
+//            Util.log("Mapped default kerbalHeadNRM -> {0}", texture.name);
           }
           else if (defaultSuit.setTexture(originalName, texture))
           {
             texture.wrapMode = TextureWrapMode.Clamp;
-            Util.log("Mapped default suit {0} -> {1}", originalName, texture.name);
+//            Util.log("Mapped default suit {0} -> {1}", originalName, texture.name);
           }
         }
 

@@ -8,4 +8,4 @@
 [assembly: AssemblyCopyright("© 2014 Davorin Učakar, Ryan Bray")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("1.10.2.*")]
+[assembly: AssemblyVersion("1.90.0.*")]

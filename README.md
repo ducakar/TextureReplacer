@@ -261,6 +261,13 @@ Known Issues
 Change Log
 ----------
 
+* 2.0
+    - added UI for configuring per-Kerbal heads and suits to Space Centre
+    - per-Kerbal head and suit assignment is saved for each game separately,
+      CustomKerbals setings from configuration files are now only used as
+      initial settings for new games or existing games when TextureReplacer 2.0
+      is installed
+    - less verbose log output
 * 1.10.2
     - fixed visor shader loading
 * 1.10.1

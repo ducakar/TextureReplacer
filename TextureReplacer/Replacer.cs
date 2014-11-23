@@ -173,7 +173,7 @@ namespace TextureReplacer
 
           mappedTextures.Add(originalName, texture);
 
-          Util.log("Mapped \"{0}\" -> {1}", originalName, texture.name);
+//          Util.log("Mapped \"{0}\" -> {1}", originalName, texture.name);
         }
       }
 

@@ -37,6 +37,7 @@ namespace TextureReplacer
       {
         DontDestroyOnLoad(this);
 
+        UI.instance = new UI();
         Loader.instance = new Loader();
         Replacer.instance = new Replacer();
         Reflections.instance = new Reflections();
@@ -71,6 +72,7 @@ namespace TextureReplacer
 
           if (GameDatabase.Instance.IsReady())
           {
+            UI.instance.initialise();
             Loader.instance.initialise();
             Replacer.instance.initialise();
             Reflections.instance.initialise();
@@ -89,6 +91,7 @@ namespace TextureReplacer
           {
             lastScene = HighLogic.LoadedScene;
 
+            UI.instance.resetScene();
             Replacer.instance.resetScene();
             Personaliser.instance.resetScene();
           }
@@ -101,6 +104,12 @@ namespace TextureReplacer
       {
         Util.log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
       }
+    }
+
+    public void OnGUI()
+    {
+      if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+        UI.instance.draw();
     }
 
     public void OnDestroy()
