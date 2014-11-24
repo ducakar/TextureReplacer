@@ -545,44 +545,27 @@ namespace TextureReplacer
         string headName = tokens.Length >= 1 ? tokens[0] : null;
         string suitName = tokens.Length >= 2 ? tokens[1] : null;
 
-        if (headName != null)
-        {
-          if (headName == "GENERIC")
-          {
-            if (customHeads.ContainsKey(name))
-              customHeads.Remove(name);
-          }
-          else
-          {
-            Head head = null;
-            if (headName != "DEFAULT")
-            {
-              string _headName = headName;
-              head = heads.FirstOrDefault(h => h.name == _headName);
-            }
+        customHeads.Remove(name);
+        customSuits.Remove(name);
 
+        if (headName != null && headName != "GENERIC")
+        {
+          Head head;
+
+          if (headName == "DEFAULT")
+            customHeads[name] = null;
+          else if ((head = heads.FirstOrDefault(h => h.name == headName)) != null)
             customHeads[name] = head;
-          }
         }
 
-        if (suitName != null)
+        if (suitName != null && suitName != "GENERIC")
         {
-          if (suitName == "GENERIC")
-          {
-            if (customSuits.ContainsKey(name))
-              customSuits.Remove(name);
-          }
-          else
-          {
-            Suit suit = null;
-            if (suitName != "DEFAULT")
-            {
-              string _suitName = suitName;
-              suit = suits.FirstOrDefault(s => s.name == _suitName);
-            }
+          Suit suit;
 
+          if (suitName == "DEFAULT")
+            customSuits[name] = null;
+          else if ((suit = suits.FirstOrDefault(s => s.name == suitName)) != null)
             customSuits[name] = suit;
-          }
         }
       }
     }

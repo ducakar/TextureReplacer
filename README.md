@@ -50,7 +50,7 @@ Instructions
 
 ### General Textures ###
 
-General replacement texture is of the form
+General replacement textures are of the form
 
     GameData/TextureReplacer/Default/<internalName>
 
@@ -60,63 +60,63 @@ texture inside `GameData/` (plus .dds/.png/.jpg/.tga extension, of course).
 Examples:
 
     GameData/TextureReplacer/
-      Default/kerbalHead              // default Kerbal head
-      Default/kerbalHeadNRM           // default Kerbal head normal map
-      Default/kerbalMain              // default IVA suit (veteran/orange)
-      Default/kerbalMainGrey          // default IVA suit (standard/grey)
-      Default/kerbalMainNRM           // default IVA suit normal map
-      Default/kerbalHelmetGrey        // default IVA helmet
-      Default/kerbalHelmetNRM         // default IVA & EVA helmet normal map
-      Default/kerbalVisor             // default IVA helmet visor
-      Default/EVAtexture              // default EVA suit
-      Default/EVAtextureNRM           // default EVA suit normal map
-      Default/EVAhelmet               // default EVA helmet
-      Default/EVAvisor                // default EVA helmet visor
-      Default/EVAjetpack              // default EVA jetpack
-      Default/EVAjetpackNRM           // default EVA jetpack normal map
+      Default/kerbalHead               // default Kerbal head
+      Default/kerbalHeadNRM            // default Kerbal head normal map
+      Default/kerbalMain               // default IVA suit (veteran/orange)
+      Default/kerbalMainGrey           // default IVA suit (standard/grey)
+      Default/kerbalMainNRM            // default IVA suit normal map
+      Default/kerbalHelmetGrey         // default IVA helmet
+      Default/kerbalHelmetNRM          // default IVA & EVA helmet normal map
+      Default/kerbalVisor              // default IVA helmet visor
+      Default/EVAtexture               // default EVA suit
+      Default/EVAtextureNRM            // default EVA suit normal map
+      Default/EVAhelmet                // default EVA helmet
+      Default/EVAvisor                 // default EVA helmet visor
+      Default/EVAjetpack               // default EVA jetpack
+      Default/EVAjetpackNRM            // default EVA jetpack normal map
 
-      Default/HUDNavBall              // HUD NavBall
-      Default/IVANavBall              // IVA NavBall, horizontally flipped
+      Default/HUDNavBall               // HUD NavBall
+      Default/IVANavBall               // IVA NavBall, horizontally flipped
 
-      Default/GalaxyTex_PositiveX     // skybox right face
-      Default/GalaxyTex_NegativeX     // skybox left face
-      Default/GalaxyTex_PositiveY     // skybox bottom face, rotated for 180°
-      Default/GalaxyTex_NegativeY     // skybox top face
-      Default/GalaxyTex_PositiveZ     // skybox front face
-      Default/GalaxyTex_NegativeZ     // skybox back face
+      Default/GalaxyTex_PositiveX      // skybox right face
+      Default/GalaxyTex_NegativeX      // skybox left face
+      Default/GalaxyTex_PositiveY      // skybox bottom face, rotated for 180°
+      Default/GalaxyTex_NegativeY      // skybox top face
+      Default/GalaxyTex_PositiveZ      // skybox front face
+      Default/GalaxyTex_NegativeZ      // skybox back face
 
-      Default/moho00                  // Moho
-      Default/moho01                  // Moho normal map
-      Default/Eve2_00                 // Eve
-      Default/Eve2_01                 // Eve normal map
-      Default/evemoon100              // Gilly
-      Default/evemoon101              // Gilly normal map
-      Default/KerbinScaledSpace300    // Kerbin
-      Default/KerbinScaledSpace401    // Kerbin normal map
-      Default/NewMunSurfaceMapDiffuse // Mün
-      Default/NewMunSurfaceMapNormals // Mün normal map
-      Default/NewMunSurfaceMap00      // Minmus
-      Default/NewMunSurfaceMap01      // Minmus normal map
-      Default/Duna5_00                // Duna
-      Default/Duna5_01                // Duna normal map
-      Default/desertplanetmoon00      // Ike
-      Default/desertplanetmoon01      // Ike normal map
-      Default/dwarfplanet100          // Dres
-      Default/dwarfplanet101          // Dres normal map
-      Default/gas1_clouds             // Jool
-      Default/cloud_normal            // Jool normal map
-      Default/newoceanmoon00          // Laythe
-      Default/newoceanmoon01          // Laythe normal map
-      Default/gp1icemoon00            // Vall
-      Default/gp1icemoon01            // Vall normal map
-      Default/rockyMoon00             // Tylo
-      Default/rockyMoon01             // Tylo normal map
-      Default/gp1minormoon100         // Bop
-      Default/gp1minormoon101         // Bop normal map
-      Default/gp1minormoon200         // Pol
-      Default/gp1minormoon201         // Pol normal map
-      Default/snowydwarfplanet00      // Eeloo
-      Default/snowydwarfplanet01      // Eeloo normal map
+      Default/moho00                   // Moho
+      Default/moho01                   // Moho normal map
+      Default/Eve2_00                  // Eve
+      Default/Eve2_01                  // Eve normal map
+      Default/evemoon100               // Gilly
+      Default/evemoon101               // Gilly normal map
+      Default/KerbinScaledSpace300     // Kerbin
+      Default/KerbinScaledSpace401     // Kerbin normal map
+      Default/NewMunSurfaceMapDiffuse  // Mün
+      Default/NewMunSurfaceMapNormals  // Mün normal map
+      Default/NewMunSurfaceMap00       // Minmus
+      Default/NewMunSurfaceMap01       // Minmus normal map
+      Default/Duna5_00                 // Duna
+      Default/Duna5_01                 // Duna normal map
+      Default/desertplanetmoon00       // Ike
+      Default/desertplanetmoon01       // Ike normal map
+      Default/dwarfplanet100           // Dres
+      Default/dwarfplanet101           // Dres normal map
+      Default/gas1_clouds              // Jool
+      Default/cloud_normal             // Jool normal map
+      Default/newoceanmoon00           // Laythe
+      Default/newoceanmoon01           // Laythe normal map
+      Default/gp1icemoon00             // Vall
+      Default/gp1icemoon01             // Vall normal map
+      Default/rockyMoon00              // Tylo
+      Default/rockyMoon01              // Tylo normal map
+      Default/gp1minormoon100          // Bop
+      Default/gp1minormoon101          // Bop normal map
+      Default/gp1minormoon200          // Pol
+      Default/gp1minormoon201          // Pol normal map
+      Default/snowydwarfplanet00       // Eeloo
+      Default/snowydwarfplanet01       // Eeloo normal map
 
 It's also possible to replace textures from `GameData/` if one specifies
 the full directory hierarchy:
@@ -146,12 +146,12 @@ meshes from `meshes` list or on whole part if `meshes` is empty or missing.
 Environment cube map texture for reflections is included with the plugin:
 
     GameData/TextureReplacer/
-      EnvMap/PositiveX  // fake skybox right face, vertically flipped
-      EnvMap/NegativeX  // fake skybox left face, vertically flipped
-      EnvMap/PositiveY  // fake skybox top face, vertically flipped
-      EnvMap/NegativeY  // fake skybox bottom face, vertically flipped
-      EnvMap/PositiveZ  // fake skybox front face, vertically flipped
-      EnvMap/NegativeZ  // fake skybox back face, vertically flipped
+      EnvMap/PositiveX         // fake skybox right face, vertically flipped
+      EnvMap/NegativeX         // fake skybox left face, vertically flipped
+      EnvMap/PositiveY         // fake skybox top face, vertically flipped
+      EnvMap/NegativeY         // fake skybox bottom face, vertically flipped
+      EnvMap/PositiveZ         // fake skybox front face, vertically flipped
+      EnvMap/NegativeZ         // fake skybox back face, vertically flipped
 
 Note that all textures must be quares and have the same dimensions that are
 powers of two. Cube map textures are slow, so keep them as low-res as possible.
@@ -218,27 +218,26 @@ DDSLoader is used to load it.
 
 In short: you should supply "blue" normal maps when image has "NRM" suffix
 and is in PNG format (JPEGs and TGAs are not recommended for normal maps)
-and "grey" normal map when DDS format is used or the texture doesn't have
+and "grey" normal map when DDS format is used or the texture does not have
 "NRM" suffix.
 
 "Grey" normal maps can be created by saving the standard "blue" normal map
 as a DDS with DXT5nm compression or by manually shuffling its colour
-channels RGBA -> GGGR.
+channels as RGBA -> GGGR.
 
 
 Notes
 -----
 
 * Use DDS format (requires DDSLoader) for optimal RAM usage and loading times
-  since it is not shadowed in RAM and can be pre-compressed and can have
-  pre-generated mipmaps.
+  since DDS textures are not shadowed in RAM and can be pre-compressed and can
+  have pre-generated mipmaps.
 * TGA and JPEG images are not suitable for normal maps.
-* Try to keep dimensions of all textures powers of two. Non-power-of-two
-  textures are not handled well in some cases.
+* Try to keep dimensions of all textures powers of two.
 * KSP can only load TGAs with RGB or RGBA colours. Paletteised 256-colour TGAs
   cause corruptions in the game database!
-* By default, texture compression is handled by ATM when present rather than by
-  TextureReplacer.
+* By default, texture compression is handled by ATM when it is present rather
+  than by TextureReplacer.
 * KSP never generates mipmaps for PNGs and JPEGs. TextureReplacer fixes this by
   generating mipmaps under paths specified in the configuration file. Other
   images are omitted to avoid making UI icons of various plugins blurry when not
@@ -265,7 +264,8 @@ Change Log
     - per-Kerbal head and suit assignment is saved for each game separately
     - `CustomKerbals` from config files are now used only as initial settings
     - fixed assignemnt of `Default/kerbalMain` veteran suit to Jeb, Bill and Bob
-    - fixed atmospheric IVA suits for when using stock suits
+    - fixed atmospheric IVA suits when using stock suits
+    - fixed `CustomKerbals` overriding when headTex or suitDir is missing
     - less verbose log output
 * 1.10.2
     - fixed visor shader loading
@@ -294,8 +294,8 @@ Change Log
       experience-based suit assignment
     - new `commanderSuit`, `pilotSuit`, `scientistSuit`, `passengerSuit` config
       options for experience-based suits
-    - new `headMultiplier` and `suitMultiplier` options for tweaking randomisation
-      algorithm for head and suit assignment
+    - new `headMultiplier` and `suitMultiplier` options for tweaking
+      randomisation algorithm for head and suit assignment
     - added support for setting normal map of the default head
     - fixed IVA helmet removal when using the default suit
     - fixed a crash which might occur when rebuilding game database
