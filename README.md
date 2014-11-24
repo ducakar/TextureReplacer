@@ -62,7 +62,8 @@ Examples:
     GameData/TextureReplacer/
       Default/kerbalHead              // default Kerbal head
       Default/kerbalHeadNRM           // default Kerbal head normal map
-      Default/kerbalMainGrey          // default IVA suit
+      Default/kerbalMain              // default IVA suit (veteran/orange)
+      Default/kerbalMainGrey          // default IVA suit (standard/grey)
       Default/kerbalMainNRM           // default IVA suit normal map
       Default/kerbalHelmetGrey        // default IVA helmet
       Default/kerbalHelmetNRM         // default IVA & EVA helmet normal map
@@ -251,8 +252,6 @@ Notes
 Known Issues
 ------------
 
-* If there is no IVA suit replacement the default EVA suit texture is used for
-  the atmospheric EVAs. [Won't fix. Provide an IVA suit to fix it.]
 * Replacement of textures from `GameData/` does not work for certain models.
   [No known fix.]
 * Jetpack re-appears after dismounting a KerbalQuest jetpack. [No fix yet.]
@@ -263,10 +262,10 @@ Change Log
 
 * 2.0
     - added UI for configuring per-Kerbal heads and suits to Space Centre
-    - per-Kerbal head and suit assignment is saved for each game separately,
-      CustomKerbals setings from configuration files are now only used as
-      initial settings for new games or existing games when TextureReplacer 2.0
-      is installed
+    - per-Kerbal head and suit assignment is saved for each game separately
+    - `CustomKerbals` from config files are now used only as initial settings
+    - fixed assignemnt of `Default/kerbalMain` veteran suit to Jeb, Bill and Bob
+    - fixed atmospheric IVA suits for when using stock suits
     - less verbose log output
 * 1.10.2
     - fixed visor shader loading

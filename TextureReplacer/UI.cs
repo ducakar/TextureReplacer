@@ -27,16 +27,16 @@ namespace TextureReplacer
 {
   class UI
   {
+    static readonly string APP_ICON_PATH = Util.DIR + "Plugins/appIcon";
     const int WINDOW_ID = 107056;
-    // Empty texture, shown when unset or a stock texture is selected.
-    readonly Texture2D EMPTY_TEX = new Texture2D(1, 1);
-    // UI properties.
-    bool isEnabled = false;
+    // UI state.
     Rect windowRect = new Rect(Screen.width - 640, 80, 600, 560);
     Vector2 rosterScroll = Vector2.zero;
-    ApplicationLauncherButton appButton = null;
-    // Current selections in UI.
     ProtoCrewMember selectedKerbal = null;
+    bool isEnabled = false;
+    // Application launcher icon.
+    Texture2D appIcon = null;
+    ApplicationLauncherButton appButton = null;
     // Instance.
     public static UI instance = null;
 
@@ -62,6 +62,7 @@ namespace TextureReplacer
       {
         Personaliser personaliser = Personaliser.instance;
 
+        GUILayout.Space(20);
         GUILayout.BeginVertical();
 
         Personaliser.Head defaultHead = personaliser.defaultHead;
@@ -69,33 +70,35 @@ namespace TextureReplacer
         Personaliser.Head head = null;
         Personaliser.Suit suit = null;
 
-        bool hasCustomHead = false;
-        bool hasCustomSuit = false;
         int headIndex = -1;
         int suitIndex = -1;
+        bool hasCustomHead = false;
+        bool hasCustomSuit = false;
 
         if (personaliser.customHeads.ContainsKey(selectedKerbal.name))
         {
           head = personaliser.customHeads[selectedKerbal.name];
-          hasCustomHead = true;
           headIndex = personaliser.heads.IndexOf(head);
+          hasCustomHead = true;
         }
 
         if (personaliser.customSuits.ContainsKey(selectedKerbal.name))
         {
           suit = personaliser.customSuits[selectedKerbal.name];
-          hasCustomSuit = true;
           suitIndex = personaliser.suits.IndexOf(suit);
+          hasCustomSuit = true;
         }
 
         head = head ?? defaultHead;
         suit = suit ?? defaultSuit;
 
-        Texture2D headTex = head.head ?? defaultHead.head ?? EMPTY_TEX;
-        Texture2D suitTex = suit.suit ?? defaultSuit.suit ?? EMPTY_TEX;
-        Texture2D helmetTex = suit.helmet ?? defaultSuit.helmet ?? EMPTY_TEX;
-        Texture2D evaSuitTex = suit.evaSuit ?? defaultSuit.evaSuit ?? EMPTY_TEX;
-        Texture2D evaHelmetTex = suit.evaHelmet ?? defaultSuit.evaHelmet ?? EMPTY_TEX;
+        Texture2D headTex = head.head ?? defaultHead.head;
+        Texture2D suitTex = suit == defaultSuit && Personaliser.isVeteran(selectedKerbal) ?
+                            defaultSuit.suitVeteran :
+                            (suit.suit ?? defaultSuit.suit);
+        Texture2D helmetTex = suit.helmet ?? defaultSuit.helmet;
+        Texture2D evaSuitTex = suit.evaSuit ?? defaultSuit.evaSuit;
+        Texture2D evaHelmetTex = suit.evaHelmet ?? defaultSuit.evaHelmet;
 
         if (hasCustomHead)
           GUILayout.Box(headTex, GUILayout.Width(250), GUILayout.Height(250));
@@ -176,7 +179,7 @@ namespace TextureReplacer
         }
         if (GUILayout.Button(">"))
         {
-          suitIndex = (personaliser.suits.Count + suitIndex - 1) % personaliser.suits.Count;
+          suitIndex = (suitIndex + 1) % personaliser.suits.Count;
           personaliser.customSuits[selectedKerbal.name] = personaliser.suits[suitIndex];
         }
 
@@ -210,6 +213,11 @@ namespace TextureReplacer
 
     public void initialise()
     {
+      appIcon = GameDatabase.Instance.GetTexture(APP_ICON_PATH, false);
+
+      Util.log(APP_ICON_PATH);
+      if (appIcon == null)
+        Util.log("Application icon missing: {0}", APP_ICON_PATH);
     }
 
     public void resetScene()
@@ -230,7 +238,7 @@ namespace TextureReplacer
         {
           appButton = ApplicationLauncher.Instance
             .AddModApplication(enable, disable, null, null, null, null,
-                               ApplicationLauncher.AppScenes.SPACECENTER, EMPTY_TEX);
+                               ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
         }
         else if (isEnabled)
         {

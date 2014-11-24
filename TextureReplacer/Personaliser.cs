@@ -50,6 +50,7 @@ namespace TextureReplacer
     {
       public string name;
       public bool isFemale;
+      public Texture2D suitVeteran;
       public Texture2D suit;
       public Texture2D suitNRM;
       public Texture2D helmet;
@@ -66,6 +67,9 @@ namespace TextureReplacer
       {
         switch (originalName)
         {
+          case "kerbalMain":
+            suitVeteran = suitVeteran ?? texture;
+            return false;
           case "kerbalMainGrey":
             suit = suit ?? texture;
             return true;
@@ -167,6 +171,14 @@ namespace TextureReplacer
     MethodInfo ksGetMethod = null;
     // Instance.
     public static Personaliser instance = null;
+
+    public static bool isVeteran(ProtoCrewMember kerbal)
+    {
+      bool value = kerbal.name == "Jebediah Kerman"
+                   || kerbal.name == "Bill Kerman"
+                   || kerbal.name == "Bob Kerman";
+      return value;
+    }
 
     static bool isRegularVessel(Vessel vessel)
     {
@@ -349,7 +361,8 @@ namespace TextureReplacer
               // stock ones all the time and to fix the switch from non-default to default texture
               // during EVA suit toggle.
               if (newTexture == null)
-                newTexture = isEvaSuit ? defaultSuit.evaSuit : defaultSuit.suit;
+                newTexture = isEvaSuit ? defaultSuit.evaSuit :
+                             isVeteran(kerbal) ? defaultSuit.suitVeteran : defaultSuit.suit;
               if (newNormalMap == null)
                 newNormalMap = isEvaSuit ? defaultSuit.evaSuitNRM : defaultSuit.suitNRM;
 
@@ -537,10 +550,7 @@ namespace TextureReplacer
           if (headName == "GENERIC")
           {
             if (customHeads.ContainsKey(name))
-            {
               customHeads.Remove(name);
-//              Util.log("Unmapped head for \"{0}\"", name);
-            }
           }
           else
           {
@@ -550,11 +560,8 @@ namespace TextureReplacer
               string _headName = headName;
               head = heads.FirstOrDefault(h => h.name == _headName);
             }
-            if (head == null)
-              headName = "DEFAULT";
 
             customHeads[name] = head;
-//            Util.log("Mapped head for \"{0}\" -> {1}", name, headName);
           }
         }
 
@@ -563,10 +570,7 @@ namespace TextureReplacer
           if (suitName == "GENERIC")
           {
             if (customSuits.ContainsKey(name))
-            {
               customSuits.Remove(name);
-//              Util.log("Unmapped suit for \"{0}\"", name);
-            }
           }
           else
           {
@@ -576,11 +580,8 @@ namespace TextureReplacer
               string _suitName = suitName;
               suit = suits.FirstOrDefault(s => s.name == _suitName);
             }
-            if (suit == null)
-              suitName = "DEFAULT";
 
             customSuits[name] = suit;
-//            Util.log("Mapped suit for \"{0}\" -> {1}", name, suitName);
           }
         }
       }
@@ -709,7 +710,6 @@ namespace TextureReplacer
             {
               Suit suit = suits.FirstOrDefault(s => s.name == suitName) ?? defaultSuit;
               cabinSuits[cabinName] = suit;
-//              Util.log("Mapped cabin suit for \"{0}\" -> {1}", cabinName, suit.name);
             }
           }
         }
@@ -802,16 +802,12 @@ namespace TextureReplacer
 
             Head head = heads.Find(h => h.name == baseName);
             if (head != null)
-            {
               head.headNRM = texture;
-//              Util.log("Mapped head \"{0}\" normal map -> {1}", head.name, texture.name);
-            }
           }
           else if (heads.All(h => h.name != headName))
           {
             var head = new Head { name = headName, head = texture };
             heads.Add(head);
-//            Util.log("Mapped head \"{0}\" -> {1}", head.name, texture.name);
           }
         }
         // Add a suit texture.
@@ -847,9 +843,6 @@ namespace TextureReplacer
             }
 
             if (!suit.setTexture(originalName, texture))
-//            if (suit.setTexture(originalName, texture))
-//              Util.log("Mapped suit \"{0}\" {1} -> {2}", dirName, originalName, texture.name);
-//            else
               Util.log("Unknown suit texture name \"{0}\": {1}", originalName, texture.name);
           }
         }
@@ -861,21 +854,16 @@ namespace TextureReplacer
           if (originalName == "kerbalHead")
           {
             defaultHead.head = texture;
-
             texture.wrapMode = TextureWrapMode.Clamp;
-//            Util.log("Mapped default kerbalHead -> {0}", texture.name);
           }
           else if (originalName == "kerbalHeadNRM")
           {
             defaultHead.headNRM = texture;
-
             texture.wrapMode = TextureWrapMode.Clamp;
-//            Util.log("Mapped default kerbalHeadNRM -> {0}", texture.name);
           }
-          else if (defaultSuit.setTexture(originalName, texture))
+          else if (defaultSuit.setTexture(originalName, texture) || originalName == "kerbalMain")
           {
             texture.wrapMode = TextureWrapMode.Clamp;
-//            Util.log("Mapped default suit {0} -> {1}", originalName, texture.name);
           }
         }
 
@@ -924,6 +912,25 @@ namespace TextureReplacer
                "KerbalStats not found. TextureReplacer will determine Kerbals' genders.");
     }
 
+    /**
+     * Default Kerbal textures are not loaded until main menu shows, so part of initialisation must
+     * be performed then.
+     */
+    void initialiseDefaultKerbal()
+    {
+      foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>())
+      {
+        if (texture.name != null &&
+            (texture.name.StartsWith("kerbal") || texture.name.StartsWith("EVA")))
+        {
+          if (texture.name == "kerbalHead")
+            defaultHead.head = defaultHead.head ?? texture;
+          else
+            defaultSuit.setTexture(texture.name, texture);
+        }
+      }
+    }
+
     public void resetScene()
     {
       ivaReplaceTimer = -1.0f;
@@ -952,6 +959,9 @@ namespace TextureReplacer
         if (isHelmetRemovalEnabled)
           GameEvents.onVesselSituationChange.Remove(updateHelmets);
       }
+
+      if (HighLogic.LoadedScene == GameScenes.MAINMENU)
+        initialiseDefaultKerbal();
     }
 
     public void updateScene()

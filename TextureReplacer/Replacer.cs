@@ -172,8 +172,6 @@ namespace TextureReplacer
             texture.wrapMode = TextureWrapMode.Clamp;
 
           mappedTextures.Add(originalName, texture);
-
-//          Util.log("Mapped \"{0}\" -> {1}", originalName, texture.name);
         }
       }
 

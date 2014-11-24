@@ -114,27 +114,21 @@ namespace TextureReplacer
         {
           case "PositiveX":
             envMapFaces[0] = texture;
-//            Util.log("Environment map +x -> {0}", texture.name);
             break;
           case "NegativeX":
             envMapFaces[1] = texture;
-//            Util.log("Environment map -x -> {0}", texture.name);
             break;
           case "PositiveY":
             envMapFaces[2] = texture;
-//            Util.log("Environment map +y -> {0}", texture.name);
             break;
           case "NegativeY":
             envMapFaces[3] = texture;
-//            Util.log("Environment map -y -> {0}", texture.name);
             break;
           case "PositiveZ":
             envMapFaces[4] = texture;
-//            Util.log("Environment map +z -> {0}", texture.name);
             break;
           case "NegativeZ":
             envMapFaces[5] = texture;
-//            Util.log("Environment map -z -> {0}", texture.name);
             break;
           default:
             Util.log("Invalid enironment map texture name {0}", texture.name);
