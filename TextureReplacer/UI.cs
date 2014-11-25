@@ -149,6 +149,7 @@ namespace TextureReplacer
 
         if (GUILayout.Button("<"))
         {
+          headIndex = headIndex == -1 ? 0 : headIndex;
           headIndex = (personaliser.heads.Count + headIndex - 1) % personaliser.heads.Count;
           personaliser.customHeads[selectedKerbal.name] = personaliser.heads[headIndex];
         }
@@ -174,6 +175,7 @@ namespace TextureReplacer
 
         if (GUILayout.Button("<"))
         {
+          suitIndex = suitIndex == -1 ? 0 : suitIndex;
           suitIndex = (personaliser.suits.Count + suitIndex - 1) % personaliser.suits.Count;
           personaliser.customSuits[selectedKerbal.name] = personaliser.suits[suitIndex];
         }

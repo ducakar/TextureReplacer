@@ -3,10 +3,10 @@
 TextureReplacer
 ===============
 
-* [GitHub page](http://github.com/ducakar/TextureReplacer).
-* [Forum page](http://forum.kerbalspaceprogram.com/threads/60961).
-* [CurseForge page](http://kerbal.curseforge.com/plugins/220217-texturereplacer).
-* [Kerbal Stuff page](https://kerbalstuff.com/mod/150/TextureReplacer).
+* [GitHub page](http://github.com/ducakar/TextureReplacer)
+* [Forum page](http://forum.kerbalspaceprogram.com/threads/60961)
+* [CurseForge page](http://kerbal.curseforge.com/plugins/220217-texturereplacer)
+* [Kerbal Stuff page](https://kerbalstuff.com/mod/150/TextureReplacer)
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
@@ -41,7 +41,7 @@ Special thanks to:
 * therealcrow999 for testing and benchmarking this plugin,
 * Ippo343 for contributing KSP-AVC configuration,
 * Proot, Green Skull and others for making texture packs for this plugin and
-* Sylith and scart91 for giving others permissions to make derivatives of their
+* Sylith and Scart91 for giving others permissions to make derivatives of their
   texture packs.
 
 
@@ -263,9 +263,9 @@ Change Log
     - added UI for configuring per-Kerbal heads and suits to Space Centre
     - per-Kerbal head and suit assignment is saved for each game separately
     - `CustomKerbals` from config files are now used only as initial settings
-    - fixed assignemnt of `Default/kerbalMain` veteran suit to Jeb, Bill and Bob
+    - fixed assignment of `Default/kerbalMain` veteran suit to Jeb, Bill and Bob
     - fixed atmospheric IVA suits when using stock suits
-    - fixed `CustomKerbals` overriding when headTex or suitDir is missing
+    - fixed `CustomKerbals` overriding when `headTex` or `suitDir` is missing
     - less verbose log output
 * 1.10.2
     - fixed visor shader loading
@@ -420,9 +420,9 @@ Change Log
 * 1.0.1
     - disabled mipmap generation when TextureCompressor is detected
 * 1.0
-    - non-power-of-two textures are never compressed to avoid curruption
+    - non-power-of-two textures are never compressed to avoid corruption
     - added option to configure paths where mipmaps may be generated
-    - fixed regeression form 0.21 loading JPEGs as entirely black
+    - fixed regression form 0.21 loading JPEGs as entirely black
 * 0.21
     - fixed personalisation when a Kerbal is thrown from a seat
     - texture compression option is now respected when mipmaps are generated
