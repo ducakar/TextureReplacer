@@ -24,10 +24,7 @@
 
 using System;
 using System.Diagnostics;
-
-#if TR_LOG_HIERARCHY
 using UnityEngine;
-#endif
 
 namespace TextureReplacer
 {
@@ -35,6 +32,11 @@ namespace TextureReplacer
   {
     static readonly char[] CONFIG_DELIMITERS = { ' ', '\t', ',' };
     public static readonly string DIR = typeof(Util).Namespace + "/";
+    public static readonly int BUMPMAP_PROPERTY = Shader.PropertyToID("_BumpMap");
+    public static readonly int CUBE_PROPERTY = Shader.PropertyToID("_Cube");
+    public static readonly int REFLECT_COLOR_PROPERTY = Shader.PropertyToID("_ReflectColor");
+    public static readonly Shader DIFFUSE_SHADER = Shader.Find("Diffuse");
+    public static readonly Shader BUMPED_DIFFUSE_SHADER = Shader.Find("Bumped Diffuse");
 
     /**
      * True iff `i` is a power of two.
@@ -62,7 +64,6 @@ namespace TextureReplacer
     }
 
     #if TR_LOG_HIERARCHY
-
     /**
      * Print hierarchy up from a transform.
      */
@@ -96,7 +97,6 @@ namespace TextureReplacer
           UnityEngine.Debug.Log(" * " + c.name + ": " + c.GetType());
       }
     }
-
     #endif
   }
 }

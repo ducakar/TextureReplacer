@@ -210,8 +210,7 @@ namespace TextureReplacer
       if (isVisorReflectionEnabled)
       {
         // Set visor texture and reflection on proto-IVA and -EVA Kerbal.
-        foreach (SkinnedMeshRenderer smr
-                 in Resources.FindObjectsOfTypeAll(typeof(SkinnedMeshRenderer)))
+        foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
         {
           if (smr.name != "visor")
             continue;
@@ -220,8 +219,8 @@ namespace TextureReplacer
           if (isEva)
           {
             smr.sharedMaterial.shader = shader;
-            smr.sharedMaterial.SetColor("_ReflectColor", visorReflectionColour);
-            smr.sharedMaterial.SetTexture("_Cube", envMap);
+            smr.sharedMaterial.SetTexture(Util.CUBE_PROPERTY, envMap);
+            smr.sharedMaterial.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
           }
         }
       }

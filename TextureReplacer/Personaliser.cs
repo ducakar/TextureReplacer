@@ -112,8 +112,6 @@ namespace TextureReplacer
     static readonly string DIR_DEFAULT = Util.DIR + "Default/";
     static readonly string DIR_HEADS = Util.DIR + "Heads/";
     static readonly string DIR_SUITS = Util.DIR + "Suits/";
-    // Delay for IVA replacement (in seconds).
-    static readonly float IVA_TIMER_DELAY = 0.2f;
     // Default textures (from `Default/`).
     public readonly Head defaultHead = new Head { name = "DEFAULT" };
     public readonly Suit defaultSuit = new Suit { name = "DEFAULT" };
@@ -156,10 +154,6 @@ namespace TextureReplacer
     readonly HashSet<string> atmSuitBodies = new HashSet<string>();
     // Whether assignment of suits should be consecutive.
     SuitAssignment suitAssignment = SuitAssignment.RANDOM;
-    // Update counter for IVA replacement. It has to scheduled with a little lag to avoid race
-    // conditions with stock IVA texture replacement that sets orange suits to Jeb, Bill and Bob and
-    // grey suits to other Kerbals.
-    float ivaReplaceTimer = -1.0f;
     // For transparent pods, previous vessel IVA has to be updated too on vessel switching since
     // textures are reset to stock on switch.
     Vessel previousVessel = null;
@@ -345,6 +339,9 @@ namespace TextureReplacer
               {
                 newTexture = head.head;
                 newNormalMap = head.headNRM;
+
+                smr.material.shader = newNormalMap != null ? Util.BUMPED_DIFFUSE_SHADER :
+                                                             Util.DIFFUSE_SHADER;
               }
               break;
 
@@ -366,6 +363,15 @@ namespace TextureReplacer
               if (newNormalMap == null)
                 newNormalMap = isEvaSuit ? defaultSuit.evaSuitNRM : defaultSuit.suitNRM;
 
+              // Update textures in Kerbal IVA object since KSP resets them to these values a few
+              // frames after portraits begin to render.
+              if (!isEva)
+              {
+                Kerbal kerbalIVA = (Kerbal) component;
+
+                kerbalIVA.textureStandard = newTexture;
+                kerbalIVA.textureVeteran = newTexture;
+              }
               break;
 
             case "helmet":
@@ -410,11 +416,11 @@ namespace TextureReplacer
               break;
           }
 
-          if (newTexture != null && newTexture != material.mainTexture)
+          if (newTexture != null)
             material.mainTexture = newTexture;
 
-          if (newNormalMap != null && newNormalMap != material.GetTexture("_BumpMap"))
-            material.SetTexture("_BumpMap", newNormalMap);
+          if (newNormalMap != null)
+            material.SetTexture(Util.BUMPMAP_PROPERTY, newNormalMap);
         }
       }
     }
@@ -448,7 +454,6 @@ namespace TextureReplacer
         }
       }
 
-      ivaReplaceTimer = -1.0f;
       ivaVessels.Clear();
       // Prevent capacity from growing too much.
       if (ivaVessels.Capacity > 16)
@@ -462,15 +467,11 @@ namespace TextureReplacer
     void scheduleSwitchUpdate(Vessel vessel)
     {
       if (previousVessel != vessel && isRegularVessel(previousVessel))
-      {
-        ivaReplaceTimer = IVA_TIMER_DELAY;
         ivaVessels.AddUnique(previousVessel);
-      }
+
       if (isRegularVessel(vessel))
-      {
-        ivaReplaceTimer = IVA_TIMER_DELAY;
         ivaVessels.AddUnique(vessel);
-      }
+
       previousVessel = vessel;
     }
 
@@ -483,16 +484,13 @@ namespace TextureReplacer
     }
 
     /**
-     * Update EVA textures when a new Kerbal is created or when one comes into 2.3 km range.
-     * If the vessel is not an EVA, update IVA textures (for transparent pods).
+     * Update IVA textures when a new vessel is created or when it comes into 2.3 km range (for
+     * transparent pods).
      */
     void scheduleSpawnUpdate(Vessel vessel)
     {
       if (isRegularVessel(vessel))
-      {
-        ivaReplaceTimer = IVA_TIMER_DELAY;
         ivaVessels.AddUnique(vessel);
-      }
     }
 
     /**
@@ -789,7 +787,7 @@ namespace TextureReplacer
           }
           else if (heads.All(h => h.name != headName))
           {
-            var head = new Head { name = headName, head = texture };
+            Head head = new Head { name = headName, head = texture };
             heads.Add(head);
           }
         }
@@ -856,8 +854,7 @@ namespace TextureReplacer
       readKerbalsConfigs();
 
       // Save pointer to helmet & visor meshes so helmet removal can restore them.
-      foreach (SkinnedMeshRenderer smr
-               in Resources.FindObjectsOfTypeAll(typeof(SkinnedMeshRenderer)))
+      foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
       {
         if (smr.name == "helmet")
           helmetMesh = smr.sharedMesh;
@@ -912,11 +909,17 @@ namespace TextureReplacer
             defaultSuit.setTexture(texture.name, texture);
         }
       }
+
+      // Set default suits on proto-IVA Kerbal.
+      foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>())
+      {
+        kerbal.textureStandard = defaultSuit.suit;
+        kerbal.textureVeteran = defaultSuit.suitVeteran;
+      }
     }
 
     public void resetScene()
     {
-      ivaReplaceTimer = -1.0f;
       previousVessel = null;
       ivaVessels.Clear();
 
@@ -949,14 +952,11 @@ namespace TextureReplacer
 
     public void updateScene()
     {
-      // IVA/EVA texture replacement pass. It is scheduled via event callbacks.
+      // IVA texture replacement pass. It is scheduled via event callbacks.
       if (HighLogic.LoadedSceneIsFlight)
       {
-        if (ivaReplaceTimer == 0.0f)
+        if (ivaVessels.Count != 0)
           personaliseIVAs();
-
-        if (ivaReplaceTimer > 0)
-          ivaReplaceTimer = Math.Max(0.0f, ivaReplaceTimer - Time.deltaTime);
       }
     }
 

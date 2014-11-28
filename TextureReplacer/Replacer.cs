@@ -81,7 +81,7 @@ namespace TextureReplacer
           texture.filterMode = FilterMode.Trilinear;
         }
 
-        Texture normalMap = material.GetTexture("_BumpMap");
+        Texture normalMap = material.GetTexture(Util.BUMPMAP_PROPERTY);
         if (normalMap == null)
           continue;
 
@@ -95,7 +95,7 @@ namespace TextureReplacer
             newNormalMap.anisoLevel = normalMap.anisoLevel;
             newNormalMap.wrapMode = normalMap.wrapMode;
 
-            material.SetTexture("_BumpMap", newNormalMap);
+            material.SetTexture(Util.BUMPMAP_PROPERTY, newNormalMap);
             UnityEngine.Object.Destroy(normalMap);
           }
         }
@@ -175,9 +175,6 @@ namespace TextureReplacer
         }
       }
 
-      // Bumpmapped version of diffuse shader for head.
-      Shader bumpedDiffuseShader = Shader.Find("Bumped Diffuse");
-
       Texture2D headNormalMap = null;
       Texture2D ivaVisorTexture = null;
       Texture2D evaVisorTexture = null;
@@ -193,15 +190,15 @@ namespace TextureReplacer
 
       // Set normal-mapped shader for head and visor texture and reflection on proto-IVA and -EVA
       // Kerbal.
-      foreach (SkinnedMeshRenderer smr
-               in Resources.FindObjectsOfTypeAll(typeof(SkinnedMeshRenderer)))
+      foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
       {
         if (smr.name == "headMesh01")
         {
-          smr.material.shader = bumpedDiffuseShader;
-
           if (headNormalMap != null)
-            smr.material.SetTexture("_BumpMap", headNormalMap);
+          {
+            smr.material.shader = Util.BUMPED_DIFFUSE_SHADER;
+            smr.material.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMap);
+          }
         }
         else if (smr.name == "visor")
         {
@@ -222,7 +219,7 @@ namespace TextureReplacer
         mappedTextures.Remove(HUD_NAVBALL);
 
         if (hudNavBallTexture.mipmapCount != 1)
-          Util.log("HUDNavBall texture shouldn't have mipmaps!");
+          Util.log("HUDNavBall texture should not have mipmaps!");
       }
 
       if (mappedTextures.TryGetValue(IVA_NAVBALL, out ivaNavBallTexture))
@@ -261,7 +258,7 @@ namespace TextureReplacer
     {
       if (replaceTimer >= 0.0f)
       {
-        var materials = (Material[]) Resources.FindObjectsOfTypeAll(typeof(Material));
+        Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
         if (materials.Length != lastMaterialCount)
         {
           replaceTextures(materials);

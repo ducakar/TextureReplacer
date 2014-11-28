@@ -77,8 +77,8 @@ namespace TextureReplacer
         if (newShader != null)
         {
           material.shader = newShader;
-          material.SetColor("_ReflectColor", reflectColour);
-          material.SetTexture("_Cube", Reflections.instance.envMap);
+          material.SetTexture(Util.CUBE_PROPERTY, Reflections.instance.envMap);
+          material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectColour);
         }
       }
     }

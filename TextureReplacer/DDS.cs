@@ -49,103 +49,104 @@ namespace TextureReplacer
     {
       try
       {
-        FileStream file = File.Open(urlFile.fullPath, FileMode.Open, FileAccess.Read);
-        BinaryReader reader = new BinaryReader(file);
-
-        if (!reader.BaseStream.CanRead)
-          throw new IOException("Cannot read DDS file");
-
-        // Implementation is based on specifications from
-        // http://msdn.microsoft.com/en-us/library/windows/desktop/bb943991%28v=vs.85%29.aspx.
-        // DX10 additions and deprecated features are not supported.
-        byte[] magic = reader.ReadBytes(4);
-        if (!fourCCEquals(magic, "DDS "))
-          throw new IOException("Invalid DDS file");
-
-        reader.ReadInt32();
-
-        int flags = reader.ReadInt32();
-        int height = reader.ReadInt32();
-        int width = reader.ReadInt32();
-
-        reader.ReadInt32();
-        reader.ReadInt32();
-
-        int nMipmaps = reader.ReadInt32();
-        if ((flags & DDSD_MIPMAPCOUNT_BIT) == 0)
-          nMipmaps = 1;
-
-        reader.BaseStream.Seek(80, SeekOrigin.Begin);
-
-        int pixelFlags = reader.ReadInt32();
-        byte[] formatFourCC = reader.ReadBytes(4);
-        int pixelSize = reader.ReadInt32() / 8;
-
-        TextureFormat format;
-        bool isCompressed = false;
-        bool isNormalMap = (pixelFlags & DDPF_NORMAL) != 0 || urlFile.name.EndsWith("NRM");
-        bool isReadable = (pixelFlags & DDPF_READABLE) != 0;
-
-        if ((pixelFlags & DDPF_FOURCC) != 0)
+        using (FileStream file = File.Open(urlFile.fullPath, FileMode.Open, FileAccess.Read))
+        using (BinaryReader reader = new BinaryReader(file))
         {
-          isCompressed = true;
+          if (!reader.BaseStream.CanRead)
+            throw new IOException("Cannot read DDS file");
 
-          if (fourCCEquals(formatFourCC, "DXT1"))
-            format = TextureFormat.DXT1;
-          else if (fourCCEquals(formatFourCC, "DXT5"))
-            format = TextureFormat.DXT5;
+          // Implementation is based on specifications from
+          // http://msdn.microsoft.com/en-us/library/windows/desktop/bb943991%28v=vs.85%29.aspx.
+          // DX10 additions and deprecated features are not supported.
+          byte[] magic = reader.ReadBytes(4);
+          if (!fourCCEquals(magic, "DDS "))
+            throw new IOException("Invalid DDS file");
+
+          reader.ReadInt32();
+
+          int flags = reader.ReadInt32();
+          int height = reader.ReadInt32();
+          int width = reader.ReadInt32();
+
+          reader.ReadInt32();
+          reader.ReadInt32();
+
+          int nMipmaps = reader.ReadInt32();
+          if ((flags & DDSD_MIPMAPCOUNT_BIT) == 0)
+            nMipmaps = 1;
+
+          reader.BaseStream.Seek(80, SeekOrigin.Begin);
+
+          int pixelFlags = reader.ReadInt32();
+          byte[] formatFourCC = reader.ReadBytes(4);
+          int pixelSize = reader.ReadInt32() / 8;
+
+          TextureFormat format;
+          bool isCompressed = false;
+          bool isNormalMap = (pixelFlags & DDPF_NORMAL) != 0 || urlFile.name.EndsWith("NRM");
+          bool isReadable = (pixelFlags & DDPF_READABLE) != 0;
+
+          if ((pixelFlags & DDPF_FOURCC) != 0)
+          {
+            isCompressed = true;
+
+            if (fourCCEquals(formatFourCC, "DXT1"))
+              format = TextureFormat.DXT1;
+            else if (fourCCEquals(formatFourCC, "DXT5"))
+              format = TextureFormat.DXT5;
+            else
+              throw new IOException("Unsupported DDS compression");
+          }
+          else if ((pixelFlags & DDPF_RGB) != 0)
+          {
+            format = (pixelFlags & DDPF_ALPHAPIXELS) != 0 ? TextureFormat.RGBA32 :
+                                                            TextureFormat.RGB24;
+          }
           else
-            throw new IOException("Unsupported DDS compression");
-        }
-        else if ((pixelFlags & DDPF_RGB) != 0)
-        {
-          format = (pixelFlags & DDPF_ALPHAPIXELS) != 0 ? TextureFormat.RGBA32 :
-                                                          TextureFormat.RGB24;
-        }
-        else
-        {
-          throw new IOException("Invalid DDS pixelformat");
-        }
-
-        int dataoffset = 128;
-
-        if (Loader.instance.mipmapBias != 0 || Loader.instance.normalMipmapBias != 0)
-        {
-          int blockSize = format == TextureFormat.DXT1 ? 8 : 16;
-          int max = Math.Min(nMipmaps - 1, isNormalMap ? Loader.instance.normalMipmapBias :
-                                                         Loader.instance.mipmapBias);
-
-          for (int i = 0; i < max; ++i)
           {
-            dataoffset += isCompressed ? ((width + 3) / 4) * ((height + 3) / 4) * blockSize :
-                                         width * height * pixelSize;
-
-            width = Math.Max(1, width / 2);
-            height = Math.Max(1, height / 2);
+            throw new IOException("Invalid DDS pixelformat");
           }
-        }
 
-        reader.BaseStream.Seek(dataoffset, SeekOrigin.Begin);
-        byte[] data = reader.ReadBytes((int) (reader.BaseStream.Length - dataoffset));
+          int dataoffset = 128;
 
-        // Swap red and blue.
-        if (!isCompressed)
-        {
-          for (int i = 0; i < data.Length; i += pixelSize)
+          if (Loader.instance.mipmapBias != 0 || Loader.instance.normalMipmapBias != 0)
           {
-            byte b = data[i + 0];
-            byte r = data[i + 2];
+            int blockSize = format == TextureFormat.DXT1 ? 8 : 16;
+            int max = Math.Min(nMipmaps - 1, isNormalMap ? Loader.instance.normalMipmapBias :
+                                                           Loader.instance.mipmapBias);
 
-            data[i + 0] = r;
-            data[i + 2] = b;
+            for (int i = 0; i < max; ++i)
+            {
+              dataoffset += isCompressed ? ((width + 3) / 4) * ((height + 3) / 4) * blockSize :
+                                           width * height * pixelSize;
+
+              width = Math.Max(1, width / 2);
+              height = Math.Max(1, height / 2);
+            }
           }
+
+          reader.BaseStream.Seek(dataoffset, SeekOrigin.Begin);
+          byte[] data = reader.ReadBytes((int) (reader.BaseStream.Length - dataoffset));
+
+          // Swap red and blue.
+          if (!isCompressed)
+          {
+            for (int i = 0; i < data.Length; i += pixelSize)
+            {
+              byte b = data[i + 0];
+              byte r = data[i + 2];
+
+              data[i + 0] = r;
+              data[i + 2] = b;
+            }
+          }
+
+          Texture2D texture = new Texture2D(width, height, format, nMipmaps > 1);
+          texture.LoadRawTextureData(data);
+          texture.Apply(false, !isReadable);
+
+          return new GameDatabase.TextureInfo(texture, isNormalMap, isReadable, isCompressed);
         }
-
-        Texture2D texture = new Texture2D(width, height, format, nMipmaps > 1);
-        texture.LoadRawTextureData(data);
-        texture.Apply(false, !isReadable);
-
-        return new GameDatabase.TextureInfo(texture, isNormalMap, isReadable, isCompressed);
       }
       catch (IOException e)
       {
@@ -155,7 +156,6 @@ namespace TextureReplacer
       {
         Util.log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
       }
-
       return null;
     }
 
