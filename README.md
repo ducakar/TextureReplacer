@@ -3,10 +3,10 @@
 TextureReplacer
 ===============
 
-* [GitHub page](http://github.com/ducakar/TextureReplacer)
 * [Forum page](http://forum.kerbalspaceprogram.com/threads/60961)
-* [CurseForge page](http://kerbal.curseforge.com/plugins/220217-texturereplacer)
+* [GitHub page](http://github.com/ducakar/TextureReplacer)
 * [Kerbal Stuff page](https://kerbalstuff.com/mod/150/TextureReplacer)
+* [CurseForge page](http://kerbal.curseforge.com/plugins/220217-texturereplacer)
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
@@ -248,21 +248,17 @@ Notes
   ones that cannot be replaced by this plugin.
 
 
-Known Issues
-------------
-
-* Replacement of certain textures from `GameData/` does not work. [No fix yet.]
-* Jetpack re-appears after dismounting a KerbalQuest jetpack. [No fix yet.]
-
-
 Change Log
 ----------
 
+* 2.0.2
+    - added option to hide the toolbar icon
+    - dead Kerbals are omitted from GUI and when saving settings
 * 2.0.1
     - improved IVA replacement; it is now immediate and completely reliable
     - fixed inheritance of `Default/kerbalHeadNRM` to heads without normal maps
 * 2.0
-    - added UI for configuring per-Kerbal heads and suits to Space Centre
+    - added GUI for configuring per-Kerbal heads and suits to Space Centre
     - per-Kerbal head and suit assignment is saved for each game separately
     - `CustomKerbals` from config files are now used only as initial settings
     - fixed assignment of `Default/kerbalMain` veteran suit to Jeb, Bill and Bob

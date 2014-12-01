@@ -37,6 +37,7 @@ namespace TextureReplacer
     // Application launcher icon.
     Texture2D appIcon = null;
     ApplicationLauncherButton appButton = null;
+    bool isGuiEnabled = true;
     // Instance.
     public static UI instance = null;
 
@@ -50,8 +51,11 @@ namespace TextureReplacer
 
       foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew)
       {
-        if (GUILayout.Button(kerbal.name))
+        if (kerbal.rosterStatus != ProtoCrewMember.RosterStatus.Dead
+            && GUILayout.Button(kerbal.name))
+        {
           selectedKerbal = kerbal;
+        }
       }
 
       GUILayout.EndVertical();
@@ -213,6 +217,13 @@ namespace TextureReplacer
       selectedKerbal = null;
     }
 
+    public void readConfig(ConfigNode rootNode)
+    {
+      string sIsGuiEnabled = rootNode.GetValue("isGUIEnabled");
+      if (sIsGuiEnabled != null)
+        bool.TryParse(sIsGuiEnabled, out isGuiEnabled);
+    }
+
     public void initialise()
     {
       appIcon = GameDatabase.Instance.GetTexture(APP_ICON_PATH, false);
@@ -232,7 +243,7 @@ namespace TextureReplacer
 
     public void draw()
     {
-      if (ApplicationLauncher.Ready)
+      if (isGuiEnabled && ApplicationLauncher.Ready)
       {
         bool hidden;
 

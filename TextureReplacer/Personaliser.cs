@@ -575,6 +575,9 @@ namespace TextureReplacer
     {
       foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew)
       {
+        if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead)
+          continue;
+
         string headName = "GENERIC";
         string suitName = "GENERIC";
 
