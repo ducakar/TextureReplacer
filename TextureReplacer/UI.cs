@@ -51,12 +51,25 @@ namespace TextureReplacer
 
       foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew)
       {
-        if (kerbal.rosterStatus != ProtoCrewMember.RosterStatus.Dead
-            && GUILayout.Button(kerbal.name))
+        switch (kerbal.rosterStatus)
         {
-          selectedKerbal = kerbal;
+          case ProtoCrewMember.RosterStatus.Assigned:
+            GUI.contentColor = Color.cyan;
+            break;
+          case ProtoCrewMember.RosterStatus.Dead:
+            continue;
+          case ProtoCrewMember.RosterStatus.Missing:
+            GUI.contentColor = Color.yellow;
+            break;
+          default:
+            GUI.contentColor = Color.white;
+            break;
         }
+
+        if (GUILayout.Button(kerbal.name))
+          selectedKerbal = kerbal;
       }
+      GUI.contentColor = Color.white;
 
       GUILayout.EndVertical();
       GUILayout.EndScrollView();

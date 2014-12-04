@@ -253,7 +253,8 @@ Change Log
 
 * 2.0.2
     - added option to hide the toolbar icon
-    - dead Kerbals are omitted from GUI and when saving settings
+    - dead Kerbals are omitted from the GUI and when saving settings
+    - assigned and missing Kerbals in the GUI are cyan and yellow respectively
 * 2.0.1
     - improved IVA replacement; it is now immediate and completely reliable
     - fixed inheritance of `Default/kerbalHeadNRM` to heads without normal maps
