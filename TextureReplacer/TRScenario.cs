@@ -20,37 +20,75 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
+
 namespace TextureReplacer
 {
-  [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER)]
+  [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER, GameScenes.FLIGHT)]
   public class TRScenario : ScenarioModule
   {
     public override void OnLoad(ConfigNode node)
     {
       Personaliser personaliser = Personaliser.instance;
-      personaliser.customHeads.Clear();
-      personaliser.customSuits.Clear();
+      personaliser.gameKerbals.Clear();
+      personaliser.perkSuits.Clear();
 
-      node = node.GetNode("CustomKerbals");
-      if (node == null)
+      ConfigNode kerbalsNode = node.GetNode("Kerbals") ?? node.GetNode("CustomKerbals");
+      if (kerbalsNode == null)
       {
-        foreach (var entry in personaliser.defaultCustomHeads)
-          personaliser.customHeads.Add(entry.Key, entry.Value);
-
-        foreach (var entry in personaliser.defaultCustomSuits)
-          personaliser.customSuits.Add(entry.Key, entry.Value);
+        foreach (var entry in personaliser.customKerbals)
+          personaliser.gameKerbals.Add(entry.Key, entry.Value);
       }
       else
       {
-        Personaliser.instance.readCustomKerbals(node);
+        personaliser.readKerbals(kerbalsNode);
+      }
+
+      ConfigNode perkSuitsNode = node.GetNode("PerkSuits");
+      if (perkSuitsNode == null)
+      {
+        foreach (var entry in personaliser.defaultPerkSuits)
+          personaliser.perkSuits.Add(entry.Key, entry.Value);
+      }
+      else
+      {
+        personaliser.readPerkSuits(perkSuitsNode);
+      }
+
+      string sIsHelmetRemovalEnabled = node.GetValue("isHelmetRemovalEnabled");
+      if (sIsHelmetRemovalEnabled != null)
+        bool.TryParse(sIsHelmetRemovalEnabled, out personaliser.isHelmetRemovalEnabled);
+
+      string sIsAtmSuitEnabled = node.GetValue("isAtmSuitEnabled");
+      if (sIsAtmSuitEnabled != null)
+        bool.TryParse(sIsAtmSuitEnabled, out personaliser.isAtmSuitEnabled);
+
+      string sSuitAssignment = node.GetValue("suitAssignment");
+      if (sSuitAssignment != null)
+      {
+        try
+        {
+          personaliser.suitAssignment =
+            (Personaliser.SuitAssignment) Enum.Parse(typeof(Personaliser.SuitAssignment),
+                                                     sSuitAssignment);
+        }
+        catch (ArgumentException)
+        {
+          personaliser.suitAssignment = Personaliser.SuitAssignment.RANDOM;
+        }
       }
     }
 
     public override void OnSave(ConfigNode node)
     {
-      node = node.AddNode("CustomKerbals");
+      Personaliser personaliser = Personaliser.instance;
 
-      Personaliser.instance.saveCustomKerbals(node);
+      personaliser.saveKerbals(node.AddNode("Kerbals"));
+      personaliser.savePerkSuits(node.AddNode("PerkSuits"));
+
+      node.AddValue("isHelmetRemovalEnabled", personaliser.isHelmetRemovalEnabled);
+      node.AddValue("isAtmSuitEnabled", personaliser.isAtmSuitEnabled);
+      node.AddValue("suitAssignment", personaliser.suitAssignment);
     }
   }
 }

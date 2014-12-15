@@ -41,6 +41,7 @@
         <Command type="AfterBuild" command="cp ${TargetFile} &quot;/run/media/davorin/Windows 7/KSP-test/GameData/TextureReplacer/Plugins&quot;" workingdir="${ProjectDir}" />
       </CustomCommands>
     </CustomCommands>
+    <DefineConstants>TR_DDS TR_LOW</DefineConstants>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

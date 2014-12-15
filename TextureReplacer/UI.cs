@@ -28,9 +28,10 @@ namespace TextureReplacer
   class UI
   {
     static readonly string APP_ICON_PATH = Util.DIR + "Plugins/appIcon";
+    static readonly string[] SUIT_ASSIGNMENTS = { "Random", "Consecutive", "Experience" };
     const int WINDOW_ID = 107056;
     // UI state.
-    Rect windowRect = new Rect(Screen.width - 640, 80, 600, 560);
+    Rect windowRect = new Rect(Screen.width - 620, 60, 600, 580);
     Vector2 rosterScroll = Vector2.zero;
     ProtoCrewMember selectedKerbal = null;
     bool isEnabled = false;
@@ -43,10 +44,14 @@ namespace TextureReplacer
 
     void windowHandler(int id)
     {
-      GUILayout.BeginHorizontal();
+      Personaliser personaliser = Personaliser.instance;
+
+      GUILayout.BeginVertical();
+      GUILayout.BeginHorizontal(GUILayout.Height(430));
+      GUILayout.BeginVertical(GUILayout.Width(200));
 
       // Roster area.
-      rosterScroll = GUILayout.BeginScrollView(rosterScroll, GUILayout.Width(200));
+      rosterScroll = GUILayout.BeginScrollView(rosterScroll);
       GUILayout.BeginVertical();
 
       foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew)
@@ -74,91 +79,84 @@ namespace TextureReplacer
       GUILayout.EndVertical();
       GUILayout.EndScrollView();
 
+      // Task suits.
+      if (GUILayout.Button("Pilot"))
+      {
+        selectedKerbal = null;
+      }
+      if (GUILayout.Button("Engineer"))
+      {
+        selectedKerbal = null;
+      }
+      if (GUILayout.Button("Scientist"))
+      {
+        selectedKerbal = null;
+      }
+      if (GUILayout.Button("Passenger"))
+      {
+        selectedKerbal = null;
+      }
+
+      GUILayout.EndVertical();
+
       // Textures.
       if (selectedKerbal != null)
       {
-        Personaliser personaliser = Personaliser.instance;
+        Personaliser.KerbalData kerbalData = personaliser.getKerbalData(selectedKerbal.name);
+        int headIndex = -1;
+        int suitIndex = -1;
+
+        if (kerbalData.head != null)
+          headIndex = personaliser.heads.IndexOf(kerbalData.head);
+
+        if (kerbalData.suit != null)
+          suitIndex = personaliser.suits.IndexOf(kerbalData.suit);
 
         GUILayout.Space(20);
         GUILayout.BeginVertical();
 
-        Personaliser.Head defaultHead = personaliser.defaultHead;
-        Personaliser.Suit defaultSuit = personaliser.defaultSuit;
-        Personaliser.Head head = null;
-        Personaliser.Suit suit = null;
-
-        int headIndex = -1;
-        int suitIndex = -1;
-        bool hasCustomHead = false;
-        bool hasCustomSuit = false;
-
-        if (personaliser.customHeads.ContainsKey(selectedKerbal.name))
-        {
-          head = personaliser.customHeads[selectedKerbal.name];
-          headIndex = personaliser.heads.IndexOf(head);
-          hasCustomHead = true;
-        }
-
-        if (personaliser.customSuits.ContainsKey(selectedKerbal.name))
-        {
-          suit = personaliser.customSuits[selectedKerbal.name];
-          suitIndex = personaliser.suits.IndexOf(suit);
-          hasCustomSuit = true;
-        }
-
-        head = head ?? defaultHead;
-        suit = suit ?? defaultSuit;
-
-        Texture2D headTex = head.head ?? defaultHead.head;
-        Texture2D suitTex = suit == defaultSuit && Personaliser.isVeteran(selectedKerbal) ?
-                            defaultSuit.suitVeteran :
-                            (suit.suit ?? defaultSuit.suit);
-        Texture2D helmetTex = suit.helmet ?? defaultSuit.helmet;
-        Texture2D evaSuitTex = suit.evaSuit ?? defaultSuit.evaSuit;
-        Texture2D evaHelmetTex = suit.evaHelmet ?? defaultSuit.evaHelmet;
-
-        if (hasCustomHead)
-          GUILayout.Box(headTex, GUILayout.Width(250), GUILayout.Height(250));
+        if (kerbalData.head != null)
+          GUILayout.Box(kerbalData.head.head, GUILayout.Width(200), GUILayout.Height(200));
         else
-          GUILayout.Box("Generic", GUILayout.Width(250), GUILayout.Height(250));
+          GUILayout.Box("Generic", GUILayout.Width(200), GUILayout.Height(200));
 
         GUILayout.Space(20);
 
-        if (hasCustomSuit)
+        if (kerbalData.suit != null)
         {
           GUILayout.BeginHorizontal();
-          GUILayout.Box(suitTex, GUILayout.Width(120), GUILayout.Height(120));
+          GUILayout.Box(kerbalData.isVeteran ? kerbalData.suit.suitVeteran : kerbalData.suit.suit,
+                        GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.Space(10);
-          GUILayout.Box(helmetTex, GUILayout.Width(120), GUILayout.Height(120));
+          GUILayout.Box(kerbalData.suit.helmet, GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.EndHorizontal();
 
           GUILayout.Space(10);
 
           GUILayout.BeginHorizontal();
-          GUILayout.Box(evaSuitTex, GUILayout.Width(120), GUILayout.Height(120));
+          GUILayout.Box(kerbalData.suit.evaSuit, GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.Space(10);
-          GUILayout.Box(evaHelmetTex, GUILayout.Width(120), GUILayout.Height(120));
+          GUILayout.Box(kerbalData.suit.evaHelmet, GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.EndHorizontal();
         }
         else
         {
           GUILayout.BeginHorizontal();
-          GUILayout.Box("Generic", GUILayout.Width(120), GUILayout.Height(120));
+          GUILayout.Box("Generic", GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.Space(10);
-          GUILayout.Box("Generic", GUILayout.Width(120), GUILayout.Height(120));
+          GUILayout.Box("Generic", GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.EndHorizontal();
 
           GUILayout.Space(10);
 
           GUILayout.BeginHorizontal();
-          GUILayout.Box("Generic", GUILayout.Width(120), GUILayout.Height(120));
+          GUILayout.Box("Generic", GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.Space(10);
-          GUILayout.Box("Generic", GUILayout.Width(120), GUILayout.Height(120));
+          GUILayout.Box("Generic", GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.EndHorizontal();
         }
 
         GUILayout.EndVertical();
-
         GUILayout.BeginVertical();
 
         GUILayout.BeginHorizontal();
@@ -168,24 +166,26 @@ namespace TextureReplacer
         {
           headIndex = headIndex == -1 ? 0 : headIndex;
           headIndex = (personaliser.heads.Count + headIndex - 1) % personaliser.heads.Count;
-          personaliser.customHeads[selectedKerbal.name] = personaliser.heads[headIndex];
+
+          kerbalData.head = personaliser.heads[headIndex];
         }
         if (GUILayout.Button(">"))
         {
           headIndex = (headIndex + 1) % personaliser.heads.Count;
-          personaliser.customHeads[selectedKerbal.name] = personaliser.heads[headIndex];
+
+          kerbalData.head = personaliser.heads[headIndex];
         }
 
         GUI.enabled = true;
         GUILayout.EndHorizontal();
 
         if (GUILayout.Button("Default"))
-          Personaliser.instance.customHeads[selectedKerbal.name] = null;
+          kerbalData.head = personaliser.defaultHead;
 
         if (GUILayout.Button("Unset"))
-          Personaliser.instance.customHeads.Remove(selectedKerbal.name);
+          kerbalData.head = null;
 
-        GUILayout.Space(170);
+        GUILayout.Space(120);
 
         GUILayout.BeginHorizontal();
         GUI.enabled = personaliser.suits.Count != 0;
@@ -194,27 +194,50 @@ namespace TextureReplacer
         {
           suitIndex = suitIndex == -1 ? 0 : suitIndex;
           suitIndex = (personaliser.suits.Count + suitIndex - 1) % personaliser.suits.Count;
-          personaliser.customSuits[selectedKerbal.name] = personaliser.suits[suitIndex];
+
+          kerbalData.suit = personaliser.suits[suitIndex];
+          kerbalData.cabinSuit = null;
         }
         if (GUILayout.Button(">"))
         {
           suitIndex = (suitIndex + 1) % personaliser.suits.Count;
-          personaliser.customSuits[selectedKerbal.name] = personaliser.suits[suitIndex];
+
+          kerbalData.suit = personaliser.suits[suitIndex];
+          kerbalData.cabinSuit = null;
         }
 
         GUI.enabled = true;
         GUILayout.EndHorizontal();
 
         if (GUILayout.Button("Default"))
-          Personaliser.instance.customSuits[selectedKerbal.name] = null;
-
+        {
+          kerbalData.suit = personaliser.defaultSuit;
+          kerbalData.cabinSuit = null;
+        }
         if (GUILayout.Button("Unset"))
-          Personaliser.instance.customSuits.Remove(selectedKerbal.name);
+        {
+          kerbalData.suit = null;
+          kerbalData.cabinSuit = null;
+        }
 
         GUILayout.EndVertical();
       }
 
       GUILayout.EndHorizontal();
+
+      personaliser.isHelmetRemovalEnabled = GUILayout.Toggle(
+        personaliser.isHelmetRemovalEnabled, "Remove IVA helmets in safe situations");
+
+      personaliser.isAtmSuitEnabled = GUILayout.Toggle(
+        personaliser.isAtmSuitEnabled, "Spawn Kerbals in IVA suits when in breathable atmosphere");
+
+      GUILayout.BeginHorizontal();
+      GUILayout.Label("Generic suits:");
+      personaliser.suitAssignment = (Personaliser.SuitAssignment) GUILayout.SelectionGrid(
+        (int) personaliser.suitAssignment, SUIT_ASSIGNMENTS, 3);
+      GUILayout.EndHorizontal();
+
+      GUILayout.EndVertical();
       GUI.DragWindow(new Rect(0, 0, Screen.width, 30));
     }
 
@@ -248,7 +271,7 @@ namespace TextureReplacer
 
     public void resetScene()
     {
-      selectedKerbal = null;
+      disable();
 
       if (HighLogic.LoadedScene == GameScenes.MAINMENU)
         appButton = null;

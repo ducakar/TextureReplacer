@@ -107,19 +107,6 @@ namespace TextureReplacer
     }
 
     /**
-     * Replace planets' surface textures.
-     */
-    static void replaceSurfaceTextures()
-    {
-//      foreach (var vcm in Resources.FindObjectsOfTypeAll<CelestialBody>())
-//      {
-//        Util.log(vcm.transform.name);
-//        Util.logDownHierarchy(vcm.transform);
-//        vcm.vertexColorMap.CreateMap(MapSO.MapDepth.RGB, mappedTextures["evemoon100"]);
-//      }
-    }
-
-    /**
      * Replace NavBalls' textures.
      */
     void updateNavball(Vessel vessel)
@@ -192,6 +179,10 @@ namespace TextureReplacer
       // Kerbal.
       foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
       {
+        #if TR_LOW
+        smr.quality = SkinQuality.Bone2;
+        #endif
+
         if (smr.name == "headMesh01")
         {
           if (headNormalMap != null)
@@ -207,8 +198,8 @@ namespace TextureReplacer
 
           if (newTexture != null)
           {
-            smr.sharedMaterial.color = Color.white;
             smr.sharedMaterial.mainTexture = newTexture;
+            smr.sharedMaterial.color = Color.white;
           }
         }
       }
@@ -249,9 +240,6 @@ namespace TextureReplacer
         else
           GameEvents.onVesselChange.Remove(updateNavball);
       }
-
-      if (scene == GameScenes.MAINMENU)
-        replaceSurfaceTextures();
     }
 
     public void updateScene()

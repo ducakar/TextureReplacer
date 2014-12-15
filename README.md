@@ -251,6 +251,11 @@ Notes
 Change Log
 ----------
 
+* 2.1
+    - added several new options to GUI
+    - cabin suits are now persistent until embarking another capsule
+    - changed settings for experiance-based suits
+    - removed `headMultiplier` and `suitMultiplier` settings
 * 2.0.2
     - added option to hide the toolbar icon
     - dead Kerbals are omitted from the GUI and when saving settings

@@ -25,12 +25,17 @@ namespace TextureReplacer
   public class TREvaModule : PartModule
   {
     [KSPField(isPersistant = true)]
+    bool isInitialised = false;
+
+    [KSPField(isPersistant = true)]
     public bool hasEvaSuit = false;
 
     [KSPEvent(guiActive = true, guiName = "Toggle EVA Suit", active = true)]
     public void toggleEvaSuit()
     {
-      if (Personaliser.instance.changeSuit(part, !hasEvaSuit))
+      Personaliser personaliser = Personaliser.instance;
+
+      if (personaliser.personalise(part, !hasEvaSuit))
       {
         hasEvaSuit = !hasEvaSuit;
       }
@@ -44,15 +49,25 @@ namespace TextureReplacer
 
     public override void OnStart(StartState state)
     {
-      if (!Personaliser.instance.changeSuit(part, hasEvaSuit))
+      Personaliser personaliser = Personaliser.instance;
+
+      if (!isInitialised)
+      {
+        hasEvaSuit = !personaliser.isAtmSuitEnabled;
+        isInitialised = true;
+      }
+
+      if (!personaliser.personalise(part, hasEvaSuit))
         hasEvaSuit = true;
     }
 
     public override void OnUpdate()
     {
-      if (!hasEvaSuit && !Personaliser.instance.isAtmBreathable())
+      Personaliser personaliser = Personaliser.instance;
+
+      if (!hasEvaSuit && !personaliser.isAtmBreathable())
       {
-        Personaliser.instance.changeSuit(part, true);
+        personaliser.personalise(part, true);
         hasEvaSuit = true;
       }
     }
