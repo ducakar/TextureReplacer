@@ -159,7 +159,8 @@ namespace TextureReplacer
       // Prevent conflicts with TextureCompressor. If it is found among loaded plugins, texture
       // compression step will be skipped since TextureCompressor should handle it (better).
       bool isATMDetected =
-        AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("ActiveTextureManagement"));
+        AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("ActiveTextureManagement",
+                                                                   StringComparison.Ordinal));
 
       if (isATMDetected)
       {

@@ -31,9 +31,10 @@ namespace TextureReplacer
     static readonly string[] SUIT_ASSIGNMENTS = { "Random", "Consecutive", "Experience" };
     const int WINDOW_ID = 107056;
     // UI state.
-    Rect windowRect = new Rect(Screen.width - 620, 60, 600, 580);
+    Rect windowRect = new Rect(Screen.width - 620, 60, 600, 560);
     Vector2 rosterScroll = Vector2.zero;
     ProtoCrewMember selectedKerbal = null;
+    string selectedPerk = null;
     bool isEnabled = false;
     // Application launcher icon.
     Texture2D appIcon = null;
@@ -72,71 +73,98 @@ namespace TextureReplacer
         }
 
         if (GUILayout.Button(kerbal.name))
+        {
           selectedKerbal = kerbal;
+          selectedPerk = null;
+        }
       }
       GUI.contentColor = Color.white;
 
       GUILayout.EndVertical();
       GUILayout.EndScrollView();
 
-      // Task suits.
+      // Perk suits.
       if (GUILayout.Button("Pilot"))
       {
         selectedKerbal = null;
+        selectedPerk = "Pilot";
       }
       if (GUILayout.Button("Engineer"))
       {
         selectedKerbal = null;
+        selectedPerk = "Engineer";
       }
       if (GUILayout.Button("Scientist"))
       {
         selectedKerbal = null;
-      }
-      if (GUILayout.Button("Passenger"))
-      {
-        selectedKerbal = null;
+        selectedPerk = "Scientist";
       }
 
       GUILayout.EndVertical();
 
       // Textures.
+      Personaliser.KerbalData kerbalData = null;
+      Personaliser.Suit perkSuit = null;
+      int headIndex = -1;
+      int suitIndex = -1;
+
       if (selectedKerbal != null)
       {
-        Personaliser.KerbalData kerbalData = personaliser.getKerbalData(selectedKerbal.name);
-        int headIndex = -1;
-        int suitIndex = -1;
+        kerbalData = personaliser.getKerbalData(selectedKerbal.name);
 
         if (kerbalData.head != null)
           headIndex = personaliser.heads.IndexOf(kerbalData.head);
 
         if (kerbalData.suit != null)
           suitIndex = personaliser.suits.IndexOf(kerbalData.suit);
+      }
+      else if (selectedPerk != null)
+      {
+        personaliser.perkSuits.TryGetValue(selectedPerk, out perkSuit);
 
-        GUILayout.Space(20);
-        GUILayout.BeginVertical();
+        if (perkSuit != null)
+          suitIndex = personaliser.suits.IndexOf(perkSuit);
+      }
 
+      GUILayout.Space(20);
+      GUILayout.BeginVertical();
+
+      if (kerbalData != null)
+      {
         if (kerbalData.head != null)
           GUILayout.Box(kerbalData.head.head, GUILayout.Width(200), GUILayout.Height(200));
         else
           GUILayout.Box("Generic", GUILayout.Width(200), GUILayout.Height(200));
 
         GUILayout.Space(20);
+      }
 
-        if (kerbalData.suit != null)
+      if (kerbalData != null || selectedPerk != null)
+      {
+        Personaliser.Suit suit = kerbalData != null ? kerbalData.suit : perkSuit;
+
+        if (suit != null)
         {
+          Personaliser.Suit defaultSuit = personaliser.defaultSuit;
+
+          Texture2D suitTex = suit == defaultSuit && kerbalData != null && kerbalData.isVeteran ?
+                              defaultSuit.suitVeteran : (suit.suit ?? defaultSuit.suit);
+          Texture2D helmetTex = suit.helmet ?? defaultSuit.helmet;
+          Texture2D evaSuitTex = suit.evaSuit ?? defaultSuit.evaSuit;
+          Texture2D evaHelmetTex = suit.evaHelmet ?? defaultSuit.evaHelmet;
+
           GUILayout.BeginHorizontal();
-          GUILayout.Box(kerbalData.isVeteran ? kerbalData.suit.suitVeteran : kerbalData.suit.suit,
-                        GUILayout.Width(100), GUILayout.Height(100));
+          GUILayout.Box(suitTex, GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.Space(10);
-          GUILayout.Box(kerbalData.suit.helmet, GUILayout.Width(100), GUILayout.Height(100));
+          GUILayout.Box(helmetTex, GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.EndHorizontal();
 
           GUILayout.Space(10);
 
           GUILayout.BeginHorizontal();
-          GUILayout.Box(kerbalData.suit.evaSuit, GUILayout.Width(100), GUILayout.Height(100));
+          GUILayout.Box(evaSuitTex, GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.Space(10);
-          GUILayout.Box(kerbalData.suit.evaHelmet, GUILayout.Width(100), GUILayout.Height(100));
+          GUILayout.Box(evaHelmetTex, GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.EndHorizontal();
         }
         else
@@ -155,10 +183,13 @@ namespace TextureReplacer
           GUILayout.Box("Generic", GUILayout.Width(100), GUILayout.Height(100));
           GUILayout.EndHorizontal();
         }
+      }
 
-        GUILayout.EndVertical();
-        GUILayout.BeginVertical();
+      GUILayout.EndVertical();
+      GUILayout.BeginVertical();
 
+      if (kerbalData != null)
+      {
         GUILayout.BeginHorizontal();
         GUI.enabled = personaliser.heads.Count != 0;
 
@@ -186,7 +217,10 @@ namespace TextureReplacer
           kerbalData.head = null;
 
         GUILayout.Space(120);
+      }
 
+      if (kerbalData != null || selectedPerk != null)
+      {
         GUILayout.BeginHorizontal();
         GUI.enabled = personaliser.suits.Count != 0;
 
@@ -195,15 +229,29 @@ namespace TextureReplacer
           suitIndex = suitIndex == -1 ? 0 : suitIndex;
           suitIndex = (personaliser.suits.Count + suitIndex - 1) % personaliser.suits.Count;
 
-          kerbalData.suit = personaliser.suits[suitIndex];
-          kerbalData.cabinSuit = null;
+          if (kerbalData != null)
+          {
+            kerbalData.suit = personaliser.suits[suitIndex];
+            kerbalData.cabinSuit = null;
+          }
+          else
+          {
+            personaliser.perkSuits[selectedPerk] = personaliser.suits[suitIndex];
+          }
         }
         if (GUILayout.Button(">"))
         {
           suitIndex = (suitIndex + 1) % personaliser.suits.Count;
 
-          kerbalData.suit = personaliser.suits[suitIndex];
-          kerbalData.cabinSuit = null;
+          if (kerbalData != null)
+          {
+            kerbalData.suit = personaliser.suits[suitIndex];
+            kerbalData.cabinSuit = null;
+          }
+          else
+          {
+            personaliser.perkSuits[selectedPerk] = personaliser.suits[suitIndex];
+          }
         }
 
         GUI.enabled = true;
@@ -211,18 +259,31 @@ namespace TextureReplacer
 
         if (GUILayout.Button("Default"))
         {
-          kerbalData.suit = personaliser.defaultSuit;
-          kerbalData.cabinSuit = null;
+          if (kerbalData != null)
+          {
+            kerbalData.suit = personaliser.defaultSuit;
+            kerbalData.cabinSuit = null;
+          }
+          else
+          {
+            personaliser.perkSuits[selectedPerk] = personaliser.defaultSuit;
+          }
         }
         if (GUILayout.Button("Unset"))
         {
-          kerbalData.suit = null;
-          kerbalData.cabinSuit = null;
+          if (kerbalData != null)
+          {
+            kerbalData.suit = null;
+            kerbalData.cabinSuit = null;
+          }
+          else
+          {
+            personaliser.perkSuits[selectedPerk] = null;
+          }
         }
-
-        GUILayout.EndVertical();
       }
 
+      GUILayout.EndVertical();
       GUILayout.EndHorizontal();
 
       personaliser.isHelmetRemovalEnabled = GUILayout.Toggle(
@@ -245,12 +306,14 @@ namespace TextureReplacer
     {
       isEnabled = true;
       selectedKerbal = null;
+      selectedPerk = null;
     }
 
     void disable()
     {
       isEnabled = false;
       selectedKerbal = null;
+      selectedPerk = null;
     }
 
     public void readConfig(ConfigNode rootNode)

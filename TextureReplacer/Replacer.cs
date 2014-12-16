@@ -32,7 +32,7 @@ namespace TextureReplacer
     public static readonly string HUD_NAVBALL = "HUDNavBall";
     public static readonly string IVA_NAVBALL = "IVANavBall";
     // General texture replacements.
-    readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
+    Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
     // NavBalls' textures.
     Texture2D hudNavBallTexture = null;
     Texture2D ivaNavBallTexture = null;
@@ -54,8 +54,11 @@ namespace TextureReplacer
       foreach (Material material in materials)
       {
         Texture texture = material.mainTexture;
-        if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp"))
+        if (texture == null || texture.name.Length == 0
+            || texture.name.StartsWith("Temp", StringComparison.Ordinal))
+        {
           continue;
+        }
 
         if (logTextures)
           Util.log("[{0}] {1}", material.name, texture.name);
@@ -146,7 +149,7 @@ namespace TextureReplacer
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
-        if (texture == null || !texture.name.StartsWith(DIR_TEXTURES))
+        if (texture == null || !texture.name.StartsWith(DIR_TEXTURES, StringComparison.Ordinal))
           continue;
 
         string originalName = texture.name.Substring(DIR_TEXTURES.Length);
@@ -155,7 +158,7 @@ namespace TextureReplacer
         // non-consecutive duplicated entries for some strange reason.
         if (!mappedTextures.ContainsKey(originalName))
         {
-          if (originalName.StartsWith("GalaxyTex_"))
+          if (originalName.StartsWith("GalaxyTex_", StringComparison.Ordinal))
             texture.wrapMode = TextureWrapMode.Clamp;
 
           mappedTextures.Add(originalName, texture);

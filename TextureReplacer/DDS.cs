@@ -52,6 +52,9 @@ namespace TextureReplacer
         using (FileStream file = File.Open(urlFile.fullPath, FileMode.Open, FileAccess.Read))
         using (BinaryReader reader = new BinaryReader(file))
         {
+          if (reader == null)
+            throw new IOException("Invalid file" + urlFile.fullPath);
+
           if (!reader.BaseStream.CanRead)
             throw new IOException("Cannot read DDS file");
 
@@ -83,7 +86,8 @@ namespace TextureReplacer
 
           TextureFormat format;
           bool isCompressed = false;
-          bool isNormalMap = (pixelFlags & DDPF_NORMAL) != 0 || urlFile.name.EndsWith("NRM");
+          bool isNormalMap = (pixelFlags & DDPF_NORMAL) != 0
+                             || urlFile.name.EndsWith("NRM", StringComparison.Ordinal);
           bool isReadable = (pixelFlags & DDPF_READABLE) != 0;
 
           if ((pixelFlags & DDPF_FOURCC) != 0)
@@ -107,26 +111,8 @@ namespace TextureReplacer
             throw new IOException("Invalid DDS pixelformat");
           }
 
-          int dataoffset = 128;
-
-          if (Loader.instance.mipmapBias != 0 || Loader.instance.normalMipmapBias != 0)
-          {
-            int blockSize = format == TextureFormat.DXT1 ? 8 : 16;
-            int max = Math.Min(nMipmaps - 1, isNormalMap ? Loader.instance.normalMipmapBias :
-                                                           Loader.instance.mipmapBias);
-
-            for (int i = 0; i < max; ++i)
-            {
-              dataoffset += isCompressed ? ((width + 3) / 4) * ((height + 3) / 4) * blockSize :
-                                           width * height * pixelSize;
-
-              width = Math.Max(1, width / 2);
-              height = Math.Max(1, height / 2);
-            }
-          }
-
-          reader.BaseStream.Seek(dataoffset, SeekOrigin.Begin);
-          byte[] data = reader.ReadBytes((int) (reader.BaseStream.Length - dataoffset));
+          reader.BaseStream.Seek(128, SeekOrigin.Begin);
+          byte[] data = reader.ReadBytes((int) (reader.BaseStream.Length - 128));
 
           // Swap red and blue.
           if (!isCompressed)

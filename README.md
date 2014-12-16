@@ -158,11 +158,11 @@ powers of two. Cube map textures are slow, so keep them as low-res as possible.
 
 ### Personalised Kerbal Textures ###
 
-Heads and suits are assigned either manually (custom Kerbals) or pseudo-randomly
-(generic Kerbals). Pseudo-random assignment is based on a Kerbal's name, which
-ensures the same head/suit is always assigned to a given Kerbal. Additionally it
-is also possible to assign suits consecutively, based on rooster index, or based
-on Kerbal experience if KerbalStats plugin is present.
+Heads and suits are assigned either manually or automatically (configured in GUI
+while configuration files provide initial settings). Pseudo-random assignment is
+based on a Kerbal's name, which ensures the same head/suit is always assigned to
+a given Kerbal. Additionally it is also possible to assign suits consecutively,
+based on rooster index, or based on Kerbal experience.
 
 Head textures reside inside `Heads/` directory and have arbitrary names. Normal
 maps are optional. To provide a normal map, name it the same as the head texture
@@ -254,7 +254,10 @@ Change Log
 * 2.1
     - added several new options to GUI
     - cabin suits are now persistent until embarking another capsule
-    - changed settings for experiance-based suits
+    - changed experiance-based suit assignment to work with stock exp. traits
+      rather than KerbalStats exp.
+    - completely changed settings for experiance-based suits
+    - removed KerbalStats support
     - removed `headMultiplier` and `suitMultiplier` settings
 * 2.0.2
     - added option to hide the toolbar icon

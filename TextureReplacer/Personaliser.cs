@@ -20,6 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -121,29 +122,29 @@ namespace TextureReplacer
     static readonly string DIR_HEADS = Util.DIR + "Heads/";
     static readonly string DIR_SUITS = Util.DIR + "Suits/";
     // Default textures (from `Default/`).
-    public readonly Head defaultHead = new Head { name = "DEFAULT" };
-    public readonly Suit defaultSuit = new Suit { name = "DEFAULT" };
+    public Head defaultHead = new Head { name = "DEFAULT" };
+    public Suit defaultSuit = new Suit { name = "DEFAULT" };
     // All Kerbal textures, including excluded by configuration.
-    public readonly List<Head> heads = new List<Head>();
-    public readonly List<Suit> suits = new List<Suit>();
+    public List<Head> heads = new List<Head>();
+    public List<Suit> suits = new List<Suit>();
     // Male textures (minus excluded).
-    public readonly List<Head> kerbalHeads = new List<Head>();
-    public readonly List<Suit> kerbalSuits = new List<Suit>();
+    public List<Head> kerbalHeads = new List<Head>();
+    public List<Suit> kerbalSuits = new List<Suit>();
     // Female textures (minus excluded).
-    public readonly List<Head> kerminHeads = new List<Head>();
-    public readonly List<Suit> kerminSuits = new List<Suit>();
+    public List<Head> kerminHeads = new List<Head>();
+    public List<Suit> kerminSuits = new List<Suit>();
     // Female name REs.
-    readonly List<Regex> kerminNames = new List<Regex>();
+    List<Regex> kerminNames = new List<Regex>();
     // Personalised Kerbal textures.
-    public readonly Dictionary<string, KerbalData> gameKerbals = new Dictionary<string, KerbalData>();
+    public Dictionary<string, KerbalData> gameKerbals = new Dictionary<string, KerbalData>();
     // Backed-up personalised textures from main configuration files. These are used to initialise
     // kerbals if a saved game doesn't contain `TRScenario`.
-    public readonly Dictionary<string, KerbalData> customKerbals = new Dictionary<string, KerbalData>();
+    public Dictionary<string, KerbalData> customKerbals = new Dictionary<string, KerbalData>();
     // Cabin-specific suits.
-    readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
+    Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
     // Perk-specific suits.
-    public readonly Dictionary<string, Suit> perkSuits = new Dictionary<string, Suit>();
-    public readonly Dictionary<string, Suit> defaultPerkSuits = new Dictionary<string, Suit>();
+    public Dictionary<string, Suit> perkSuits = new Dictionary<string, Suit>();
+    public Dictionary<string, Suit> defaultPerkSuits = new Dictionary<string, Suit>();
     // Helmet removal.
     Mesh helmetMesh = null;
     Mesh visorMesh = null;
@@ -151,7 +152,7 @@ namespace TextureReplacer
     // Atmospheric IVA suit parameters.
     public bool isAtmSuitEnabled = true;
     double atmSuitPressure = 0.5;
-    readonly HashSet<string> atmSuitBodies = new HashSet<string>();
+    HashSet<string> atmSuitBodies = new HashSet<string>();
     // Whether assignment of suits should be consecutive.
     public SuitAssignment suitAssignment = SuitAssignment.RANDOM;
     // For transparent pods, previous vessel IVA has to be updated too on vessel switching since
@@ -160,7 +161,7 @@ namespace TextureReplacer
     // List of vessels where IVA textures have to be updated. In stock game it suffices to only
     // perform this on the current vessel but not so if one uses transparent pods (JSITransparentPod
     // or sfr modules).
-    readonly List<Vessel> ivaVessels = new List<Vessel>();
+    List<Vessel> ivaVessels = new List<Vessel>();
     // Instance.
     public static Personaliser instance = null;
 
@@ -202,30 +203,15 @@ namespace TextureReplacer
       return kerbalData;
     }
 
-    /*
-     * Select suit based on experience reported by KerbalStats.
-     */
-    //    bool getTaskSuit(object kerbal, out Suit suit)
-    //    {
-    //      suit = null;
-    //
-    //      if (suitAssignment != SuitAssignment.EXPERIENCE)
-    //        return false;
-    //
-    //      double experience = -1.0;
-    //
-    //      foreach (var taskSuit in perkSuits)
-    //      {
-    //        double taskExp = ksGetExperience(kerbal, taskSuit.Key);
-    //
-    //        if (taskExp > experience)
-    //        {
-    //          suit = taskSuit.Value;
-    //          experience = taskExp;
-    //        }
-    //      }
-    //      return true;
-    //    }
+    Suit getPerkSuit(ProtoCrewMember kerbal)
+    {
+      Suit suit = null;
+
+      if (suitAssignment == SuitAssignment.EXPERIENCE)
+        perkSuits.TryGetValue(kerbal.experienceTrait.TypeName, out suit);
+
+      return suit;
+    }
 
     /**
      * Replace textures on a Kerbal model.
@@ -251,10 +237,9 @@ namespace TextureReplacer
         }
       }
 
-      if ((isEva && kerbalData.cabinSuit == null)
-          || !(isEva || cabinSuits.TryGetValue(cabin.partInfo.name, out kerbalData.cabinSuit)))
+      if (isEva || !cabinSuits.TryGetValue(cabin.partInfo.name, out kerbalData.cabinSuit))
       {
-        suit = kerbalData.suit;
+        suit = kerbalData.suit ?? getPerkSuit(kerbal);
 
         if (suit == null)
         {
@@ -275,7 +260,7 @@ namespace TextureReplacer
       }
 
       head = head == defaultHead ? null : head;
-      suit = kerbalData.cabinSuit ?? suit;
+      suit = (isEva && needsSuit) || kerbalData.cabinSuit == null ? suit : kerbalData.cabinSuit;
       suit = suit == defaultSuit ? null : suit;
 
       // We must include hidden meshes, since flares are hidden when light is turned off.
@@ -492,7 +477,7 @@ namespace TextureReplacer
                 // `Kerbal.ShowHelmet(false)` irreversibly removes a helmet while
                 // `Kerbal.ShowHelmet(true)` has no effect at all. We need the following workaround.
                 foreach (SkinnedMeshRenderer smr
-                     in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
+                         in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
                 {
                   if (smr.name == "helmet")
                     smr.sharedMesh = hideHelmets ? null : helmetMesh;
@@ -561,40 +546,35 @@ namespace TextureReplacer
     }
 
     /**
-     * Read task suits mapping.
+     * Read perk suits mapping.
      */
     public void readPerkSuits(ConfigNode node)
     {
       foreach (ConfigNode.Value entry in node.values)
       {
-        string task = entry.name;
+        string perkName = entry.name;
         string suitName = entry.value;
 
-        perkSuits.Remove(entry.name);
+        perkSuits.Remove(perkName);
 
         if (suitName != null && suitName != "GENERIC")
         {
-          perkSuits[task] = suitName == "DEFAULT" ? defaultSuit :
-                            suits.FirstOrDefault(s => s.name == suitName);
+          perkSuits[perkName] = suitName == "DEFAULT" ? defaultSuit :
+                                suits.FirstOrDefault(s => s.name == suitName);
         }
       }
     }
 
     /**
-     * Save task suits mapping.
+     * Save perk suits mapping.
      */
     public void savePerkSuits(ConfigNode node)
     {
       foreach (var entry in perkSuits)
       {
-        string suitName = "GENERIC";
-        Suit suit;
+        string suitName = entry.Value == null ? "GENERIC" : entry.Value.name;
 
-        if (perkSuits.TryGetValue(entry.Key, out suit))
-          suitName = suit == null ? "DEFAULT" : suit.name;
-
-        if (suitName != "GENERIC")
-          node.AddValue(entry.Key, suitName);
+        node.AddValue(entry.Key, suitName);
       }
     }
 
@@ -658,9 +638,9 @@ namespace TextureReplacer
           }
         }
 
-        ConfigNode taskNode = file.config.GetNode("TaskSuits");
-        if (taskNode != null)
-          readPerkSuits(taskNode);
+        ConfigNode perkNode = file.config.GetNode("PerkSuits");
+        if (perkNode != null)
+          readPerkSuits(perkNode);
 
         ConfigNode cabinNode = file.config.GetNode("CabinSuits");
         if (cabinNode != null)
@@ -670,7 +650,7 @@ namespace TextureReplacer
             string cabinName = entry.name;
             string suitName = entry.value;
 
-            perkSuits.Remove(entry.name);
+            cabinSuits.Remove(cabinName);
 
             if (suitName != null && suitName != "GENERIC")
             {
@@ -690,9 +670,6 @@ namespace TextureReplacer
       // Tag female suits.
       foreach (Suit suit in suits)
         suit.isFemale = femaleSuits.Contains(suit.name);
-
-      foreach (var entry in customKerbals)
-        customKerbals.Add(entry.Key, entry.Value);
 
       foreach (var entry in perkSuits)
         defaultPerkSuits.Add(entry.Key, entry.Value);
@@ -753,16 +730,16 @@ namespace TextureReplacer
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
-        if (texture == null || !texture.name.StartsWith(Util.DIR))
+        if (texture == null || !texture.name.StartsWith(Util.DIR, StringComparison.Ordinal))
           continue;
 
         // Add a head texture.
-        if (texture.name.StartsWith(DIR_HEADS))
+        if (texture.name.StartsWith(DIR_HEADS, StringComparison.Ordinal))
         {
           texture.wrapMode = TextureWrapMode.Clamp;
 
           string headName = texture.name.Substring(DIR_HEADS.Length);
-          if (headName.EndsWith("NRM"))
+          if (headName.EndsWith("NRM", StringComparison.Ordinal))
           {
             string baseName = headName.Substring(0, headName.Length - 3);
 
@@ -777,7 +754,7 @@ namespace TextureReplacer
           }
         }
         // Add a suit texture.
-        else if (texture.name.StartsWith(DIR_SUITS))
+        else if (texture.name.StartsWith(DIR_SUITS, StringComparison.Ordinal))
         {
           texture.wrapMode = TextureWrapMode.Clamp;
 
@@ -812,7 +789,7 @@ namespace TextureReplacer
               Util.log("Unknown suit texture name \"{0}\": {1}", originalName, texture.name);
           }
         }
-        else if (texture.name.StartsWith(DIR_DEFAULT))
+        else if (texture.name.StartsWith(DIR_DEFAULT, StringComparison.Ordinal))
         {
           int lastSlash = texture.name.LastIndexOf('/');
           string originalName = texture.name.Substring(lastSlash + 1);
@@ -863,8 +840,9 @@ namespace TextureReplacer
     {
       foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>())
       {
-        if (texture.name != null &&
-            (texture.name.StartsWith("kerbal") || texture.name.StartsWith("EVA")))
+        if (texture.name != null
+            && (texture.name.StartsWith("kerbal", StringComparison.Ordinal)
+            || texture.name.StartsWith("EVA", StringComparison.Ordinal)))
         {
           if (texture.name == "kerbalHead")
             defaultHead.head = defaultHead.head ?? texture;
