@@ -21,6 +21,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -30,6 +31,8 @@ namespace TextureReplacer
     static readonly string APP_ICON_PATH = Util.DIR + "Plugins/appIcon";
     static readonly string[] SUIT_ASSIGNMENTS = { "Random", "Consecutive", "Experience" };
     const int WINDOW_ID = 107056;
+    // Perks from config files.
+    readonly List<string> perks = new List<string>();
     // UI state.
     Rect windowRect = new Rect(Screen.width - 620, 60, 600, 560);
     Vector2 rosterScroll = Vector2.zero;
@@ -40,6 +43,7 @@ namespace TextureReplacer
     Texture2D appIcon = null;
     ApplicationLauncherButton appButton = null;
     bool isGuiEnabled = true;
+    bool isInitialised = false;
     // Instance.
     public static UI instance = null;
 
@@ -49,10 +53,9 @@ namespace TextureReplacer
 
       GUILayout.BeginVertical();
       GUILayout.BeginHorizontal(GUILayout.Height(430));
-      GUILayout.BeginVertical(GUILayout.Width(200));
 
       // Roster area.
-      rosterScroll = GUILayout.BeginScrollView(rosterScroll);
+      rosterScroll = GUILayout.BeginScrollView(rosterScroll, GUILayout.Width(200));
       GUILayout.BeginVertical();
 
       foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew)
@@ -79,28 +82,22 @@ namespace TextureReplacer
         }
       }
       GUI.contentColor = Color.white;
+      GUI.color = new Color(1.0f, 0.8f, 1.0f);
+
+      // Perk suits.
+      foreach (string perk in perks)
+      {
+        if (GUILayout.Button(perk))
+        {
+          selectedKerbal = null;
+          selectedPerk = perk;
+        }
+      }
+
+      GUI.color = Color.white;
 
       GUILayout.EndVertical();
       GUILayout.EndScrollView();
-
-      // Perk suits.
-      if (GUILayout.Button("Pilot"))
-      {
-        selectedKerbal = null;
-        selectedPerk = "Pilot";
-      }
-      if (GUILayout.Button("Engineer"))
-      {
-        selectedKerbal = null;
-        selectedPerk = "Engineer";
-      }
-      if (GUILayout.Button("Scientist"))
-      {
-        selectedKerbal = null;
-        selectedPerk = "Scientist";
-      }
-
-      GUILayout.EndVertical();
 
       // Textures.
       Personaliser.KerbalData kerbalData = null;
@@ -314,22 +311,37 @@ namespace TextureReplacer
       isEnabled = false;
       selectedKerbal = null;
       selectedPerk = null;
+
+      rosterScroll = Vector2.zero;
     }
 
     public void readConfig(ConfigNode rootNode)
     {
-      string sIsGuiEnabled = rootNode.GetValue("isGUIEnabled");
-      if (sIsGuiEnabled != null)
-        bool.TryParse(sIsGuiEnabled, out isGuiEnabled);
+      Util.parse(rootNode.GetValue("isGUIEnabled"), ref isGuiEnabled);
+
+      foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("EXPERIENCE_TRAIT"))
+      {
+        string name = node.GetValue("name");
+        if (name != null)
+          perks.AddUnique(name);
+      }
     }
 
     public void initialise()
     {
       appIcon = GameDatabase.Instance.GetTexture(APP_ICON_PATH, false);
-
-      Util.log(APP_ICON_PATH);
       if (appIcon == null)
         Util.log("Application icon missing: {0}", APP_ICON_PATH);
+
+      isInitialised = true;
+    }
+
+    public void destroy()
+    {
+      disable();
+
+      if (appButton != null)
+        ApplicationLauncher.Instance.RemoveModApplication(appButton);
     }
 
     public void resetScene()
@@ -342,7 +354,7 @@ namespace TextureReplacer
 
     public void draw()
     {
-      if (isGuiEnabled && ApplicationLauncher.Ready)
+      if (ApplicationLauncher.Ready && isGuiEnabled && isInitialised)
       {
         bool hidden;
 

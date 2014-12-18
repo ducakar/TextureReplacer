@@ -23,7 +23,9 @@
 //#define TR_LOG_HIERARCHY
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -61,6 +63,77 @@ namespace TextureReplacer
     {
       Type callerClass = new StackTrace(1, false).GetFrame(0).GetMethod().DeclaringType;
       UnityEngine.Debug.Log("[TR." + callerClass.Name + "] " + String.Format(s, args));
+    }
+
+    public static void parse(string name, ref bool variable)
+    {
+      bool value;
+      if (bool.TryParse(name, out value))
+        variable = value;
+    }
+
+    public static void parse(string name, ref int variable)
+    {
+      int value;
+      if (int.TryParse(name, out value))
+        variable = value;
+    }
+
+    public static void parse(string name, ref double variable)
+    {
+      double value;
+      if (double.TryParse(name, out value))
+        variable = value;
+    }
+
+    public static void parse<E>(string name, ref E variable)
+    {
+      try
+      {
+        variable = (E) Enum.Parse(typeof(E), name, true);
+      }
+      catch (ArgumentException)
+      {
+      }
+      catch (OverflowException)
+      {
+      }
+    }
+
+    public static void parse(string name, ref Color variable)
+    {
+      if (name != null)
+      {
+        string[] components = splitConfigValue(name);
+
+        if (components.Length == 3)
+        {
+          float.TryParse(components[0], out variable.r);
+          float.TryParse(components[1], out variable.g);
+          float.TryParse(components[2], out variable.b);
+        }
+      }
+    }
+
+    public static void addLists(string[] lists, ICollection<string> variable)
+    {
+      foreach (string list in lists)
+      {
+        foreach (string item in splitConfigValue(list))
+        {
+          if (!variable.Contains(item))
+            variable.Add(item);
+        }
+      }
+    }
+
+    public static void addRELists(string[] lists, ICollection<Regex> variable)
+    {
+      foreach (string list in lists)
+      {
+        foreach (string item in splitConfigValue(list))
+          variable.Add(new Regex(item));
+      }
     }
 
     #if TR_LOG_HIERARCHY

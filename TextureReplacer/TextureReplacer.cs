@@ -30,12 +30,17 @@ namespace TextureReplacer
   {
     GameScenes lastScene = GameScenes.LOADING;
     bool isInitialised = false;
+    static TextureReplacer instance = null;
 
     public void Start()
     {
       try
       {
+        if (instance != null)
+          DestroyImmediate(instance);
+
         DontDestroyOnLoad(this);
+        instance = this;
 
         UI.instance = new UI();
         Loader.instance = new Loader();
@@ -115,7 +120,10 @@ namespace TextureReplacer
 
     public void OnDestroy()
     {
-      Reflections.instance.destroy();
+      if (Reflections.instance != null)
+        Reflections.instance.destroy();
+      if (UI.instance != null)
+        UI.instance.destroy();
     }
   }
 }

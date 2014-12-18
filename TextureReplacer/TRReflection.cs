@@ -39,21 +39,7 @@ namespace TextureReplacer
         return;
 
       Color reflectColour = new Color(0.5f, 0.5f, 0.5f);
-
-      string[] components = Util.splitConfigValue(colour);
-      if (components.Length < 3 || 4 < components.Length)
-      {
-        Util.log("reflectionColour must have exactly 3 or 4 components");
-      }
-      else
-      {
-        float.TryParse(components[0], out reflectColour.r);
-        float.TryParse(components[1], out reflectColour.g);
-        float.TryParse(components[2], out reflectColour.b);
-
-        if (components.Length == 4)
-          float.TryParse(components[3], out reflectColour.a);
-      }
+      Util.parse(colour, ref reflectColour);
 
       string[] meshNames = Util.splitConfigValue(meshes);
 

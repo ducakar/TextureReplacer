@@ -32,7 +32,7 @@ namespace TextureReplacer
     public static readonly string HUD_NAVBALL = "HUDNavBall";
     public static readonly string IVA_NAVBALL = "IVANavBall";
     // General texture replacements.
-    Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
+    readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
     // NavBalls' textures.
     Texture2D hudNavBallTexture = null;
     Texture2D ivaNavBallTexture = null;
@@ -136,9 +136,7 @@ namespace TextureReplacer
      */
     public void readConfig(ConfigNode rootNode)
     {
-      string sLogTextures = rootNode.GetValue("logTextures");
-      if (sLogTextures != null)
-        bool.TryParse(sLogTextures, out logTextures);
+      Util.parse(rootNode.GetValue("logTextures"), ref logTextures);
     }
 
     /**

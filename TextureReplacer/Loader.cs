@@ -31,15 +31,15 @@ namespace TextureReplacer
 {
   class Loader
   {
+    // NavBall textures.
+    static readonly string HUD_NAVBALL = Replacer.DIR_TEXTURES + Replacer.HUD_NAVBALL;
+    static readonly string IVA_NAVBALL = Replacer.DIR_TEXTURES + Replacer.IVA_NAVBALL;
     // Texture compression and mipmap generation parameters.
     int lastTextureCount = 0;
     // List of substrings for paths where mipmap generating is enabled.
     readonly List<Regex> generateMipmaps = new List<Regex> { new Regex("^" + Util.DIR) };
     // List of substrings for paths where textures shouldn't be unloaded.
     readonly List<Regex> keepLoaded = new List<Regex> { new Regex("^" + Reflections.DIR_ENVMAP) };
-    // NavBall textures.
-    static readonly string HUD_NAVBALL = Replacer.DIR_TEXTURES + Replacer.HUD_NAVBALL;
-    static readonly string IVA_NAVBALL = Replacer.DIR_TEXTURES + Replacer.IVA_NAVBALL;
     // Features.
     bool? isCompressionEnabled = null;
     bool? isMipmapGenEnabled = null;
@@ -67,13 +67,8 @@ namespace TextureReplacer
      */
     public void readConfig(ConfigNode rootNode)
     {
-      string sMipmapBias = rootNode.GetValue("mipmapBias");
-      if (sMipmapBias != null)
-        int.TryParse(sMipmapBias, out mipmapBias);
-
-      string sNormalMipmapBias = rootNode.GetValue("normalMipmapBias");
-      if (sNormalMipmapBias != null)
-        int.TryParse(sNormalMipmapBias, out normalMipmapBias);
+      Util.parse(rootNode.GetValue("mipmapBias"), ref mipmapBias);
+      Util.parse(rootNode.GetValue("normalMipmapBias"), ref normalMipmapBias);
 
       mipmapBias = Math.Max(mipmapBias, 0);
       normalMipmapBias = Math.Max(normalMipmapBias, 0);
@@ -118,11 +113,7 @@ namespace TextureReplacer
         }
       }
 
-      foreach (string sGenerateMipmaps in rootNode.GetValues("generateMipmaps"))
-      {
-        foreach (string s in Util.splitConfigValue(sGenerateMipmaps))
-          generateMipmaps.Add(new Regex(s));
-      }
+      Util.addRELists(rootNode.GetValues("generateMipmaps"), generateMipmaps);
 
       string sIsUnloadingEnabled = rootNode.GetValue("isUnloadingEnabled");
       if (sIsUnloadingEnabled != null)
@@ -144,11 +135,7 @@ namespace TextureReplacer
         }
       }
 
-      foreach (string sKeepLoaded in rootNode.GetValues("keepLoaded"))
-      {
-        foreach (string s in Util.splitConfigValue(sKeepLoaded))
-          keepLoaded.Add(new Regex(s));
-      }
+      Util.addRELists(rootNode.GetValues("keepLoaded"), keepLoaded);
     }
 
     /**

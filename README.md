@@ -251,6 +251,14 @@ Notes
 Change Log
 ----------
 
+* 2.1.1
+    - support for non-stock experience traits
+    - experience suits in GUI now show at the end of the roster
+    - fixed `CustomKerbals` config settings being ignored
+    - fixed persistence of cabin suits, but not through scene switches
+    - fixed duplicated TextureReplacer after GameDatabase reloads
+    - fixed toolbar button to survive GameDatabase reload
+    - code cleanup
 * 2.1
     - added several new options to GUI
     - cabin suits are now persistent until embarking another capsule

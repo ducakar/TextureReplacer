@@ -39,13 +39,13 @@ namespace TextureReplacer
       { "KSP/Alpha/Translucent", "TR/Visor" },
       { "KSP/Alpha/Translucent Specular", "TR/Visor" }
     };
-    Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
+    readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflective shader material.
     Material shaderMaterial = null;
     // Visor reflection feature.
     bool isVisorReflectionEnabled = true;
     // Reflection colour.
-    Color visorReflectionColour = new Color(1.0f, 1.0f, 1.0f);
+    Color visorReflectionColour = Color.white;
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool logReflectiveMeshes = false;
     // Reflective shader.
@@ -70,29 +70,9 @@ namespace TextureReplacer
      */
     public void readConfig(ConfigNode rootNode)
     {
-      string sLogReflectiveMeshes = rootNode.GetValue("logReflectiveMeshes");
-      if (sLogReflectiveMeshes != null)
-        bool.TryParse(sLogReflectiveMeshes, out logReflectiveMeshes);
-
-      string sIsVisorReflectionEnabled = rootNode.GetValue("isVisorReflectionEnabled");
-      if (sIsVisorReflectionEnabled != null)
-        bool.TryParse(sIsVisorReflectionEnabled, out isVisorReflectionEnabled);
-
-      string sVisorReflectionColour = rootNode.GetValue("visorReflectionColour");
-      if (sVisorReflectionColour != null)
-      {
-        string[] components = Util.splitConfigValue(sVisorReflectionColour);
-        if (components.Length != 3)
-        {
-          Util.log("visorReplectionColour must have exactly 3 components");
-        }
-        else
-        {
-          float.TryParse(components[0], out visorReflectionColour.r);
-          float.TryParse(components[1], out visorReflectionColour.g);
-          float.TryParse(components[2], out visorReflectionColour.b);
-        }
-      }
+      Util.parse(rootNode.GetValue("logReflectiveMeshes"), ref logReflectiveMeshes);
+      Util.parse(rootNode.GetValue("isVisorReflectionEnabled"), ref isVisorReflectionEnabled);
+      Util.parse(rootNode.GetValue("visorReflectionColour"), ref visorReflectionColour);
     }
 
     /**
@@ -246,15 +226,10 @@ namespace TextureReplacer
     public void destroy()
     {
       if (envMap != null)
-        Resources.UnloadAsset(envMap);
+        Object.Destroy(envMap);
 
       if (shaderMaterial != null)
-        Resources.UnloadAsset(shaderMaterial);
-
-      envMap = null;
-      shader = null;
-      shaderMaterial = null;
-      isVisorReflectionEnabled = false;
+        Object.Destroy(shaderMaterial);
     }
   }
 }
