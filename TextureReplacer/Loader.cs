@@ -36,6 +36,8 @@ namespace TextureReplacer
     static readonly string IVA_NAVBALL = Replacer.DIR_TEXTURES + Replacer.IVA_NAVBALL;
     // Texture compression and mipmap generation parameters.
     int lastTextureCount = 0;
+    // DDS texture loader.
+    bool isDDSLoaderEnabled = false;
     // List of substrings for paths where mipmap generating is enabled.
     readonly List<Regex> generateMipmaps = new List<Regex> { new Regex("^" + Util.DIR) };
     // List of substrings for paths where textures shouldn't be unloaded.
@@ -44,9 +46,6 @@ namespace TextureReplacer
     bool? isCompressionEnabled = null;
     bool? isMipmapGenEnabled = null;
     bool? isUnloadingEnabled = null;
-    // Mipmap bias for DDS loader.
-    public int mipmapBias = 0;
-    public int normalMipmapBias = 0;
     // Instance.
     public static Loader instance = null;
 
@@ -67,11 +66,12 @@ namespace TextureReplacer
      */
     public void readConfig(ConfigNode rootNode)
     {
-      Util.parse(rootNode.GetValue("mipmapBias"), ref mipmapBias);
-      Util.parse(rootNode.GetValue("normalMipmapBias"), ref normalMipmapBias);
+      Util.parse(rootNode.GetValue("isDDSLoaderEnabled"), ref isDDSLoaderEnabled);
+      Util.parse(rootNode.GetValue("mipmapBias"), ref DDS.mipmapBias);
+      Util.parse(rootNode.GetValue("normalMipmapBias"), ref DDS.normalMipmapBias);
 
-      mipmapBias = Math.Max(mipmapBias, 0);
-      normalMipmapBias = Math.Max(normalMipmapBias, 0);
+      DDS.mipmapBias = Math.Max(DDS.mipmapBias, 0);
+      DDS.normalMipmapBias = Math.Max(DDS.normalMipmapBias, 0);
 
       string sIsCompressionEnabled = rootNode.GetValue("isCompressionEnabled");
       if (sIsCompressionEnabled != null)
@@ -143,6 +143,9 @@ namespace TextureReplacer
      */
     public void configure()
     {
+      if (!isDDSLoaderEnabled && DDS.instance != null)
+        DDS.instance.extensions.Clear();
+
       // Prevent conflicts with TextureCompressor. If it is found among loaded plugins, texture
       // compression step will be skipped since TextureCompressor should handle it (better).
       bool isATMDetected =

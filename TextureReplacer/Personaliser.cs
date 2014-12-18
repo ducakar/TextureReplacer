@@ -607,6 +607,9 @@ namespace TextureReplacer
         if (customNode != null)
           loadKerbals(customNode);
 
+        foreach (var entry in gameKerbals)
+          customKerbals.Add(entry.Key, entry.Value);
+
         ConfigNode genericNode = file.config.GetNode("GenericKerbals");
         if (genericNode != null)
         {
@@ -621,7 +624,7 @@ namespace TextureReplacer
 
         ConfigNode perkNode = file.config.GetNode("PerkSuits");
         if (perkNode != null)
-          loadSuitMap(perkNode, perkSuits);
+          loadSuitMap(perkNode, defaultPerkSuits);
 
         ConfigNode cabinNode = file.config.GetNode("CabinSuits");
         if (cabinNode != null)
@@ -637,12 +640,6 @@ namespace TextureReplacer
       // Tag female suits.
       foreach (Suit suit in suits)
         suit.isFemale = femaleSuits.Contains(suit.name);
-
-      foreach (var entry in gameKerbals)
-        customKerbals.Add(entry.Key, entry.Value);
-
-      foreach (var entry in perkSuits)
-        defaultPerkSuits.Add(entry.Key, entry.Value);
 
       // Create lists of male heads and suits.
       kerbalHeads.AddRange(heads.Where(h => !h.isFemale && !excludedHeads.Contains(h.name)));
@@ -857,7 +854,7 @@ namespace TextureReplacer
       perkSuits.Clear();
 
       loadKerbals(node.GetNode("Kerbals") ?? node.GetNode("CustomKerbals"));
-      loadSuitMap(node.GetNode("PerkSuits"), perkSuits);
+      loadSuitMap(node.GetNode("PerkSuits"), perkSuits, defaultPerkSuits);
 
       Util.parse(node.GetValue("isHelmetRemovalEnabled"), ref isHelmetRemovalEnabled);
       Util.parse(node.GetValue("isAtmSuitEnabled"), ref isAtmSuitEnabled);

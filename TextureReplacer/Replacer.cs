@@ -43,6 +43,8 @@ namespace TextureReplacer
     float replaceTimer = -1.0f;
     // Print material/texture names when performing texture replacement pass.
     bool logTextures = false;
+    // Change shinning quality.
+    SkinQuality skinningQuality = SkinQuality.Auto;
     // Instance.
     public static Replacer instance = null;
 
@@ -136,6 +138,7 @@ namespace TextureReplacer
      */
     public void readConfig(ConfigNode rootNode)
     {
+      Util.parse(rootNode.GetValue("skinningQuality"), ref skinningQuality);
       Util.parse(rootNode.GetValue("logTextures"), ref logTextures);
     }
 
@@ -180,9 +183,8 @@ namespace TextureReplacer
       // Kerbal.
       foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
       {
-        #if TR_LOW
-        smr.quality = SkinQuality.Bone2;
-        #endif
+        if (skinningQuality != SkinQuality.Auto)
+          smr.quality = skinningQuality;
 
         if (smr.name == "headMesh01")
         {
@@ -194,7 +196,7 @@ namespace TextureReplacer
         }
         else if (smr.name == "visor")
         {
-          bool isEVA = smr.transform.parent.parent.parent.parent == null;
+          bool isEVA = smr.transform.root.GetComponent<KerbalEVA>() != null;
           Texture2D newTexture = isEVA ? evaVisorTexture : ivaVisorTexture;
 
           if (newTexture != null)

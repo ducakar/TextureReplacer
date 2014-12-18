@@ -132,12 +132,12 @@ Note that all texture and directory names are case-sensitive!
 Reflections are shown on visors of Kerbal's helmets and on parts that include
 `TRReflection` module, e.g.:
 
-      MODULE
-      {
-        name = TRReflection
-        colour = 0.5 0.5 0.5
-        meshes = OuterShell FrontWindow SideWindow
-      }
+    MODULE
+    {
+      name = TRReflection
+      colour = 0.5 0.5 0.5
+      meshes = OuterShell FrontWindow SideWindow
+    }
 
 `colour` ("0.5 0.5 0.5" by default) and `meshes` (empty by default) parameters
 are optional. Reflection texture is multiplied by `colour` and applied on the
@@ -158,36 +158,36 @@ powers of two. Cube map textures are slow, so keep them as low-res as possible.
 
 ### Personalised Kerbal Textures ###
 
-Heads and suits are assigned either manually or automatically (configured in GUI
-while configuration files provide initial settings). Pseudo-random assignment is
-based on a Kerbal's name, which ensures the same head/suit is always assigned to
-a given Kerbal. Additionally it is also possible to assign suits consecutively,
-based on rooster index, or based on Kerbal experience.
+Heads and suits are assigned either manually or automatically (configured in the
+GUI while configuration files only provide initial settings). Pseudo-random
+assignment is based on a Kerbal's name, which ensures the same head/suit is
+always assigned to a given Kerbal. Additionally it is also possible to assign
+suits consecutively, based on rooster index, or based on Kerbal experience.
 
-Head textures reside inside `Heads/` directory and have arbitrary names. Normal
-maps are optional. To provide a normal map, name it the same as the head texture
-but add "NRM" suffix.
+Head textures reside inside `Heads/` directory (and its subdirectories) and have
+arbitrary names. Normal maps are optional. To provide a normal map, name it the
+same as the head texture but add "NRM" suffix.
 
     GameData/TextureReplacer/
-      Heads/<head>      // Head texture
-      Heads/<head>NRM   // Normal map for head texture <head> (optional)
+      Heads/[<subDir>/]<head>     // Head texture
+      Heads/[<subDir>/]<head>NRM  // Normal map for <head> (optional)
 
 Suit textures' names are identical as for the default texture replacement except
 that there is no `kerbalMain` texture (`kerbalMainGrey` replaces both). Each
 suit must reside in its own directory:
 
     GameData/TextureReplacer/
-      Suits/<suit>/kerbalMainGrey   // IVA suit
-      Suits/<suit>/kerbalMainNRM    // IVA suit normal map
-      Suits/<suit>/kerbalHelmetGrey // IVA helmet
-      Suits/<suit>/kerbalHelmetNRM  // IVA & EVA helmet normal map
-      Suits/<suit>/kerbalVisor      // IVA helmet visor
-      Suits/<suit>/EVAtexture       // EVA suit
-      Suits/<suit>/EVAtextureNRM    // EVA suit normal map
-      Suits/<suit>/EVAhelmet        // EVA helmet
-      Suits/<suit>/EVAvisor         // EVA helmet visor
-      Suits/<suit>/EVAjetpack       // EVA jetpack
-      Suits/<suit>/EVAjetpackNRM    // EVA jetpack normal map
+      Suits/[<subDir>/]<suit>/kerbalMainGrey    // IVA suit
+      Suits/[<subDir>/]<suit>/kerbalMainNRM     // IVA suit normal map
+      Suits/[<subDir>/]<suit>/kerbalHelmetGrey  // IVA helmet
+      Suits/[<subDir>/]<suit>/kerbalHelmetNRM   // IVA & EVA helmet normal map
+      Suits/[<subDir>/]<suit>/kerbalVisor       // IVA helmet visor
+      Suits/[<subDir>/]<suit>/EVAtexture        // EVA suit
+      Suits/[<subDir>/]<suit>/EVAtextureNRM     // EVA suit normal map
+      Suits/[<subDir>/]<suit>/EVAhelmet         // EVA helmet
+      Suits/[<subDir>/]<suit>/EVAvisor          // EVA helmet visor
+      Suits/[<subDir>/]<suit>/EVAjetpack        // EVA jetpack
+      Suits/[<subDir>/]<suit>/EVAjetpackNRM     // EVA jetpack normal map
 
 For generic Kerbals, heads are selected independently form suits so any head can
 be paired with any of the suits and each head has an equal chance of being
@@ -204,10 +204,10 @@ Main configuration file:
 One can also use additional configuration files; configuration is merged from
 all `*.cfg` files that contain `TextureReplacer { ... }` as the root node. This
 should prove useful to developers of texture packs so they can distribute
-pack-specific head/suit assignment rules in a separate file. All the `*.cfg`
-files (including `@Default.cfg`) are processed in alphabetical order (the reason
+pack-specific head/suit assignment rules in a separate file. All `*.cfg` files
+(including `@Default.cfg`) are processed in alphabetical order (the reason
 behind the leading "@" in `@Default.cfg` is that it is processed first and can
-be overridden by subsequent configuration files).
+be overridden by subsequent custom configuration files).
 
 ### Normal Maps ###
 
@@ -236,8 +236,8 @@ Notes
 * Try to keep dimensions of all textures powers of two.
 * KSP can only load TGAs with RGB or RGBA colours. Paletteised 256-colour TGAs
   cause corruptions in the game database!
-* By default, texture compression is handled by ATM when it is present rather
-  than by TextureReplacer.
+* By default, texture compression and mipmap generation are handled by ATM when
+  it is present rather than by TextureReplacer.
 * KSP never generates mipmaps for PNGs and JPEGs. TextureReplacer fixes this by
   generating mipmaps under paths specified in the configuration file. Other
   images are omitted to avoid making UI icons of various plugins blurry when not
@@ -246,6 +246,14 @@ Notes
   also used in the map mode and in the tracking station. When getting closer to
   the surface those textures are slowly interpolated into the high-resolution
   ones that cannot be replaced by this plugin.
+
+
+Known Bugs
+----------
+
+* Cabin-specific IVA suits don't persist through scene switches while on EVA.
+* IVA visor texture is applied to EVA Kerbals if game database is reloaded while
+  in the main menu.
 
 
 Change Log
