@@ -20,6 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#if TR_DDS
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -177,3 +179,5 @@ namespace TextureReplacer
     }
   }
 }
+
+#endif

@@ -105,7 +105,6 @@ namespace TextureReplacer
       if (name != null)
       {
         string[] components = splitConfigValue(name);
-
         if (components.Length == 3)
         {
           float.TryParse(components[0], out variable.r);

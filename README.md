@@ -262,6 +262,8 @@ Change Log
 * 2.1.1
     - support for non-stock experience traits
     - experience suits in GUI now show at the end of the roster
+    - added `skinningQuality` config option
+    - changed default value for `colour` in TRReflection module to "1 1 1"
     - fixed `CustomKerbals` config settings being ignored
     - fixed persistence of cabin suits, but not through scene switches
     - fixed duplicated TextureReplacer after GameDatabase reloads

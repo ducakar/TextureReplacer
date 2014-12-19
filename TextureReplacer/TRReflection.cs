@@ -29,7 +29,7 @@ namespace TextureReplacer
   {
     // Configuration file parameters.
     [KSPField(isPersistant = false)]
-    public string colour = "0.5 0.5 0.5";
+    public string colour = "";
     [KSPField(isPersistant = false)]
     public string meshes = "";
 
@@ -38,7 +38,7 @@ namespace TextureReplacer
       if (Reflections.instance.envMap == null)
         return;
 
-      Color reflectColour = new Color(0.5f, 0.5f, 0.5f);
+      Color reflectColour = new Color(1.0f, 1.0f, 1.0f);
       Util.parse(colour, ref reflectColour);
 
       string[] meshNames = Util.splitConfigValue(meshes);

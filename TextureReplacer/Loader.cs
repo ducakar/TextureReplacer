@@ -36,8 +36,6 @@ namespace TextureReplacer
     static readonly string IVA_NAVBALL = Replacer.DIR_TEXTURES + Replacer.IVA_NAVBALL;
     // Texture compression and mipmap generation parameters.
     int lastTextureCount = 0;
-    // DDS texture loader.
-    bool isDDSLoaderEnabled = false;
     // List of substrings for paths where mipmap generating is enabled.
     readonly List<Regex> generateMipmaps = new List<Regex> { new Regex("^" + Util.DIR) };
     // List of substrings for paths where textures shouldn't be unloaded.
@@ -66,12 +64,13 @@ namespace TextureReplacer
      */
     public void readConfig(ConfigNode rootNode)
     {
-      Util.parse(rootNode.GetValue("isDDSLoaderEnabled"), ref isDDSLoaderEnabled);
+      #if TR_DDS
       Util.parse(rootNode.GetValue("mipmapBias"), ref DDS.mipmapBias);
       Util.parse(rootNode.GetValue("normalMipmapBias"), ref DDS.normalMipmapBias);
 
       DDS.mipmapBias = Math.Max(DDS.mipmapBias, 0);
       DDS.normalMipmapBias = Math.Max(DDS.normalMipmapBias, 0);
+      #endif
 
       string sIsCompressionEnabled = rootNode.GetValue("isCompressionEnabled");
       if (sIsCompressionEnabled != null)
@@ -143,9 +142,6 @@ namespace TextureReplacer
      */
     public void configure()
     {
-      if (!isDDSLoaderEnabled && DDS.instance != null)
-        DDS.instance.extensions.Clear();
-
       // Prevent conflicts with TextureCompressor. If it is found among loaded plugins, texture
       // compression step will be skipped since TextureCompressor should handle it (better).
       bool isATMDetected =
