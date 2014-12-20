@@ -39,6 +39,7 @@ namespace TextureReplacer
 
     public class KerbalData
     {
+      public int hash;
       public bool isFemale;
       public bool isVeteran;
       public Head head;
@@ -186,6 +187,16 @@ namespace TextureReplacer
       return value;
     }
 
+    Suit getPerkSuit(ProtoCrewMember kerbal)
+    {
+      Suit suit = null;
+
+      if (suitAssignment == SuitAssignment.EXPERIENCE)
+        perkSuits.TryGetValue(kerbal.experienceTrait.Config.Name, out suit);
+
+      return suit;
+    }
+
     public KerbalData getKerbalData(string name)
     {
       KerbalData kerbalData;
@@ -194,23 +205,52 @@ namespace TextureReplacer
       {
         int spaceIndex = name.IndexOf(' ');
         string firstName = spaceIndex > 0 ? name.Substring(0, spaceIndex) : name;
-        bool isFemale = kerminNames.Any(r => r.IsMatch(firstName));
-        bool isVeteran = name == "Jebediah Kerman" || name == "Bill Kerman" || name == "Bob Kerman";
 
-        kerbalData = new KerbalData { isFemale = isFemale, isVeteran = isVeteran };
+        kerbalData = new KerbalData {
+          hash = name.GetHashCode(),
+          isFemale = kerminNames.Any(r => r.IsMatch(firstName)),
+          isVeteran = name == "Jebediah Kerman" || name == "Bill Kerman" || name == "Bob Kerman"
+        };
         gameKerbals.Add(name, kerbalData);
       }
       return kerbalData;
     }
 
-    Suit getPerkSuit(ProtoCrewMember kerbal)
+    public Head getKerbalHead(KerbalData kerbalData)
     {
-      Suit suit = null;
+      if (kerbalData.head != null)
+        return kerbalData.head;
 
-      if (suitAssignment == SuitAssignment.EXPERIENCE)
-        perkSuits.TryGetValue(kerbal.experienceTrait.TypeName, out suit);
+      List<Head> genderHeads = kerbalData.isFemale && kerminHeads.Count != 0 ?
+                               kerminHeads : kerbalHeads;
+      if (genderHeads.Count == 0)
+        return defaultHead;
 
-      return suit;
+      // Hash is multiplied with a large prime to increase randomisation, since hashes returned
+      // by `GetHashCode()` are close together if strings only differ in the last (few) char(s).
+      int number = (kerbalData.hash * 4099) & 0x7fffffff;
+      return genderHeads[number % genderHeads.Count];
+    }
+
+    public Suit getKerbalSuit(ProtoCrewMember kerbal, KerbalData kerbalData)
+    {
+      Suit suit = kerbalData.suit ?? getPerkSuit(kerbal);
+      if (suit != null)
+        return suit;
+
+      List<Suit> genderSuits = kerbalData.isFemale && kerminSuits.Count != 0 ?
+                               kerminSuits : kerbalSuits;
+      if (genderSuits.Count == 0)
+        return defaultSuit;
+
+      // Here we must use a different prime to increase randomisation so that the same head is
+      // not always combined with the same suit.
+      int number =
+        suitAssignment == SuitAssignment.RANDOM ?
+        ((kerbalData.hash + kerbal.name.Length) * 2053) & 0x7fffffff :
+        HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
+
+      return genderSuits[number % genderSuits.Count];
     }
 
     /**
@@ -220,44 +260,12 @@ namespace TextureReplacer
     {
       KerbalData kerbalData = getKerbalData(kerbal.name);
       bool isEva = cabin == null;
-      bool isFemale = kerbalData.isFemale;
-      Head head = kerbalData.head;
-      Suit suit = kerbalData.suit;
 
-      if (head == null)
-      {
-        List<Head> genderHeads = isFemale && kerminHeads.Count != 0 ? kerminHeads : kerbalHeads;
-
-        if (genderHeads.Count != 0)
-        {
-          // Hash is multiplied with a large prime to increase randomisation, since hashes returned
-          // by `GetHashCode()` are close together if strings only differ in the last (few) char(s).
-          int number = (kerbal.name.GetHashCode() * 4099) & 0x7fffffff;
-          head = genderHeads[number % genderHeads.Count];
-        }
-      }
+      Head head = getKerbalHead(kerbalData);
+      Suit suit = null;
 
       if (isEva || !cabinSuits.TryGetValue(cabin.partInfo.name, out kerbalData.cabinSuit))
-      {
-        suit = kerbalData.suit ?? getPerkSuit(kerbal);
-
-        if (suit == null)
-        {
-          List<Suit> genderSuits = isFemale && kerminSuits.Count != 0 ? kerminSuits : kerbalSuits;
-
-          if (genderSuits.Count != 0)
-          {
-            // Here we must use a different prime to increase randomisation so that the same head is
-            // not always combined with the same suit.
-            int number =
-              suitAssignment == SuitAssignment.RANDOM ?
-              ((kerbal.name.GetHashCode() + kerbal.name.Length) * 2053) & 0x7fffffff :
-              HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
-
-            suit = genderSuits[number % genderSuits.Count];
-          }
-        }
-      }
+        suit = getKerbalSuit(kerbal, kerbalData);
 
       head = head == defaultHead ? null : head;
       suit = (isEva && needsSuit) || kerbalData.cabinSuit == null ? suit : kerbalData.cabinSuit;
@@ -499,7 +507,7 @@ namespace TextureReplacer
       if (node == null)
       {
         foreach (var entry in customKerbals)
-          gameKerbals.Add(entry.Key, entry.Value);
+          gameKerbals[entry.Key] = entry.Value;
       }
       else
       {
@@ -557,7 +565,7 @@ namespace TextureReplacer
         if (defaultSuit != null)
         {
           foreach (var entry in defaultMap)
-            map.Add(entry.Key, entry.Value);
+            map[entry.Key] = entry.Value;
         }
       }
       else
@@ -608,7 +616,7 @@ namespace TextureReplacer
           loadKerbals(customNode);
 
         foreach (var entry in gameKerbals)
-          customKerbals.Add(entry.Key, entry.Value);
+          customKerbals[entry.Key] = entry.Value;
 
         ConfigNode genericNode = file.config.GetNode("GenericKerbals");
         if (genericNode != null)

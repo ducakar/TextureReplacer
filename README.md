@@ -259,8 +259,12 @@ Known Bugs
 Change Log
 ----------
 
+* 2.1.2
+    - GUI now shows generic heads and suits instead of just printing "Generic"
+    - fixed crash with duplicated entries in `CustomKerbals`
+    - fixed experience suits for non-stock traits when `name` != `title`
 * 2.1.1
-    - support for non-stock experience traits
+    - GUI now adds buttons for assigning suits to non-stock experience traits
     - experience suits in GUI now show at the end of the roster
     - added `skinningQuality` config option
     - changed default value for `colour` in TRReflection module to "1 1 1"

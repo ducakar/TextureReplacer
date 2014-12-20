@@ -190,8 +190,8 @@ namespace TextureReplacer
         {
           if (headNormalMap != null)
           {
-            smr.material.shader = Util.BUMPED_DIFFUSE_SHADER;
-            smr.material.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMap);
+            smr.sharedMaterial.shader = Util.BUMPED_DIFFUSE_SHADER;
+            smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMap);
           }
         }
         else if (smr.name == "visor")
