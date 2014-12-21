@@ -29,6 +29,83 @@ namespace TextureReplacer
 {
   class Reflections
   {
+    public enum Type
+    {
+      NONE,
+      STATIC,
+      REAL
+    }
+
+    public class Script
+    {
+      readonly RenderTexture envMap = null;
+      readonly Transform partTransform = null;
+      readonly int frameCountBias = Util.random.Next(instance.reflectionInterval);
+      int currentFace = Util.random.Next(6);
+
+      void updateFaces(int faceMask)
+      {
+        Transform spaceTransf = ScaledSpace.Instance.transform;
+        Vector3 spacePos = spaceTransf.position;
+        Vector3 partScale = partTransform.localScale;
+
+        // Scaled space is neccessary to render skybox and high-altitude models of celestial bodies.
+        spaceTransf.position = partTransform.position;
+        // We set scale to zero to "hide" the part since it shouldn't reflect itself.
+        partTransform.localScale = Vector3.zero;
+
+        instance.camera.transform.root.position = partTransform.position;
+        instance.camera.RenderToCubemap(envMap, faceMask);
+
+        partTransform.localScale = partScale;
+        spaceTransf.position = spacePos;
+      }
+
+      public Script(Part part)
+      {
+        instance.ensureCamera();
+
+        envMap = new RenderTexture(instance.reflectionResolution,
+                                   instance.reflectionResolution,
+                                   24);
+        envMap.hideFlags = HideFlags.HideAndDontSave;
+        envMap.wrapMode = TextureWrapMode.Clamp;
+        envMap.isCubemap = true;
+
+        partTransform = part.transform;
+
+        updateFaces(0x3f);
+      }
+
+      public void apply(Material material, Color reflectionColour)
+      {
+        material.shader = instance.toReflective(material.shader);
+        material.SetTexture(Util.CUBE_PROPERTY, envMap);
+        material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectionColour);
+      }
+
+      public void applyVisor(Material material)
+      {
+        material.shader = instance.visorShader;
+        material.SetTexture(Util.CUBE_PROPERTY, envMap);
+        material.SetColor(Util.REFLECT_COLOR_PROPERTY, instance.visorReflectionColour);
+      }
+
+      public void destroy()
+      {
+        Object.DestroyImmediate(envMap);
+      }
+
+      public void update()
+      {
+        if ((Time.frameCount + frameCountBias) % Reflections.instance.reflectionInterval != 0)
+          return;
+
+        updateFaces(instance.forceEnvMapRegenerate ? 0x3f : 1 << currentFace);
+        currentFace = (currentFace + 1) % 6;
+      }
+    }
+
     public static readonly string DIR_ENVMAP = Util.DIR + "EnvMap/";
     // Reflective shader map.
     static readonly string[,] SHADER_MAP = {
@@ -42,18 +119,59 @@ namespace TextureReplacer
     readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflective shader material.
     Material shaderMaterial = null;
+    // Reflection camera.
+    Camera camera = null;
+    // Force re-generating of all real reflection environment maps on scene or vessel change.
+    GameScenes lastScene = GameScenes.MAINMENU;
+    Vessel lastVessel = null;
+    bool forceEnvMapRegenerate = false;
+    // Environment map textures.
+    public Cubemap staticEnvMap = null;
+    // Reflection type.
+    public Type reflectionType = Type.REAL;
+    // Real reflection resolution.
+    int reflectionResolution = 32;
+    // Interval in frames for updating environment map faces.
+    int reflectionInterval = 1;
     // Visor reflection feature.
     bool isVisorReflectionEnabled = true;
     // Reflection colour.
-    Color visorReflectionColour = Color.white;
+    Color visorReflectionColour = new Color(0.5f, 0.5f, 0.5f);
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool logReflectiveMeshes = false;
     // Reflective shader.
-    public Shader shader = null;
-    // Environment map.
-    public Cubemap envMap = null;
+    public Shader visorShader = null;
     // Instance.
     public static Reflections instance = null;
+
+    void ensureCamera()
+    {
+      if (camera == null)
+      {
+        camera = new GameObject("ReflectionCamera", new[] { typeof(Camera) }).camera;
+        camera.enabled = false;
+        camera.backgroundColor = Color.black;
+        camera.nearClipPlane = 0.1f;
+        camera.farClipPlane = 10000.0f;
+
+        // Render layers:
+        //  0 - parts
+        //  1 - thrusters
+        //  9 - sky/atmosphere
+        // 10 - scaled space
+        // 12 - navball
+        // 15 - buildings, terrain
+        camera.cullingMask = 1 << 0 | 1 << 9 | 1 << 10 | 1 << 15;
+
+        // Cull everything but scaled space at 100 m.
+        float[] cullDistances = new float[32];
+        cullDistances[0] = 100.0f;
+        cullDistances[9] = 100.0f;
+        cullDistances[15] = 100.0f;
+
+        camera.layerCullDistances = cullDistances;
+      }
+    }
 
     /**
      * Get reflective version of a shader.
@@ -65,14 +183,47 @@ namespace TextureReplacer
       return newShader;
     }
 
+    public void setReflectionType(Type type)
+    {
+      if (type == Type.STATIC && staticEnvMap == null)
+        type = Type.NONE;
+
+      reflectionType = type;
+
+      // Set visor texture and reflection on proto-EVA Kerbal.
+      foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
+      {
+        if (smr.name != "visor")
+          continue;
+
+        bool isEva = smr.transform.root.GetComponent<KerbalEVA>() != null;
+        if (isEva)
+        {
+          Material material = smr.sharedMaterial;
+          bool applyStatic = isVisorReflectionEnabled && reflectionType == Type.STATIC;
+
+          // We apply visor shader for real reflections later, through TREvaModule since we don't
+          // want corrupted reflections in the main menu.
+          material.shader = applyStatic ? visorShader : Util.transparentSpecularShader;
+          material.SetTexture(Util.CUBE_PROPERTY, applyStatic ? staticEnvMap : null);
+          material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
+        }
+      }
+
+      Util.log("Switched to reflection type: {0}", reflectionType);
+    }
+
     /**
      * Read configuration and perform pre-load initialisation.
      */
     public void readConfig(ConfigNode rootNode)
     {
-      Util.parse(rootNode.GetValue("logReflectiveMeshes"), ref logReflectiveMeshes);
+      Util.parse(rootNode.GetValue("reflectionType"), ref reflectionType);
+      Util.parse(rootNode.GetValue("reflectionResolution"), ref reflectionResolution);
+      Util.parse(rootNode.GetValue("reflectionInterval"), ref reflectionInterval);
       Util.parse(rootNode.GetValue("isVisorReflectionEnabled"), ref isVisorReflectionEnabled);
       Util.parse(rootNode.GetValue("visorReflectionColour"), ref visorReflectionColour);
+      Util.parse(rootNode.GetValue("logReflectiveMeshes"), ref logReflectiveMeshes);
     }
 
     /**
@@ -122,54 +273,44 @@ namespace TextureReplacer
       // Generate generic reflection cube map texture.
       if (envMapFaces.Any(t => t == null))
       {
-        Util.log("Some environment map faces are missing. Reflections disabled.");
+        Util.log("Some environment map faces are missing. Static reflections disabled.");
       }
       else
       {
         int envMapSize = envMapFaces[0].width;
 
-        if (envMapFaces.Any(t => t.width != envMapSize || t.height != envMapSize))
+        if (envMapFaces.Any(t => t.width != envMapSize || t.height != envMapSize)
+            || envMapFaces.Any(t => !Util.isPow2(t.width) || !Util.isPow2(t.height)))
         {
-          Util.log("Environment map faces have different dimensions. Reflections disabled.");
-        }
-        else if (envMapFaces.Any(t => !Util.isPow2(t.width) || !Util.isPow2(t.height)))
-        {
-          Util.log("Environment map dimensions are not powers of two. Reflections disabled.");
+          Util.log("Invalid environment map faces. Static reflections disabled.");
         }
         else
         {
           try
           {
-            envMap = new Cubemap(envMapSize, TextureFormat.RGB24, true);
-            envMap.wrapMode = TextureWrapMode.Clamp;
-            envMap.SetPixels(envMapFaces[0].GetPixels(), CubemapFace.PositiveX);
-            envMap.SetPixels(envMapFaces[1].GetPixels(), CubemapFace.NegativeX);
-            envMap.SetPixels(envMapFaces[2].GetPixels(), CubemapFace.PositiveY);
-            envMap.SetPixels(envMapFaces[3].GetPixels(), CubemapFace.NegativeY);
-            envMap.SetPixels(envMapFaces[4].GetPixels(), CubemapFace.PositiveZ);
-            envMap.SetPixels(envMapFaces[5].GetPixels(), CubemapFace.NegativeZ);
-            envMap.Apply(true, true);
+            staticEnvMap = new Cubemap(envMapSize, TextureFormat.RGB24, true);
+            staticEnvMap.hideFlags = HideFlags.HideAndDontSave;
+            staticEnvMap.wrapMode = TextureWrapMode.Clamp;
+            staticEnvMap.SetPixels(envMapFaces[0].GetPixels(), CubemapFace.PositiveX);
+            staticEnvMap.SetPixels(envMapFaces[1].GetPixels(), CubemapFace.NegativeX);
+            staticEnvMap.SetPixels(envMapFaces[2].GetPixels(), CubemapFace.PositiveY);
+            staticEnvMap.SetPixels(envMapFaces[3].GetPixels(), CubemapFace.NegativeY);
+            staticEnvMap.SetPixels(envMapFaces[4].GetPixels(), CubemapFace.PositiveZ);
+            staticEnvMap.SetPixels(envMapFaces[5].GetPixels(), CubemapFace.NegativeZ);
+            staticEnvMap.Apply(true, false);
 
-            Util.log("Environment map cube texture generated.");
+            Util.log("Static environment map cube texture generated.");
           }
           catch (UnityException)
           {
-            envMap = null;
-            Util.log("Environment map texture is not readable. Reflections disabled.");
+            if (staticEnvMap != null)
+              Object.DestroyImmediate(staticEnvMap);
+
+            staticEnvMap = null;
+
+            Util.log("Failed to set up static reflections. Textures not readable?");
           }
         }
-      }
-
-      foreach (Texture2D face in envMapFaces)
-      {
-        if (face != null)
-          GameDatabase.Instance.RemoveTexture(face.name);
-      }
-
-      if (envMap == null)
-      {
-        destroy();
-        return;
       }
 
       string shaderPath = KSP.IO.IOUtils.GetFilePathFor(GetType(), "Visor.shader");
@@ -179,40 +320,22 @@ namespace TextureReplacer
       {
         shaderSource = File.ReadAllText(shaderPath);
         shaderMaterial = new Material(shaderSource);
-        shader = shaderMaterial.shader;
+        visorShader = shaderMaterial.shader;
 
         Util.log("Visor shader sucessfully compiled.");
       }
       catch (System.IO.IsolatedStorage.IsolatedStorageException)
       {
-        Util.log("Visor shader loading failed. Reflections disabled.");
-        destroy();
-        return;
-      }
+        isVisorReflectionEnabled = false;
 
-      if (isVisorReflectionEnabled)
-      {
-        // Set visor texture and reflection on proto-IVA and -EVA Kerbal.
-        foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
-        {
-          if (smr.name != "visor")
-            continue;
-
-          bool isEva = smr.transform.parent.parent.parent.parent == null;
-          if (isEva)
-          {
-            smr.sharedMaterial.shader = shader;
-            smr.sharedMaterial.SetTexture(Util.CUBE_PROPERTY, envMap);
-            smr.sharedMaterial.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
-          }
-        }
+        Util.log("Visor shader loading failed. Visor reflections disabled.");
       }
 
       for (int i = 0; i < SHADER_MAP.GetLength(0); ++i)
       {
         Shader original = Shader.Find(SHADER_MAP[i, 0]);
-        Shader reflective = SHADER_MAP[i, 1] == shader.name ?
-                            shader : Shader.Find(SHADER_MAP[i, 1]);
+        Shader reflective = SHADER_MAP[i, 1] == visorShader.name ?
+                            visorShader : Shader.Find(SHADER_MAP[i, 1]);
 
         if (original == null)
           Util.log("Shader \"{0}\" missing", SHADER_MAP[i, 0]);
@@ -221,15 +344,42 @@ namespace TextureReplacer
         else
           shaderMap.Add(original, reflective);
       }
+
+      setReflectionType(reflectionType);
     }
 
     public void destroy()
     {
-      if (envMap != null)
-        Object.Destroy(envMap);
+      if (staticEnvMap != null)
+        Object.DestroyImmediate(staticEnvMap);
+
+      if (camera != null)
+        Object.DestroyImmediate(camera);
 
       if (shaderMaterial != null)
-        Object.Destroy(shaderMaterial);
+        Object.DestroyImmediate(shaderMaterial);
+    }
+
+    public void resetScene()
+    {
+      lastVessel = null;
+    }
+
+    public void updateScene()
+    {
+      forceEnvMapRegenerate = false;
+
+      if (HighLogic.LoadedScene != lastScene)
+      {
+        forceEnvMapRegenerate = true;
+        lastScene = HighLogic.LoadedScene;
+      }
+
+      if (HighLogic.LoadedSceneIsFlight && FlightGlobals.ActiveVessel != lastVessel)
+      {
+        forceEnvMapRegenerate = true;
+        lastVessel = FlightGlobals.ActiveVessel;
+      }
     }
   }
 }

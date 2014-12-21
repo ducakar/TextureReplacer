@@ -27,6 +27,8 @@ namespace TextureReplacer
 {
   public class TRReflection : PartModule
   {
+    Reflections.Script script = null;
+
     // Configuration file parameters.
     [KSPField(isPersistant = false)]
     public string colour = "";
@@ -35,15 +37,19 @@ namespace TextureReplacer
 
     public override void OnStart(StartState state)
     {
-      if (Reflections.instance.envMap == null)
-        return;
+      Reflections reflections = Reflections.instance;
 
-      Color reflectColour = new Color(1.0f, 1.0f, 1.0f);
+      if (reflections.reflectionType == Reflections.Type.NONE)
+        return;
+      if (reflections.reflectionType == Reflections.Type.REAL)
+        script = new Reflections.Script(part);
+
+      Color reflectColour = new Color(0.5f, 0.5f, 0.5f);
       Util.parse(colour, ref reflectColour);
 
       string[] meshNames = Util.splitConfigValue(meshes);
 
-      if (Reflections.instance.logReflectiveMeshes)
+      if (reflections.logReflectiveMeshes)
         Util.log("Part \"{0}\"", part.name);
 
       foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
@@ -51,22 +57,37 @@ namespace TextureReplacer
         if (meshFilter.renderer == null)
           continue;
 
-        if (Reflections.instance.logReflectiveMeshes)
-          Util.log("+ {0} [{1}]", meshFilter.name, meshFilter.renderer.material.shader.name);
-
-        if (meshNames.Length != 0 && !meshNames.Contains(meshFilter.name))
-          continue;
-
         Material material = meshFilter.renderer.material;
-        Shader newShader = Reflections.instance.toReflective(material.shader);
 
-        if (newShader != null)
+        if (reflections.logReflectiveMeshes)
+          Util.log("+ {0} [{1}]", meshFilter.name, material.shader.name);
+
+        if (meshNames.Length == 0 || meshNames.Contains(meshFilter.name))
         {
-          material.shader = newShader;
-          material.SetTexture(Util.CUBE_PROPERTY, Reflections.instance.envMap);
-          material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectColour);
+          if (script == null)
+          {
+            material.shader = reflections.toReflective(material.shader);
+            material.SetTexture(Util.CUBE_PROPERTY, reflections.staticEnvMap);
+            material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectColour);
+          }
+          else
+          {
+            script.apply(material, reflectColour);
+          }
         }
       }
+    }
+
+    public void Update()
+    {
+      if (script != null)
+        script.update();
+    }
+
+    public void OnDestroy()
+    {
+      if (script != null)
+        script.destroy();
     }
   }
 }

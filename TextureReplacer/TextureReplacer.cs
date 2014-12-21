@@ -30,7 +30,8 @@ namespace TextureReplacer
   {
     GameScenes lastScene = GameScenes.LOADING;
     bool isInitialised = false;
-    static TextureReplacer instance = null;
+    // Instance.
+    public static TextureReplacer instance = null;
 
     public void Start()
     {
@@ -99,10 +100,12 @@ namespace TextureReplacer
 
             UI.instance.resetScene();
             Replacer.instance.resetScene();
+            Reflections.instance.resetScene();
             Personaliser.instance.resetScene();
           }
 
           Replacer.instance.updateScene();
+          Reflections.instance.resetScene();
           Personaliser.instance.updateScene();
         }
       }

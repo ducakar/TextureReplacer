@@ -20,10 +20,15 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System.Linq;
+using UnityEngine;
+
 namespace TextureReplacer
 {
   public class TREvaModule : PartModule
   {
+    Reflections.Script reflectionScript = null;
+
     [KSPField(isPersistant = true)]
     bool isInitialised = false;
 
@@ -51,6 +56,17 @@ namespace TextureReplacer
     {
       Personaliser personaliser = Personaliser.instance;
 
+      if (reflectionScript == null && Reflections.instance.reflectionType == Reflections.Type.REAL)
+      {
+        reflectionScript = new Reflections.Script(part);
+
+        SkinnedMeshRenderer visor = part.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+          .FirstOrDefault(m => m.name == "visor");
+
+        if (visor != null)
+          reflectionScript.applyVisor(visor.material);
+      }
+
       if (!isInitialised)
       {
         hasEvaSuit = !personaliser.isAtmSuitEnabled;
@@ -65,11 +81,22 @@ namespace TextureReplacer
     {
       Personaliser personaliser = Personaliser.instance;
 
-      if (!hasEvaSuit && !personaliser.isAtmBreathable())
+      if (hasEvaSuit)
+      {
+        if (reflectionScript != null)
+          reflectionScript.update();
+      }
+      else if (!personaliser.isAtmBreathable())
       {
         personaliser.personalise(part, true);
         hasEvaSuit = true;
       }
+    }
+
+    public void OnDestroy()
+    {
+      if (reflectionScript != null)
+        reflectionScript.destroy();
     }
   }
 }

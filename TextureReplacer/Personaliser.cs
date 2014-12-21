@@ -309,8 +309,8 @@ namespace TextureReplacer
                 newTexture = head.head;
                 newNormalMap = head.headNRM;
 
-                smr.material.shader = newNormalMap != null ? Util.BUMPED_DIFFUSE_SHADER :
-                                                             Util.DIFFUSE_SHADER;
+                smr.material.shader = newNormalMap != null ? Util.bumpedDiffuseShader :
+                                                             Util.diffuseShader;
               }
               break;
 

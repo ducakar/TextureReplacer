@@ -190,7 +190,7 @@ namespace TextureReplacer
         {
           if (headNormalMap != null)
           {
-            smr.sharedMaterial.shader = Util.BUMPED_DIFFUSE_SHADER;
+            smr.sharedMaterial.shader = Util.bumpedDiffuseShader;
             smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMap);
           }
         }

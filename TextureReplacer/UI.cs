@@ -333,7 +333,7 @@ namespace TextureReplacer
     {
       disable();
 
-      if (appButton != null)
+      if (ApplicationLauncher.Ready && appButton != null)
         ApplicationLauncher.Instance.RemoveModApplication(appButton);
     }
 

@@ -129,21 +129,23 @@ Note that all texture and directory names are case-sensitive!
 
 ### Reflections ###
 
-Reflections are shown on visors of Kerbal's helmets and on parts that include
+Reflections are shown on visors of Kerbals' helmets and on parts that include
 `TRReflection` module, e.g.:
 
     MODULE
     {
       name = TRReflection
       colour = 0.5 0.5 0.5
-      meshes = OuterShell FrontWindow SideWindow
+      meshes = FrontWindow SideWindow
     }
 
 `colour` ("0.5 0.5 0.5" by default) and `meshes` (empty by default) parameters
 are optional. Reflection texture is multiplied by `colour` and applied on the
 meshes from `meshes` list or on whole part if `meshes` is empty or missing.
 
-Environment cube map texture for reflections is included with the plugin:
+Reflections are of two types: real and static (set in the confituration files).
+Real reflections reflect the environment of a part while static reflections
+reflect the skybox from `EnvMap/` directory:
 
     GameData/TextureReplacer/
       EnvMap/PositiveX         // fake skybox right face, vertically flipped
@@ -251,6 +253,7 @@ Notes
 Known Bugs
 ----------
 
+* Skybox is not reflected with real reflections.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
 * IVA visor texture is applied to EVA Kerbals if game database is reloaded while
   in the main menu.
@@ -259,6 +262,11 @@ Known Bugs
 Change Log
 ----------
 
+* 2.2
+    - added real reflections, generated in real time
+    - reverted default value for `colour` in TRReflection to "0.5 0.5 0.5"
+    - deleted default `EnvMap/*` textures, they should come bundled with skyboxes
+    - fixed UI crash on KSP shutdown
 * 2.1.2
     - GUI now shows generic heads and suits instead of just printing "Generic"
     - fixed crash with duplicated entries in `CustomKerbals`
@@ -590,7 +598,3 @@ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
-
-
-Environment map textures are based on skybox from Proot's KSP Renaissance
-Compilation and are distributed under the terms of CC BY-NC-SA 4.0 licence.

@@ -39,6 +39,7 @@
         <Command type="AfterBuild" command="cp ${TargetFile} GameData/TextureReplacer/Plugins" workingdir="${SolutionDir}" />
         <Command type="AfterBuild" command="cp README.md GameData/TextureReplacer" workingdir="${SolutionDir}" />
         <Command type="AfterBuild" command="cp ${TargetFile} &quot;/run/media/davorin/Windows 7/KSP-test/GameData/TextureReplacer/Plugins&quot;" workingdir="${ProjectDir}" />
+        <Command type="Execute" command="wine &quot;../../../../../../run/media/davorin/Windows 7/KSP-test/KSP.exe&quot;" workingdir="" />
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
