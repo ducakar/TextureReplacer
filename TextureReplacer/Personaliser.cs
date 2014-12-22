@@ -221,8 +221,8 @@ namespace TextureReplacer
       if (kerbalData.head != null)
         return kerbalData.head;
 
-      List<Head> genderHeads = kerbalData.isFemale && kerminHeads.Count != 0 ?
-                               kerminHeads : kerbalHeads;
+      List<Head> genderHeads = kerbalData.isFemale && kerminHeads.Count != 0 ? kerminHeads :
+                                                                               kerbalHeads;
       if (genderHeads.Count == 0)
         return defaultHead;
 
@@ -238,8 +238,8 @@ namespace TextureReplacer
       if (suit != null)
         return suit;
 
-      List<Suit> genderSuits = kerbalData.isFemale && kerminSuits.Count != 0 ?
-                               kerminSuits : kerbalSuits;
+      List<Suit> genderSuits = kerbalData.isFemale && kerminSuits.Count != 0 ? kerminSuits :
+                                                                               kerbalSuits;
       if (genderSuits.Count == 0)
         return defaultSuit;
 
@@ -523,13 +523,13 @@ namespace TextureReplacer
           if (headName != null && headName != "GENERIC")
           {
             kerbalData.head = headName == "DEFAULT" ? defaultHead :
-                              heads.FirstOrDefault(h => h.name == headName);
+                                                      heads.FirstOrDefault(h => h.name == headName);
           }
 
           if (suitName != null && suitName != "GENERIC")
           {
             kerbalData.suit = suitName == "DEFAULT" ? defaultSuit :
-                              suits.FirstOrDefault(s => s.name == suitName);
+                                                      suits.FirstOrDefault(s => s.name == suitName);
           }
         }
       }

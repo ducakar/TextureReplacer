@@ -2,6 +2,7 @@
 /TextureReplacer/bin
 /TextureReplacer/obj
 /GameData/TextureReplacer/README.md
+/KSP.log
 *.dll
 *.tga
 *.png

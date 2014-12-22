@@ -30,13 +30,14 @@ namespace TextureReplacer
   {
     static readonly string APP_ICON_PATH = Util.DIR + "Plugins/appIcon";
     static readonly string[] SUIT_ASSIGNMENTS = { "Random", "Consecutive", "Experience" };
+    static readonly string[] REFLECTION_TYPES = { "None", "Static", "Real" };
     static readonly Color SELECTED_COLOUR = new Color(0.7f, 0.9f, 1.0f);
     static readonly Color PERK_COLOUR = new Color(1.0f, 0.8f, 1.0f);
     const int WINDOW_ID = 107056;
     // Perks from config files.
     readonly List<string> perks = new List<string>();
     // UI state.
-    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 575);
+    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 600);
     Vector2 rosterScroll = Vector2.zero;
     ProtoCrewMember selectedKerbal = null;
     string selectedPerk = null;
@@ -51,6 +52,7 @@ namespace TextureReplacer
 
     void windowHandler(int id)
     {
+      Reflections reflections = Reflections.instance;
       Personaliser personaliser = Personaliser.instance;
 
       GUILayout.BeginVertical();
@@ -283,10 +285,21 @@ namespace TextureReplacer
         personaliser.isAtmSuitEnabled, "Spawn Kerbals in IVA suits when in breathable atmosphere");
 
       GUILayout.BeginHorizontal();
-      GUILayout.Label("Generic suits:");
+      GUILayout.Label("Generic suits", GUILayout.Width(120));
       personaliser.suitAssignment = (Personaliser.SuitAssignment) GUILayout.SelectionGrid(
         (int) personaliser.suitAssignment, SUIT_ASSIGNMENTS, 3);
       GUILayout.EndHorizontal();
+
+      Reflections.Type reflectionType = reflections.reflectionType;
+
+      GUILayout.BeginHorizontal();
+      GUILayout.Label("Reflections", GUILayout.Width(120));
+      reflectionType = (Reflections.Type) GUILayout.SelectionGrid(
+        (int) reflectionType, REFLECTION_TYPES, 3);
+      GUILayout.EndHorizontal();
+
+      if (reflectionType != reflections.reflectionType)
+        reflections.setReflectionType(reflectionType);
 
       GUILayout.EndVertical();
       GUI.DragWindow(new Rect(0, 0, Screen.width, 30));
@@ -333,8 +346,16 @@ namespace TextureReplacer
     {
       disable();
 
-      if (ApplicationLauncher.Ready && appButton != null)
-        ApplicationLauncher.Instance.RemoveModApplication(appButton);
+      try
+      {
+        if (ApplicationLauncher.Ready && appButton != null)
+          ApplicationLauncher.Instance.RemoveModApplication(appButton);
+      }
+      catch (NullReferenceException)
+      {
+        // Null pointer exception occurs somewhere inside RemoveModApplication if it is called on
+        // KSP shutdown.
+      }
     }
 
     public void resetScene()

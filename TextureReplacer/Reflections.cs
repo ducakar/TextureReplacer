@@ -79,9 +79,14 @@ namespace TextureReplacer
 
       public void apply(Material material, Color reflectionColour)
       {
-        material.shader = instance.toReflective(material.shader);
-        material.SetTexture(Util.CUBE_PROPERTY, envMap);
-        material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectionColour);
+        Shader reflectiveShader = instance.toReflective(material.shader);
+
+        if (reflectiveShader != null)
+        {
+          material.shader = reflectiveShader;
+          material.SetTexture(Util.CUBE_PROPERTY, envMap);
+          material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectionColour);
+        }
       }
 
       public void applyVisor(Material material)
@@ -96,13 +101,17 @@ namespace TextureReplacer
         Object.DestroyImmediate(envMap);
       }
 
-      public void update()
+      public void update(bool force = false)
       {
-        if ((Time.frameCount + frameCountBias) % Reflections.instance.reflectionInterval != 0)
-          return;
-
-        updateFaces(instance.forceEnvMapRegenerate ? 0x3f : 1 << currentFace);
-        currentFace = (currentFace + 1) % 6;
+        if (force)
+        {
+          updateFaces(0x3f);
+        }
+        else if ((Time.frameCount + frameCountBias) % Reflections.instance.reflectionInterval == 0)
+        {
+          updateFaces(1 << currentFace);
+          currentFace = (currentFace + 1) % 6;
+        }
       }
     }
 
@@ -121,10 +130,6 @@ namespace TextureReplacer
     Material shaderMaterial = null;
     // Reflection camera.
     Camera camera = null;
-    // Force re-generating of all real reflection environment maps on scene or vessel change.
-    GameScenes lastScene = GameScenes.MAINMENU;
-    Vessel lastVessel = null;
-    bool forceEnvMapRegenerate = false;
     // Environment map textures.
     public Cubemap staticEnvMap = null;
     // Reflection type.
@@ -132,7 +137,7 @@ namespace TextureReplacer
     // Real reflection resolution.
     int reflectionResolution = 32;
     // Interval in frames for updating environment map faces.
-    int reflectionInterval = 1;
+    int reflectionInterval = 4;
     // Visor reflection feature.
     bool isVisorReflectionEnabled = true;
     // Reflection colour.
@@ -183,6 +188,18 @@ namespace TextureReplacer
       return newShader;
     }
 
+    public void applyStatic(Material material, Color reflectionColour)
+    {
+      Shader reflectiveShader = instance.toReflective(material.shader);
+
+      if (reflectiveShader != null)
+      {
+        material.shader = reflectiveShader;
+        material.SetTexture(Util.CUBE_PROPERTY, staticEnvMap);
+        material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectionColour);
+      }
+    }
+
     public void setReflectionType(Type type)
     {
       if (type == Type.STATIC && staticEnvMap == null)
@@ -200,17 +217,15 @@ namespace TextureReplacer
         if (isEva)
         {
           Material material = smr.sharedMaterial;
-          bool applyStatic = isVisorReflectionEnabled && reflectionType == Type.STATIC;
+          bool enableStatic = isVisorReflectionEnabled && reflectionType == Type.STATIC;
 
           // We apply visor shader for real reflections later, through TREvaModule since we don't
           // want corrupted reflections in the main menu.
-          material.shader = applyStatic ? visorShader : Util.transparentSpecularShader;
-          material.SetTexture(Util.CUBE_PROPERTY, applyStatic ? staticEnvMap : null);
+          material.shader = enableStatic ? visorShader : Util.transparentSpecularShader;
+          material.SetTexture(Util.CUBE_PROPERTY, enableStatic ? staticEnvMap : null);
           material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
         }
       }
-
-      Util.log("Switched to reflection type: {0}", reflectionType);
     }
 
     /**
@@ -360,26 +375,18 @@ namespace TextureReplacer
         Object.DestroyImmediate(shaderMaterial);
     }
 
-    public void resetScene()
+    public void loadScenario(ConfigNode node)
     {
-      lastVessel = null;
+      Type type = reflectionType;
+      Util.parse(node.GetValue("reflectionType"), ref type);
+
+      if (type != reflectionType)
+        setReflectionType(type);
     }
 
-    public void updateScene()
+    public void saveScenario(ConfigNode node)
     {
-      forceEnvMapRegenerate = false;
-
-      if (HighLogic.LoadedScene != lastScene)
-      {
-        forceEnvMapRegenerate = true;
-        lastScene = HighLogic.LoadedScene;
-      }
-
-      if (HighLogic.LoadedSceneIsFlight && FlightGlobals.ActiveVessel != lastVessel)
-      {
-        forceEnvMapRegenerate = true;
-        lastVessel = FlightGlobals.ActiveVessel;
-      }
+      node.AddValue("reflectionType", reflectionType);
     }
   }
 }

@@ -100,12 +100,10 @@ namespace TextureReplacer
 
             UI.instance.resetScene();
             Replacer.instance.resetScene();
-            Reflections.instance.resetScene();
             Personaliser.instance.resetScene();
           }
 
           Replacer.instance.updateScene();
-          Reflections.instance.resetScene();
           Personaliser.instance.updateScene();
         }
       }
@@ -117,16 +115,30 @@ namespace TextureReplacer
 
     public void OnGUI()
     {
-      if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-        UI.instance.draw();
+      try
+      {
+        if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+          UI.instance.draw();
+      }
+      catch (Exception e)
+      {
+        Util.log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
+      }
     }
 
     public void OnDestroy()
     {
-      if (Reflections.instance != null)
-        Reflections.instance.destroy();
-      if (UI.instance != null)
-        UI.instance.destroy();
+      try
+      {
+        if (Reflections.instance != null)
+          Reflections.instance.destroy();
+        if (UI.instance != null)
+          UI.instance.destroy();
+      }
+      catch (Exception e)
+      {
+        Util.log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
+      }
     }
   }
 }

@@ -43,6 +43,9 @@ namespace TextureReplacer
       if (personaliser.personalise(part, !hasEvaSuit))
       {
         hasEvaSuit = !hasEvaSuit;
+
+        if (hasEvaSuit && reflectionScript != null)
+          reflectionScript.update(true);
       }
       else
       {
@@ -90,6 +93,9 @@ namespace TextureReplacer
       {
         personaliser.personalise(part, true);
         hasEvaSuit = true;
+
+        if (reflectionScript != null)
+          reflectionScript.update(true);
       }
     }
 

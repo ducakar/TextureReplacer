@@ -143,7 +143,7 @@ Reflections are shown on visors of Kerbals' helmets and on parts that include
 are optional. Reflection texture is multiplied by `colour` and applied on the
 meshes from `meshes` list or on whole part if `meshes` is empty or missing.
 
-Reflections are of two types: real and static (set in the confituration files).
+Reflections are of two types: real and static (set in the configuration files).
 Real reflections reflect the environment of a part while static reflections
 reflect the skybox from `EnvMap/` directory:
 
@@ -198,6 +198,10 @@ selected.
 See configuration file contents for how to configure head/suit assignment rules.
 
 ### Configuration File ###
+
+NOTE: All options that can be configured in the GUI are saved per-game and not
+in the configuration files. Configuration files only provide initial settings
+for those options.
 
 Main configuration file:
 
@@ -263,10 +267,10 @@ Change Log
 ----------
 
 * 2.2
-    - added real reflections, generated in real time
+    - added real reflections, generated from environment in real time
+    - added new GUI option to switch between reflection types
     - reverted default value for `colour` in TRReflection to "0.5 0.5 0.5"
-    - deleted default `EnvMap/*` textures, they should come bundled with skyboxes
-    - fixed UI crash on KSP shutdown
+    - erased default `EnvMap/*` textures, they should come bundled with skyboxes
 * 2.1.2
     - GUI now shows generic heads and suits instead of just printing "Generic"
     - fixed crash with duplicated entries in `CustomKerbals`

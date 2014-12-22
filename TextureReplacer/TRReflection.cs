@@ -44,8 +44,8 @@ namespace TextureReplacer
       if (reflections.reflectionType == Reflections.Type.REAL)
         script = new Reflections.Script(part);
 
-      Color reflectColour = new Color(0.5f, 0.5f, 0.5f);
-      Util.parse(colour, ref reflectColour);
+      Color reflectionColour = new Color(0.5f, 0.5f, 0.5f);
+      Util.parse(colour, ref reflectionColour);
 
       string[] meshNames = Util.splitConfigValue(meshes);
 
@@ -65,15 +65,9 @@ namespace TextureReplacer
         if (meshNames.Length == 0 || meshNames.Contains(meshFilter.name))
         {
           if (script == null)
-          {
-            material.shader = reflections.toReflective(material.shader);
-            material.SetTexture(Util.CUBE_PROPERTY, reflections.staticEnvMap);
-            material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectColour);
-          }
+            reflections.applyStatic(material, reflectionColour);
           else
-          {
-            script.apply(material, reflectColour);
-          }
+            script.apply(material, reflectionColour);
         }
       }
     }
