@@ -179,8 +179,7 @@ namespace TextureReplacer
       if (mappedTextures.TryGetValue("EVAvisor", out evaVisorTexture))
         mappedTextures.Remove("EVAvisor");
 
-      // Set normal-mapped shader for head and visor texture and reflection on proto-IVA and -EVA
-      // Kerbal.
+      // Set normal-mapped shader for head and visor texture on proto-IVA and -EVA Kerbals.
       foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
       {
         if (skinningQuality != SkinQuality.Auto)

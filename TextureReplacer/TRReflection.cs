@@ -52,6 +52,8 @@ namespace TextureReplacer
       if (reflections.logReflectiveMeshes)
         Util.log("Part \"{0}\"", part.name);
 
+      bool success = false;
+
       foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
       {
         if (meshFilter.renderer == null)
@@ -64,11 +66,21 @@ namespace TextureReplacer
 
         if (meshNames.Length == 0 || meshNames.Contains(meshFilter.name))
         {
-          if (script == null)
-            reflections.applyStatic(material, reflectionColour);
-          else
-            script.apply(material, reflectionColour);
+          success |= script == null ? reflections.applyStatic(material, reflectionColour) :
+                                      script.apply(material, reflectionColour);
         }
+      }
+
+      if (!success)
+      {
+        if (script != null)
+        {
+          script.destroy();
+          script = null;
+        }
+
+        Util.log("Failed to replace any shader on \"{0}\" with its reflective counterpart",
+                 part.name);
       }
     }
 

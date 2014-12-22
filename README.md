@@ -257,7 +257,6 @@ Notes
 Known Bugs
 ----------
 
-* Skybox is not reflected with real reflections.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
 * IVA visor texture is applied to EVA Kerbals if game database is reloaded while
   in the main menu.

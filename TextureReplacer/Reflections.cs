@@ -77,7 +77,7 @@ namespace TextureReplacer
         updateFaces(0x3f);
       }
 
-      public void apply(Material material, Color reflectionColour)
+      public bool apply(Material material, Color reflectionColour)
       {
         Shader reflectiveShader = instance.toReflective(material.shader);
 
@@ -86,7 +86,9 @@ namespace TextureReplacer
           material.shader = reflectiveShader;
           material.SetTexture(Util.CUBE_PROPERTY, envMap);
           material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectionColour);
+          return true;
         }
+        return false;
       }
 
       public void applyVisor(Material material)
@@ -135,7 +137,7 @@ namespace TextureReplacer
     // Reflection type.
     public Type reflectionType = Type.REAL;
     // Real reflection resolution.
-    int reflectionResolution = 32;
+    int reflectionResolution = 64;
     // Interval in frames for updating environment map faces.
     int reflectionInterval = 4;
     // Visor reflection feature.
@@ -157,7 +159,7 @@ namespace TextureReplacer
         camera.enabled = false;
         camera.backgroundColor = Color.black;
         camera.nearClipPlane = 0.1f;
-        camera.farClipPlane = 10000.0f;
+        camera.farClipPlane = 3.0e7f;
 
         // Render layers:
         //  0 - parts
@@ -166,7 +168,9 @@ namespace TextureReplacer
         // 10 - scaled space
         // 12 - navball
         // 15 - buildings, terrain
-        camera.cullingMask = 1 << 0 | 1 << 9 | 1 << 10 | 1 << 15;
+        // 18 - skybox
+        // 23 - sun
+        camera.cullingMask = 1 << 0 | 1 << 9 | 1 << 10 | 1 << 15 | 1 << 18 | 1 << 23;
 
         // Cull everything but scaled space at 100 m.
         float[] cullDistances = new float[32];
@@ -188,7 +192,7 @@ namespace TextureReplacer
       return newShader;
     }
 
-    public void applyStatic(Material material, Color reflectionColour)
+    public bool applyStatic(Material material, Color reflectionColour)
     {
       Shader reflectiveShader = instance.toReflective(material.shader);
 
@@ -197,7 +201,9 @@ namespace TextureReplacer
         material.shader = reflectiveShader;
         material.SetTexture(Util.CUBE_PROPERTY, staticEnvMap);
         material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectionColour);
+        return true;
       }
+      return false;
     }
 
     public void setReflectionType(Type type)
