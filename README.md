@@ -130,20 +130,7 @@ Note that all texture and directory names are case-sensitive!
 ### Reflections ###
 
 Reflections are shown on visors of Kerbals' helmets and on parts that include
-`TRReflection` module, e.g.:
-
-    MODULE
-    {
-      name = TRReflection
-      colour = 0.5 0.5 0.5
-      meshes = FrontWindow SideWindow
-    }
-
-`colour` ("0.5 0.5 0.5" by default) and `meshes` (empty by default) parameters
-are optional. Reflection texture is multiplied by `colour` and applied on the
-meshes from `meshes` list or on whole part if `meshes` is empty or missing.
-
-Reflections are of two types: real and static (set in the configuration files).
+`TRReflection` module. There are two types of reflections: real and static.
 Real reflections reflect the environment of a part while static reflections
 reflect the skybox from `EnvMap/` directory:
 
@@ -157,6 +144,32 @@ reflect the skybox from `EnvMap/` directory:
 
 Note that all textures must be quares and have the same dimensions that are
 powers of two. Cube map textures are slow, so keep them as low-res as possible.
+
+`TRReflection` part module can be used as in the following example that adds
+reflections onto Mk1-2 pod windows:
+
+    MODULE
+    {
+      name = TRReflection
+      shader = Reflective/Bumped Diffuse
+      colour = 0.5 0.5 0.5
+      meshes = FrontWindow SideWindow
+    }
+
+There are several parameters, all optional:
+
+* `shader`: Most shaders should be automatically mapped to their reflective
+  counterparts. In some cases, however, thare are no reflective version
+  of a shader (e.g. emission shaders) so you will have to manually specify
+  the shader that suits you the best.
+* `colour`: Reflection is pre-multiplied by this RGB value before added to
+  the material. "0.5 0.5 0.5" by default.
+* `meshes`: If this parameter is empty or non-existent, reflection will be
+  applied to all meshes of a part. Otherwise it specifies a space- and/or
+  comma-sparated list of mesh names where to apply reflections. You may find
+  `logReflectiveMeshes` configuration option very helpful as it prints names
+  of all meshes for each part with `TRReflection` module into your log.
+
 
 ### Personalised Kerbal Textures ###
 

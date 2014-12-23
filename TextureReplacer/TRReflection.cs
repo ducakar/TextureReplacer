@@ -31,6 +31,8 @@ namespace TextureReplacer
 
     // Configuration file parameters.
     [KSPField(isPersistant = false)]
+    public string shader = "";
+    [KSPField(isPersistant = false)]
     public string colour = "";
     [KSPField(isPersistant = false)]
     public string meshes = "";
@@ -64,10 +66,13 @@ namespace TextureReplacer
         if (reflections.logReflectiveMeshes)
           Util.log("+ {0} [{1}]", meshFilter.name, material.shader.name);
 
+        Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
+
         if (meshNames.Length == 0 || meshNames.Contains(meshFilter.name))
         {
-          success |= script == null ? reflections.applyStatic(material, reflectionColour) :
-                                      script.apply(material, reflectionColour);
+          success |= script == null ?
+                     reflections.applyStatic(material, reflectiveShader, reflectionColour) :
+                     script.apply(material, reflectiveShader, reflectionColour);
         }
       }
 

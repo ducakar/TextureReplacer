@@ -47,17 +47,13 @@ namespace TextureReplacer
       {
         Transform spaceTransf = ScaledSpace.Instance.transform;
         Vector3 spacePos = spaceTransf.position;
-        Vector3 partScale = partTransform.localScale;
 
-        // Scaled space is neccessary to render skybox and high-altitude models of celestial bodies.
+        // It seems ScaledSpace has to be always rendered from the origin of its coordinate system.
         spaceTransf.position = partTransform.position;
-        // We set scale to zero to "hide" the part since it shouldn't reflect itself.
-        partTransform.localScale = Vector3.zero;
 
         instance.camera.transform.root.position = partTransform.position;
         instance.camera.RenderToCubemap(envMap, faceMask);
 
-        partTransform.localScale = partScale;
         spaceTransf.position = spacePos;
       }
 
@@ -77,9 +73,9 @@ namespace TextureReplacer
         updateFaces(0x3f);
       }
 
-      public bool apply(Material material, Color reflectionColour)
+      public bool apply(Material material, Shader shader, Color reflectionColour)
       {
-        Shader reflectiveShader = instance.toReflective(material.shader);
+        Shader reflectiveShader = shader ?? instance.toReflective(material.shader);
 
         if (reflectiveShader != null)
         {
@@ -109,7 +105,7 @@ namespace TextureReplacer
         {
           updateFaces(0x3f);
         }
-        else if ((Time.frameCount + frameCountBias) % Reflections.instance.reflectionInterval == 0)
+        else if ((Time.frameCount + frameCountBias) % instance.reflectionInterval == 0)
         {
           updateFaces(1 << currentFace);
           currentFace = (currentFace + 1) % 6;
@@ -133,7 +129,7 @@ namespace TextureReplacer
     // Reflection camera.
     Camera camera = null;
     // Environment map textures.
-    public Cubemap staticEnvMap = null;
+    Cubemap staticEnvMap = null;
     // Reflection type.
     public Type reflectionType = Type.REAL;
     // Real reflection resolution.
@@ -147,7 +143,7 @@ namespace TextureReplacer
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool logReflectiveMeshes = false;
     // Reflective shader.
-    public Shader visorShader = null;
+    Shader visorShader = null;
     // Instance.
     public static Reflections instance = null;
 
@@ -155,10 +151,11 @@ namespace TextureReplacer
     {
       if (camera == null)
       {
-        camera = new GameObject("ReflectionCamera", new[] { typeof(Camera) }).camera;
+        camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).camera;
         camera.enabled = false;
         camera.backgroundColor = Color.black;
-        camera.nearClipPlane = 0.1f;
+        // Any smaller number and visors will refect internals of helmets.
+        camera.nearClipPlane = 0.6f;
         camera.farClipPlane = 3.0e7f;
 
         // Render layers:
@@ -166,16 +163,14 @@ namespace TextureReplacer
         //  1 - thrusters
         //  9 - sky/atmosphere
         // 10 - scaled space
-        // 12 - navball
         // 15 - buildings, terrain
         // 18 - skybox
         // 23 - sun
         camera.cullingMask = 1 << 0 | 1 << 9 | 1 << 10 | 1 << 15 | 1 << 18 | 1 << 23;
 
-        // Cull everything but scaled space at 100 m.
+        // Cull everything but scaled space & co. at 100 m.
         float[] cullDistances = new float[32];
         cullDistances[0] = 100.0f;
-        cullDistances[9] = 100.0f;
         cullDistances[15] = 100.0f;
 
         camera.layerCullDistances = cullDistances;
@@ -192,9 +187,9 @@ namespace TextureReplacer
       return newShader;
     }
 
-    public bool applyStatic(Material material, Color reflectionColour)
+    public bool applyStatic(Material material, Shader shader, Color reflectionColour)
     {
-      Shader reflectiveShader = instance.toReflective(material.shader);
+      Shader reflectiveShader = shader ?? toReflective(material.shader);
 
       if (reflectiveShader != null)
       {
@@ -375,7 +370,7 @@ namespace TextureReplacer
         Object.DestroyImmediate(staticEnvMap);
 
       if (camera != null)
-        Object.DestroyImmediate(camera);
+        Object.DestroyImmediate(camera.gameObject);
 
       if (shaderMaterial != null)
         Object.DestroyImmediate(shaderMaterial);
