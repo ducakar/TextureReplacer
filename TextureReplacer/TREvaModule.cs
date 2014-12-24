@@ -20,7 +20,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System.Linq;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -63,11 +62,14 @@ namespace TextureReplacer
       {
         reflectionScript = new Reflections.Script(part);
 
-        SkinnedMeshRenderer visor = part.GetComponentsInChildren<SkinnedMeshRenderer>(true)
-          .FirstOrDefault(m => m.name == "visor");
-
-        if (visor != null)
-          reflectionScript.applyVisor(visor.material);
+        foreach (SkinnedMeshRenderer smr in part.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+        {
+          if (smr.name == "visor")
+          {
+            reflectionScript.applyVisor(smr.material);
+            break;
+          }
+        }
       }
 
       if (!isInitialised)

@@ -38,8 +38,9 @@ namespace TextureReplacer
 
     public class Script
     {
-      readonly RenderTexture envMap = null;
-      readonly Transform partTransform = null;
+      readonly RenderTexture envMap;
+      readonly Transform transform;
+      readonly bool isEva;
       readonly int frameCountBias = Util.random.Next(instance.reflectionInterval);
       int currentFace = Util.random.Next(6);
 
@@ -47,13 +48,20 @@ namespace TextureReplacer
       {
         Transform spaceTransf = ScaledSpace.Instance.transform;
         Vector3 spacePos = spaceTransf.position;
+        Vector3 cameraPos = transform.position;
+
+        if (isEva)
+          cameraPos += transform.up * 0.4f;
 
         // It seems ScaledSpace has to be always rendered from the origin of its coordinate system.
-        spaceTransf.position = partTransform.position;
+        spaceTransf.position = cameraPos;
+        // Hide model. That's an ugly hack; some meshes may end up in a wrong layer after this.
+        transform.SetLayerRecursive(31);
 
-        instance.camera.transform.root.position = partTransform.position;
+        instance.camera.transform.position = cameraPos;
         instance.camera.RenderToCubemap(envMap, faceMask);
 
+        transform.SetLayerRecursive(0);
         spaceTransf.position = spacePos;
       }
 
@@ -68,7 +76,11 @@ namespace TextureReplacer
         envMap.wrapMode = TextureWrapMode.Clamp;
         envMap.isCubemap = true;
 
-        partTransform = part.transform;
+        transform = part.transform;
+        isEva = part.GetComponent<KerbalEVA>() != null;
+
+        if (isEva)
+          transform = transform.Find("model01");
 
         updateFaces(0x3f);
       }
@@ -135,7 +147,7 @@ namespace TextureReplacer
     // Real reflection resolution.
     int reflectionResolution = 64;
     // Interval in frames for updating environment map faces.
-    int reflectionInterval = 4;
+    int reflectionInterval = 1;
     // Visor reflection feature.
     bool isVisorReflectionEnabled = true;
     // Reflection colour.
@@ -155,7 +167,7 @@ namespace TextureReplacer
         camera.enabled = false;
         camera.backgroundColor = Color.black;
         // Any smaller number and visors will refect internals of helmets.
-        camera.nearClipPlane = 0.6f;
+        camera.nearClipPlane = 0.2f;
         camera.farClipPlane = 3.0e7f;
 
         // Render layers:
