@@ -29,18 +29,18 @@ namespace TextureReplacer
   class UI
   {
     static readonly string APP_ICON_PATH = Util.DIR + "Plugins/appIcon";
-    static readonly string[] SUIT_ASSIGNMENTS = { "Random", "Consecutive", "Experience" };
+    static readonly string[] SUIT_ASSIGNMENTS = { "Random", "Consecutive", "Class" };
     static readonly string[] REFLECTION_TYPES = { "None", "Static", "Real" };
     static readonly Color SELECTED_COLOUR = new Color(0.7f, 0.9f, 1.0f);
-    static readonly Color PERK_COLOUR = new Color(1.0f, 0.8f, 1.0f);
+    static readonly Color CLASS_COLOUR = new Color(1.0f, 0.8f, 1.0f);
     const int WINDOW_ID = 107056;
-    // Perks from config files.
-    readonly List<string> perks = new List<string>();
+    // Classes from config files.
+    readonly List<string> classes = new List<string>();
     // UI state.
     Rect windowRect = new Rect(Screen.width - 600, 60, 580, 600);
     Vector2 rosterScroll = Vector2.zero;
     ProtoCrewMember selectedKerbal = null;
-    string selectedPerk = null;
+    string selectedClass = null;
     bool isEnabled = false;
     // Application launcher icon.
     Texture2D appIcon = null;
@@ -82,19 +82,19 @@ namespace TextureReplacer
         if (GUILayout.Button(kerbal.name))
         {
           selectedKerbal = kerbal;
-          selectedPerk = null;
+          selectedClass = null;
         }
       }
       GUI.contentColor = Color.white;
-      GUI.color = PERK_COLOUR;
+      GUI.color = CLASS_COLOUR;
 
-      // Perk suits.
-      foreach (string perk in perks)
+      // Class suits.
+      foreach (string clazz in classes)
       {
-        if (GUILayout.Button(perk))
+        if (GUILayout.Button(clazz))
         {
           selectedKerbal = null;
-          selectedPerk = perk;
+          selectedClass = clazz;
         }
       }
 
@@ -125,9 +125,9 @@ namespace TextureReplacer
           suitIndex = personaliser.suits.IndexOf(suit);
         }
       }
-      else if (selectedPerk != null)
+      else if (selectedClass != null)
       {
-        personaliser.perkSuits.TryGetValue(selectedPerk, out suit);
+        personaliser.classSuits.TryGetValue(selectedClass, out suit);
 
         if (suit != null)
           suitIndex = personaliser.suits.IndexOf(suit);
@@ -203,7 +203,7 @@ namespace TextureReplacer
         GUILayout.Space(120);
       }
 
-      if (kerbalData != null || selectedPerk != null)
+      if (kerbalData != null || selectedClass != null)
       {
         GUILayout.BeginHorizontal();
         GUI.enabled = personaliser.suits.Count != 0;
@@ -220,7 +220,7 @@ namespace TextureReplacer
           }
           else
           {
-            personaliser.perkSuits[selectedPerk] = personaliser.suits[suitIndex];
+            personaliser.classSuits[selectedClass] = personaliser.suits[suitIndex];
           }
         }
         if (GUILayout.Button(">"))
@@ -234,7 +234,7 @@ namespace TextureReplacer
           }
           else
           {
-            personaliser.perkSuits[selectedPerk] = personaliser.suits[suitIndex];
+            personaliser.classSuits[selectedClass] = personaliser.suits[suitIndex];
           }
         }
 
@@ -252,7 +252,7 @@ namespace TextureReplacer
           }
           else
           {
-            personaliser.perkSuits[selectedPerk] = defaultSuit;
+            personaliser.classSuits[selectedClass] = defaultSuit;
           }
         }
 
@@ -267,7 +267,7 @@ namespace TextureReplacer
           }
           else
           {
-            personaliser.perkSuits[selectedPerk] = null;
+            personaliser.classSuits[selectedClass] = null;
           }
         }
 
@@ -309,14 +309,14 @@ namespace TextureReplacer
     {
       isEnabled = true;
       selectedKerbal = null;
-      selectedPerk = null;
+      selectedClass = null;
     }
 
     void disable()
     {
       isEnabled = false;
       selectedKerbal = null;
-      selectedPerk = null;
+      selectedClass = null;
 
       rosterScroll = Vector2.zero;
     }
@@ -329,7 +329,7 @@ namespace TextureReplacer
       {
         string name = node.GetValue("name");
         if (name != null)
-          perks.AddUnique(name);
+          classes.AddUnique(name);
       }
     }
 

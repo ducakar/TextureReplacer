@@ -34,7 +34,7 @@ namespace TextureReplacer
     {
       RANDOM,
       CONSECUTIVE,
-      EXPERIENCE
+      CLASS
     }
 
     public class KerbalData
@@ -42,6 +42,7 @@ namespace TextureReplacer
       public int hash;
       public bool isFemale;
       public bool isVeteran;
+
       public Head head;
       public Suit suit;
       public Suit cabinSuit;
@@ -52,6 +53,7 @@ namespace TextureReplacer
       public string name;
       public bool isFemale;
       public bool isEyeless;
+
       public Texture2D head;
       public Texture2D headNRM;
     }
@@ -60,6 +62,7 @@ namespace TextureReplacer
     {
       public string name;
       public bool isFemale;
+
       public Texture2D suitVeteran;
       public Texture2D suit;
       public Texture2D suitNRM;
@@ -143,9 +146,9 @@ namespace TextureReplacer
     readonly Dictionary<string, KerbalData> customKerbals = new Dictionary<string, KerbalData>();
     // Cabin-specific suits.
     readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
-    // Perk-specific suits.
-    public readonly Dictionary<string, Suit> perkSuits = new Dictionary<string, Suit>();
-    public readonly Dictionary<string, Suit> defaultPerkSuits = new Dictionary<string, Suit>();
+    // Class-specific suits.
+    public readonly Dictionary<string, Suit> classSuits = new Dictionary<string, Suit>();
+    public readonly Dictionary<string, Suit> defaultClassSuits = new Dictionary<string, Suit>();
     // Helmet removal.
     Mesh helmetMesh = null;
     Mesh visorMesh = null;
@@ -187,12 +190,12 @@ namespace TextureReplacer
       return value;
     }
 
-    Suit getPerkSuit(ProtoCrewMember kerbal)
+    Suit getClassSuit(ProtoCrewMember kerbal)
     {
       Suit suit = null;
 
-      if (suitAssignment == SuitAssignment.EXPERIENCE)
-        perkSuits.TryGetValue(kerbal.experienceTrait.Config.Name, out suit);
+      if (suitAssignment == SuitAssignment.CLASS)
+        classSuits.TryGetValue(kerbal.experienceTrait.Config.Name, out suit);
 
       return suit;
     }
@@ -234,7 +237,7 @@ namespace TextureReplacer
 
     public Suit getKerbalSuit(ProtoCrewMember kerbal, KerbalData kerbalData)
     {
-      Suit suit = kerbalData.suit ?? getPerkSuit(kerbal);
+      Suit suit = kerbalData.suit ?? getClassSuit(kerbal);
       if (suit != null)
         return suit;
 
@@ -630,9 +633,9 @@ namespace TextureReplacer
           Util.parse(genericNode.GetValue("suitAssignment"), ref suitAssignment);
         }
 
-        ConfigNode perkNode = file.config.GetNode("PerkSuits");
-        if (perkNode != null)
-          loadSuitMap(perkNode, defaultPerkSuits);
+        ConfigNode classNode = file.config.GetNode("ClassSuits");
+        if (classNode != null)
+          loadSuitMap(classNode, defaultClassSuits);
 
         ConfigNode cabinNode = file.config.GetNode("CabinSuits");
         if (cabinNode != null)
@@ -859,10 +862,10 @@ namespace TextureReplacer
     public void loadScenario(ConfigNode node)
     {
       gameKerbals.Clear();
-      perkSuits.Clear();
+      classSuits.Clear();
 
       loadKerbals(node.GetNode("Kerbals") ?? node.GetNode("CustomKerbals"));
-      loadSuitMap(node.GetNode("PerkSuits"), perkSuits, defaultPerkSuits);
+      loadSuitMap(node.GetNode("ClassSuits"), classSuits, defaultClassSuits);
 
       Util.parse(node.GetValue("isHelmetRemovalEnabled"), ref isHelmetRemovalEnabled);
       Util.parse(node.GetValue("isAtmSuitEnabled"), ref isAtmSuitEnabled);
@@ -872,7 +875,7 @@ namespace TextureReplacer
     public void saveScenario(ConfigNode node)
     {
       saveKerbals(node.AddNode("Kerbals"));
-      saveSuitMap(perkSuits, node.AddNode("PerkSuits"));
+      saveSuitMap(classSuits, node.AddNode("ClassSuits"));
 
       node.AddValue("isHelmetRemovalEnabled", isHelmetRemovalEnabled);
       node.AddValue("isAtmSuitEnabled", isAtmSuitEnabled);

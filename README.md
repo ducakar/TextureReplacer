@@ -14,7 +14,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * replace stock textures with custom ones,
 * set personalised head and suit textures for selected Kerbals,
 * set persistent random head and suit textures for other Kerbals,
-* set suits based on Kerbals' experiences,
+* set suits based on Kerbals' classes,
 * set cockpit-specific IVA suits,
 * remove IVA helmets in safe situations,
 * spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
@@ -177,7 +177,7 @@ Heads and suits are assigned either manually or automatically (configured in the
 GUI while configuration files only provide initial settings). Pseudo-random
 assignment is based on a Kerbal's name, which ensures the same head/suit is
 always assigned to a given Kerbal. Additionally it is also possible to assign
-suits consecutively, based on rooster index, or based on Kerbal experience.
+suits consecutively, based on rooster index, or class.
 
 Head textures reside inside `Heads/` directory (and its subdirectories) and have
 arbitrary names. Normal maps are optional. To provide a normal map, name it the

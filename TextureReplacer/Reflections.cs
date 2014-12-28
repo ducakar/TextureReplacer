@@ -135,6 +135,12 @@ namespace TextureReplacer
       { "KSP/Alpha/Translucent", "TR/Visor" },
       { "KSP/Alpha/Translucent Specular", "TR/Visor" }
     };
+    static readonly float[] CULL_DISTANCES = {
+      100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f,
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 100000.0f,
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
+    };
     readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflective shader material.
     Material shaderMaterial = null;
@@ -165,27 +171,23 @@ namespace TextureReplacer
       {
         camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).camera;
         camera.enabled = false;
-        camera.backgroundColor = Color.black;
         // Any smaller number and visors will refect internals of helmets.
         camera.nearClipPlane = 0.2f;
         camera.farClipPlane = 3.0e7f;
 
         // Render layers:
         //  0 - parts
-        //  1 - thrusters
+        //  1 - RCS jets
+        //  5 - engine exhaust
         //  9 - sky/atmosphere
-        // 10 - scaled space
+        // 10 - scaled space bodies
         // 15 - buildings, terrain
         // 18 - skybox
         // 23 - sun
-        camera.cullingMask = 1 << 0 | 1 << 9 | 1 << 10 | 1 << 15 | 1 << 18 | 1 << 23;
-
+        camera.cullingMask = 0x00848623;
         // Cull everything but scaled space & co. at 100 m.
-        float[] cullDistances = new float[32];
-        cullDistances[0] = 100.0f;
-        cullDistances[15] = 100.0f;
-
-        camera.layerCullDistances = cullDistances;
+        camera.layerCullSpherical = true;
+        camera.layerCullDistances = CULL_DISTANCES;
       }
     }
 

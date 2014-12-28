@@ -147,16 +147,6 @@ namespace TextureReplacer
      */
     public void initialise()
     {
-      // We want to iterate through both the stock skybox and the skybox from GameData.
-      foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>())
-      {
-        if (texture.name.EndsWith("GalaxyTex_", StringComparison.Ordinal))
-        {
-          texture.wrapMode = TextureWrapMode.Clamp;
-          texture.filterMode = FilterMode.Trilinear;
-        }
-      }
-
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
@@ -164,6 +154,12 @@ namespace TextureReplacer
           continue;
 
         string originalName = texture.name.Substring(DIR_TEXTURES.Length);
+
+        if (texture.filterMode == FilterMode.Bilinear)
+          texture.filterMode = FilterMode.Trilinear;
+
+        if (originalName.StartsWith("GalaxyTex_", StringComparison.Ordinal))
+          texture.wrapMode = TextureWrapMode.Clamp;
 
         // This in wrapped inside an 'if' clause just in case if corrupted GameDatabase contains
         // non-consecutive duplicated entries for some strange reason.
