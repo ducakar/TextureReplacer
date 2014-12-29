@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -172,7 +173,7 @@ namespace TextureReplacer
         camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).camera;
         camera.enabled = false;
         // Any smaller number and visors will refect internals of helmets.
-        camera.nearClipPlane = 0.2f;
+        camera.nearClipPlane = 0.15f;
         camera.farClipPlane = 3.0e7f;
 
         // Render layers:
@@ -343,21 +344,20 @@ namespace TextureReplacer
         }
       }
 
-      string shaderPath = KSP.IO.IOUtils.GetFilePathFor(GetType(), "Visor.shader");
-      string shaderSource = null;
-
       try
       {
-        shaderSource = File.ReadAllText(shaderPath);
-        shaderMaterial = new Material(shaderSource);
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        Stream stream = assembly.GetManifestResourceStream("TextureReplacer.Visor-compiled.shader");
+        StreamReader reader = new StreamReader(stream);
+
+        shaderMaterial = new Material(reader.ReadToEnd());
         visorShader = shaderMaterial.shader;
 
         Util.log("Visor shader sucessfully compiled.");
       }
-      catch (System.IO.IsolatedStorage.IsolatedStorageException)
+      catch
       {
         isVisorReflectionEnabled = false;
-
         Util.log("Visor shader loading failed. Visor reflections disabled.");
       }
 

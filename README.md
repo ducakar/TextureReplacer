@@ -188,21 +188,46 @@ same as the head texture but add "NRM" suffix.
       Heads/[<subDir>/]<head>NRM  // Normal map for <head> (optional)
 
 Suit textures' names are identical as for the default texture replacement except
-that there is no `kerbalMain` texture (`kerbalMainGrey` replaces both). Each
-suit must reside in its own directory:
+that there is no `kerbalMain` texture (`kerbalMainGrey` replaces both) and class
+level versions of suit and helmet textures are possible. Each suit must reside
+inside its own directory:
 
     GameData/TextureReplacer/
-      Suits/[<subDir>/]<suit>/kerbalMainGrey    // IVA suit
-      Suits/[<subDir>/]<suit>/kerbalMainNRM     // IVA suit normal map
-      Suits/[<subDir>/]<suit>/kerbalHelmetGrey  // IVA helmet
-      Suits/[<subDir>/]<suit>/kerbalHelmetNRM   // IVA & EVA helmet normal map
-      Suits/[<subDir>/]<suit>/kerbalVisor       // IVA helmet visor
-      Suits/[<subDir>/]<suit>/EVAtexture        // EVA suit
-      Suits/[<subDir>/]<suit>/EVAtextureNRM     // EVA suit normal map
-      Suits/[<subDir>/]<suit>/EVAhelmet         // EVA helmet
-      Suits/[<subDir>/]<suit>/EVAvisor          // EVA helmet visor
-      Suits/[<subDir>/]<suit>/EVAjetpack        // EVA jetpack
-      Suits/[<subDir>/]<suit>/EVAjetpackNRM     // EVA jetpack normal map
+      Suits/[<subDir>/]<suit>/kerbalMainGrey     // IVA suit
+      Suits/[<subDir>/]<suit>/kerbalMainGrey1    // IVA suit (level 1)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey2    // IVA suit (level 2)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey3    // IVA suit (level 3)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey4    // IVA suit (level 4)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey5    // IVA suit (level 5)
+      Suits/[<subDir>/]<suit>/kerbalMainNRM      // IVA suit normal map
+      Suits/[<subDir>/]<suit>/kerbalHelmetGrey   // IVA helmet
+      Suits/[<subDir>/]<suit>/kerbalHelmetGrey1  // IVA helmet (level 1)
+      Suits/[<subDir>/]<suit>/kerbalHelmetGrey2  // IVA helmet (level 2)
+      Suits/[<subDir>/]<suit>/kerbalHelmetGrey3  // IVA helmet (level 3)
+      Suits/[<subDir>/]<suit>/kerbalHelmetGrey4  // IVA helmet (level 4)
+      Suits/[<subDir>/]<suit>/kerbalHelmetGrey5  // IVA helmet (level 5)
+      Suits/[<subDir>/]<suit>/kerbalHelmetNRM    // IVA & EVA helmet normal map
+      Suits/[<subDir>/]<suit>/kerbalVisor        // IVA helmet visor
+      Suits/[<subDir>/]<suit>/EVAtexture         // EVA suit
+      Suits/[<subDir>/]<suit>/EVAtexture1        // EVA suit (level 1)
+      Suits/[<subDir>/]<suit>/EVAtexture2        // EVA suit (level 2)
+      Suits/[<subDir>/]<suit>/EVAtexture3        // EVA suit (level 3)
+      Suits/[<subDir>/]<suit>/EVAtexture4        // EVA suit (level 4)
+      Suits/[<subDir>/]<suit>/EVAtexture5        // EVA suit (level 5)
+      Suits/[<subDir>/]<suit>/EVAtextureNRM      // EVA suit normal map
+      Suits/[<subDir>/]<suit>/EVAhelmet          // EVA helmet
+      Suits/[<subDir>/]<suit>/EVAhelmet1         // EVA helmet (level 1)
+      Suits/[<subDir>/]<suit>/EVAhelmet2         // EVA helmet (level 2)
+      Suits/[<subDir>/]<suit>/EVAhelmet3         // EVA helmet (level 3)
+      Suits/[<subDir>/]<suit>/EVAhelmet4         // EVA helmet (level 4)
+      Suits/[<subDir>/]<suit>/EVAhelmet5         // EVA helmet (level 5)
+      Suits/[<subDir>/]<suit>/EVAvisor           // EVA helmet visor
+      Suits/[<subDir>/]<suit>/EVAjetpack         // EVA jetpack
+      Suits/[<subDir>/]<suit>/EVAjetpackNRM      // EVA jetpack normal map
+
+The level textures (`kerbalMainGrey#`, `kerbalHelmetGrey#`, `EVAtexture#` and
+`EVAhelmet#`) are optional. If missing, level 0 texture will be used for all
+levels for that part of suit.
 
 For generic Kerbals, heads are selected independently form suits so any head can
 be paired with any of the suits and each head has an equal chance of being
@@ -280,9 +305,11 @@ Change Log
 
 * 2.2
     - added real reflections, generated from environment in real time
+    - added level-specific textures for suits
     - added new GUI option to switch between reflection types
-    - reverted default value for `colour` in TRReflection to "0.5 0.5 0.5"
     - erased default `EnvMap/*` textures, they should come bundled with skyboxes
+    - embedded visor shader into DLL
+    - reverted default value for `colour` in TRReflection to "0.5 0.5 0.5"
 * 2.1.2
     - GUI now shows generic heads and suits instead of just printing "Generic"
     - fixed crash with duplicated entries in `CustomKerbals`

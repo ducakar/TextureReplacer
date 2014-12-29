@@ -37,7 +37,6 @@
         <Command type="Execute" command="wine &quot;../../../../../../run/media/davorin/Windows 7/KSP-test/KSP.exe&quot; -nolog" workingdir="${SolutionDir}" />
       </CustomCommands>
     </CustomCommands>
-    <DefineConstants>TR_DDS</DefineConstants>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -53,7 +52,7 @@
     <Compile Include="TRScenario.cs" />
     <Compile Include="UI.cs" />
     <Compile Include="Util.cs" />
-    <None Include="Visor-source.shader" />
+    <None Include="Visor.shader" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System">
@@ -65,5 +64,8 @@
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Visor-compiled.shader" />
   </ItemGroup>
 </Project>

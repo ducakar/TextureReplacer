@@ -76,8 +76,35 @@ namespace TextureReplacer
       public Texture2D evaJetpack;
       public Texture2D evaJetpackNRM;
 
+      Texture2D[] levelSuits;
+      Texture2D[] levelHelmets;
+      Texture2D[] levelEvaSuits;
+      Texture2D[] levelEvaHelmets;
+
+      public Texture2D getSuit(int level)
+      {
+        return level != 0 && levelSuits != null ? levelSuits[level - 1] : suit;
+      }
+
+      public Texture2D getHelmet(int level)
+      {
+        return level != 0 && levelHelmets != null ? levelHelmets[level - 1] : helmet;
+      }
+
+      public Texture2D getEvaSuit(int level)
+      {
+        return level != 0 && levelEvaSuits != null ? levelEvaSuits[level - 1] : evaSuit;
+      }
+
+      public Texture2D getEvaHelmet(int level)
+      {
+        return level != 0 && levelEvaHelmets != null ? levelEvaHelmets[level - 1] : evaHelmet;
+      }
+
       public bool setTexture(string originalName, Texture2D texture)
       {
+        int level;
+
         switch (originalName)
         {
           case "kerbalMain":
@@ -115,6 +142,50 @@ namespace TextureReplacer
             return true;
           case "EVAjetpackNRM":
             evaJetpackNRM = evaJetpackNRM ?? texture;
+            return true;
+          case "kerbalMainGrey1":
+          case "kerbalMainGrey2":
+          case "kerbalMainGrey3":
+          case "kerbalMainGrey4":
+          case "kerbalMainGrey5":
+            if (levelSuits == null)
+              levelSuits = new Texture2D[5];
+
+            level = originalName.Last() - 0x30;
+            levelSuits[level - 1] = levelSuits[level - 1] ?? texture;
+            return true;
+          case "kerbalHelmetGrey1":
+          case "kerbalHelmetGrey2":
+          case "kerbalHelmetGrey3":
+          case "kerbalHelmetGrey4":
+          case "kerbalHelmetGrey5":
+            if (levelHelmets == null)
+              levelHelmets = new Texture2D[5];
+
+            level = originalName.Last() - 0x30;
+            levelHelmets[level - 1] = levelHelmets[level - 1] ?? texture;
+            return true;
+          case "EVAtexture1":
+          case "EVAtexture2":
+          case "EVAtexture3":
+          case "EVAtexture4":
+          case "EVAtexture5":
+            if (levelEvaSuits == null)
+              levelEvaSuits = new Texture2D[5];
+
+            level = originalName.Last() - 0x30;
+            levelEvaSuits[level - 1] = levelEvaSuits[level - 1] ?? texture;
+            return true;
+          case "EVAhelmet1":
+          case "EVAhelmet2":
+          case "EVAhelmet3":
+          case "EVAhelmet4":
+          case "EVAhelmet5":
+            if (levelEvaHelmets == null)
+              levelEvaHelmets = new Texture2D[5];
+
+            level = originalName.Last() - 0x30;
+            levelEvaHelmets[level - 1] = levelEvaHelmets[level - 1] ?? texture;
             return true;
           default:
             return false;
@@ -194,7 +265,7 @@ namespace TextureReplacer
     {
       Suit suit = null;
 
-      if (suitAssignment == SuitAssignment.CLASS)
+      if (suitAssignment == SuitAssignment.CLASS && kerbal.type == ProtoCrewMember.KerbalType.Crew)
         classSuits.TryGetValue(kerbal.experienceTrait.Config.Name, out suit);
 
       return suit;
@@ -263,6 +334,7 @@ namespace TextureReplacer
     {
       KerbalData kerbalData = getKerbalData(kerbal.name);
       bool isEva = cabin == null;
+      int level = suitAssignment == SuitAssignment.CLASS ? kerbal.experienceLevel : 0;
 
       Head head = getKerbalHead(kerbalData);
       Suit suit = null;
@@ -322,7 +394,7 @@ namespace TextureReplacer
 
               if (suit != null)
               {
-                newTexture = isEvaSuit ? suit.evaSuit : suit.suit;
+                newTexture = isEvaSuit ? suit.getEvaSuit(level) : suit.getSuit(level);
                 newNormalMap = isEvaSuit ? suit.evaSuitNRM : suit.suitNRM;
               }
 
@@ -355,7 +427,7 @@ namespace TextureReplacer
 
               if (needsSuit && suit != null)
               {
-                newTexture = isEva ? suit.evaHelmet : suit.helmet;
+                newTexture = isEva ? suit.getEvaHelmet(level) : suit.getHelmet(level);
                 newNormalMap = suit.helmetNRM;
               }
               break;
