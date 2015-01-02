@@ -307,6 +307,9 @@ Change Log
     - added real reflections, generated from environment in real time
     - added level-specific textures for suits
     - added new GUI option to switch between reflection types
+    - added compatibility for Reflection Plugin
+      * TRReflection now recognises some Reflection Plugin parameters
+      * MM patch in `Extras/MM_ReflectionPluginWrapper.cfg`
     - erased default `EnvMap/*` textures, they should come bundled with skyboxes
     - embedded visor shader into DLL
     - reverted default value for `colour` in TRReflection to "0.5 0.5 0.5"

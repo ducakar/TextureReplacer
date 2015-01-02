@@ -29,13 +29,18 @@ namespace TextureReplacer
   {
     Reflections.Script script = null;
 
-    // Configuration file parameters.
     [KSPField(isPersistant = false)]
     public string shader = "";
     [KSPField(isPersistant = false)]
     public string colour = "";
     [KSPField(isPersistant = false)]
     public string meshes = "";
+
+    // ReflectionPlugin parameters.
+    [KSPField(isPersistant = false)]
+    public string ReflectionColor = "";
+    [KSPField(isPersistant = false)]
+    public string MeshesToChange = "all";
 
     public override void OnStart(StartState state)
     {
@@ -46,10 +51,15 @@ namespace TextureReplacer
       if (reflections.reflectionType == Reflections.Type.REAL)
         script = new Reflections.Script(part);
 
+      Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
+
       Color reflectionColour = new Color(0.5f, 0.5f, 0.5f);
+      Util.parse(ReflectionColor, ref reflectionColour);
       Util.parse(colour, ref reflectionColour);
 
       string[] meshNames = Util.splitConfigValue(meshes);
+      if (MeshesToChange != "all")
+        meshNames.AddUniqueRange(Util.splitConfigValue(MeshesToChange));
 
       if (reflections.logReflectiveMeshes)
         Util.log("Part \"{0}\"", part.name);
@@ -65,8 +75,6 @@ namespace TextureReplacer
 
         if (reflections.logReflectiveMeshes)
           Util.log("+ {0} [{1}]", meshFilter.name, material.shader.name);
-
-        Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
 
         if (meshNames.Length == 0 || meshNames.Contains(meshFilter.name))
         {

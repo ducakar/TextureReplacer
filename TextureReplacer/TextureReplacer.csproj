@@ -33,10 +33,11 @@
       <CustomCommands>
         <Command type="AfterBuild" command="cp ${TargetFile} GameData/TextureReplacer/Plugins" workingdir="${SolutionDir}" />
         <Command type="AfterBuild" command="cp README.md GameData/TextureReplacer" workingdir="${SolutionDir}" />
-        <Command type="AfterBuild" command="cp ${TargetFile} &quot;/run/media/davorin/Windows 7/KSP-test/GameData/TextureReplacer/Plugins&quot;" workingdir="${ProjectDir}" />
+        <Command type="AfterBuild" command="cp ${TargetFile} &quot;/run/media/davorin/Windows 7/KSP-test/GameData/TextureReplacer/Plugins&quot;" workingdir="${SolutionDir}" />
         <Command type="Execute" command="wine &quot;../../../../../../run/media/davorin/Windows 7/KSP-test/KSP.exe&quot; -nolog" workingdir="${SolutionDir}" />
       </CustomCommands>
     </CustomCommands>
+    <DefineConstants>TR_DDS</DefineConstants>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
