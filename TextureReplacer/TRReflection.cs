@@ -20,6 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -57,7 +58,7 @@ namespace TextureReplacer
       Util.parse(ReflectionColor, ref reflectionColour);
       Util.parse(colour, ref reflectionColour);
 
-      string[] meshNames = Util.splitConfigValue(meshes);
+      List<string> meshNames = Util.splitConfigValue(meshes).ToList();
       if (MeshesToChange != "all")
         meshNames.AddUniqueRange(Util.splitConfigValue(MeshesToChange));
 
@@ -76,7 +77,7 @@ namespace TextureReplacer
         if (reflections.logReflectiveMeshes)
           Util.log("+ {0} [{1}]", meshFilter.name, material.shader.name);
 
-        if (meshNames.Length == 0 || meshNames.Contains(meshFilter.name))
+        if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name))
         {
           success |= script == null ?
                      reflections.applyStatic(material, reflectiveShader, reflectionColour) :
@@ -95,12 +96,6 @@ namespace TextureReplacer
         Util.log("Failed to replace any shader on \"{0}\" with its reflective counterpart",
                  part.name);
       }
-    }
-
-    public void Update()
-    {
-      if (script != null)
-        script.update();
     }
 
     public void OnDestroy()

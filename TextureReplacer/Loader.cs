@@ -31,15 +31,16 @@ namespace TextureReplacer
 {
   class Loader
   {
-    // NavBall textures.
-    static readonly string HUD_NAVBALL = Replacer.DIR_TEXTURES + Replacer.HUD_NAVBALL;
-    static readonly string IVA_NAVBALL = Replacer.DIR_TEXTURES + Replacer.IVA_NAVBALL;
     // Texture compression and mipmap generation parameters.
     int lastTextureCount = 0;
     // List of substrings for paths where mipmap generating is enabled.
     readonly List<Regex> generateMipmaps = new List<Regex> { new Regex("^" + Util.DIR) };
     // List of substrings for paths where textures shouldn't be unloaded.
-    readonly List<Regex> keepLoaded = new List<Regex> { new Regex("^" + Reflections.DIR_ENVMAP) };
+    readonly List<Regex> keepLoaded = new List<Regex> {
+      new Regex("^" + Reflections.DIR_ENVMAP),
+      new Regex("^" + Replacer.DIR_TEXTURES + Replacer.HUD_NAVBALL),
+      new Regex("^" + Replacer.DIR_TEXTURES + Replacer.IVA_NAVBALL)
+    };
     // Features.
     bool? isCompressionEnabled = null;
     bool? isMipmapGenEnabled = null;
@@ -220,9 +221,7 @@ namespace TextureReplacer
         // blurriness when using less-than-full texture quality.
         if (isMipmapGenEnabled.Value && texture.mipmapCount == 1
             && (texture.width > 1 || texture.height > 1)
-            && generateMipmaps.Any(r => r.IsMatch(texture.name))
-            && texture.name != HUD_NAVBALL
-            && texture.name != IVA_NAVBALL)
+            && generateMipmaps.Any(r => r.IsMatch(texture.name)))
         {
           Color32[] pixels32 = texture.GetPixels32();
 

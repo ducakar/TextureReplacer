@@ -9,8 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		GameData\TextureReplacer\TextureReplacer.version = GameData\TextureReplacer\TextureReplacer.version
 		GameData\TextureReplacer\%40Default.cfg = GameData\TextureReplacer\%40Default.cfg
 		GameData\TextureReplacer\ATM.cfg = GameData\TextureReplacer\ATM.cfg
-		GameData\TextureReplacer\Diverse.cfg = GameData\TextureReplacer\Diverse.cfg
-		Extras\MM_Reflections.cfg = Extras\MM_Reflections.cfg
+		Extras\DiverseKerbalHeads.cfg = Extras\DiverseKerbalHeads.cfg
+		Extras\MM_ReflectionPluginWrapper.cfg = Extras\MM_ReflectionPluginWrapper.cfg
 	EndProjectSection
 EndProject
 Global

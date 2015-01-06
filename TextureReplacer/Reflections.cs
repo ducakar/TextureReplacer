@@ -39,40 +39,20 @@ namespace TextureReplacer
 
     public class Script
     {
+      // List of all created reflection scripts.
+      static readonly List<Script> scripts = new List<Script>();
+      static int currentScript = 0;
+
       readonly RenderTexture envMap;
       readonly Transform transform;
       readonly bool isEva;
-      readonly int frameCountBias = Util.random.Next(instance.reflectionInterval);
       int currentFace = Util.random.Next(6);
-
-      void updateFaces(int faceMask)
-      {
-        Transform spaceTransf = ScaledSpace.Instance.transform;
-        Vector3 spacePos = spaceTransf.position;
-        Vector3 cameraPos = transform.position;
-
-        if (isEva)
-          cameraPos += transform.up * 0.4f;
-
-        // It seems ScaledSpace has to be always rendered from the origin of its coordinate system.
-        spaceTransf.position = cameraPos;
-        // Hide model. That's an ugly hack; some meshes may end up in a wrong layer after this.
-        transform.SetLayerRecursive(31);
-
-        instance.camera.transform.position = cameraPos;
-        instance.camera.RenderToCubemap(envMap, faceMask);
-
-        transform.SetLayerRecursive(0);
-        spaceTransf.position = spacePos;
-      }
 
       public Script(Part part)
       {
-        instance.ensureCamera();
+        ensureCamera();
 
-        envMap = new RenderTexture(instance.reflectionResolution,
-                                   instance.reflectionResolution,
-                                   24);
+        envMap = new RenderTexture(reflectionResolution, reflectionResolution, 24);
         envMap.hideFlags = HideFlags.HideAndDontSave;
         envMap.wrapMode = TextureWrapMode.Clamp;
         envMap.isCubemap = true;
@@ -81,9 +61,25 @@ namespace TextureReplacer
         isEva = part.GetComponent<KerbalEVA>() != null;
 
         if (isEva)
+        {
           transform = transform.Find("model01");
 
-        updateFaces(0x3f);
+          SkinnedMeshRenderer visor = part.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+            .FirstOrDefault(m => m.name == "visor");
+
+          if (visor != null)
+          {
+            Material material = visor.material;
+
+            material.shader = instance.visorShader;
+            material.SetTexture(Util.CUBE_PROPERTY, envMap);
+            material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
+          }
+        }
+
+        update(true);
+
+        scripts.Add(this);
       }
 
       public bool apply(Material material, Shader shader, Color reflectionColour)
@@ -100,28 +96,44 @@ namespace TextureReplacer
         return false;
       }
 
-      public void applyVisor(Material material)
-      {
-        material.shader = instance.visorShader;
-        material.SetTexture(Util.CUBE_PROPERTY, envMap);
-        material.SetColor(Util.REFLECT_COLOR_PROPERTY, instance.visorReflectionColour);
-      }
-
       public void destroy()
       {
+        scripts.Remove(this);
+
         Object.DestroyImmediate(envMap);
       }
 
-      public void update(bool force = false)
+      public void update(bool force)
       {
-        if (force)
+        int faceMask = force ? 0x3f : 1 << currentFace;
+
+        Transform spaceTransf = ScaledSpace.Instance.transform;
+        Vector3 spacePos = spaceTransf.position;
+        Vector3 cameraPos = transform.position;
+
+        if (isEva)
+          cameraPos += transform.up * 0.4f;
+
+        // It seems ScaledSpace has to be always rendered from the origin of its coordinate system.
+        spaceTransf.position = cameraPos;
+        // Hide model. That's an ugly hack; some meshes may end up in a wrong layer after this.
+        transform.SetLayerRecursive(31);
+
+        camera.transform.position = cameraPos;
+        camera.RenderToCubemap(envMap, faceMask);
+
+        transform.SetLayerRecursive(0);
+        spaceTransf.position = spacePos;
+
+        currentFace = (currentFace + 1) % 6;
+      }
+
+      public static void updateScripts(bool force = false)
+      {
+        if (scripts.Count != 0 && (force || Time.frameCount % reflectionInterval == 0))
         {
-          updateFaces(0x3f);
-        }
-        else if ((Time.frameCount + frameCountBias) % instance.reflectionInterval == 0)
-        {
-          updateFaces(1 << currentFace);
-          currentFace = (currentFace + 1) % 6;
+          currentScript = (currentScript + 1) % scripts.Count;
+          scripts[currentScript].update(force);
         }
       }
     }
@@ -146,19 +158,19 @@ namespace TextureReplacer
     // Reflective shader material.
     Material shaderMaterial = null;
     // Reflection camera.
-    Camera camera = null;
+    static Camera camera = null;
     // Environment map textures.
     Cubemap staticEnvMap = null;
     // Reflection type.
     public Type reflectionType = Type.REAL;
     // Real reflection resolution.
-    int reflectionResolution = 64;
+    static int reflectionResolution = 128;
     // Interval in frames for updating environment map faces.
-    int reflectionInterval = 1;
+    static int reflectionInterval = 2;
     // Visor reflection feature.
-    bool isVisorReflectionEnabled = true;
+    static bool isVisorReflectionEnabled = true;
     // Reflection colour.
-    Color visorReflectionColour = new Color(0.5f, 0.5f, 0.5f);
+    static Color visorReflectionColour = new Color(0.5f, 0.5f, 0.5f);
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool logReflectiveMeshes = false;
     // Reflective shader.
@@ -166,7 +178,7 @@ namespace TextureReplacer
     // Instance.
     public static Reflections instance = null;
 
-    void ensureCamera()
+    static void ensureCamera()
     {
       if (camera == null)
       {

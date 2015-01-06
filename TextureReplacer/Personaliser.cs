@@ -240,13 +240,6 @@ namespace TextureReplacer
     // Instance.
     public static Personaliser instance = null;
 
-    static bool isRegularVessel(Vessel vessel)
-    {
-      bool value = vessel != null && vessel.parts.Count != 0
-                   && vessel.rootPart.GetComponent<KerbalEVA>() == null;
-      return value;
-    }
-
     static bool isSituationSafe(Vessel vessel)
     {
       bool value = vessel.situation != Vessel.Situations.FLYING
@@ -468,38 +461,29 @@ namespace TextureReplacer
     }
 
     /**
-     * Personalise Kerbals in internal spaces.
+     * Personalise Kerbals in internal spaces of a vessel.
      */
-    void personaliseIVAs()
+    void personaliseIVA(Vessel vessel)
     {
-      // IVA textures must be replaced with a little lag, otherwise we risk race conditions with KSP
-      // handler that resets IVA suits to the stock ones. The race condition issue always occurs
-      // when boarding an external seat.
-      foreach (Vessel vessel in ivaVessels)
+      foreach (Part part in vessel.parts.Where(p => p.internalModel != null))
       {
-        if (vessel != null && vessel.loaded && vessel.vesselName != null)
+        Kerbal[] kerbals = part.internalModel.GetComponentsInChildren<Kerbal>();
+        if (kerbals.Length != 0)
         {
-          foreach (Part part in vessel.parts)
-          {
-            if (part.internalModel != null)
-            {
-              Kerbal[] kerbals = part.internalModel.GetComponentsInChildren<Kerbal>();
-              if (kerbals.Length != 0)
-              {
-                bool needsSuit = !isHelmetRemovalEnabled || !isSituationSafe(vessel);
+          bool needsSuit = !isHelmetRemovalEnabled || !isSituationSafe(vessel);
 
-                foreach (Kerbal kerbal in kerbals)
-                  personaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, needsSuit);
-              }
-            }
-          }
+          foreach (Kerbal kerbal in kerbals)
+            personaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, needsSuit);
         }
       }
+    }
 
-      ivaVessels.Clear();
-      // Prevent capacity from growing too much.
-      if (ivaVessels.Capacity > 16)
-        ivaVessels.TrimExcess();
+    /**
+     * Update IVA textures when a new vessel is loaded (required for transparent pods).
+     */
+    void scheduleLoadUpdate(Vessel vessel)
+    {
+      ivaVessels.Add(vessel);
     }
 
     /**
@@ -508,11 +492,10 @@ namespace TextureReplacer
      */
     void scheduleSwitchUpdate(Vessel vessel)
     {
-      if (previousVessel != vessel && isRegularVessel(previousVessel))
-        ivaVessels.AddUnique(previousVessel);
+      if (previousVessel != null)
+        ivaVessels.Add(previousVessel);
 
-      if (isRegularVessel(vessel))
-        ivaVessels.AddUnique(vessel);
+      ivaVessels.AddUnique(vessel);
 
       previousVessel = vessel;
     }
@@ -522,17 +505,15 @@ namespace TextureReplacer
      */
     void scheduleTransferUpdate(GameEvents.HostedFromToAction<ProtoCrewMember, Part> action)
     {
-      scheduleSwitchUpdate(action.to.vessel);
+      ivaVessels.Add(action.to.vessel);
     }
 
     /**
-     * Update IVA textures when a new vessel is created or when it comes into 2.3 km range (for
-     * transparent pods).
+     * Update IVA on docking.
      */
-    void scheduleSpawnUpdate(Vessel vessel)
+    void scheduleDockingUpdate(GameEvents.FromToAction<Part, Part> action)
     {
-      if (isRegularVessel(vessel))
-        ivaVessels.AddUnique(vessel);
+      ivaVessels.Add(action.to.vessel);
     }
 
     /**
@@ -544,29 +525,26 @@ namespace TextureReplacer
       if (!isHelmetRemovalEnabled || vessel == null)
         return;
 
-      foreach (Part part in vessel.parts)
+      foreach (Part part in vessel.parts.Where(p => p.internalModel != null))
       {
-        if (part.internalModel != null)
+        Kerbal[] kerbals = part.internalModel.GetComponentsInChildren<Kerbal>();
+        if (kerbals.Length != 0)
         {
-          Kerbal[] kerbals = part.internalModel.GetComponentsInChildren<Kerbal>();
-          if (kerbals.Length != 0)
-          {
-            bool hideHelmets = isSituationSafe(vessel);
+          bool hideHelmets = isSituationSafe(vessel);
 
-            foreach (Kerbal kerbal in kerbals)
+          foreach (Kerbal kerbal in kerbals)
+          {
+            if (kerbal.showHelmet)
             {
-              if (kerbal.showHelmet)
+              // `Kerbal.ShowHelmet(false)` irreversibly removes a helmet while
+              // `Kerbal.ShowHelmet(true)` has no effect at all. We need the following workaround.
+              foreach (SkinnedMeshRenderer smr
+                       in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
               {
-                // `Kerbal.ShowHelmet(false)` irreversibly removes a helmet while
-                // `Kerbal.ShowHelmet(true)` has no effect at all. We need the following workaround.
-                foreach (SkinnedMeshRenderer smr
-                         in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
-                {
-                  if (smr.name == "helmet")
-                    smr.sharedMesh = hideHelmets ? null : helmetMesh;
-                  else if (smr.name == "visor")
-                    smr.sharedMesh = hideHelmets ? null : visorMesh;
-                }
+                if (smr.name == "helmet")
+                  smr.sharedMesh = hideHelmets ? null : helmetMesh;
+                else if (smr.name == "visor")
+                  smr.sharedMesh = hideHelmets ? null : visorMesh;
               }
             }
           }
@@ -900,21 +878,19 @@ namespace TextureReplacer
 
       if (HighLogic.LoadedSceneIsFlight)
       {
-        GameEvents.onVesselChange.Add(scheduleSwitchUpdate);
-        GameEvents.onVesselWasModified.Add(scheduleSwitchUpdate);
-        GameEvents.onCrewTransferred.Add(scheduleTransferUpdate);
-        GameEvents.onVesselCreate.Add(scheduleSpawnUpdate);
-        GameEvents.onVesselLoaded.Add(scheduleSpawnUpdate);
         GameEvents.onVesselSituationChange.Add(updateHelmets);
+        GameEvents.onVesselLoaded.Add(scheduleLoadUpdate);
+        GameEvents.onVesselChange.Add(scheduleSwitchUpdate);
+        GameEvents.onCrewTransferred.Add(scheduleTransferUpdate);
+        GameEvents.onPartCouple.Add(scheduleDockingUpdate);
       }
       else
       {
-        GameEvents.onVesselChange.Remove(scheduleSwitchUpdate);
-        GameEvents.onVesselWasModified.Remove(scheduleSwitchUpdate);
-        GameEvents.onCrewTransferred.Remove(scheduleTransferUpdate);
-        GameEvents.onVesselCreate.Remove(scheduleSpawnUpdate);
-        GameEvents.onVesselLoaded.Remove(scheduleSpawnUpdate);
         GameEvents.onVesselSituationChange.Remove(updateHelmets);
+        GameEvents.onVesselLoaded.Remove(scheduleLoadUpdate);
+        GameEvents.onVesselChange.Remove(scheduleSwitchUpdate);
+        GameEvents.onCrewTransferred.Remove(scheduleTransferUpdate);
+        GameEvents.onPartCouple.Remove(scheduleDockingUpdate);
       }
 
       if (HighLogic.LoadedScene == GameScenes.MAINMENU)
@@ -923,11 +899,18 @@ namespace TextureReplacer
 
     public void updateScene()
     {
-      // IVA texture replacement pass. It is scheduled via event callbacks.
-      if (HighLogic.LoadedSceneIsFlight)
+      if (ivaVessels.Count != 0)
       {
-        if (ivaVessels.Count != 0)
-          personaliseIVAs();
+        foreach (var vessel in ivaVessels)
+        {
+          if (vessel != null && vessel.loaded)
+            personaliseIVA(vessel);
+        }
+
+        ivaVessels.Clear();
+        // Prevent the list from growing too much.
+        if (ivaVessels.Capacity > 16)
+          ivaVessels.TrimExcess();
       }
     }
 

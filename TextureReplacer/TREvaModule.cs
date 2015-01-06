@@ -59,18 +59,7 @@ namespace TextureReplacer
       Personaliser personaliser = Personaliser.instance;
 
       if (reflectionScript == null && Reflections.instance.reflectionType == Reflections.Type.REAL)
-      {
         reflectionScript = new Reflections.Script(part);
-
-        foreach (SkinnedMeshRenderer smr in part.GetComponentsInChildren<SkinnedMeshRenderer>(true))
-        {
-          if (smr.name == "visor")
-          {
-            reflectionScript.applyVisor(smr.material);
-            break;
-          }
-        }
-      }
 
       if (!isInitialised)
       {
@@ -86,18 +75,10 @@ namespace TextureReplacer
     {
       Personaliser personaliser = Personaliser.instance;
 
-      if (hasEvaSuit)
-      {
-        if (reflectionScript != null)
-          reflectionScript.update();
-      }
-      else if (!personaliser.isAtmBreathable())
+      if (!hasEvaSuit && !personaliser.isAtmBreathable())
       {
         personaliser.personalise(part, true);
         hasEvaSuit = true;
-
-        if (reflectionScript != null)
-          reflectionScript.update(true);
       }
     }
 

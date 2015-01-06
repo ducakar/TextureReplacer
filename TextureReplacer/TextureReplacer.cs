@@ -21,6 +21,7 @@
  */
 
 using System;
+using System.Reflection;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -35,6 +36,8 @@ namespace TextureReplacer
 
     public void Start()
     {
+      Util.log("Started {0}", Assembly.GetExecutingAssembly().GetName().Version);
+
       try
       {
         if (instance != null)
@@ -51,8 +54,6 @@ namespace TextureReplacer
 
         foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
         {
-          Util.log("Reading configuration: {0}", file.url);
-
           UI.instance.readConfig(file.config);
           Loader.instance.readConfig(file.config);
           Replacer.instance.readConfig(file.config);
@@ -105,6 +106,9 @@ namespace TextureReplacer
 
           Replacer.instance.updateScene();
           Personaliser.instance.updateScene();
+
+          if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
+            Reflections.Script.updateScripts();
         }
       }
       catch (Exception e)
