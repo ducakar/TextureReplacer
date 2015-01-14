@@ -34,7 +34,7 @@
         <Command type="AfterBuild" command="cp ${TargetFile} GameData/TextureReplacer/Plugins" workingdir="${SolutionDir}" />
         <Command type="AfterBuild" command="cp README.md GameData/TextureReplacer" workingdir="${SolutionDir}" />
         <Command type="AfterBuild" command="cp ${TargetFile} &quot;/run/media/davorin/Windows 7/KSP-test/GameData/TextureReplacer/Plugins&quot;" workingdir="${SolutionDir}" />
-        <Command type="Execute" command="wine &quot;../../../../../../run/media/davorin/Windows 7/KSP-test/KSP.exe&quot; -nolog" workingdir="${SolutionDir}" />
+        <Command type="Execute" command="wine &quot;../../../../../../run/media/davorin/Windows 7/KSP-test/KSP.exe&quot;" workingdir="${SolutionDir}" />
       </CustomCommands>
     </CustomCommands>
     <DefineConstants>TR_DDS</DefineConstants>
@@ -60,10 +60,10 @@
       <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\System.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

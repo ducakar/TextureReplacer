@@ -20,8 +20,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using UnityEngine;
-
 namespace TextureReplacer
 {
   public class TREvaModule : PartModule
@@ -43,12 +41,11 @@ namespace TextureReplacer
       {
         hasEvaSuit = !hasEvaSuit;
 
-        if (hasEvaSuit && reflectionScript != null)
-          reflectionScript.update(true);
+        if (reflectionScript != null)
+          reflectionScript.setActive(hasEvaSuit);
       }
       else
       {
-        hasEvaSuit = true;
         ScreenMessages.PostScreenMessage("No breathable atmosphere", 5.0f,
                                          ScreenMessageStyle.UPPER_CENTER);
       }
@@ -58,9 +55,6 @@ namespace TextureReplacer
     {
       Personaliser personaliser = Personaliser.instance;
 
-      if (reflectionScript == null && Reflections.instance.reflectionType == Reflections.Type.REAL)
-        reflectionScript = new Reflections.Script(part);
-
       if (!isInitialised)
       {
         hasEvaSuit = !personaliser.isAtmSuitEnabled;
@@ -69,6 +63,12 @@ namespace TextureReplacer
 
       if (!personaliser.personalise(part, hasEvaSuit))
         hasEvaSuit = true;
+
+      if (Reflections.instance.reflectionType == Reflections.Type.REAL)
+      {
+        reflectionScript = new Reflections.Script(part, 1);
+        reflectionScript.setActive(hasEvaSuit);
+      }
     }
 
     public override void OnUpdate()
@@ -79,6 +79,9 @@ namespace TextureReplacer
       {
         personaliser.personalise(part, true);
         hasEvaSuit = true;
+
+        if (reflectionScript != null)
+          reflectionScript.setActive(true);
       }
     }
 

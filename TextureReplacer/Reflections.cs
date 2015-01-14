@@ -46,12 +46,13 @@ namespace TextureReplacer
       readonly RenderTexture envMap;
       readonly Transform transform;
       readonly bool isEva;
-      int currentFace = Util.random.Next(6);
+      readonly int interval;
+      int counter;
+      int currentFace;
+      bool isActive = true;
 
-      public Script(Part part)
+      public Script(Part part, int updateInterval)
       {
-        ensureCamera();
-
         envMap = new RenderTexture(reflectionResolution, reflectionResolution, 24);
         envMap.hideFlags = HideFlags.HideAndDontSave;
         envMap.wrapMode = TextureWrapMode.Clamp;
@@ -77,6 +78,11 @@ namespace TextureReplacer
           }
         }
 
+        interval = updateInterval;
+        counter = Util.random.Next(updateInterval);
+        currentFace = Util.random.Next(6);
+
+        ensureCamera();
         update(true);
 
         scripts.Add(this);
@@ -103,7 +109,7 @@ namespace TextureReplacer
         Object.DestroyImmediate(envMap);
       }
 
-      public void update(bool force)
+      void update(bool force)
       {
         int faceMask = force ? 0x3f : 1 << currentFace;
 
@@ -114,7 +120,7 @@ namespace TextureReplacer
         if (isEva)
           cameraPos += transform.up * 0.4f;
 
-        // It seems ScaledSpace has to be always rendered from the origin of its coordinate system.
+        // It seems ScaledSpace must always be rendered from the origin of its coordinate system.
         spaceTransf.position = cameraPos;
         // Hide model. That's an ugly hack; some meshes may end up in a wrong layer after this.
         transform.SetLayerRecursive(31);
@@ -128,12 +134,35 @@ namespace TextureReplacer
         currentFace = (currentFace + 1) % 6;
       }
 
-      public static void updateScripts(bool force = false)
+      public void setActive(bool value)
       {
-        if (scripts.Count != 0 && (force || Time.frameCount % reflectionInterval == 0))
+        if (!isActive && value)
+          update(true);
+
+        isActive = value;
+      }
+
+      public static void updateScripts()
+      {
+        if (scripts.Count != 0 && Time.frameCount % reflectionInterval == 0)
         {
-          currentScript = (currentScript + 1) % scripts.Count;
-          scripts[currentScript].update(force);
+          int startScript = currentScript;
+          do
+          {
+            Script script = scripts[currentScript];
+            currentScript = (currentScript + 1) % scripts.Count;
+
+            if (script.isActive)
+            {
+              script.counter = (script.counter + 1) % script.interval;
+              if (script.counter == 0)
+              {
+                script.update(false);
+                break;
+              }
+            }
+          }
+          while(currentScript != startScript);
         }
       }
     }

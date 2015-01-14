@@ -20,6 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -35,6 +36,8 @@ namespace TextureReplacer
     [KSPField(isPersistant = false)]
     public string colour = "";
     [KSPField(isPersistant = false)]
+    public string interval = "";
+    [KSPField(isPersistant = false)]
     public string meshes = "";
 
     // ReflectionPlugin parameters.
@@ -47,20 +50,24 @@ namespace TextureReplacer
     {
       Reflections reflections = Reflections.instance;
 
-      if (reflections.reflectionType == Reflections.Type.NONE)
-        return;
-      if (reflections.reflectionType == Reflections.Type.REAL)
-        script = new Reflections.Script(part);
-
       Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
-
       Color reflectionColour = new Color(0.5f, 0.5f, 0.5f);
+      int updateInterval = 1;
+
       Util.parse(ReflectionColor, ref reflectionColour);
       Util.parse(colour, ref reflectionColour);
+      Util.parse(interval, ref updateInterval);
+
+      updateInterval = Math.Max(updateInterval, 1);
 
       List<string> meshNames = Util.splitConfigValue(meshes).ToList();
       if (MeshesToChange != "all")
         meshNames.AddUniqueRange(Util.splitConfigValue(MeshesToChange));
+
+      if (reflections.reflectionType == Reflections.Type.NONE)
+        return;
+      if (reflections.reflectionType == Reflections.Type.REAL)
+        script = new Reflections.Script(part, updateInterval);
 
       if (reflections.logReflectiveMeshes)
         Util.log("Part \"{0}\"", part.name);

@@ -153,6 +153,7 @@ reflections onto Mk1-2 pod windows:
       name = TRReflection
       shader = Reflective/Bumped Diffuse
       colour = 0.5 0.5 0.5
+      interval = 1
       meshes = FrontWindow SideWindow
     }
 
@@ -164,11 +165,26 @@ There are several parameters, all optional:
   the shader that suits you the best.
 * `colour`: Reflection is pre-multiplied by this RGB value before added to
   the material. "0.5 0.5 0.5" by default.
+* `interval`: Once in how many steps the reflection should be updated. "1"
+  means it is updated every time, "2" every second time etc. "1" by default.
 * `meshes`: If this parameter is empty or non-existent, reflection will be
   applied to all meshes of a part. Otherwise it specifies a space- and/or
   comma-sparated list of mesh names where to apply reflections. You may find
   `logReflectiveMeshes` configuration option very helpful as it prints names
   of all meshes for each part with `TRReflection` module into your log.
+
+Real reflection update step occurs once in `reflectionInterval` frames (2 by
+default, it can be changed in a configuration file). Only one face of one
+reflection is updated in each step. Since cube textures used for reflections
+have 6 faces,
+
+    numberOfReflectiveParts * 6 * reflectionInterval
+
+frames must pass for all parts' reflections to be fully updated. You can also
+specify individual `interval` property for reflective parts; if it is > 1 the
+reflection will not be updated each step. E.g. if `interval = 2` it will only
+be updated every second step and every other step it will be skipped, so the
+next reflective part in a row will be updated in that step.
 
 
 ### Personalised Kerbal Textures ###
