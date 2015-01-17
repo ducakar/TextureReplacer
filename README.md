@@ -3,7 +3,7 @@
 TextureReplacer
 ===============
 
-* [Forum page](http://forum.kerbalspaceprogram.com/threads/60961)
+* [Forum thread](http://forum.kerbalspaceprogram.com/threads/107471)
 * [GitHub page](http://github.com/ducakar/TextureReplacer)
 * [Kerbal Stuff page](https://kerbalstuff.com/mod/150/TextureReplacer)
 * [CurseForge page](http://kerbal.curseforge.com/plugins/220217-texturereplacer)
@@ -12,19 +12,15 @@ TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
 
 * replace stock textures with custom ones,
-* set personalised head and suit textures for selected Kerbals,
-* set persistent random head and suit textures for other Kerbals,
-* set suits based on Kerbals' classes,
-* set cockpit-specific IVA suits,
+* assign personalised head and suit textures for each Kerbal,
+* assign suits based on class and experience level,
 * remove IVA helmets in safe situations,
-* spawn Kerbals in IVA suit without helmet and jetpack in breathable atmosphere,
-* add normal map for head texture,
-* add helmet visor texture,
-* enable (fake) reflection on helmet visors and parts,
-* generate missing mipmaps for PNG and JPEG model textures (to fix a KSP bug),
-* compress uncompressed textures from `GameData/` and reduce RAM usage,
-* change bilinear texture filter to trilinear to improve mipmap quality and
-* unload textures from RAM after KSP finishes loading.
+* toggle between EVA suit and IVA suit without helmet in breathable atmosphere,
+* add reflections to parts and helmet visors,
+* generate missing mipmaps for PNG and JPEG model textures,
+* compress uncompressed textures from `GameData/` to shrink textures in VRAM,
+* unload textures from RAM after KSP finishes loading to reduce RAM usage and
+* change bilinear texture filter to trilinear to improve mipmap quality.
 
 Special thanks to:
 
@@ -32,15 +28,13 @@ Special thanks to:
   Management and Visual Enhancements where some code has been borrowed from,
 * Tingle for Universe Replacer; studying his code helped me a lot while
   developing this plugin,
-* taniwha for KerbalStats that is optionally used by this plugin for gender
+* taniwha for KerbalStats that was optionally used by this plugin for gender
   determination and role-based suit assignment,
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
   reflections,
-* sarbian for DDS loader where I learnt how to create an image loader for
-  GameDatabase,
 * therealcrow999 for testing and benchmarking this plugin,
 * Ippo343 for contributing KSP-AVC configuration,
-* Proot, Green Skull and others for making texture packs for this plugin and
+* Proot, Scart91, Green Skull and others for creating texture packs and
 * Sylith and Scart91 for giving others permissions to make derivatives of their
   texture packs.
 
@@ -161,39 +155,33 @@ There are several parameters, all optional:
 
 * `shader`: Most shaders should be automatically mapped to their reflective
   counterparts. In some cases, however, thare are no reflective version
-  of a shader (e.g. emission shaders) so you will have to manually specify
-  the shader that suits you the best.
+  of a shader, so you will have to manually specify appropriate shader.
 * `colour`: Reflection is pre-multiplied by this RGB value before added to
   the material. "0.5 0.5 0.5" by default.
-* `interval`: Once in how many steps the reflection should be updated. "1"
-  means it is updated every time, "2" every second time etc. "1" by default.
-* `meshes`: If this parameter is empty or non-existent, reflection will be
-  applied to all meshes of a part. Otherwise it specifies a space- and/or
-  comma-sparated list of mesh names where to apply reflections. You may find
-  `logReflectiveMeshes` configuration option very helpful as it prints names
-  of all meshes for each part with `TRReflection` module into your log.
+* `interval`: Once in how many steps the reflection is updated. "1" by default.
+* `meshes`: Space- and/or comma-sparated list of mesh names where to apply
+  reflections. Reflection is applied to whole part if this parameter is empty or
+  non-existent. You may find `logReflectiveMeshes` configuration option very
+  helpful as it prints names of all meshes for each part with `TRReflection`
+  module into your log.
 
-Real reflection update step occurs once in `reflectionInterval` frames (2 by
-default, it can be changed in a configuration file). Only one face of one
-reflection is updated in each step. Since cube textures used for reflections
-have 6 faces,
-
-    numberOfReflectiveParts * 6 * reflectionInterval
-
-frames must pass for all parts' reflections to be fully updated. You can also
-specify individual `interval` property for reflective parts; if it is > 1 the
-reflection will not be updated each step. E.g. if `interval = 2` it will only
-be updated every second step and every other step it will be skipped, so the
-next reflective part in a row will be updated in that step.
+Real reflection update occurs once in `reflectionInterval` frames (2 by default,
+it can be changed in a configuration file). Only one face of one reflection is
+updated in each step, so each reflections must be updated six times to be fully
+updated in all six directions. You can also specify individual `interval`
+property for reflective parts; if it is > 1 the reflection will not be updated
+each step. E.g. for `interval = 2` it will only be updated every second step and
+every other step it will be skipped, so the next reflective part in a row will
+be updated instead.
 
 
 ### Personalised Kerbal Textures ###
 
 Heads and suits are assigned either manually or automatically (configured in the
-GUI while configuration files only provide initial settings). Pseudo-random
-assignment is based on a Kerbal's name, which ensures the same head/suit is
-always assigned to a given Kerbal. Additionally it is also possible to assign
-suits consecutively, based on rooster index, or class.
+GUI while configuration files can provide initial settings). "Random" assignment
+of heads and suits is based on Kerbals' names, which ensures the same head/suit
+is always assigned to a given Kerbal. Additionally, suits can also be assigned
+consecutively (based on roster index) or based on class and experience level.
 
 Head textures reside inside `Heads/` directory (and its subdirectories) and have
 arbitrary names. Normal maps are optional. To provide a normal map, name it the
@@ -205,7 +193,7 @@ same as the head texture but add "NRM" suffix.
 
 Suit textures' names are identical as for the default texture replacement except
 that there is no `kerbalMain` texture (`kerbalMainGrey` replaces both) and class
-level versions of suit and helmet textures are possible. Each suit must reside
+level variants of suit and helmet textures are possible. Each suit must reside
 inside its own directory:
 
     GameData/TextureReplacer/
@@ -241,15 +229,12 @@ inside its own directory:
       Suits/[<subDir>/]<suit>/EVAjetpack         // EVA jetpack
       Suits/[<subDir>/]<suit>/EVAjetpackNRM      // EVA jetpack normal map
 
-The level textures (`kerbalMainGrey#`, `kerbalHelmetGrey#`, `EVAtexture#` and
-`EVAhelmet#`) are optional. If missing, level 0 texture will be used for all
-levels for that part of suit.
+The level textures are optional. If missing, level 0 texture will be used for
+all levels for that part of suit.
 
 For generic Kerbals, heads are selected independently form suits so any head can
 be paired with any of the suits and each head has an equal chance of being
 selected.
-
-See configuration file contents for how to configure head/suit assignment rules.
 
 ### Configuration File ###
 
@@ -257,33 +242,31 @@ NOTE: All options that can be configured in the GUI are saved per-game and not
 in the configuration files. Configuration files only provide initial settings
 for those options.
 
-Main configuration file:
+Main/default configuration file:
 
     GameData/TextureReplacer/@Default.cfg
 
 One can also use additional configuration files; configuration is merged from
-all `*.cfg` files that contain `TextureReplacer { ... }` as the root node. This
+all `*.cfg` files containing `TextureReplacer { ... }` as the root node. This
 should prove useful to developers of texture packs so they can distribute
 pack-specific head/suit assignment rules in a separate file. All `*.cfg` files
-(including `@Default.cfg`) are processed in alphabetical order (the reason
-behind the leading "@" in `@Default.cfg` is that it is processed first and can
-be overridden by subsequent custom configuration files).
+(including `@Default.cfg`) are processed in alphabetical order (the leading "@"
+in `@Default.cfg` ensures it is processed first and overridden by subsequent
+custom configuration files).
 
 ### Normal Maps ###
 
-Unity uses "grey" normal maps (RGBA = YYYX) to avoid artefacts when applying
+Unity uses "grey" normal maps (RGBA = YYYX) to minimise artefacts when applying
 DXT5 texture compression on them. When a normal map has a "NRM" suffix Unity
 converts it from RGB = XYZ ("blue") to RGBA = YYYX ("grey") normal map unless
 DDSLoader is used to load it.
 
-In short: you should supply "blue" normal maps when image has "NRM" suffix
-and is in PNG format (JPEGs and TGAs are not recommended for normal maps)
-and "grey" normal map when DDS format is used or the texture does not have
-"NRM" suffix.
+In short: you should supply "blue" normal maps when a texture has "NRM" suffix
+and is in PNG format (JPEGs and TGAs are not recommended for normal maps) and
+"grey" normal map for textures in DDS format or without "NRM" suffix.
 
-"Grey" normal maps can be created by saving the standard "blue" normal map
-as a DDS with DXT5nm compression or by manually shuffling its colour
-channels as RGBA -> GGGR.
+"Grey" normal maps can be created by saving the standard "blue" normal map as a
+DDS with DXT5nm compression or by manually shuffling its channels RGBA -> GGGR.
 
 
 Notes
@@ -308,9 +291,12 @@ Notes
   ones that cannot be replaced by this plugin.
 
 
-Known Bugs
-----------
+Known Issues
+------------
 
+* Clouds from EVE are not properly relfected, especially from the development
+  version.
+* Textures are sometimes not replaced for Kerbals in transparent pods.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
 * IVA visor texture is applied to EVA Kerbals if game database is reloaded while
   in the main menu.
@@ -328,6 +314,7 @@ Change Log
       * MM patch in `Extras/MM_ReflectionPluginWrapper.cfg`
     - erased default `EnvMap/*` textures, they should come bundled with skyboxes
     - embedded visor shader into DLL
+    - simplified and optimised code for IVA personalisations
     - reverted default value for `colour` in TRReflection to "0.5 0.5 0.5"
 * 2.1.2
     - GUI now shows generic heads and suits instead of just printing "Generic"

@@ -148,10 +148,8 @@ namespace TextureReplacer
           case "kerbalMainGrey3":
           case "kerbalMainGrey4":
           case "kerbalMainGrey5":
-            if (levelSuits == null)
-              levelSuits = new Texture2D[5];
-
             level = originalName.Last() - 0x30;
+            levelSuits = levelSuits ?? new Texture2D[5];
             levelSuits[level - 1] = levelSuits[level - 1] ?? texture;
             return true;
           case "kerbalHelmetGrey1":
@@ -159,10 +157,8 @@ namespace TextureReplacer
           case "kerbalHelmetGrey3":
           case "kerbalHelmetGrey4":
           case "kerbalHelmetGrey5":
-            if (levelHelmets == null)
-              levelHelmets = new Texture2D[5];
-
             level = originalName.Last() - 0x30;
+            levelHelmets = levelHelmets ?? new Texture2D[5];
             levelHelmets[level - 1] = levelHelmets[level - 1] ?? texture;
             return true;
           case "EVAtexture1":
@@ -170,10 +166,8 @@ namespace TextureReplacer
           case "EVAtexture3":
           case "EVAtexture4":
           case "EVAtexture5":
-            if (levelEvaSuits == null)
-              levelEvaSuits = new Texture2D[5];
-
             level = originalName.Last() - 0x30;
+            levelEvaSuits = levelEvaSuits ?? new Texture2D[5];
             levelEvaSuits[level - 1] = levelEvaSuits[level - 1] ?? texture;
             return true;
           case "EVAhelmet1":
@@ -181,10 +175,8 @@ namespace TextureReplacer
           case "EVAhelmet3":
           case "EVAhelmet4":
           case "EVAhelmet5":
-            if (levelEvaHelmets == null)
-              levelEvaHelmets = new Texture2D[5];
-
             level = originalName.Last() - 0x30;
+            levelEvaHelmets = levelEvaHelmets ?? new Texture2D[5];
             levelEvaHelmets[level - 1] = levelEvaHelmets[level - 1] ?? texture;
             return true;
           default:
@@ -495,6 +487,8 @@ namespace TextureReplacer
       if (previousVessel != null)
         ivaVessels.Add(previousVessel);
 
+      // AddUnique makes sence since a vessel may be created/loaded/docked and then switched to
+      // within the same frame.
       ivaVessels.AddUnique(vessel);
 
       previousVessel = vessel;
@@ -899,6 +893,7 @@ namespace TextureReplacer
 
     public void updateScene()
     {
+      // IVA texture replacement pass. It is scheduled via event callbacks.
       if (ivaVessels.Count != 0)
       {
         foreach (var vessel in ivaVessels)
