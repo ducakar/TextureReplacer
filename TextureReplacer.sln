@@ -27,7 +27,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = TextureReplacer\TextureReplacer.csproj
-		version = 2.2.0
+		version = 2.2.1
 	EndGlobalSection
 EndGlobal

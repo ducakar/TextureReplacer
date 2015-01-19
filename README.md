@@ -305,6 +305,8 @@ Known Issues
 Change Log
 ----------
 
+* 2.2.1
+    - updated default configuration for Kopernicus and Kittopia
 * 2.2
     - added real reflections, generated from environment in real time
     - added level-specific textures for suits
@@ -625,8 +627,6 @@ Change Log
 
 Licence
 -------
-
-Plugin code and binaries are distributed under the following licence:
 
 Copyright © 2013-2014 Davorin Učakar, Ryan Bray
 
