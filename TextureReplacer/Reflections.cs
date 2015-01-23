@@ -146,7 +146,7 @@ namespace TextureReplacer
       {
         if (scripts.Count != 0 && Time.frameCount % reflectionInterval == 0)
         {
-          int startScript = currentScript;
+          int startScript = currentScript % scripts.Count;
           do
           {
             Script script = scripts[currentScript];
