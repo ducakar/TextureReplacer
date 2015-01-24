@@ -305,6 +305,8 @@ Known Issues
 Change Log
 ----------
 
+* 2.2.3
+    - really fixed crash that may occur when a reflective part is removed
 * 2.2.2
     - fixed crash that may occur when a reflective part is removed
 * 2.2.1
