@@ -116,20 +116,33 @@ namespace TextureReplacer
         Transform spaceTransf = ScaledSpace.Instance.transform;
         Vector3 spacePos = spaceTransf.position;
         Vector3 cameraPos = transform.position;
+        Vector3 localScale = transform.localScale;
 
         if (isEva)
+        {
           cameraPos += transform.up * 0.4f;
+          // Hide Kerbal. That's an ugly hack; some meshes may end up in a wrong layer after this.
+          transform.SetLayerRecursive(31);
+        }
+        else
+        {
+          // Hide part. Applying this on a Kerbal makes ragdoll system go crazy and tear apart the
+          // poor Kerbal.
+          transform.localScale = Vector3.zero;
+        }
 
         // It seems ScaledSpace must always be rendered from the origin of its coordinate system.
         spaceTransf.position = cameraPos;
-        // Hide model. That's an ugly hack; some meshes may end up in a wrong layer after this.
-        transform.SetLayerRecursive(31);
 
         camera.transform.position = cameraPos;
         camera.RenderToCubemap(envMap, faceMask);
 
-        transform.SetLayerRecursive(0);
         spaceTransf.position = spacePos;
+
+        if (isEva)
+          transform.SetLayerRecursive(0);
+        else
+          transform.localScale = localScale;
 
         currentFace = (currentFace + 1) % 6;
       }

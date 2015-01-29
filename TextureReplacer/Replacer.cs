@@ -76,7 +76,7 @@ namespace TextureReplacer
             newTexture.wrapMode = texture.wrapMode;
 
             material.mainTexture = newTexture;
-            UnityEngine.Object.Destroy(texture);
+            UnityEngine.Object.DestroyImmediate(texture);
           }
         }
         // Trilinear filter have already been applied to replacement textures, here we apply it also
@@ -101,7 +101,7 @@ namespace TextureReplacer
             newNormalMap.wrapMode = normalMap.wrapMode;
 
             material.SetTexture(Util.BUMPMAP_PROPERTY, newNormalMap);
-            UnityEngine.Object.Destroy(normalMap);
+            UnityEngine.Object.DestroyImmediate(normalMap);
           }
         }
         else if (normalMap.filterMode == FilterMode.Bilinear)
@@ -255,6 +255,9 @@ namespace TextureReplacer
           replaceTextures(materials);
           lastMaterialCount = materials.Length;
         }
+
+        if (replaceTimer == 0.0f)
+          GC.Collect();
 
         replaceTimer = replaceTimer == 0.0f ? -1.0f : Math.Max(0.0f, replaceTimer - Time.deltaTime);
       }
