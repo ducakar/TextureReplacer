@@ -305,8 +305,11 @@ Known Issues
 Change Log
 ----------
 
+* 2.2.5
+    - reverted immediate texture unloading on general replacement
 * 2.2.4
     - fixed TRReflection making airlocks non-clickable
+    - made texture unloading immediate
 * 2.2.3
     - really fixed crash that may occur when a reflective part is removed
 * 2.2.2
