@@ -294,8 +294,7 @@ Notes
 Known Issues
 ------------
 
-* Clouds from EVE are not properly relfected, especially from the development
-  version.
+* Clouds from development version of EVE are not properly relfected.
 * Textures are sometimes not replaced for Kerbals in transparent pods.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
 * IVA visor texture is applied to EVA Kerbals if game database is reloaded while
@@ -305,11 +304,17 @@ Known Issues
 Change Log
 ----------
 
+* 2.2.6
+    - new and more robust method for hiding meshes during reflection generation
+    - fixed `isVisorReflectionEnabled` being ignored for real reflections
+    - fixed Direct3D issue with compressed textures smaller than 4x4
+* 2.2.6
+    - fixed cloud reflections from orbit for stable version of EVE
 * 2.2.5
-    - reverted immediate texture unloading on general replacement
+    - reverted immediate texture unloading
 * 2.2.4
     - fixed TRReflection making airlocks non-clickable
-    - made texture unloading immediate
+    - made texture unloading immediate during general replacement
 * 2.2.3
     - really fixed crash that may occur when a reflective part is removed
 * 2.2.2
@@ -637,7 +642,7 @@ Change Log
 Licence
 -------
 
-Copyright © 2013-2014 Davorin Učakar, Ryan Bray
+Copyright © 2013-2015 Davorin Učakar, Ryan Bray
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),

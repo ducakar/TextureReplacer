@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2014 Davorin Učakar
+ * Copyright © 2013-2015 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,12 +39,19 @@ namespace TextureReplacer
 
     public class Script
     {
+      struct TransformLayer
+      {
+        public GameObject gameObject;
+        public int layer;
+      }
+
       // List of all created reflection scripts.
       static readonly List<Script> scripts = new List<Script>();
       static int currentScript = 0;
 
       readonly RenderTexture envMap;
       readonly Transform transform;
+      readonly TransformLayer[] transformLayers;
       readonly bool isEva;
       readonly int interval;
       int counter;
@@ -59,6 +66,19 @@ namespace TextureReplacer
         envMap.isCubemap = true;
 
         transform = part.transform;
+
+        Transform[] transforms = part.GetComponentsInChildren<Transform>(true)
+          .Where(t => t.gameObject != null).ToArray();
+
+        transformLayers = new TransformLayer[transforms.Length];
+        for (int i = 0; i < transformLayers.Length; ++i)
+        {
+          GameObject gameObject = transforms[i].gameObject;
+
+          transformLayers[i].gameObject = gameObject;
+          transformLayers[i].layer = gameObject.layer;
+        }
+
         isEva = part.GetComponent<KerbalEVA>() != null;
 
         if (isEva)
@@ -116,19 +136,15 @@ namespace TextureReplacer
         Transform spaceTransf = ScaledSpace.Instance.transform;
         Vector3 spacePos = spaceTransf.position;
         Vector3 cameraPos = transform.position;
-        Vector3 localScale = transform.localScale;
 
         if (isEva)
-        {
           cameraPos += transform.up * 0.4f;
-          // Hide Kerbal. That's an ugly hack; some meshes may end up in a wrong layer after this.
-          transform.SetLayerRecursive(31);
-        }
-        else
+
+        // Hide meshes of the current part.
+        foreach (TransformLayer tl in transformLayers)
         {
-          // Hide part. Applying this on a Kerbal makes ragdoll system go crazy and tear apart the
-          // poor Kerbal.
-          transform.localScale = Vector3.zero;
+          if (tl.gameObject != null)
+            tl.gameObject.layer = 31;
         }
 
         // It seems ScaledSpace must always be rendered from the origin of its coordinate system.
@@ -139,10 +155,11 @@ namespace TextureReplacer
 
         spaceTransf.position = spacePos;
 
-        if (isEva)
-          transform.SetLayerRecursive(0);
-        else
-          transform.localScale = localScale;
+        foreach (TransformLayer tl in transformLayers)
+        {
+          if (tl.gameObject != null)
+            tl.gameObject.layer = tl.layer;
+        }
 
         currentFace = (currentFace + 1) % 6;
       }
@@ -194,7 +211,7 @@ namespace TextureReplacer
     };
     static readonly float[] CULL_DISTANCES = {
       100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f,
-      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 100000.0f,
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 160000.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
     };
@@ -211,10 +228,10 @@ namespace TextureReplacer
     static int reflectionResolution = 128;
     // Interval in frames for updating environment map faces.
     static int reflectionInterval = 2;
-    // Visor reflection feature.
-    static bool isVisorReflectionEnabled = true;
     // Reflection colour.
     static Color visorReflectionColour = new Color(0.5f, 0.5f, 0.5f);
+    // Visor reflection feature.
+    public bool isVisorReflectionEnabled = true;
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool logReflectiveMeshes = false;
     // Reflective shader.

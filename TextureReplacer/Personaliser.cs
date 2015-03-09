@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2014 Davorin Učakar
+ * Copyright © 2013-2015 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -280,8 +280,7 @@ namespace TextureReplacer
       if (kerbalData.head != null)
         return kerbalData.head;
 
-      List<Head> genderHeads = kerbalData.isFemale && kerminHeads.Count != 0 ? kerminHeads :
-                                                                               kerbalHeads;
+      List<Head> genderHeads = kerbalData.isFemale ? kerminHeads : kerbalHeads;
       if (genderHeads.Count == 0)
         return defaultHead;
 
@@ -297,8 +296,7 @@ namespace TextureReplacer
       if (suit != null)
         return suit;
 
-      List<Suit> genderSuits = kerbalData.isFemale && kerminSuits.Count != 0 ? kerminSuits :
-                                                                               kerbalSuits;
+      List<Suit> genderSuits = kerbalData.isFemale ? kerminSuits : kerbalSuits;
       if (genderSuits.Count == 0)
         return defaultSuit;
 

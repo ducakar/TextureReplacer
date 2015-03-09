@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2014 Davorin Učakar
+ * Copyright © 2013-2015 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -64,7 +64,8 @@ namespace TextureReplacer
       if (!personaliser.personalise(part, hasEvaSuit))
         hasEvaSuit = true;
 
-      if (Reflections.instance.reflectionType == Reflections.Type.REAL)
+      if (Reflections.instance.isVisorReflectionEnabled
+          && Reflections.instance.reflectionType == Reflections.Type.REAL)
       {
         reflectionScript = new Reflections.Script(part, 1);
         reflectionScript.setActive(hasEvaSuit);

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2014 Davorin Učakar
+ * Copyright © 2013-2015 Davorin Učakar
  * Copyright © 2013 Ryan Bray
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -240,7 +240,7 @@ namespace TextureReplacer
         }
 
         // Compress if necessary.
-        if (isCompressionEnabled.Value
+        if (isCompressionEnabled.Value && texture.width >= 4 && texture.height >= 4
             && texture.format != TextureFormat.DXT1 && texture.format != TextureFormat.DXT5)
         {
           texture.Compress(true);
