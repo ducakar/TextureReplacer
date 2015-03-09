@@ -37,7 +37,6 @@
         <Command type="Execute" command="wine &quot;../../../../../../run/media/davorin/Windows 7/KSP-test/KSP.exe&quot;" workingdir="${SolutionDir}" />
       </CustomCommands>
     </CustomCommands>
-    <DefineConstants>TR_DDS</DefineConstants>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
