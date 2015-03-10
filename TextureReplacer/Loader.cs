@@ -65,14 +65,6 @@ namespace TextureReplacer
      */
     public void readConfig(ConfigNode rootNode)
     {
-      #if TR_DDS
-      Util.parse(rootNode.GetValue("mipmapBias"), ref DDS.mipmapBias);
-      Util.parse(rootNode.GetValue("normalMipmapBias"), ref DDS.normalMipmapBias);
-
-      DDS.mipmapBias = Math.Max(DDS.mipmapBias, 0);
-      DDS.normalMipmapBias = Math.Max(DDS.normalMipmapBias, 0);
-      #endif
-
       string sIsCompressionEnabled = rootNode.GetValue("isCompressionEnabled");
       if (sIsCompressionEnabled != null)
       {
@@ -230,17 +222,29 @@ namespace TextureReplacer
           bool hasAlpha = format == TextureFormat.RGBA32 || format == TextureFormat.DXT5;
           bool isTransparent = hasAlpha && pixels32.Any(p => p.a != 255);
 
+          // Workaround for a Unity + D3D bug.
+          int quality = QualitySettings.masterTextureLimit;
+
+          if (isCompressionEnabled.Value && quality > 0
+              && (texture.width >> quality) % 4 != 0 && (texture.width >> quality) % 4 != 0)
+          {
+            QualitySettings.masterTextureLimit = 0;
+          }
+
           // Rebuild texture. This time with mipmaps.
           TextureFormat newFormat = isTransparent ? TextureFormat.RGBA32 : TextureFormat.RGB24;
           texture.Resize(texture.width, texture.height, newFormat, true);
           texture.SetPixels32(pixels32);
           texture.Apply(true, false);
 
+          if (quality != QualitySettings.masterTextureLimit)
+            QualitySettings.masterTextureLimit = quality;
+
           hasGenMipmaps = true;
         }
 
         // Compress if necessary.
-        if (isCompressionEnabled.Value && texture.width >= 4 && texture.height >= 4
+        if (isCompressionEnabled.Value
             && texture.format != TextureFormat.DXT1 && texture.format != TextureFormat.DXT5)
         {
           texture.Compress(true);

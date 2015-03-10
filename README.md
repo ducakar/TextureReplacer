@@ -307,7 +307,7 @@ Change Log
 * 2.2.6
     - new and more robust method for hiding meshes during reflection generation
     - fixed `isVisorReflectionEnabled` being ignored for real reflections
-    - fixed Direct3D issue with compressed textures smaller than 4x4
+    - fixed issue with non-multiple-of-4 texture dimensions (thanks to sarbian)
 * 2.2.6
     - fixed cloud reflections from orbit for stable version of EVE
 * 2.2.5
