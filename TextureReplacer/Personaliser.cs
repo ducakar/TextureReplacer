@@ -232,6 +232,10 @@ namespace TextureReplacer
     // Instance.
     public static Personaliser instance = null;
 
+    /**
+     * Whether a vessel is in a "safe" situation, so Kerbals don't need helmets (landed/splashed
+     * or in orbit).
+     */
     static bool isSituationSafe(Vessel vessel)
     {
       bool value = vessel.situation != Vessel.Situations.FLYING
@@ -239,6 +243,9 @@ namespace TextureReplacer
       return value;
     }
 
+    /**
+     * Whether atmosphere is breathable.
+     */
     public bool isAtmBreathable()
     {
       bool value = FlightGlobals.getStaticPressure() >= atmSuitPressure

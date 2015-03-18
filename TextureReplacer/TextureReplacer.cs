@@ -38,111 +38,83 @@ namespace TextureReplacer
     {
       Util.log("Started {0}", Assembly.GetExecutingAssembly().GetName().Version);
 
-      try
+      if (instance != null)
+        DestroyImmediate(instance);
+
+      DontDestroyOnLoad(this);
+      instance = this;
+
+      UI.instance = new UI();
+      Loader.instance = new Loader();
+      Replacer.instance = new Replacer();
+      Reflections.instance = new Reflections();
+      Personaliser.instance = new Personaliser();
+
+      foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
       {
-        if (instance != null)
-          DestroyImmediate(instance);
-
-        DontDestroyOnLoad(this);
-        instance = this;
-
-        UI.instance = new UI();
-        Loader.instance = new Loader();
-        Replacer.instance = new Replacer();
-        Reflections.instance = new Reflections();
-        Personaliser.instance = new Personaliser();
-
-        foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
-        {
-          UI.instance.readConfig(file.config);
-          Loader.instance.readConfig(file.config);
-          Replacer.instance.readConfig(file.config);
-          Reflections.instance.readConfig(file.config);
-          Personaliser.instance.readConfig(file.config);
-        }
-
-        Loader.instance.configure();
+        UI.instance.readConfig(file.config);
+        Loader.instance.readConfig(file.config);
+        Replacer.instance.readConfig(file.config);
+        Reflections.instance.readConfig(file.config);
+        Personaliser.instance.readConfig(file.config);
       }
-      catch (Exception e)
-      {
-        Util.log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
-      }
+
+      Loader.instance.configure();
     }
 
     public void LateUpdate()
     {
-      try
+      if (!isInitialised)
       {
-        if (!isInitialised)
+        // Compress textures, generate mipmaps, convert DXT5 -> DXT1 if necessary etc.
+        Loader.instance.processTextures();
+
+        if (GameDatabase.Instance.IsReady())
         {
-          // Compress textures, generate mipmaps, convert DXT5 -> DXT1 if necessary etc.
-          Loader.instance.processTextures();
+          UI.instance.initialise();
+          Loader.instance.initialise();
+          Replacer.instance.initialise();
+          Reflections.instance.initialise();
+          Personaliser.instance.initialise();
 
-          if (GameDatabase.Instance.IsReady())
-          {
-            UI.instance.initialise();
-            Loader.instance.initialise();
-            Replacer.instance.initialise();
-            Reflections.instance.initialise();
-            Personaliser.instance.initialise();
-
-            isInitialised = true;
-          }
-        }
-        else
-        {
-          // Schedule general texture replacement pass at the beginning of each scene. Textures are
-          // still loaded several frames after scene switch so this pass must be repeated multiple
-          // times. Especially problematic is the main menu that resets skybox texture twice, second
-          // time being several tens of frames after the load (depending on frame rate).
-          if (HighLogic.LoadedScene != lastScene)
-          {
-            lastScene = HighLogic.LoadedScene;
-
-            UI.instance.resetScene();
-            Replacer.instance.resetScene();
-            Personaliser.instance.resetScene();
-          }
-
-          Replacer.instance.updateScene();
-          Personaliser.instance.updateScene();
-
-          if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
-            Reflections.Script.updateScripts();
+          isInitialised = true;
         }
       }
-      catch (Exception e)
+      else
       {
-        Util.log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
+        // Schedule general texture replacement pass at the beginning of each scene. Textures are
+        // still loaded several frames after scene switch so this pass must be repeated multiple
+        // times. Especially problematic is the main menu that resets skybox texture twice, second
+        // time being several tens of frames after the load (depending on frame rate).
+        if (HighLogic.LoadedScene != lastScene)
+        {
+          lastScene = HighLogic.LoadedScene;
+
+          UI.instance.resetScene();
+          Replacer.instance.resetScene();
+          Personaliser.instance.resetScene();
+        }
+
+        Replacer.instance.updateScene();
+        Personaliser.instance.updateScene();
+
+        if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
+          Reflections.Script.updateScripts();
       }
     }
 
     public void OnGUI()
     {
-      try
-      {
-        if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-          UI.instance.draw();
-      }
-      catch (Exception e)
-      {
-        Util.log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
-      }
+      if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
+        UI.instance.draw();
     }
 
     public void OnDestroy()
     {
-      try
-      {
-        if (Reflections.instance != null)
-          Reflections.instance.destroy();
-        if (UI.instance != null)
-          UI.instance.destroy();
-      }
-      catch (Exception e)
-      {
-        Util.log("{0}: {1}\n{2}", e.GetType(), e.Message, e.StackTrace);
-      }
+      if (Reflections.instance != null)
+        Reflections.instance.destroy();
+      if (UI.instance != null)
+        UI.instance.destroy();
     }
   }
 }

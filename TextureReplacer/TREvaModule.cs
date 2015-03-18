@@ -32,7 +32,7 @@ namespace TextureReplacer
     [KSPField(isPersistant = true)]
     public bool hasEvaSuit = false;
 
-    [KSPEvent(guiActive = true, guiName = "Toggle EVA Suit", active = true)]
+    [KSPEvent(guiActive = true, guiName = "Toggle EVA Suit")]
     public void toggleEvaSuit()
     {
       Personaliser personaliser = Personaliser.instance;
@@ -72,7 +72,7 @@ namespace TextureReplacer
       }
     }
 
-    public override void OnUpdate()
+    public void Update()
     {
       Personaliser personaliser = Personaliser.instance;
 
