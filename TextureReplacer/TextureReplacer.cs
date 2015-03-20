@@ -20,7 +20,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
 using System.Reflection;
 using UnityEngine;
 
@@ -29,22 +28,22 @@ namespace TextureReplacer
   [KSPAddon(KSPAddon.Startup.Instantly, true)]
   public class TextureReplacer : MonoBehaviour
   {
-    GameScenes lastScene = GameScenes.LOADING;
-    bool isInitialised = false;
-    // Instance.
-    public static TextureReplacer instance = null;
+    // Status.
+    public static bool isInitialised = false;
+    public static bool isLoaded = false;
 
     public void Start()
     {
       Util.log("Started {0}", Assembly.GetExecutingAssembly().GetName().Version);
 
-      if (instance != null)
-        DestroyImmediate(instance);
-
       DontDestroyOnLoad(this);
-      instance = this;
 
-      UI.instance = new UI();
+      isInitialised = false;
+      isLoaded = false;
+
+      if (Reflections.instance != null)
+        Reflections.instance.destroy();
+
       Loader.instance = new Loader();
       Replacer.instance = new Replacer();
       Reflections.instance = new Reflections();
@@ -52,7 +51,6 @@ namespace TextureReplacer
 
       foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
       {
-        UI.instance.readConfig(file.config);
         Loader.instance.readConfig(file.config);
         Replacer.instance.readConfig(file.config);
         Reflections.instance.readConfig(file.config);
@@ -71,7 +69,6 @@ namespace TextureReplacer
 
         if (GameDatabase.Instance.IsReady())
         {
-          UI.instance.initialise();
           Loader.instance.initialise();
           Replacer.instance.initialise();
           Reflections.instance.initialise();
@@ -80,41 +77,19 @@ namespace TextureReplacer
           isInitialised = true;
         }
       }
+      else if (!isLoaded)
+      {
+        if (PartLoader.Instance.IsReady())
+        {
+          Personaliser.instance.load();
+
+          isLoaded = true;
+        }
+      }
       else
       {
-        // Schedule general texture replacement pass at the beginning of each scene. Textures are
-        // still loaded several frames after scene switch so this pass must be repeated multiple
-        // times. Especially problematic is the main menu that resets skybox texture twice, second
-        // time being several tens of frames after the load (depending on frame rate).
-        if (HighLogic.LoadedScene != lastScene)
-        {
-          lastScene = HighLogic.LoadedScene;
-
-          UI.instance.resetScene();
-          Replacer.instance.resetScene();
-          Personaliser.instance.resetScene();
-        }
-
-        Replacer.instance.updateScene();
-        Personaliser.instance.updateScene();
-
-        if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
-          Reflections.Script.updateScripts();
+        Destroy(this);
       }
-    }
-
-    public void OnGUI()
-    {
-      if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-        UI.instance.draw();
-    }
-
-    public void OnDestroy()
-    {
-      if (Reflections.instance != null)
-        Reflections.instance.destroy();
-      if (UI.instance != null)
-        UI.instance.destroy();
     }
   }
 }

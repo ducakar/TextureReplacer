@@ -185,6 +185,89 @@ namespace TextureReplacer
       }
     }
 
+    /**
+     * Component bound to internal models that triggers Kerbal texture personalisation when the
+     * internal model changes.
+     */
+    class IvaModule : MonoBehaviour
+    {
+      public void Start()
+      {
+        Personaliser.instance.personaliseIva(GetComponent<InternalModel>());
+      }
+    }
+
+    class EvaModule : PartModule
+    {
+      Reflections.Script reflectionScript = null;
+
+      [KSPField(isPersistant = true)]
+      bool isInitialised = false;
+
+      [KSPField(isPersistant = true)]
+      public bool hasEvaSuit = false;
+
+      [KSPEvent(guiActive = true, guiName = "Toggle EVA Suit")]
+      public void toggleEvaSuit()
+      {
+        Personaliser personaliser = Personaliser.instance;
+
+        if (personaliser.personaliseEva(part, !hasEvaSuit))
+        {
+          hasEvaSuit = !hasEvaSuit;
+
+          if (reflectionScript != null)
+            reflectionScript.setActive(hasEvaSuit);
+        }
+        else
+        {
+          ScreenMessages.PostScreenMessage("No breathable atmosphere", 5.0f,
+                                           ScreenMessageStyle.UPPER_CENTER);
+        }
+      }
+
+      public override void OnStart(StartState state)
+      {
+        Personaliser personaliser = Personaliser.instance;
+
+        if (!isInitialised)
+        {
+          hasEvaSuit = !personaliser.isAtmSuitEnabled;
+          isInitialised = true;
+        }
+
+        if (!personaliser.personaliseEva(part, hasEvaSuit))
+          hasEvaSuit = true;
+
+        if (Reflections.instance.isVisorReflectionEnabled
+            && Reflections.instance.reflectionType == Reflections.Type.REAL)
+        {
+          reflectionScript = new Reflections.Script(part, 1);
+          reflectionScript.setActive(hasEvaSuit);
+        }
+      }
+
+      public void Update()
+      {
+        Personaliser personaliser = Personaliser.instance;
+
+        if (!hasEvaSuit && !personaliser.isAtmBreathable())
+        {
+          personaliser.personaliseEva(part, true);
+          hasEvaSuit = true;
+
+          if (reflectionScript != null)
+            reflectionScript.setActive(true);
+        }
+      }
+
+      public void OnDestroy()
+      {
+        if (reflectionScript != null)
+          reflectionScript.destroy();
+      }
+    }
+
     static readonly string DIR_DEFAULT = Util.DIR + "Default/";
     static readonly string DIR_HEADS = Util.DIR + "Heads/";
     static readonly string DIR_SUITS = Util.DIR + "Suits/";
@@ -222,13 +305,6 @@ namespace TextureReplacer
     readonly HashSet<string> atmSuitBodies = new HashSet<string>();
     // Whether assignment of suits should be consecutive.
     public SuitAssignment suitAssignment = SuitAssignment.RANDOM;
-    // For transparent pods, previous vessel IVA has to be updated too on vessel switching since
-    // textures are reset to stock on switch.
-    Vessel previousVessel = null;
-    // List of vessels where IVA textures have to be updated. In stock game it suffices to only
-    // perform this on the current vessel but not so if one uses transparent pods (JSITransparentPod
-    // or sfr modules).
-    readonly List<Vessel> ivaVessels = new List<Vessel>();
     // Instance.
     public static Personaliser instance = null;
 
@@ -248,8 +324,9 @@ namespace TextureReplacer
      */
     public bool isAtmBreathable()
     {
-      bool value = FlightGlobals.getStaticPressure() >= atmSuitPressure
-                   && atmSuitBodies.Contains(FlightGlobals.currentMainBody.bodyName);
+      bool value = HighLogic.LoadedSceneIsFlight
+                   || (FlightGlobals.getStaticPressure() >= atmSuitPressure
+                   && atmSuitBodies.Contains(FlightGlobals.currentMainBody.bodyName));
       return value;
     }
 
@@ -458,66 +535,20 @@ namespace TextureReplacer
     }
 
     /**
-     * Personalise Kerbals in internal spaces of a vessel.
+     * Personalise Kerbals in an internal space of a vessel. Used by IvaModule.
      */
-    void personaliseIVA(Vessel vessel)
+    void personaliseIva(InternalModel internalModel)
     {
-      foreach (Part part in vessel.parts.Where(p => p.internalModel != null))
+      Kerbal[] kerbals = internalModel.GetComponentsInChildren<Kerbal>();
+      if (kerbals.Length != 0)
       {
-        Kerbal[] kerbals = part.internalModel.GetComponentsInChildren<Kerbal>();
-        if (kerbals.Length != 0)
-        {
-          bool needsSuit = !isHelmetRemovalEnabled || !isSituationSafe(vessel);
+        bool needsSuit = !isHelmetRemovalEnabled || !isSituationSafe(internalModel.vessel);
 
-          foreach (Kerbal kerbal in kerbals)
-            personaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, needsSuit);
-        }
+        foreach (Kerbal kerbal in kerbals)
+          personaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, needsSuit);
       }
     }
 
-    /**
-     * Update IVA textures when a new vessel is loaded (required for transparent pods).
-     */
-    void scheduleLoadUpdate(Vessel vessel)
-    {
-      ivaVessels.Add(vessel);
-    }
-
-    /**
-     * Update IVA textures on vessel switch or docking. For transparent pods to work correctly,
-     * this also has to be performed for the old vessel.
-     */
-    void scheduleSwitchUpdate(Vessel vessel)
-    {
-      if (previousVessel != null)
-        ivaVessels.Add(previousVessel);
-
-      // AddUnique makes sence since a vessel may be created/loaded/docked and then switched to
-      // within the same frame.
-      ivaVessels.AddUnique(vessel);
-
-      previousVessel = vessel;
-    }
-
-    /**
-     * Update IVA textures on crew transfer.
-     */
-    void scheduleTransferUpdate(GameEvents.HostedFromToAction<ProtoCrewMember, Part> action)
-    {
-      ivaVessels.Add(action.to.vessel);
-    }
-
-    /**
-     * Update IVA on docking.
-     */
-    void scheduleDockingUpdate(GameEvents.FromToAction<Part, Part> action)
-    {
-      ivaVessels.Add(action.to.vessel);
-    }
-
-    /**
-     * Enable/disable helmets in the current IVA space depending on situation.
-     */
     void updateHelmets(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> action)
     {
       Vessel vessel = action.host;
@@ -549,6 +580,29 @@ namespace TextureReplacer
           }
         }
       }
+    }
+
+    /**
+     * Set external EVA/IVA suit. Fails and return false iff trying to remove EVA suit outside of
+     * breathable atmosphere.
+     * This function is used by EvaModule.
+     */
+    bool personaliseEva(Part evaPart, bool evaSuit)
+    {
+      bool success = true;
+
+      List<ProtoCrewMember> crew = evaPart.protoModuleCrew;
+      if (crew.Count != 0)
+      {
+        if (!evaSuit && !isAtmBreathable())
+        {
+          evaSuit = true;
+          success = false;
+        }
+
+        personaliseKerbal(evaPart, crew[0], null, evaSuit);
+      }
+      return success;
     }
 
     /**
@@ -825,30 +879,18 @@ namespace TextureReplacer
       }
 
       readKerbalsConfigs();
-
-      // Save pointer to helmet & visor meshes so helmet removal can restore them.
-      foreach (KerbalEVA eva in Resources.FindObjectsOfTypeAll<KerbalEVA>())
-      {
-        foreach (SkinnedMeshRenderer smr in eva.GetComponentsInChildren<SkinnedMeshRenderer>(true))
-        {
-          if (smr.name == "helmet")
-            helmetMesh = smr.sharedMesh;
-          else if (smr.name == "visor")
-            visorMesh = smr.sharedMesh;
-        }
-
-        // Install module for KerbalEVA part to enable EVA suit toggle.
-        if (eva.GetComponent<TREvaModule>() == null)
-          eva.gameObject.AddComponent<TREvaModule>();
-      }
     }
 
-    /**
-     * Default Kerbal textures are not loaded until main menu shows, so part of initialisation must
-     * be performed then.
-     */
-    void initialiseDefaultKerbal()
+    public void load()
     {
+      // Add TRIvaBehaviour to all internal models.
+      foreach (InternalModel part in PartLoader.Instance.internalParts)
+      {
+        if (part.GetComponent<IvaModule>() == null)
+          part.gameObject.AddComponent<IvaModule>();
+      }
+
+      // Initialise default Kerbal, which is only loaded when the main menu shows.
       foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>())
       {
         if (texture.name != null
@@ -868,50 +910,31 @@ namespace TextureReplacer
         kerbal.textureStandard = defaultSuit.suit;
         kerbal.textureVeteran = defaultSuit.suitVeteran;
       }
+
+      // Save pointer to helmet & visor meshes so helmet removal can restore them.
+      Part eva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
+
+      foreach (SkinnedMeshRenderer smr in eva.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+      {
+        if (smr.name == "helmet")
+          helmetMesh = smr.sharedMesh;
+        else if (smr.name == "visor")
+          visorMesh = smr.sharedMesh;
+      }
+
+      // Install module for KerbalEVA part to enable EVA suit toggle.
+      if (eva.GetComponent<EvaModule>() == null)
+        eva.gameObject.AddComponent<EvaModule>();
     }
 
-    public void resetScene()
+    public void beginFlight()
     {
-      previousVessel = null;
-      ivaVessels.Clear();
-
-      if (HighLogic.LoadedSceneIsFlight)
-      {
-        GameEvents.onVesselSituationChange.Add(updateHelmets);
-        GameEvents.onVesselLoaded.Add(scheduleLoadUpdate);
-        GameEvents.onVesselChange.Add(scheduleSwitchUpdate);
-        GameEvents.onCrewTransferred.Add(scheduleTransferUpdate);
-        GameEvents.onPartCouple.Add(scheduleDockingUpdate);
-      }
-      else
-      {
-        GameEvents.onVesselSituationChange.Remove(updateHelmets);
-        GameEvents.onVesselLoaded.Remove(scheduleLoadUpdate);
-        GameEvents.onVesselChange.Remove(scheduleSwitchUpdate);
-        GameEvents.onCrewTransferred.Remove(scheduleTransferUpdate);
-        GameEvents.onPartCouple.Remove(scheduleDockingUpdate);
-      }
-
-      if (HighLogic.LoadedScene == GameScenes.MAINMENU)
-        initialiseDefaultKerbal();
+      GameEvents.onVesselSituationChange.Add(updateHelmets);
     }
 
-    public void updateScene()
+    public void endFlight()
     {
-      // IVA texture replacement pass. It is scheduled via event callbacks.
-      if (ivaVessels.Count != 0)
-      {
-        foreach (var vessel in ivaVessels)
-        {
-          if (vessel != null && vessel.loaded)
-            personaliseIVA(vessel);
-        }
-
-        ivaVessels.Clear();
-        // Prevent the list from growing too much.
-        if (ivaVessels.Capacity > 16)
-          ivaVessels.TrimExcess();
-      }
+      GameEvents.onVesselSituationChange.Remove(updateHelmets);
     }
 
     public void loadScenario(ConfigNode node)
@@ -935,29 +958,6 @@ namespace TextureReplacer
       node.AddValue("isHelmetRemovalEnabled", isHelmetRemovalEnabled);
       node.AddValue("isAtmSuitEnabled", isAtmSuitEnabled);
       node.AddValue("suitAssignment", suitAssignment);
-    }
-
-    /**
-     * Set external EVA/IVA suit. Fails and return false iff trying to remove EVA suit outside of
-     * breathable atmosphere.
-     * This function is used by TREvaModule.
-     */
-    public bool personalise(Part evaPart, bool evaSuit)
-    {
-      bool success = true;
-
-      List<ProtoCrewMember> crew = evaPart.protoModuleCrew;
-      if (crew.Count != 0)
-      {
-        if (!evaSuit && !isAtmBreathable())
-        {
-          evaSuit = true;
-          success = false;
-        }
-
-        personaliseKerbal(evaPart, crew[0], null, evaSuit);
-      }
-      return success;
     }
   }
 }

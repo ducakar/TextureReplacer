@@ -34,7 +34,9 @@ namespace TextureReplacer
     // Texture compression and mipmap generation parameters.
     int lastTextureCount = 0;
     // List of substrings for paths where mipmap generating is enabled.
-    readonly List<Regex> generateMipmaps = new List<Regex> { new Regex("^" + Util.DIR) };
+    readonly List<Regex> generateMipmaps = new List<Regex> {
+      new Regex("^" + Util.DIR + "(Default|Heads|Suits)/")
+    };
     // List of substrings for paths where textures shouldn't be unloaded.
     readonly List<Regex> keepLoaded = new List<Regex> {
       new Regex("^" + Reflections.DIR_ENVMAP),

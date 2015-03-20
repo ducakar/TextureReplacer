@@ -26,7 +26,8 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  class UI
+  [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
+  public class TRGui : MonoBehaviour
   {
     static readonly string APP_ICON_PATH = Util.DIR + "Plugins/appIcon";
     static readonly string[] SUIT_ASSIGNMENTS = { "Random", "Consecutive", "Class" };
@@ -46,9 +47,6 @@ namespace TextureReplacer
     Texture2D appIcon = null;
     ApplicationLauncherButton appButton = null;
     bool isGuiEnabled = true;
-    bool isInitialised = false;
-    // Instance.
-    public static UI instance = null;
 
     void windowHandler(int id)
     {
@@ -321,69 +319,53 @@ namespace TextureReplacer
       rosterScroll = Vector2.zero;
     }
 
-    public void readConfig(ConfigNode rootNode)
+    public void Start()
     {
-      Util.parse(rootNode.GetValue("isGUIEnabled"), ref isGuiEnabled);
-
-      foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("EXPERIENCE_TRAIT"))
+      if (isGuiEnabled)
       {
-        string name = node.GetValue("name");
-        if (name != null)
-          classes.AddUnique(name);
-      }
-    }
+        foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("TextureReplacer"))
+          Util.parse(node.GetValue("isGUIEnabled"), ref isGuiEnabled);
 
-    public void initialise()
-    {
-      appIcon = GameDatabase.Instance.GetTexture(APP_ICON_PATH, false);
-      if (appIcon == null)
-        Util.log("Application icon missing: {0}", APP_ICON_PATH);
-
-      isInitialised = true;
-    }
-
-    public void destroy()
-    {
-      disable();
-
-      try
-      {
-        if (ApplicationLauncher.Ready && appButton != null)
-          ApplicationLauncher.Instance.RemoveModApplication(appButton);
-      }
-      catch (NullReferenceException)
-      {
-        // Null pointer exception occurs somewhere inside RemoveModApplication if it is called on
-        // KSP shutdown.
-      }
-    }
-
-    public void resetScene()
-    {
-      disable();
-
-      if (HighLogic.LoadedScene == GameScenes.MAINMENU)
-        appButton = null;
-    }
-
-    public void draw()
-    {
-      if (ApplicationLauncher.Ready && isGuiEnabled && isInitialised)
-      {
-        bool hidden;
-
-        if (!ApplicationLauncher.Instance.Contains(appButton, out hidden))
+        foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("EXPERIENCE_TRAIT"))
         {
-          appButton = ApplicationLauncher.Instance
-            .AddModApplication(enable, disable, null, null, null, null,
-                               ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
+          string className = node.GetValue("name");
+          if (className != null)
+            classes.AddUnique(className);
         }
-        else if (isEnabled)
+
+        appIcon = GameDatabase.Instance.GetTexture(APP_ICON_PATH, false);
+        if (appIcon == null)
+          Util.log("Application icon missing: {0}", APP_ICON_PATH);
+
+        appButton = ApplicationLauncher.Instance
+          .AddModApplication(enable, disable, null, null, null, null,
+                             ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
+      }
+    }
+
+    public void OnGUI()
+    {
+      if (ApplicationLauncher.Ready && isEnabled)
+      {
+        GUI.skin = HighLogic.Skin;
+        windowRect = GUILayout.Window(WINDOW_ID, windowRect, windowHandler, "TextureReplacer");
+        windowRect.x = Math.Max(0, Math.Min(Screen.width - 30, windowRect.x));
+        windowRect.y = Math.Max(0, Math.Min(Screen.height - 30, windowRect.y));
+      }
+    }
+
+    public void OnDestroy()
+    {
+      disable();
+
+      if (ApplicationLauncher.Instance != null && appButton != null)
+      {
+        try
         {
-          GUI.skin = HighLogic.Skin;
-          windowRect = GUILayout.Window(WINDOW_ID, windowRect, windowHandler, "TextureReplacer");
-          windowRect.x = Math.Max(0, Math.Min(Screen.width - 30, windowRect.x));
-          windowRect.y = Math.Max(0, Math.Min(Screen.height - 30, windowRect.y));
+          ApplicationLauncher.Instance.RemoveModApplication(appButton);
+        }
+        catch (NullReferenceException)
+        {
         }
       }
     }

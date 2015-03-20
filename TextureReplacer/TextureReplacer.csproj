@@ -10,7 +10,7 @@
     <RootNamespace>TextureReplacer</RootNamespace>
     <AssemblyName>TextureReplacer</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <ReleaseVersion>2.2.6</ReleaseVersion>
+    <ReleaseVersion>2.2.90</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -46,12 +46,12 @@
     <Compile Include="Reflections.cs" />
     <Compile Include="Replacer.cs" />
     <Compile Include="TextureReplacer.cs" />
-    <Compile Include="TREvaModule.cs" />
     <Compile Include="TRReflection.cs" />
     <Compile Include="TRScenario.cs" />
-    <Compile Include="UI.cs" />
     <Compile Include="Util.cs" />
     <None Include="Visor.shader" />
+    <Compile Include="TRGui.cs" />
+    <Compile Include="TRActivator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

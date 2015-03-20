@@ -36,11 +36,6 @@ namespace TextureReplacer
     // NavBalls' textures.
     Texture2D hudNavBallTexture = null;
     Texture2D ivaNavBallTexture = null;
-    // Generic texture replacement parameters.
-    int lastMaterialCount = 0;
-    // General replacement has to be performed for more than one frame when a scene switch occurs
-    // since textures and models may also be loaded with a lag.
-    float replaceTimer = -1.0f;
     // Print material/texture names when performing texture replacement pass.
     bool logTextures = false;
     // Change shinning quality.
@@ -51,9 +46,9 @@ namespace TextureReplacer
     /**
      * General texture replacement step.
      */
-    void replaceTextures(Material[] materials)
+    void replaceTextures()
     {
-      foreach (Material material in materials)
+      foreach (Material material in Resources.FindObjectsOfTypeAll<Material>())
       {
         Texture texture = material.mainTexture;
         if (texture == null || texture.name.Length == 0
@@ -124,9 +119,10 @@ namespace TextureReplacer
           hudNavball.navBall.renderer.sharedMaterial.mainTexture = hudNavBallTexture;
       }
 
-      if (ivaNavBallTexture != null)
+      if (ivaNavBallTexture != null && InternalSpace.Instance != null)
       {
-        InternalNavBall ivaNavball = UnityEngine.Object.FindObjectOfType<InternalNavBall>();
+        InternalNavBall ivaNavball = InternalSpace.Instance
+          .GetComponentInChildren<InternalNavBall>();
 
         if (ivaNavball != null)
           ivaNavball.navBall.renderer.sharedMaterial.mainTexture = ivaNavBallTexture;
@@ -225,39 +221,24 @@ namespace TextureReplacer
       }
     }
 
-    public void resetScene()
+    public void beginFlight()
     {
-      lastMaterialCount = 0;
-
-      GameScenes scene = HighLogic.LoadedScene;
-
-      if (scene == GameScenes.MAINMENU || scene == GameScenes.SPACECENTER)
-        replaceTimer = 2.0f;
-      else
-        replaceTimer = 0.2f;
-
       if (hudNavBallTexture != null || ivaNavBallTexture != null)
       {
-        if (HighLogic.LoadedSceneIsFlight)
-          GameEvents.onVesselChange.Add(updateNavball);
-        else
-          GameEvents.onVesselChange.Remove(updateNavball);
+        updateNavball(FlightGlobals.ActiveVessel);
+        GameEvents.onVesselChange.Add(updateNavball);
       }
     }
 
-    public void updateScene()
+    public void endFlight()
     {
-      if (replaceTimer >= 0.0f)
-      {
-        Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
-        if (materials.Length != lastMaterialCount)
-        {
-          replaceTextures(materials);
-          lastMaterialCount = materials.Length;
-        }
+      if (hudNavBallTexture != null || ivaNavBallTexture != null)
+        GameEvents.onVesselChange.Remove(updateNavball);
+    }
 
-        replaceTimer = replaceTimer == 0.0f ? -1.0f : Math.Max(0.0f, replaceTimer - Time.deltaTime);
-      }
+    public void beginScene()
+    {
+      replaceTextures();
     }
   }
 }

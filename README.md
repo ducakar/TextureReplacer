@@ -304,6 +304,13 @@ Known Issues
 Change Log
 ----------
 
+* 2.2.90
+    - major code refactoring
+    - IVA personalisation is now triggered via a component bound to internal
+      models, which makes it completelyreliable, even with transparent pods and
+      without need for other mods to manually call event methods
+    - general texture replacement is now completely reliable
+    - no code runs per-frame any more, unless you have real reflections enabled
 * 2.2.6
     - new and more robust method for hiding meshes during reflection generation
     - fixed `isVisorReflectionEnabled` being ignored for real reflections
