@@ -246,7 +246,7 @@ namespace TextureReplacer
         camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).camera;
         camera.enabled = false;
         // Any smaller number and visors will refect internals of helmets.
-        camera.nearClipPlane = 0.15f;
+        camera.nearClipPlane = 0.125f;
         camera.farClipPlane = 3.0e7f;
 
         // Render layers:
@@ -260,7 +260,6 @@ namespace TextureReplacer
         // 23 - sun
         camera.cullingMask = 0x00848623;
         // Cull everything but scaled space & co. at 100 m.
-        camera.layerCullSpherical = true;
         camera.layerCullDistances = CULL_DISTANCES;
       }
     }

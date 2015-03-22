@@ -32,6 +32,7 @@ Special thanks to:
   determination and role-based suit assignment,
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
   reflections,
+* sarbian for fixing an issue with non-mupliple-of-4 texture dimensions,
 * therealcrow999 for testing and benchmarking this plugin,
 * Ippo343 for contributing KSP-AVC configuration,
 * Proot, Scart91, Green Skull and others for creating texture packs and
@@ -294,23 +295,27 @@ Notes
 Known Issues
 ------------
 
-* Clouds from development version of EVE are not properly relfected.
-* Textures are sometimes not replaced for Kerbals in transparent pods.
+* Clouds from EVE are only reflected when on/near the ground or over 160 km.
+* Clouds from development version of EVE are not properly reflected.
+* Kerbals in transparent pods are not personalised in several situations.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
-* IVA visor texture is applied to EVA Kerbals if game database is reloaded while
-  in the main menu.
+* Reloading game database in the space centre scene resets per-game setings.
+* Reloading game database in the main menu switches IVA visor texture.
 
 
 Change Log
 ----------
 
-* 2.2.90
+* 2.3
     - major code refactoring
+    - removed most of code that had to run per-frame, mechanisms provided by
+      Unity/KSP exploited instead
     - IVA personalisation is now triggered via a component bound to internal
-      models, which makes it completelyreliable, even with transparent pods and
-      without need for other mods to manually call event methods
-    - general texture replacement is now completely reliable
-    - no code runs per-frame any more, unless you have real reflections enabled
+      models instead of multiple event methods, which makes it simpler, more
+      reliable and without need for other mods to manually call event methods
+    - general texture replacement is now completely reliable and in one pass
+    - per-frame reflection updater only runs when real reflections are enabled
+    - GUI is only loaded during the space centre scene
 * 2.2.6
     - new and more robust method for hiding meshes during reflection generation
     - fixed `isVisorReflectionEnabled` being ignored for real reflections

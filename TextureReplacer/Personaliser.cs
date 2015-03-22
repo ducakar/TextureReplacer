@@ -194,6 +194,7 @@ namespace TextureReplacer
       public void Start()
       {
         Personaliser.instance.personaliseIva(GetComponent<InternalModel>());
+        Destroy(this);
       }
     }
 
@@ -324,7 +325,7 @@ namespace TextureReplacer
      */
     public bool isAtmBreathable()
     {
-      bool value = HighLogic.LoadedSceneIsFlight
+      bool value = !HighLogic.LoadedSceneIsFlight
                    || (FlightGlobals.getStaticPressure() >= atmSuitPressure
                    && atmSuitBodies.Contains(FlightGlobals.currentMainBody.bodyName));
       return value;
