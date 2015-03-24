@@ -58,8 +58,7 @@ namespace TextureReplacer
     static int textureSize(Texture2D texture)
     {
       int nPixels = texture.width * texture.height;
-      return texture.format == TextureFormat.DXT1 || texture.format == TextureFormat.RGB24 ?
-        nPixels * 3 : nPixels * 4;
+      return texture.format == TextureFormat.DXT1 || texture.format == TextureFormat.RGB24 ? nPixels * 3 : nPixels * 4;
     }
 
     /**
@@ -139,9 +138,8 @@ namespace TextureReplacer
     {
       // Prevent conflicts with TextureCompressor. If it is found among loaded plugins, texture
       // compression step will be skipped since TextureCompressor should handle it (better).
-      bool isATMDetected =
-        AssemblyLoader.loadedAssemblies.Any(a => a.name.StartsWith("ActiveTextureManagement",
-                                                                   StringComparison.Ordinal));
+      bool isATMDetected = AssemblyLoader.loadedAssemblies
+        .Any(a => a.name.StartsWith("ActiveTextureManagement", StringComparison.Ordinal));
 
       if (isATMDetected)
       {
@@ -246,8 +244,7 @@ namespace TextureReplacer
         }
 
         // Compress if necessary.
-        if (isCompressionEnabled.Value
-            && texture.format != TextureFormat.DXT1 && texture.format != TextureFormat.DXT5)
+        if (isCompressionEnabled.Value && texture.format != TextureFormat.DXT1 && texture.format != TextureFormat.DXT5)
         {
           texture.Compress(true);
           texInfos[i].isCompressed = true;

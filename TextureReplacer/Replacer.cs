@@ -184,11 +184,11 @@ namespace TextureReplacer
 
         if (smr.name == "headMesh01")
         {
+          // Replace with bump-mapped shader so normal maps for heads will work.
+          smr.sharedMaterial.shader = Util.bumpedDiffuseShader;
+
           if (headNormalMap != null)
-          {
-            smr.sharedMaterial.shader = Util.bumpedDiffuseShader;
             smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMap);
-          }
         }
         else if (smr.name == "visor")
         {

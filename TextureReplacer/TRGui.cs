@@ -240,7 +240,8 @@ namespace TextureReplacer
         GUILayout.EndHorizontal();
 
         GUI.color = suit == defaultSuit && (kerbalData == null || kerbalData.suit != null) ?
-                    SELECTED_COLOUR : Color.white;
+          SELECTED_COLOUR : Color.white;
+
         if (GUILayout.Button("Default"))
         {
           if (kerbalData != null)
@@ -254,8 +255,7 @@ namespace TextureReplacer
           }
         }
 
-        GUI.color = suit == null || (kerbalData != null && kerbalData.suit == null) ?
-                    SELECTED_COLOUR : Color.white;
+        GUI.color = suit == null || (kerbalData != null && kerbalData.suit == null) ? SELECTED_COLOUR : Color.white;
         if (GUILayout.Button("Unset/Generic"))
         {
           if (kerbalData != null)
@@ -292,8 +292,7 @@ namespace TextureReplacer
 
       GUILayout.BeginHorizontal();
       GUILayout.Label("Reflections", GUILayout.Width(120));
-      reflectionType = (Reflections.Type) GUILayout.SelectionGrid(
-        (int) reflectionType, REFLECTION_TYPES, 3);
+      reflectionType = (Reflections.Type) GUILayout.SelectionGrid((int) reflectionType, REFLECTION_TYPES, 3);
       GUILayout.EndHorizontal();
 
       if (reflectionType != reflections.reflectionType)
@@ -319,7 +318,19 @@ namespace TextureReplacer
       rosterScroll = Vector2.zero;
     }
 
-    public void Start()
+    void onGUIApplicationLauncherReady()
+    {
+      appButton = ApplicationLauncher.Instance
+        .AddModApplication(enable, disable, null, null, null, null,
+                           ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
+    }
+
+    void onGUIApplicationLauncherUnreadifying(GameScenes scenes)
+    {
+      ApplicationLauncher.Instance.RemoveModApplication(appButton);
+    }
+
+    public void Awake()
     {
       if (isGuiEnabled)
       {
@@ -337,15 +348,14 @@ namespace TextureReplacer
         if (appIcon == null)
           Util.log("Application icon missing: {0}", APP_ICON_PATH);
 
-        appButton = ApplicationLauncher.Instance
-          .AddModApplication(enable, disable, null, null, null, null,
-                             ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
+        GameEvents.onGUIApplicationLauncherReady.Add(onGUIApplicationLauncherReady);
+        GameEvents.onGUIApplicationLauncherUnreadifying.Add(onGUIApplicationLauncherUnreadifying);
       }
     }
 
     public void OnGUI()
     {
-      if (ApplicationLauncher.Ready && isEnabled)
+      if (isEnabled)
       {
         GUI.skin = HighLogic.Skin;
         windowRect = GUILayout.Window(WINDOW_ID, windowRect, windowHandler, "TextureReplacer");
@@ -356,18 +366,8 @@ namespace TextureReplacer
 
     public void OnDestroy()
     {
-      disable();
-
-      if (ApplicationLauncher.Instance != null && appButton != null)
-      {
-        try
-        {
-          ApplicationLauncher.Instance.RemoveModApplication(appButton);
-        }
-        catch (NullReferenceException)
-        {
-        }
-      }
+      GameEvents.onGUIApplicationLauncherReady.Remove(onGUIApplicationLauncherReady);
+      GameEvents.onGUIApplicationLauncherUnreadifying.Remove(onGUIApplicationLauncherUnreadifying);
     }
   }
 }

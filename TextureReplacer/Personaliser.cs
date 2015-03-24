@@ -37,17 +37,6 @@ namespace TextureReplacer
       CLASS
     }
 
-    public class KerbalData
-    {
-      public int hash;
-      public bool isFemale;
-      public bool isVeteran;
-
-      public Head head;
-      public Suit suit;
-      public Suit cabinSuit;
-    }
-
     public class Head
     {
       public string name;
@@ -185,6 +174,17 @@ namespace TextureReplacer
       }
     }
 
+    public class KerbalData
+    {
+      public int hash;
+      public bool isFemale;
+      public bool isVeteran;
+
+      public Head head;
+      public Suit suit;
+      public Suit cabinSuit;
+    }
+
     /**
      * Component bound to internal models that triggers Kerbal texture personalisation when the
      * internal model changes.
@@ -193,7 +193,7 @@ namespace TextureReplacer
     {
       public void Start()
       {
-        Personaliser.instance.personaliseIva(GetComponent<InternalModel>());
+        Personaliser.instance.personaliseIva(GetComponent<Kerbal>());
         Destroy(this);
       }
     }
@@ -222,8 +222,7 @@ namespace TextureReplacer
         }
         else
         {
-          ScreenMessages.PostScreenMessage("No breathable atmosphere", 5.0f,
-                                           ScreenMessageStyle.UPPER_CENTER);
+          ScreenMessages.PostScreenMessage("No breathable atmosphere", 5.0f, ScreenMessageStyle.UPPER_CENTER);
         }
       }
 
@@ -315,9 +314,7 @@ namespace TextureReplacer
      */
     static bool isSituationSafe(Vessel vessel)
     {
-      bool value = vessel.situation != Vessel.Situations.FLYING
-                   && vessel.situation != Vessel.Situations.SUB_ORBITAL;
-      return value;
+      return vessel.situation != Vessel.Situations.FLYING && vessel.situation != Vessel.Situations.SUB_ORBITAL;
     }
 
     /**
@@ -387,10 +384,9 @@ namespace TextureReplacer
 
       // Here we must use a different prime to increase randomisation so that the same head is
       // not always combined with the same suit.
-      int number =
-        suitAssignment == SuitAssignment.RANDOM ?
-        ((kerbalData.hash + kerbal.name.Length) * 2053) & 0x7fffffff :
-        HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
+      int number = suitAssignment == SuitAssignment.RANDOM
+        ? ((kerbalData.hash + kerbal.name.Length) * 2053) & 0x7fffffff
+        : HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
 
       return genderSuits[number % genderSuits.Count];
     }
@@ -451,9 +447,6 @@ namespace TextureReplacer
               {
                 newTexture = head.head;
                 newNormalMap = head.headNRM;
-
-                smr.material.shader = newNormalMap != null ? Util.bumpedDiffuseShader :
-                                                             Util.diffuseShader;
               }
               break;
 
@@ -470,8 +463,9 @@ namespace TextureReplacer
               // stock ones all the time and to fix the switch from non-default to default texture
               // during EVA suit toggle.
               if (newTexture == null)
-                newTexture = isEvaSuit ? defaultSuit.evaSuit :
-                             kerbalData.isVeteran ? defaultSuit.suitVeteran : defaultSuit.suit;
+                newTexture = isEvaSuit ? defaultSuit.evaSuit
+                  : kerbalData.isVeteran ? defaultSuit.suitVeteran
+                  : defaultSuit.suit;
 
               if (newNormalMap == null)
                 newNormalMap = isEvaSuit ? defaultSuit.evaSuitNRM : defaultSuit.suitNRM;
@@ -538,16 +532,11 @@ namespace TextureReplacer
     /**
      * Personalise Kerbals in an internal space of a vessel. Used by IvaModule.
      */
-    void personaliseIva(InternalModel internalModel)
+    void personaliseIva(Kerbal kerbal)
     {
-      Kerbal[] kerbals = internalModel.GetComponentsInChildren<Kerbal>();
-      if (kerbals.Length != 0)
-      {
-        bool needsSuit = !isHelmetRemovalEnabled || !isSituationSafe(internalModel.vessel);
+      bool needsSuit = !isHelmetRemovalEnabled || !isSituationSafe(kerbal.InVessel);
 
-        foreach (Kerbal kerbal in kerbals)
-          personaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, needsSuit);
-      }
+      personaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, needsSuit);
     }
 
     void updateHelmets(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> action)
@@ -563,20 +552,16 @@ namespace TextureReplacer
         {
           bool hideHelmets = isSituationSafe(vessel);
 
-          foreach (Kerbal kerbal in kerbals)
+          foreach (Kerbal kerbal in kerbals.Where(k => k.showHelmet))
           {
-            if (kerbal.showHelmet)
+            // `Kerbal.ShowHelmet(false)` irreversibly removes a helmet while
+            // `Kerbal.ShowHelmet(true)` has no effect at all. We need the following workaround.
+            foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
-              // `Kerbal.ShowHelmet(false)` irreversibly removes a helmet while
-              // `Kerbal.ShowHelmet(true)` has no effect at all. We need the following workaround.
-              foreach (SkinnedMeshRenderer smr
-                       in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
-              {
-                if (smr.name == "helmet")
-                  smr.sharedMesh = hideHelmets ? null : helmetMesh;
-                else if (smr.name == "visor")
-                  smr.sharedMesh = hideHelmets ? null : visorMesh;
-              }
+              if (smr.name == "helmet")
+                smr.sharedMesh = hideHelmets ? null : helmetMesh;
+              else if (smr.name == "visor")
+                smr.sharedMesh = hideHelmets ? null : visorMesh;
             }
           }
         }
@@ -628,16 +613,10 @@ namespace TextureReplacer
           KerbalData kerbalData = getKerbalData(name);
 
           if (headName != null && headName != "GENERIC")
-          {
-            kerbalData.head = headName == "DEFAULT" ? defaultHead :
-                                                      heads.FirstOrDefault(h => h.name == headName);
-          }
+            kerbalData.head = headName == "DEFAULT" ? defaultHead : heads.Find(h => h.name == headName);
 
           if (suitName != null && suitName != "GENERIC")
-          {
-            kerbalData.suit = suitName == "DEFAULT" ? defaultSuit :
-                                                      suits.FirstOrDefault(s => s.name == suitName);
-          }
+            kerbalData.suit = suitName == "DEFAULT" ? defaultSuit : suits.Find(s => s.name == suitName);
         }
       }
     }
@@ -664,8 +643,7 @@ namespace TextureReplacer
     /**
      * Load suit mapping.
      */
-    void loadSuitMap(ConfigNode node, IDictionary<string, Suit> map,
-                     IDictionary<string, Suit> defaultMap = null)
+    void loadSuitMap(ConfigNode node, IDictionary<string, Suit> map, IDictionary<string, Suit> defaultMap = null)
     {
       if (node == null)
       {
@@ -684,10 +662,7 @@ namespace TextureReplacer
           map.Remove(entry.name);
 
           if (suitName != null && suitName != "GENERIC")
-          {
-            map[entry.name] = suitName == "DEFAULT" ? defaultSuit :
-                              suits.FirstOrDefault(s => s.name == suitName);
-          }
+            map[entry.name] = suitName == "DEFAULT" ? defaultSuit : suits.Find(s => s.name == suitName);
         }
       }
     }
@@ -836,21 +811,15 @@ namespace TextureReplacer
           {
             string dirName = texture.name.Substring(DIR_SUITS.Length, dirNameLength);
 
-            Suit suit;
-            if (suitDirs.ContainsKey(dirName))
+            int index;
+            if (!suitDirs.TryGetValue(dirName, out index))
             {
-              int index = suitDirs[dirName];
-              suit = suits[index];
-            }
-            else
-            {
-              int index = suits.Count;
-              suit = new Suit { name = dirName };
-              suits.Add(suit);
-
+              index = suits.Count;
+              suits.Add(new Suit { name = dirName });
               suitDirs.Add(dirName, index);
             }
 
+            Suit suit = suits[index];
             if (!suit.setTexture(originalName, texture))
               Util.log("Unknown suit texture name \"{0}\": {1}", originalName, texture.name);
           }
@@ -884,13 +853,6 @@ namespace TextureReplacer
 
     public void load()
     {
-      // Add TRIvaBehaviour to all internal models.
-      foreach (InternalModel part in PartLoader.Instance.internalParts)
-      {
-        if (part.GetComponent<IvaModule>() == null)
-          part.gameObject.AddComponent<IvaModule>();
-      }
-
       // Initialise default Kerbal, which is only loaded when the main menu shows.
       foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>())
       {
@@ -905,11 +867,14 @@ namespace TextureReplacer
         }
       }
 
-      // Set default suits on proto-IVA Kerbal.
+      // Set default suits on proto-IVA Kerbal and add IvaModule to it.
       foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>())
       {
         kerbal.textureStandard = defaultSuit.suit;
         kerbal.textureVeteran = defaultSuit.suitVeteran;
+
+        if (kerbal.GetComponent<IvaModule>() == null)
+          kerbal.gameObject.AddComponent<IvaModule>();
       }
 
       // Save pointer to helmet & visor meshes so helmet removal can restore them.
@@ -943,7 +908,7 @@ namespace TextureReplacer
       gameKerbals.Clear();
       classSuits.Clear();
 
-      loadKerbals(node.GetNode("Kerbals") ?? node.GetNode("CustomKerbals"));
+      loadKerbals(node.GetNode("Kerbals"));
       loadSuitMap(node.GetNode("ClassSuits"), classSuits, defaultClassSuits);
 
       Util.parse(node.GetValue("isHelmetRemovalEnabled"), ref isHelmetRemovalEnabled);

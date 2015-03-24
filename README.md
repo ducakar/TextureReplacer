@@ -295,9 +295,10 @@ Notes
 Known Issues
 ------------
 
+* There are issues with some reflective parts: highlighting, radial attachment
+  and/or mouse click may not work.
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
 * Clouds from development version of EVE are not properly reflected.
-* Kerbals in transparent pods are not personalised in several situations.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
 * Reloading game database in the space centre scene resets per-game setings.
 * Reloading game database in the main menu switches IVA visor texture.
@@ -306,6 +307,9 @@ Known Issues
 Change Log
 ----------
 
+* 2.3.1
+    - further improved IVA personalisation; it should now work with all mods
+    - addition/removal of toolbar botton is now done correctly
 * 2.3
     - major code refactoring
     - removed most of code that had to run per-frame, mechanisms provided by
