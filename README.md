@@ -141,7 +141,7 @@ Note that all textures must be quares and have the same dimensions that are
 powers of two. Cube map textures are slow, so keep them as low-res as possible.
 
 `TRReflection` part module can be used as in the following example that adds
-reflections onto Mk1-2 pod windows:
+reflections onto the windows of Mk1-2 pod:
 
     MODULE
     {
@@ -166,15 +166,12 @@ There are several parameters, all optional:
   helpful as it prints names of all meshes for each part with `TRReflection`
   module into your log.
 
-Real reflection update occurs once in `reflectionInterval` frames (2 by default,
-it can be changed in a configuration file). Only one face of one reflection is
-updated in each step, so each reflections must be updated six times to be fully
-updated in all six directions. You can also specify individual `interval`
-property for reflective parts; if it is > 1 the reflection will not be updated
-each step. E.g. for `interval = 2` it will only be updated every second step and
-every other step it will be skipped, so the next reflective part in a row will
-be updated instead.
-
+One face of one reflection cube texture is updated every `reflectionInterval`
+frames (2 by default, it can be changed in a configuration file), so each
+reflective part has to be updated six times to update all six texture faces.
+More reflective parts there are on the scene less frequently they are updated.
+`interval` field on TRReflection module can lessen the update rate for a part;
+e.g. `interval = 2` makes the part update half less frequently.
 
 ### Personalised Kerbal Textures ###
 
@@ -232,10 +229,6 @@ inside its own directory:
 
 The level textures are optional. If missing, level 0 texture will be used for
 all levels for that part of suit.
-
-For generic Kerbals, heads are selected independently form suits so any head can
-be paired with any of the suits and each head has an equal chance of being
-selected.
 
 ### Configuration File ###
 
@@ -298,7 +291,7 @@ Known Issues
 * There are issues with some reflective parts: highlighting, radial attachment
   and/or mouse click may not work.
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
-* Clouds from development version of EVE are not properly reflected.
+* Clouds from the development version of EVE are not properly reflected.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
 * Reloading game database in the space centre scene resets per-game setings.
 * Reloading game database in the main menu switches IVA visor texture.
@@ -307,9 +300,12 @@ Known Issues
 Change Log
 ----------
 
+* 2.4
+    - updated to work with stock female Kerbals
+    - removed gender detection from names, `femaleNames` config option
 * 2.3.1
     - further improved IVA personalisation; it should now work with all mods
-    - addition/removal of toolbar botton is now done correctly
+    - addition/removal of toolbar button is now done correctly
 * 2.3
     - major code refactoring
     - removed most of code that had to run per-frame, mechanisms provided by

@@ -102,7 +102,7 @@ namespace TextureReplacer
       GUILayout.EndScrollView();
 
       // Textures.
-      Personaliser.Head defaultHead = personaliser.defaultHead;
+      Personaliser.Head defaultHead = personaliser.defaultHead[0];
       Personaliser.Suit defaultSuit = personaliser.defaultSuit;
       Personaliser.KerbalData kerbalData = null;
       Personaliser.Head head = null;
@@ -113,6 +113,7 @@ namespace TextureReplacer
       if (selectedKerbal != null)
       {
         kerbalData = personaliser.getKerbalData(selectedKerbal.name);
+        defaultHead = personaliser.defaultHead[kerbalData.gender];
 
         if (kerbalData != null)
         {

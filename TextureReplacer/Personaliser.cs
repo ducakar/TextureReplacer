@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -177,7 +176,7 @@ namespace TextureReplacer
     public class KerbalData
     {
       public int hash;
-      public bool isFemale;
+      public int gender;
       public bool isVeteran;
 
       public Head head;
@@ -272,19 +271,14 @@ namespace TextureReplacer
     static readonly string DIR_HEADS = Util.DIR + "Heads/";
     static readonly string DIR_SUITS = Util.DIR + "Suits/";
     // Default textures (from `Default/`).
-    public readonly Head defaultHead = new Head { name = "DEFAULT" };
+    public readonly Head[] defaultHead = { new Head { name = "DEFAULT" }, new Head { name = "DEFAULT" } };
     public readonly Suit defaultSuit = new Suit { name = "DEFAULT" };
     // All Kerbal textures, including excluded by configuration.
     public readonly List<Head> heads = new List<Head>();
     public readonly List<Suit> suits = new List<Suit>();
-    // Male textures (minus excluded).
-    readonly List<Head> kerbalHeads = new List<Head>();
-    readonly List<Suit> kerbalSuits = new List<Suit>();
-    // Female textures (minus excluded).
-    readonly List<Head> kerminHeads = new List<Head>();
-    readonly List<Suit> kerminSuits = new List<Suit>();
-    // Female name REs.
-    readonly List<Regex> kerminNames = new List<Regex>();
+    // Male/female textures (minus excluded).
+    readonly List<Head>[] kerbalHeads = { new List<Head>(), new List<Head>() };
+    readonly List<Suit>[] kerbalSuits = { new List<Suit>(), new List<Suit>() };
     // Personalised Kerbal textures.
     readonly Dictionary<string, KerbalData> gameKerbals = new Dictionary<string, KerbalData>();
     // Backed-up personalised textures from main configuration files. These are used to initialise
@@ -344,12 +338,9 @@ namespace TextureReplacer
 
       if (!gameKerbals.TryGetValue(name, out kerbalData))
       {
-        int spaceIndex = name.IndexOf(' ');
-        string firstName = spaceIndex > 0 ? name.Substring(0, spaceIndex) : name;
-
         kerbalData = new KerbalData {
           hash = name.GetHashCode(),
-          isFemale = kerminNames.Any(r => r.IsMatch(firstName)),
+          gender = name.GetHashCode() % 2,
           isVeteran = name == "Jebediah Kerman" || name == "Bill Kerman" || name == "Bob Kerman"
         };
         gameKerbals.Add(name, kerbalData);
@@ -362,9 +353,9 @@ namespace TextureReplacer
       if (kerbalData.head != null)
         return kerbalData.head;
 
-      List<Head> genderHeads = kerbalData.isFemale ? kerminHeads : kerbalHeads;
+      List<Head> genderHeads = kerbalHeads[kerbalData.gender];
       if (genderHeads.Count == 0)
-        return defaultHead;
+        return defaultHead[kerbalData.gender];
 
       // Hash is multiplied with a large prime to increase randomisation, since hashes returned
       // by `GetHashCode()` are close together if strings only differ in the last (few) char(s).
@@ -378,7 +369,7 @@ namespace TextureReplacer
       if (suit != null)
         return suit;
 
-      List<Suit> genderSuits = kerbalData.isFemale ? kerminSuits : kerbalSuits;
+      List<Suit> genderSuits = kerbalSuits[kerbalData.gender];
       if (genderSuits.Count == 0)
         return defaultSuit;
 
@@ -406,7 +397,7 @@ namespace TextureReplacer
       if (isEva || !cabinSuits.TryGetValue(cabin.partInfo.name, out kerbalData.cabinSuit))
         suit = getKerbalSuit(kerbal, kerbalData);
 
-      head = head == defaultHead ? null : head;
+      head = head == defaultHead[0] || head == defaultHead[1] ? null : head;
       suit = (isEva && needsSuit) || kerbalData.cabinSuit == null ? suit : kerbalData.cabinSuit;
       suit = suit == defaultSuit ? null : suit;
 
@@ -610,11 +601,19 @@ namespace TextureReplacer
           string headName = tokens.Length >= 1 ? tokens[0] : null;
           string suitName = tokens.Length >= 2 ? tokens[1] : null;
 
+          // When a game is loaded, check if the Kerbal is in the roster.
+          Game game = HighLogic.CurrentGame;
+          if (game != null && game.CrewRoster.Crew.All(k => k.name != name))
+            return;
+
           KerbalData kerbalData = getKerbalData(name);
 
           if (headName != null && headName != "GENERIC")
-            kerbalData.head = headName == "DEFAULT" ? defaultHead : heads.Find(h => h.name == headName);
-
+          {
+            kerbalData.head = headName == "DEFAULT"
+              ? defaultHead[kerbalData.gender]
+              : heads.Find(h => h.name == headName);
+          }
           if (suitName != null && suitName != "GENERIC")
             kerbalData.suit = suitName == "DEFAULT" ? defaultSuit : suits.Find(s => s.name == suitName);
         }
@@ -707,7 +706,6 @@ namespace TextureReplacer
           Util.addLists(genericNode.GetValues("excludedSuits"), excludedSuits);
           Util.addLists(genericNode.GetValues("femaleHeads"), femaleHeads);
           Util.addLists(genericNode.GetValues("femaleSuits"), femaleSuits);
-          Util.addRELists(genericNode.GetValues("femaleNames"), kerminNames);
           Util.addLists(genericNode.GetValues("eyelessHeads"), eyelessHeads);
           Util.parse(genericNode.GetValue("suitAssignment"), ref suitAssignment);
         }
@@ -732,21 +730,20 @@ namespace TextureReplacer
         suit.isFemale = femaleSuits.Contains(suit.name);
 
       // Create lists of male heads and suits.
-      kerbalHeads.AddRange(heads.Where(h => !h.isFemale && !excludedHeads.Contains(h.name)));
-      kerbalSuits.AddRange(suits.Where(s => !s.isFemale && !excludedSuits.Contains(s.name)));
+      kerbalHeads[0].AddRange(heads.Where(h => !h.isFemale && !excludedHeads.Contains(h.name)));
+      kerbalSuits[0].AddRange(suits.Where(s => !s.isFemale && !excludedSuits.Contains(s.name)));
 
       // Create lists of female heads and suits.
-      kerminHeads.AddRange(heads.Where(h => h.isFemale && !excludedHeads.Contains(h.name)));
-      kerminSuits.AddRange(suits.Where(s => s.isFemale && !excludedSuits.Contains(s.name)));
+      kerbalHeads[1].AddRange(heads.Where(h => h.isFemale && !excludedHeads.Contains(h.name)));
+      kerbalSuits[1].AddRange(suits.Where(s => s.isFemale && !excludedSuits.Contains(s.name)));
 
       // Trim lists.
       heads.TrimExcess();
       suits.TrimExcess();
-      kerbalHeads.TrimExcess();
-      kerbalSuits.TrimExcess();
-      kerminHeads.TrimExcess();
-      kerminSuits.TrimExcess();
-      kerminNames.TrimExcess();
+      kerbalHeads[0].TrimExcess();
+      kerbalSuits[0].TrimExcess();
+      kerbalHeads[1].TrimExcess();
+      kerbalSuits[1].TrimExcess();
     }
 
     /**
@@ -831,12 +828,12 @@ namespace TextureReplacer
 
           if (originalName == "kerbalHead")
           {
-            defaultHead.head = texture;
+            defaultHead[0].head = texture;
             texture.wrapMode = TextureWrapMode.Clamp;
           }
           else if (originalName == "kerbalHeadNRM")
           {
-            defaultHead.headNRM = texture;
+            defaultHead[0].headNRM = texture;
             texture.wrapMode = TextureWrapMode.Clamp;
           }
           else if (defaultSuit.setTexture(originalName, texture) || originalName == "kerbalMain")
@@ -853,20 +850,6 @@ namespace TextureReplacer
 
     public void load()
     {
-      // Initialise default Kerbal, which is only loaded when the main menu shows.
-      foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>())
-      {
-        if (texture.name != null
-            && (texture.name.StartsWith("kerbal", StringComparison.Ordinal)
-            || texture.name.StartsWith("EVA", StringComparison.Ordinal)))
-        {
-          if (texture.name == "kerbalHead")
-            defaultHead.head = defaultHead.head ?? texture;
-          else
-            defaultSuit.setTexture(texture.name, texture);
-        }
-      }
-
       // Set default suits on proto-IVA Kerbal and add IvaModule to it.
       foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>())
       {

@@ -51,11 +51,8 @@ namespace TextureReplacer
       foreach (Material material in Resources.FindObjectsOfTypeAll<Material>())
       {
         Texture texture = material.mainTexture;
-        if (texture == null || texture.name.Length == 0
-            || texture.name.StartsWith("Temp", StringComparison.Ordinal))
-        {
+        if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp", StringComparison.Ordinal))
           continue;
-        }
 
         if (logTextures)
           Util.log("[{0}] {1}", material.name, texture.name);
@@ -121,8 +118,7 @@ namespace TextureReplacer
 
       if (ivaNavBallTexture != null && InternalSpace.Instance != null)
       {
-        InternalNavBall ivaNavball = InternalSpace.Instance
-          .GetComponentInChildren<InternalNavBall>();
+        InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
 
         if (ivaNavball != null)
           ivaNavball.navBall.renderer.sharedMaterial.mainTexture = ivaNavBallTexture;
