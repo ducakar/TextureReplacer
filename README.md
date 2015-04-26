@@ -288,13 +288,11 @@ Notes
 Known Issues
 ------------
 
-* There are issues with some reflective parts: highlighting, radial attachment
-  and/or mouse click may not work.
+* Reflections disable part highlighting.
+* Reflections may break radial attachment on some parts.
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
 * Clouds from the development version of EVE are not properly reflected.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
-* Reloading game database in the space centre scene resets per-game setings.
-* Reloading game database in the main menu switches IVA visor texture.
 
 
 Change Log
@@ -303,6 +301,7 @@ Change Log
 * 2.4
     - updated to work with stock female Kerbals
     - removed gender detection from names, `femaleNames` config option
+    - fixed all issues with game database reloading
 * 2.3.1
     - further improved IVA personalisation; it should now work with all mods
     - addition/removal of toolbar button is now done correctly
@@ -320,8 +319,6 @@ Change Log
     - new and more robust method for hiding meshes during reflection generation
     - fixed `isVisorReflectionEnabled` being ignored for real reflections
     - fixed issue with non-multiple-of-4 texture dimensions (thanks to sarbian)
-* 2.2.6
-    - fixed cloud reflections from orbit for stable version of EVE
 * 2.2.5
     - reverted immediate texture unloading
 * 2.2.4

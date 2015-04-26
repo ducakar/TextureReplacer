@@ -188,8 +188,8 @@ namespace TextureReplacer
         }
         else if (smr.name == "visor")
         {
-          bool isEVA = smr.transform.root.GetComponent<KerbalEVA>() != null;
-          Texture2D newTexture = isEVA ? evaVisorTexture : ivaVisorTexture;
+          bool isEva = smr.transform.root.name != "kerbal";
+          Texture2D newTexture = isEva ? evaVisorTexture : ivaVisorTexture;
 
           if (newTexture != null)
           {

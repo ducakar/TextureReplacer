@@ -188,7 +188,7 @@ namespace TextureReplacer
      * Component bound to internal models that triggers Kerbal texture personalisation when the
      * internal model changes.
      */
-    class IvaModule : MonoBehaviour
+    class TRIvaModule : MonoBehaviour
     {
       public void Start()
       {
@@ -197,7 +197,7 @@ namespace TextureReplacer
       }
     }
 
-    class EvaModule : PartModule
+    class TREvaModule : PartModule
     {
       Reflections.Script reflectionScript = null;
 
@@ -856,8 +856,8 @@ namespace TextureReplacer
         kerbal.textureStandard = defaultSuit.suit;
         kerbal.textureVeteran = defaultSuit.suitVeteran;
 
-        if (kerbal.GetComponent<IvaModule>() == null)
-          kerbal.gameObject.AddComponent<IvaModule>();
+        if (kerbal.GetComponent<TRIvaModule>() == null)
+          kerbal.gameObject.AddComponent<TRIvaModule>();
       }
 
       // Save pointer to helmet & visor meshes so helmet removal can restore them.
@@ -872,8 +872,18 @@ namespace TextureReplacer
       }
 
       // Install module for KerbalEVA part to enable EVA suit toggle.
-      if (eva.GetComponent<EvaModule>() == null)
-        eva.gameObject.AddComponent<EvaModule>();
+      if (eva.GetComponent<TREvaModule>() == null)
+        eva.gameObject.AddComponent<TREvaModule>();
+
+      // Re-read scenario if database is reloaded during the space centre scene to avoid losing all per-game settings.
+      if (HighLogic.CurrentGame != null)
+      {
+        ConfigNode scenarioNode = HighLogic.CurrentGame.config.GetNodes("SCENARIO")
+          .FirstOrDefault(n => n.GetValue("name") == "TRScenario");
+
+        if (scenarioNode != null)
+          loadScenario(scenarioNode);
+      }
     }
 
     public void beginFlight()
