@@ -57,6 +57,9 @@ namespace TextureReplacer
         if (logTextures)
           Util.log("[{0}] {1}", material.name, texture.name);
 
+        if (texture.filterMode == FilterMode.Bilinear)
+          texture.filterMode = FilterMode.Trilinear;
+
         Texture2D newTexture;
         mappedTextures.TryGetValue(texture.name, out newTexture);
 
@@ -71,16 +74,13 @@ namespace TextureReplacer
             UnityEngine.Object.Destroy(texture);
           }
         }
-        // Trilinear filter have already been applied to replacement textures, here we apply it also
-        // to original textures that are not being replaced.
-        else if (texture.filterMode == FilterMode.Bilinear)
-        {
-          texture.filterMode = FilterMode.Trilinear;
-        }
 
         Texture normalMap = material.GetTexture(Util.BUMPMAP_PROPERTY);
         if (normalMap == null)
           continue;
+
+        if (normalMap.filterMode == FilterMode.Bilinear)
+          normalMap.filterMode = FilterMode.Trilinear;
 
         Texture2D newNormalMap;
         mappedTextures.TryGetValue(normalMap.name, out newNormalMap);
@@ -95,10 +95,6 @@ namespace TextureReplacer
             material.SetTexture(Util.BUMPMAP_PROPERTY, newNormalMap);
             UnityEngine.Object.Destroy(normalMap);
           }
-        }
-        else if (normalMap.filterMode == FilterMode.Bilinear)
-        {
-          normalMap.filterMode = FilterMode.Trilinear;
         }
       }
     }
@@ -159,12 +155,15 @@ namespace TextureReplacer
           mappedTextures.Add(originalName, texture);
       }
 
-      Texture2D headNormalMap = null;
+      Texture2D[] headNormalMaps = { null, null };
       Texture2D ivaVisorTexture = null;
       Texture2D evaVisorTexture = null;
 
-      if (mappedTextures.TryGetValue("kerbalHeadNRM", out headNormalMap))
+      if (mappedTextures.TryGetValue("kerbalHeadNRM", out headNormalMaps[0]))
         mappedTextures.Remove("kerbalHeadNRM");
+
+      if (mappedTextures.TryGetValue("kerbalGirl_06_BaseColorNRM", out headNormalMaps[1]))
+        mappedTextures.Remove("kerbalGirl_06_BaseColorNRM");
 
       if (mappedTextures.TryGetValue("kerbalVisor", out ivaVisorTexture))
         mappedTextures.Remove("kerbalVisor");
@@ -178,24 +177,42 @@ namespace TextureReplacer
         if (skinningQuality != SkinQuality.Auto)
           smr.quality = skinningQuality;
 
-        if (smr.name == "headMesh01")
+        switch (smr.name)
         {
-          // Replace with bump-mapped shader so normal maps for heads will work.
-          smr.sharedMaterial.shader = Util.bumpedDiffuseShader;
+          case "headMesh01":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
+            // Replace with bump-mapped shader so normal maps for heads will work.
+            smr.sharedMaterial.shader = Util.bumpedDiffuseShader;
 
-          if (headNormalMap != null)
-            smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMap);
-        }
-        else if (smr.name == "visor")
-        {
-          bool isEva = smr.transform.root.name != "kerbal";
-          Texture2D newTexture = isEva ? evaVisorTexture : ivaVisorTexture;
+            if (smr.name == "headMesh01")
+            {
+              if (headNormalMaps[0] != null)
+                smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMaps[0]);
+            }
+            else
+            {
+              if (headNormalMaps[1] != null)
+                smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMaps[1]);
+            }
+            break;
 
-          if (newTexture != null)
-          {
-            smr.sharedMaterial.mainTexture = newTexture;
-            smr.sharedMaterial.color = Color.white;
-          }
+          case "body01":
+          case "mesh_female_kerbalAstronaut01_body01":
+            // Replace body shader for females, so alpha on suits defines specularity, same as for male Kerbals.
+            smr.sharedMaterial.shader = Util.bumpedSpecularShader;
+            break;
+
+          case "visor":
+          case "mesh_female_kerbalAstronaut01_visor":
+            bool isEva = smr.transform.root.name.StartsWith("kerbalEVA", StringComparison.Ordinal);
+            Texture2D newTexture = isEva ? evaVisorTexture : ivaVisorTexture;
+
+            if (newTexture != null)
+            {
+              smr.sharedMaterial.mainTexture = newTexture;
+              smr.sharedMaterial.color = Color.white;
+            }
+            break;
         }
       }
 
@@ -213,7 +230,7 @@ namespace TextureReplacer
         mappedTextures.Remove(IVA_NAVBALL);
 
         if (ivaNavBallTexture.mipmapCount != 1)
-          Util.log("IVANavBall texture shouldn't have mipmaps!");
+          Util.log("IVANavBall texture should not have mipmaps!");
       }
     }
 

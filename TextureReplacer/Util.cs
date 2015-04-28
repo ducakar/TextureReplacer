@@ -40,6 +40,7 @@ namespace TextureReplacer
     public static readonly Shader transparentSpecularShader = Shader.Find("Transparent/Specular");
     public static readonly Shader diffuseShader = Shader.Find("Diffuse");
     public static readonly Shader bumpedDiffuseShader = Shader.Find("Bumped Diffuse");
+    public static readonly Shader bumpedSpecularShader = Shader.Find("KSP/Bumped Specular");
     public static readonly System.Random random = new System.Random();
 
     /**

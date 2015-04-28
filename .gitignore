@@ -4,6 +4,7 @@
 /GameData/TextureReplacer/README.md
 /KSP.log
 *.dll
+*.dds
 *.tga
 *.png
 *.gif

@@ -112,17 +112,14 @@ namespace TextureReplacer
 
       if (selectedKerbal != null)
       {
-        kerbalData = personaliser.getKerbalData(selectedKerbal.name);
-        defaultHead = personaliser.defaultHead[kerbalData.gender];
+        kerbalData = personaliser.getKerbalData(selectedKerbal);
+        defaultHead = personaliser.defaultHead[(int) selectedKerbal.gender];
 
-        if (kerbalData != null)
-        {
-          head = personaliser.getKerbalHead(kerbalData);
-          suit = personaliser.getKerbalSuit(selectedKerbal, kerbalData);
+        head = personaliser.getKerbalHead(selectedKerbal, kerbalData);
+        suit = personaliser.getKerbalSuit(selectedKerbal, kerbalData);
 
-          headIndex = personaliser.heads.IndexOf(head);
-          suitIndex = personaliser.suits.IndexOf(suit);
-        }
+        headIndex = personaliser.heads.IndexOf(head);
+        suitIndex = personaliser.suits.IndexOf(suit);
       }
       else if (selectedClass != null)
       {
@@ -328,7 +325,8 @@ namespace TextureReplacer
 
     void onGUIApplicationLauncherUnreadifying(GameScenes scenes)
     {
-      ApplicationLauncher.Instance.RemoveModApplication(appButton);
+      if (appButton)
+        ApplicationLauncher.Instance.RemoveModApplication(appButton);
     }
 
     public void Awake()
@@ -352,6 +350,12 @@ namespace TextureReplacer
         GameEvents.onGUIApplicationLauncherReady.Add(onGUIApplicationLauncherReady);
         GameEvents.onGUIApplicationLauncherUnreadifying.Add(onGUIApplicationLauncherUnreadifying);
       }
+    }
+
+    public void Start()
+    {
+      if (appButton == null)
+        onGUIApplicationLauncherReady();
     }
 
     public void OnGUI()
