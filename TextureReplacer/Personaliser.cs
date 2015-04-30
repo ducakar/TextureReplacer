@@ -402,7 +402,7 @@ namespace TextureReplacer
       if (isEva || !cabinSuits.TryGetValue(cabin.partInfo.name, out kerbalData.cabinSuit))
         suit = getKerbalSuit(kerbal, kerbalData);
 
-      head = head == defaultHead[0] || head == defaultHead[1] ? null : head;
+      head = head == defaultHead[(int) kerbal.gender] ? null : head;
       suit = (isEva && needsSuit) || kerbalData.cabinSuit == null ? suit : kerbalData.cabinSuit;
       suit = suit == defaultSuit ? null : suit;
 
@@ -420,6 +420,8 @@ namespace TextureReplacer
         }
         else
         {
+          Util.log("{0} :: {1} :: {2}", smr.name, smr.material.shader, smr.material.mainTexture);
+
           Material material = renderer.material;
           Texture2D newTexture = null;
           Texture2D newNormalMap = null;
@@ -443,10 +445,10 @@ namespace TextureReplacer
             case "upTeeth01":
             case "upTeeth02":
             case "tongue":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
             case "headMesh":
             case "ponytail":
             case "downTeeth01":
@@ -607,7 +609,9 @@ namespace TextureReplacer
     {
       node = node ?? customKerbalsNode;
 
-      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew)
+      KerbalRoster roster = HighLogic.CurrentGame.CrewRoster;
+
+      foreach (ProtoCrewMember kerbal in roster.Crew.Concat(roster.Tourist).Concat(roster.Unowned))
       {
         if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead)
           continue;
@@ -648,7 +652,9 @@ namespace TextureReplacer
      */
     void saveKerbals(ConfigNode node)
     {
-      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew)
+      KerbalRoster roster = HighLogic.CurrentGame.CrewRoster;
+
+      foreach (ProtoCrewMember kerbal in roster.Crew.Concat(roster.Tourist).Concat(roster.Unowned))
       {
         if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead)
           continue;

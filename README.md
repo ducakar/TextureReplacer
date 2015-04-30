@@ -300,6 +300,10 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.1
+    - replaced default female shaders to make them consistent with males and
+      enable bumpmapping and suit shinines
+    - fixed legacy females feature tourists etc.
 * 2.4
     - updated for KSP 1.0
     - updated personalisation to work with stock female Kerbals

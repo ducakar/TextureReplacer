@@ -39,8 +39,8 @@ namespace TextureReplacer
     public static readonly int REFLECT_COLOR_PROPERTY = Shader.PropertyToID("_ReflectColor");
     public static readonly Shader transparentSpecularShader = Shader.Find("Transparent/Specular");
     public static readonly Shader diffuseShader = Shader.Find("Diffuse");
-    public static readonly Shader bumpedDiffuseShader = Shader.Find("Bumped Diffuse");
-    public static readonly Shader bumpedSpecularShader = Shader.Find("KSP/Bumped Specular");
+    public static readonly Shader headShader = Shader.Find("Bumped Diffuse");
+    public static readonly Shader suitShader = Shader.Find("KSP/Bumped Specular");
     public static readonly System.Random random = new System.Random();
 
     /**
@@ -141,9 +141,6 @@ namespace TextureReplacer
     }
 
     #if TR_LOG_HIERARCHY
-    /**
-     * Print hierarchy up from a transform.
-     */
     public static void logDownHierarchy(Transform tf, int indent = 0)
     {
       string sIndent = "";
@@ -154,7 +151,16 @@ namespace TextureReplacer
         UnityEngine.Debug.Log(sIndent + "- " + tf.gameObject.name + ": " + tf.gameObject.GetType());
 
       foreach (Component c in tf.GetComponents<Component>())
-        UnityEngine.Debug.Log(sIndent + " * " + c.name + ": " + c.GetType());
+      {
+        UnityEngine.Debug.Log(sIndent + " * " + c);
+
+        Renderer r = c as Renderer;
+        if (r != null)
+        {
+          UnityEngine.Debug.Log(sIndent + "   shader:  " + r.material.shader);
+          UnityEngine.Debug.Log(sIndent + "   texture: " + r.material.mainTexture);
+        }
+      }
 
       for (int i = 0; i < tf.childCount; ++i)
         logDownHierarchy(tf.GetChild(i), indent + 1);
@@ -171,7 +177,16 @@ namespace TextureReplacer
           UnityEngine.Debug.Log("+ " + tf.gameObject.name + ": " + tf.gameObject.GetType());
 
         foreach (Component c in tf.GetComponents<Component>())
-          UnityEngine.Debug.Log(" * " + c.name + ": " + c.GetType());
+        {
+          UnityEngine.Debug.Log(" * " + c);
+
+          Renderer r = c as Renderer;
+          if (r != null)
+          {
+            UnityEngine.Debug.Log("   shader:  " + r.material.shader);
+            UnityEngine.Debug.Log("   texture: " + r.material.mainTexture);
+          }
+        }
       }
     }
     #endif
