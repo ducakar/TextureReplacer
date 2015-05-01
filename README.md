@@ -180,8 +180,8 @@ e.g. `interval = 2` makes the part update half less frequently.
 Heads and suits are assigned either manually or automatically (configured in the
 GUI while configuration files can provide initial settings). "Random" assignment
 of heads and suits is based on Kerbals' names, which ensures the same head/suit
-is always assigned to a given Kerbal. Additionally, suits can also be assigned
-consecutively (based on roster index) or based on class and experience level.
+is always assigned to a given Kerbal. Additionally, special per-class suit can
+be set for suits for each class.
 
 Head textures reside inside `Heads/` directory (and its subdirectories) and have
 arbitrary names. Normal maps are optional. To provide a normal map, name it the
@@ -303,6 +303,9 @@ Change Log
 * 2.4.1
     - replaced default female shaders to make them consistent with males and
       enable bumpmapping and suit shinines
+    - removed consecutive suit assignment
+    - removed (now redundant) suit assignment settings, since random suit is
+      used when per-class suit is not available
     - fixed legacy females feature tourists etc.
 * 2.4
     - updated for KSP 1.0

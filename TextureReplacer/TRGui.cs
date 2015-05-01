@@ -30,7 +30,6 @@ namespace TextureReplacer
   public class TRGui : MonoBehaviour
   {
     static readonly string APP_ICON_PATH = Util.DIR + "Plugins/appIcon";
-    static readonly string[] SUIT_ASSIGNMENTS = { "Random", "Consecutive", "Class" };
     static readonly string[] REFLECTION_TYPES = { "None", "Static", "Real" };
     static readonly Color SELECTED_COLOUR = new Color(0.7f, 0.9f, 1.0f);
     static readonly Color CLASS_COLOUR = new Color(1.0f, 0.8f, 1.0f);
@@ -38,7 +37,7 @@ namespace TextureReplacer
     // Classes from config files.
     readonly List<string> classes = new List<string>();
     // UI state.
-    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 600);
+    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 580);
     Vector2 rosterScroll = Vector2.zero;
     ProtoCrewMember selectedKerbal = null;
     string selectedClass = null;
@@ -279,12 +278,6 @@ namespace TextureReplacer
 
       personaliser.isAtmSuitEnabled = GUILayout.Toggle(
         personaliser.isAtmSuitEnabled, "Spawn Kerbals in IVA suits when in breathable atmosphere");
-
-      GUILayout.BeginHorizontal();
-      GUILayout.Label("Generic suits", GUILayout.Width(120));
-      personaliser.suitAssignment = (Personaliser.SuitAssignment) GUILayout.SelectionGrid(
-        (int) personaliser.suitAssignment, SUIT_ASSIGNMENTS, 3);
-      GUILayout.EndHorizontal();
 
       Reflections.Type reflectionType = reflections.reflectionType;
 

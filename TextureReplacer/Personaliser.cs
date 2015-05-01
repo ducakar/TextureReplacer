@@ -29,13 +29,6 @@ namespace TextureReplacer
 {
   class Personaliser
   {
-    public enum SuitAssignment
-    {
-      RANDOM,
-      CONSECUTIVE,
-      CLASS
-    }
-
     public class Head
     {
       public string name;
@@ -270,6 +263,7 @@ namespace TextureReplacer
     static readonly string DIR_DEFAULT = Util.DIR + "Default/";
     static readonly string DIR_HEADS = Util.DIR + "Heads/";
     static readonly string DIR_SUITS = Util.DIR + "Suits/";
+    static readonly string[] VETERANS = { "Jebediah Kerman", "Bill Kerman", "Bob Kerman", "Valentina Kerman" };
     // Default textures (from `Default/`).
     public readonly Head[] defaultHead = { new Head { name = "DEFAULT" }, new Head { name = "DEFAULT" } };
     public readonly Suit defaultSuit = new Suit { name = "DEFAULT" };
@@ -299,8 +293,6 @@ namespace TextureReplacer
     public bool isAtmSuitEnabled = true;
     double atmSuitPressure = 50.0;
     readonly HashSet<string> atmSuitBodies = new HashSet<string>();
-    // Whether assignment of suits should be consecutive.
-    public SuitAssignment suitAssignment = SuitAssignment.RANDOM;
     // Instance.
     public static Personaliser instance = null;
 
@@ -326,11 +318,8 @@ namespace TextureReplacer
 
     Suit getClassSuit(ProtoCrewMember kerbal)
     {
-      Suit suit = null;
-
-      if (suitAssignment == SuitAssignment.CLASS && kerbal.type == ProtoCrewMember.KerbalType.Crew)
-        classSuits.TryGetValue(kerbal.experienceTrait.Config.Name, out suit);
-
+      Suit suit;
+      classSuits.TryGetValue(kerbal.experienceTrait.Config.Name, out suit);
       return suit;
     }
 
@@ -343,7 +332,7 @@ namespace TextureReplacer
         kerbalData = new KerbalData {
           hash = kerbal.name.GetHashCode(),
           gender = (int) kerbal.gender,
-          isVeteran = kerbal.name == "Jebediah Kerman" || kerbal.name == "Bill Kerman" || kerbal.name == "Bob Kerman"
+          isVeteran = VETERANS.Any(n => n == kerbal.name)
         };
         gameKerbals.Add(kerbal.name, kerbalData);
 
@@ -380,10 +369,7 @@ namespace TextureReplacer
 
       // Here we must use a different prime to increase randomisation so that the same head is
       // not always combined with the same suit.
-      int number = suitAssignment == SuitAssignment.RANDOM
-        ? ((kerbalData.hash + kerbal.name.Length) * 2053) & 0x7fffffff
-        : HighLogic.CurrentGame.CrewRoster.IndexOf(kerbal);
-
+      int number = ((kerbalData.hash + kerbal.name.Length) * 2053) & 0x7fffffff;
       return genderSuits[number % genderSuits.Count];
     }
 
@@ -394,7 +380,6 @@ namespace TextureReplacer
     {
       KerbalData kerbalData = getKerbalData(kerbal);
       bool isEva = cabin == null;
-      int level = suitAssignment == SuitAssignment.CLASS ? kerbal.experienceLevel : 0;
 
       Head head = getKerbalHead(kerbal, kerbalData);
       Suit suit = null;
@@ -420,8 +405,6 @@ namespace TextureReplacer
         }
         else
         {
-          Util.log("{0} :: {1} :: {2}", smr.name, smr.material.shader, smr.material.mainTexture);
-
           Material material = renderer.material;
           Texture2D newTexture = null;
           Texture2D newNormalMap = null;
@@ -465,7 +448,7 @@ namespace TextureReplacer
 
               if (suit != null)
               {
-                newTexture = isEvaSuit ? suit.getEvaSuit(level) : suit.getSuit(level);
+                newTexture = isEvaSuit ? suit.getEvaSuit(kerbal.experienceLevel) : suit.getSuit(kerbal.experienceLevel);
                 newNormalMap = isEvaSuit ? suit.evaSuitNRM : suit.suitNRM;
               }
 
@@ -500,7 +483,7 @@ namespace TextureReplacer
 
               if (needsSuit && suit != null)
               {
-                newTexture = isEva ? suit.getEvaHelmet(level) : suit.getHelmet(level);
+                newTexture = isEva ? suit.getEvaHelmet(kerbal.experienceLevel) : suit.getHelmet(kerbal.experienceLevel);
                 newNormalMap = suit.helmetNRM;
               }
               break;
@@ -752,7 +735,6 @@ namespace TextureReplacer
           Util.addLists(genericNode.GetValues("femaleHeads"), femaleHeads);
           Util.addLists(genericNode.GetValues("femaleSuits"), femaleSuits);
           Util.addLists(genericNode.GetValues("eyelessHeads"), eyelessHeads);
-          Util.parse(genericNode.GetValue("suitAssignment"), ref suitAssignment);
         }
 
         ConfigNode classNode = file.config.GetNode("ClassSuits");
@@ -982,7 +964,6 @@ namespace TextureReplacer
 
       Util.parse(node.GetValue("isHelmetRemovalEnabled"), ref isHelmetRemovalEnabled);
       Util.parse(node.GetValue("isAtmSuitEnabled"), ref isAtmSuitEnabled);
-      Util.parse(node.GetValue("suitAssignment"), ref suitAssignment);
     }
 
     public void saveScenario(ConfigNode node)
@@ -992,7 +973,6 @@ namespace TextureReplacer
 
       node.AddValue("isHelmetRemovalEnabled", isHelmetRemovalEnabled);
       node.AddValue("isAtmSuitEnabled", isAtmSuitEnabled);
-      node.AddValue("suitAssignment", suitAssignment);
     }
   }
 }
