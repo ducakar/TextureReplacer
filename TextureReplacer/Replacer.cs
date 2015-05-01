@@ -100,6 +100,61 @@ namespace TextureReplacer
       }
     }
 
+    static void updateKerbalMeshes(Transform tf, Texture headNormalMap, Texture visorTexture)
+    {
+      Shader headShader = Shader.Find("Bumped Diffuse");
+      Shader suitShader = Shader.Find("KSP/Bumped Specular");
+
+      foreach (SkinnedMeshRenderer smr in tf.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+      {
+        switch (smr.name)
+        {
+          case "headMesh01":
+          case "upTeeth01":
+          case "upTeeth02":
+          case "tongue":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
+          case "headMesh":
+          case "ponytail":
+          case "downTeeth01":
+            // Replace with bump-mapped shader so normal maps for heads will work.
+            smr.sharedMaterial.shader = headShader;
+
+            if (headNormalMap != null)
+              smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMap);
+            break;
+
+          case "body01":
+          case "mesh_female_kerbalAstronaut01_body01":
+          case "helmet":
+          case "mesh_female_kerbalAstronaut01_helmet":
+            // Replace body shader for females, so alpha on suits defines specularity, same as for male Kerbals.
+            smr.sharedMaterial.shader = suitShader;
+            break;
+
+          case "visor":
+          case "mesh_female_kerbalAstronaut01_visor":
+            if (visorTexture != null)
+            {
+              smr.sharedMaterial.mainTexture = visorTexture;
+              smr.sharedMaterial.color = Color.white;
+            }
+            smr.sharedMaterial.color = Color.white;
+            break;
+        }
+      }
+
+      Transform jetpack = tf.Find("model01/jetpack01");
+      if (jetpack != null)
+      {
+        foreach (SkinnedMeshRenderer smr in jetpack.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+          smr.sharedMaterial.shader = suitShader;
+      }
+    }
+
     /**
      * Replace NavBalls' textures.
      */
@@ -134,7 +189,7 @@ namespace TextureReplacer
     /**
      * Post-load initialisation.
      */
-    public void initialise()
+    public void load()
     {
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
@@ -176,84 +231,22 @@ namespace TextureReplacer
       {
         if (skinningQuality != SkinQuality.Auto)
           smr.quality = skinningQuality;
-
-        // Fix shaders on Kerbals (for male--female consistency and to enable bumpmapping).
-        switch (smr.name)
-        {
-          case "headMesh01":
-          case "upTeeth01":
-          case "upTeeth02":
-          case "tongue":
-          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
-          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
-          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
-          case "headMesh":
-          case "ponytail":
-          case "downTeeth01":
-            // Replace with bump-mapped shader so normal maps for heads will work.
-            smr.sharedMaterial.shader = Util.headShader;
-            break;
-
-          case "body01":
-          case "mesh_female_kerbalAstronaut01_body01":
-          case "helmet":
-          case "mesh_female_kerbalAstronaut01_helmet":
-            // Replace body shader for females, so alpha on suits defines specularity, same as for male Kerbals.
-            smr.sharedMaterial.shader = Util.suitShader;
-            break;
-
-          case "visor":
-          case "mesh_female_kerbalAstronaut01_visor":
-            bool isEva = smr.transform.root.name.StartsWith("kerbalEVA", StringComparison.Ordinal);
-            Texture2D newTexture = isEva ? evaVisorTexture : ivaVisorTexture;
-
-            if (newTexture != null)
-            {
-              smr.sharedMaterial.mainTexture = newTexture;
-              smr.sharedMaterial.color = Color.white;
-            }
-            break;
-        }
       }
 
-      // Set normal-mapped shader for head and visor texture on proto-IVA and -EVA Kerbals.
-      var kerbalModels = Resources.FindObjectsOfTypeAll<Kerbal>().Select(k => k.transform)
-        .Concat(Resources.FindObjectsOfTypeAll<KerbalEVA>().Select(k => k.transform));
+      // Fix female shaders, set normal-mapped shader for head and visor texture on proto-IVA and -EVA Kerbals.
+      Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
 
-      foreach (Transform tf in kerbalModels)
-      {
-        foreach (SkinnedMeshRenderer smr in tf.GetComponentsInChildren<SkinnedMeshRenderer>(true))
-        {
-          int gender = -1;
+      Kerbal maleIva = kerbals.First(k => k.transform.name == "kerbalMale");
+      updateKerbalMeshes(maleIva.transform, headNormalMaps[0], ivaVisorTexture);
 
-          switch (smr.name)
-          {
-            case "headMesh01":
-            case "upTeeth02":
-            case "tongue":
-              gender = 0;
-              break;
+      Kerbal femaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
+      updateKerbalMeshes(femaleIva.transform, headNormalMaps[1], ivaVisorTexture);
 
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
-            case "headMesh":
-            case "ponytail":
-            case "downteeth01":
-              gender = 1;
-              break;
+      Part maleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
+      updateKerbalMeshes(maleEva.transform, headNormalMaps[0], evaVisorTexture);
 
-            case "upTeeth01":
-              gender = tf.name.IndexOf("female", StringComparison.Ordinal) >= 0 ? 1 : 0;
-              break;
-          }
-
-          if (gender >= 0 && headNormalMaps[gender] != null)
-            smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMaps[gender]);
-        }
-      }
+      Part femaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
+      updateKerbalMeshes(femaleEva.transform, headNormalMaps[1], evaVisorTexture);
 
       // Find NavBall replacement textures if available.
       if (mappedTextures.TryGetValue(HUD_NAVBALL, out hudNavBallTexture))

@@ -301,12 +301,14 @@ Change Log
 ----------
 
 * 2.4.1
-    - replaced default female shaders to make them consistent with males and
-      enable bumpmapping and suit shinines
+    - shaders on Kerbals are now changed to make them consistent between males
+      and females and fix bumpmapping and specular lighting for female suits
     - removed consecutive suit assignment
-    - removed (now redundant) suit assignment settings, since random suit is
-      used when per-class suit is not available
-    - fixed legacy females feature tourists etc.
+    - removed (now redundant) suit assignment setting, since random suit is
+      automatically used when the per-class suit is not available
+    - fixed legacy females feature for tourists
+    - fixed random suit assignment when the per-class suit is not available
+    - fixed default veteran suit assignment for Valentina
 * 2.4
     - updated for KSP 1.0
     - updated personalisation to work with stock female Kerbals

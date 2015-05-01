@@ -332,7 +332,7 @@ namespace TextureReplacer
     /**
      * Post-load initialisation.
      */
-    public void initialise()
+    public void load()
     {
       Texture2D[] envMapFaces = new Texture2D[6];
 

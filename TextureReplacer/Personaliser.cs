@@ -91,39 +91,51 @@ namespace TextureReplacer
           case "kerbalMain":
             suitVeteran = suitVeteran ?? texture;
             return false;
+
           case "kerbalMainGrey":
             suit = suit ?? texture;
             return true;
+
           case "kerbalMainNRM":
             suitNRM = suitNRM ?? texture;
             return true;
+
           case "kerbalHelmetGrey":
             helmet = helmet ?? texture;
             return true;
+
           case "kerbalHelmetNRM":
             helmetNRM = helmetNRM ?? texture;
             return true;
+
           case "kerbalVisor":
             visor = visor ?? texture;
             return true;
+
           case "EVAtexture":
             evaSuit = evaSuit ?? texture;
             return true;
+
           case "EVAtextureNRM":
             evaSuitNRM = evaSuitNRM ?? texture;
             return true;
+
           case "EVAhelmet":
             evaHelmet = evaHelmet ?? texture;
             return true;
+
           case "EVAvisor":
             evaVisor = evaVisor ?? texture;
             return true;
+
           case "EVAjetpack":
             evaJetpack = evaJetpack ?? texture;
             return true;
+
           case "EVAjetpackNRM":
             evaJetpackNRM = evaJetpackNRM ?? texture;
             return true;
+
           case "kerbalMainGrey1":
           case "kerbalMainGrey2":
           case "kerbalMainGrey3":
@@ -133,6 +145,7 @@ namespace TextureReplacer
             levelSuits = levelSuits ?? new Texture2D[5];
             levelSuits[level - 1] = levelSuits[level - 1] ?? texture;
             return true;
+
           case "kerbalHelmetGrey1":
           case "kerbalHelmetGrey2":
           case "kerbalHelmetGrey3":
@@ -142,6 +155,7 @@ namespace TextureReplacer
             levelHelmets = levelHelmets ?? new Texture2D[5];
             levelHelmets[level - 1] = levelHelmets[level - 1] ?? texture;
             return true;
+
           case "EVAtexture1":
           case "EVAtexture2":
           case "EVAtexture3":
@@ -151,6 +165,7 @@ namespace TextureReplacer
             levelEvaSuits = levelEvaSuits ?? new Texture2D[5];
             levelEvaSuits[level - 1] = levelEvaSuits[level - 1] ?? texture;
             return true;
+
           case "EVAhelmet1":
           case "EVAhelmet2":
           case "EVAhelmet3":
@@ -160,6 +175,7 @@ namespace TextureReplacer
             levelEvaHelmets = levelEvaHelmets ?? new Texture2D[5];
             levelEvaHelmets[level - 1] = levelEvaHelmets[level - 1] ?? texture;
             return true;
+
           default:
             return false;
         }
@@ -275,8 +291,8 @@ namespace TextureReplacer
     readonly List<Suit>[] kerbalSuits = { new List<Suit>(), new List<Suit>() };
     // Personalised Kerbal textures.
     readonly Dictionary<string, KerbalData> gameKerbals = new Dictionary<string, KerbalData>();
-    // Backed-up personalised textures from main configuration files. These are used to initialise
-    // kerbals if a saved game doesn't contain `TRScenario`.
+    // Backed-up personalised textures from main configuration files. These are used to initialise kerbals if a saved
+    // game doesn't contain `TRScenario`.
     ConfigNode customKerbalsNode = new ConfigNode();
     // Cabin-specific suits.
     readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
@@ -297,8 +313,7 @@ namespace TextureReplacer
     public static Personaliser instance = null;
 
     /**
-     * Whether a vessel is in a "safe" situation, so Kerbals don't need helmets (landed/splashed
-     * or in orbit).
+     * Whether a vessel is in a "safe" situation, so Kerbals don't need helmets (landed/splashed or in orbit).
      */
     static bool isSituationSafe(Vessel vessel)
     {
@@ -351,8 +366,8 @@ namespace TextureReplacer
       if (genderHeads.Count == 0)
         return defaultHead[(int) kerbal.gender];
 
-      // Hash is multiplied with a large prime to increase randomisation, since hashes returned
-      // by `GetHashCode()` are close together if strings only differ in the last (few) char(s).
+      // Hash is multiplied with a large prime to increase randomisation, since hashes returned by `GetHashCode()` are
+      // close together if strings only differ in the last (few) char(s).
       int number = (kerbalData.hash * 4099) & 0x7fffffff;
       return genderHeads[number % genderHeads.Count];
     }
@@ -363,12 +378,17 @@ namespace TextureReplacer
       if (suit != null)
         return suit;
 
-      List<Suit> genderSuits = kerbalSuits[kerbalData.gender];
+      List<Suit> genderSuits = kerbalSuits[0];
+
+      // Use female suits only if available, fall back to male suits otherwise.
+      if (kerbalData.gender != 0 && kerbalSuits[1].Count != 0)
+        genderSuits = kerbalSuits[1];
+
       if (genderSuits.Count == 0)
         return defaultSuit;
 
-      // Here we must use a different prime to increase randomisation so that the same head is
-      // not always combined with the same suit.
+      // We must use a different prime here to increase randomisation so that the same head is not always combined with
+      // the same suit.
       int number = ((kerbalData.hash + kerbal.name.Length) * 2053) & 0x7fffffff;
       return genderSuits[number % genderSuits.Count];
     }
@@ -507,7 +527,7 @@ namespace TextureReplacer
             default: // Jetpack.
               smr.enabled = needsSuit;
 
-              if (needsSuit && suit != null)
+              if (isEva && needsSuit && suit != null)
               {
                 newTexture = suit.evaJetpack;
                 newNormalMap = suit.evaJetpackNRM;
@@ -788,7 +808,7 @@ namespace TextureReplacer
     /**
      * Post-load initialisation.
      */
-    public void initialise()
+    public void load()
     {
       var suitDirs = new Dictionary<string, int>();
       string lastTextureName = "";
@@ -884,10 +904,7 @@ namespace TextureReplacer
       }
 
       readKerbalsConfigs();
-    }
 
-    public void load()
-    {
       // Initialise default Kerbal, which is only loaded when the main menu shows.
       foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>())
       {

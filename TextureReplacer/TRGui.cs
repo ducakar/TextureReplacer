@@ -37,7 +37,7 @@ namespace TextureReplacer
     // Classes from config files.
     readonly List<string> classes = new List<string>();
     // UI state.
-    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 580);
+    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 575);
     Vector2 rosterScroll = Vector2.zero;
     ProtoCrewMember selectedKerbal = null;
     string selectedClass = null;

@@ -70,9 +70,6 @@ namespace TextureReplacer
         if (GameDatabase.Instance.IsReady())
         {
           Loader.instance.initialise();
-          Replacer.instance.initialise();
-          Reflections.instance.initialise();
-          Personaliser.instance.initialise();
 
           isInitialised = true;
         }
@@ -81,6 +78,8 @@ namespace TextureReplacer
       {
         if (PartLoader.Instance.IsReady())
         {
+          Replacer.instance.load();
+          Reflections.instance.load();
           Personaliser.instance.load();
 
           isLoaded = true;
