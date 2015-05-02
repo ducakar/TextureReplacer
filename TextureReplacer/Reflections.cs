@@ -133,13 +133,6 @@ namespace TextureReplacer
       {
         int faceMask = force ? 0x3f : 1 << currentFace;
 
-        Transform spaceTransf = ScaledSpace.Instance.transform;
-        Vector3 spacePos = spaceTransf.position;
-        Vector3 cameraPos = transform.position;
-
-        if (isEva)
-          cameraPos += transform.up * 0.4f;
-
         // Hide meshes of the current part.
         foreach (TransformLayer tl in transformLayers)
         {
@@ -147,13 +140,23 @@ namespace TextureReplacer
             tl.gameObject.layer = 31;
         }
 
-        // It seems ScaledSpace must always be rendered from the origin of its coordinate system.
-        spaceTransf.position = cameraPos;
-
-        camera.transform.position = cameraPos;
+        // Skybox.
+        camera.transform.position = GalaxyCubeControl.Instance.transform.position;
+        camera.farClipPlane = 100.0f;
+        camera.cullingMask = (1 << 9) | (1 << 18);
         camera.RenderToCubemap(envMap, faceMask);
 
-        spaceTransf.position = spacePos;
+        // Scaled space.
+        camera.transform.position = ScaledSpace.Instance.transform.position;
+        camera.farClipPlane = 3.0e7f;
+        camera.cullingMask = (1 << 10) | (1 << 23);
+        camera.RenderToCubemap(envMap, faceMask);
+
+        // Scene.
+        camera.transform.position = isEva ? transform.position + 0.4f * transform.up : transform.position;
+        camera.farClipPlane = 60000.0f;
+        camera.cullingMask = (1 << 0) | (1 << 1) | (1 << 5) | (1 << 15);
+        camera.RenderToCubemap(envMap, faceMask);
 
         foreach (TransformLayer tl in transformLayers)
         {
@@ -209,11 +212,21 @@ namespace TextureReplacer
       { "KSP/Alpha/Translucent", "TR/Visor" },
       { "KSP/Alpha/Translucent Specular", "TR/Visor" }
     };
+
+    // Render layers:
+    //  0 - parts
+    //  1 - RCS jets
+    //  5 - engine exhaust
+    //  9 - sky/atmosphere
+    // 10 - scaled space bodies
+    // 15 - buildings, terrain
+    // 18 - skybox
+    // 23 - sun
     static readonly float[] CULL_DISTANCES = {
-      100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f,
-      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 60000.0f,
+      1000.0f, 100.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
     };
     readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflective shader material.
@@ -245,21 +258,9 @@ namespace TextureReplacer
       {
         camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).camera;
         camera.enabled = false;
+        camera.clearFlags = CameraClearFlags.Depth;
         // Any smaller number and visors will refect internals of helmets.
         camera.nearClipPlane = 0.125f;
-        camera.farClipPlane = 3.0e7f;
-
-        // Render layers:
-        //  0 - parts
-        //  1 - RCS jets
-        //  5 - engine exhaust
-        //  9 - sky/atmosphere
-        // 10 - scaled space bodies
-        // 15 - buildings, terrain
-        // 18 - skybox
-        // 23 - sun
-        camera.cullingMask = 0x00848623;
-        // Cull everything but scaled space & co. at 100 m.
         camera.layerCullDistances = CULL_DISTANCES;
       }
     }

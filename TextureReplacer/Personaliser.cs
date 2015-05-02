@@ -383,8 +383,7 @@ namespace TextureReplacer
       // Use female suits only if available, fall back to male suits otherwise.
       if (kerbalData.gender != 0 && kerbalSuits[1].Count != 0)
         genderSuits = kerbalSuits[1];
-
-      if (genderSuits.Count == 0)
+      else if (genderSuits.Count == 0)
         return defaultSuit;
 
       // We must use a different prime here to increase randomisation so that the same head is not always combined with

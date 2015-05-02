@@ -53,7 +53,7 @@ namespace TextureReplacer
       Personaliser personaliser = Personaliser.instance;
 
       GUILayout.BeginVertical();
-      GUILayout.BeginHorizontal(GUILayout.Height(430));
+      GUILayout.BeginHorizontal();
 
       // Roster area.
       rosterScroll = GUILayout.BeginScrollView(rosterScroll, GUILayout.Width(200));

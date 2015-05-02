@@ -289,7 +289,7 @@ Notes
 Known Issues
 ------------
 
-* Atmosphere skybox is not wholly reflected, there's a black strip around.
+* Atmospheric skybox is not wholly reflected, there's a black strip around.
 * Reflections disable part highlighting.
 * Reflections may break radial attachment on some parts.
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
@@ -304,11 +304,12 @@ Change Log
     - shaders on Kerbals are now changed to make them consistent between males
       and females and fix bumpmapping and specular lighting for female suits
     - removed consecutive suit assignment
-    - removed (now redundant) suit assignment setting, since random suit is
-      automatically used when the per-class suit is not available
+    - removed (now redundant) suit assignment setting, since a random suit is
+      automatically used when the class suit is not set
     - fixed legacy females feature for tourists
-    - fixed random suit assignment when the per-class suit is not available
+    - fixed random suit assignment when the class suit is not available
     - fixed default veteran suit assignment for Valentina
+    - fixed skybox reflection
 * 2.4
     - updated for KSP 1.0
     - updated personalisation to work with stock female Kerbals
