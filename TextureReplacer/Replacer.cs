@@ -142,7 +142,6 @@ namespace TextureReplacer
               smr.sharedMaterial.mainTexture = visorTexture;
               smr.sharedMaterial.color = Color.white;
             }
-            smr.sharedMaterial.color = Color.white;
             break;
         }
       }

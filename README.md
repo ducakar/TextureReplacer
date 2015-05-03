@@ -181,7 +181,7 @@ Heads and suits are assigned either manually or automatically (configured in the
 GUI while configuration files can provide initial settings). "Random" assignment
 of heads and suits is based on Kerbals' names, which ensures the same head/suit
 is always assigned to a given Kerbal. Additionally, special per-class suit can
-be set for suits for each class.
+be set for each class.
 
 Head textures reside inside `Heads/` directory (and its subdirectories) and have
 arbitrary names. Normal maps are optional. To provide a normal map, name it the
@@ -300,6 +300,8 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.2
+    - fixed white visors when not using visor texture
 * 2.4.1
     - shaders on Kerbals are now changed to make them consistent between males
       and females and fix bumpmapping and specular lighting for female suits
