@@ -55,22 +55,22 @@ texture inside `GameData/` (plus .dds/.png/.jpg/.tga extension, of course).
 Examples:
 
     GameData/TextureReplacer/
-      Default/kerbalHead                  // default male head
-      Default/kerbalHeadNRM               // default male head normal map
-      Default/kerbalGirl_06_BaseColor     // default female head
-      Default/kerbalGirl_06_BaseColorNRM  // default female head normal map
-      Default/kerbalMain                  // default IVA suit (veteran/orange)
-      Default/kerbalMainGrey              // default IVA suit (standard/grey)
-      Default/kerbalMainNRM               // default IVA suit normal map
-      Default/kerbalHelmetGrey            // default IVA helmet
-      Default/kerbalHelmetNRM             // default IVA & EVA helmet normal map
-      Default/kerbalVisor                 // default IVA helmet visor
-      Default/EVAtexture                  // default EVA suit
-      Default/EVAtextureNRM               // default EVA suit normal map
-      Default/EVAhelmet                   // default EVA helmet
-      Default/EVAvisor                    // default EVA helmet visor
-      Default/EVAjetpack                  // default EVA jetpack
-      Default/EVAjetpackNRM               // default EVA jetpack normal map
+      Default/kerbalHead                  // teeth and male head
+      Default/kerbalHeadNRM               // teeth and male head normal map
+      Default/kerbalGirl_06_BaseColor     // female head
+      Default/kerbalGirl_06_BaseColorNRM  // female head normal map
+      Default/kerbalMain                  // IVA suit (veteran/orange)
+      Default/kerbalMainGrey              // IVA suit (standard/grey)
+      Default/kerbalMainNRM               // IVA suit normal map
+      Default/kerbalHelmetGrey            // IVA helmet
+      Default/kerbalHelmetNRM             // IVA & EVA helmet normal map
+      Default/kerbalVisor                 // IVA helmet visor
+      Default/EVAtexture                  // EVA suit
+      Default/EVAtextureNRM               // EVA suit normal map
+      Default/EVAhelmet                   // EVA helmet
+      Default/EVAvisor                    // EVA helmet visor
+      Default/EVAjetpack                  // EVA jetpack
+      Default/EVAjetpackNRM               // EVA jetpack normal map
 
       Default/HUDNavBall                  // HUD NavBall
       Default/IVANavBall                  // IVA NavBall, horizontally flipped
@@ -300,6 +300,9 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.3
+    - all Kerbals' teeth now use `Default/kerbalHead` texture and are not
+      personalised to solve the female teeth texturing problem
 * 2.4.2
     - fixed white visors when not using visor texture
 * 2.4.1

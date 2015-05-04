@@ -410,9 +410,15 @@ namespace TextureReplacer
       suit = (isEva && needsSuit) || kerbalData.cabinSuit == null ? suit : kerbalData.cabinSuit;
       suit = suit == defaultSuit ? null : suit;
 
+      Transform model = isEva ? component.transform.Find("model01") : component.transform.Find("kbIVA@idle/model01");
+      Transform flag = isEva ? component.transform.Find("model/kbEVA_flagDecals") : null;
+
+      if (isEva)
+        flag.renderer.enabled = needsSuit;
+
       // We must include hidden meshes, since flares are hidden when light is turned off.
       // All other meshes are always visible, so no performance hit here.
-      foreach (Renderer renderer in component.GetComponentsInChildren<Renderer>(true))
+      foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>(true))
       {
         var smr = renderer as SkinnedMeshRenderer;
 
@@ -444,21 +450,23 @@ namespace TextureReplacer
               break;
 
             case "headMesh01":
-            case "upTeeth01":
-            case "upTeeth02":
-            case "tongue":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
             case "headMesh":
             case "ponytail":
-            case "downTeeth01":
               if (head != null)
               {
                 newTexture = head.head;
                 newNormalMap = head.headNRM;
               }
+              break;
+
+            case "tongue":
+            case "upTeeth01":
+            case "upTeeth02":
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
+            case "downTeeth01":
               break;
 
             case "body01":
@@ -570,7 +578,7 @@ namespace TextureReplacer
           {
             // `Kerbal.ShowHelmet(false)` irreversibly removes a helmet while
             // `Kerbal.ShowHelmet(true)` has no effect at all. We need the following workaround.
-            foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
+            foreach (SkinnedMeshRenderer smr in kerbal.helmetTransform.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
               if (smr.name.EndsWith("helmet", StringComparison.Ordinal))
                 smr.sharedMesh = hideHelmets ? null : helmetMesh[(int) kerbal.protoCrewMember.gender];

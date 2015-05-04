@@ -52,6 +52,7 @@ namespace TextureReplacer
       foreach (Material material in Resources.FindObjectsOfTypeAll<Material>())
       {
         Texture texture = material.mainTexture;
+
         if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp", StringComparison.Ordinal))
           continue;
 
@@ -100,37 +101,48 @@ namespace TextureReplacer
       }
     }
 
-    static void updateKerbalMeshes(Transform tf, Texture headNormalMap, Texture visorTexture)
+    static void updateKerbalMeshes(Transform tf, Texture headNRM, Texture visorTexture, ref Material teethMaterial)
     {
       Shader headShader = Shader.Find("Bumped Diffuse");
       Shader suitShader = Shader.Find("KSP/Bumped Specular");
 
       foreach (SkinnedMeshRenderer smr in tf.GetComponentsInChildren<SkinnedMeshRenderer>(true))
       {
+        // Many meshes share material, so it suffices to enumerate only one mesh for each material.
         switch (smr.name)
         {
           case "headMesh01":
-          case "upTeeth01":
-          case "upTeeth02":
-          case "tongue":
           case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
-          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
-          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
           case "headMesh":
-          case "ponytail":
-          case "downTeeth01":
+          case "tongue":
             // Replace with bump-mapped shader so normal maps for heads will work.
             smr.sharedMaterial.shader = headShader;
 
-            if (headNormalMap != null)
-              smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMap);
+            if (headNRM != null)
+              smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNRM);
+
+            // Save male head material, we need to apply it to female teeth.
+            if (smr.name == "headMesh01")
+              teethMaterial = smr.sharedMaterial;
+            break;
+
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
+          case "upTeeth01":
+          case "downTeeth01":
+            // Females don't have textured teeth, they use the same material as for the eyeballs. Extending female head
+            // material/texture to their teeth is not possible since teeth overlap with some ponytail subtexture.
+            // However, female teeth map to the same texture coordinates as male teeth, so we fix this by applying male
+            // head & teeth material for female teeth.
+            if (teethMaterial != null && smr.sharedMaterial != teethMaterial)
+              smr.sharedMaterial = teethMaterial;
             break;
 
           case "body01":
           case "mesh_female_kerbalAstronaut01_body01":
           case "helmet":
           case "mesh_female_kerbalAstronaut01_helmet":
+          case "jetpack_base01":
             // Replace body shader for females, so alpha on suits defines specularity, same as for male Kerbals.
             smr.sharedMaterial.shader = suitShader;
             break;
@@ -144,13 +156,6 @@ namespace TextureReplacer
             }
             break;
         }
-      }
-
-      Transform jetpack = tf.Find("model01/jetpack01");
-      if (jetpack != null)
-      {
-        foreach (SkinnedMeshRenderer smr in jetpack.GetComponentsInChildren<SkinnedMeshRenderer>(true))
-          smr.sharedMaterial.shader = suitShader;
       }
     }
 
@@ -234,18 +239,19 @@ namespace TextureReplacer
 
       // Fix female shaders, set normal-mapped shader for head and visor texture on proto-IVA and -EVA Kerbals.
       Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
+      Material teethMaterialMaterial = null;
 
       Kerbal maleIva = kerbals.First(k => k.transform.name == "kerbalMale");
-      updateKerbalMeshes(maleIva.transform, headNormalMaps[0], ivaVisorTexture);
+      updateKerbalMeshes(maleIva.transform, headNormalMaps[0], ivaVisorTexture, ref teethMaterialMaterial);
 
       Kerbal femaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
-      updateKerbalMeshes(femaleIva.transform, headNormalMaps[1], ivaVisorTexture);
+      updateKerbalMeshes(femaleIva.transform, headNormalMaps[1], ivaVisorTexture, ref teethMaterialMaterial);
 
       Part maleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
-      updateKerbalMeshes(maleEva.transform, headNormalMaps[0], evaVisorTexture);
+      updateKerbalMeshes(maleEva.transform, headNormalMaps[0], evaVisorTexture, ref teethMaterialMaterial);
 
       Part femaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
-      updateKerbalMeshes(femaleEva.transform, headNormalMaps[1], evaVisorTexture);
+      updateKerbalMeshes(femaleEva.transform, headNormalMaps[1], evaVisorTexture, ref teethMaterialMaterial);
 
       // Find NavBall replacement textures if available.
       if (mappedTextures.TryGetValue(HUD_NAVBALL, out hudNavBallTexture))
