@@ -37,10 +37,10 @@ namespace TextureReplacer
     // NavBalls' textures.
     Texture2D hudNavBallTexture = null;
     Texture2D ivaNavBallTexture = null;
-    // Print material/texture names when performing texture replacement pass.
-    bool logTextures = false;
     // Change shinning quality.
     SkinQuality skinningQuality = SkinQuality.Auto;
+    // Print material/texture names when performing texture replacement pass.
+    bool logTextures = false;
     // Instance.
     public static Replacer instance = null;
 

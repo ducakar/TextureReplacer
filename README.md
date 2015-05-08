@@ -302,7 +302,7 @@ Change Log
 
 * 2.4.3
     - all Kerbals' teeth now use `Default/kerbalHead` texture and are not
-      personalised to solve the female teeth texturing problem
+      personalised any more to solve the female teeth texturing problem
 * 2.4.2
     - fixed white visors when not using visor texture
 * 2.4.1
