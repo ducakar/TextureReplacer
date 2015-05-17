@@ -291,7 +291,6 @@ Known Issues
 
 * Atmospheric skybox is not wholly reflected, there's a black strip around.
 * Reflections disable part highlighting.
-* Reflections may break radial attachment on some parts.
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
 * Clouds from the development version of EVE are not properly reflected.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
