@@ -240,7 +240,12 @@ namespace TextureReplacer
 
         if (!isInitialised)
         {
-          hasEvaSuit = !personaliser.isAtmSuitEnabled;
+          if (!personaliser.isAtmSuitEnabled)
+          {
+            Events.First().active = false;
+            hasEvaSuit = true;
+          }
+
           isInitialised = true;
         }
 
@@ -926,9 +931,9 @@ namespace TextureReplacer
         }
       }
 
-      // Set default suits on proto-IVA Kerbal and add IvaModule to it.
       foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>())
       {
+        // After na IVA space is initialised, suits are reset to these values. Replace stock textures with default ones.
         kerbal.textureStandard = defaultSuit.suit;
         kerbal.textureVeteran = defaultSuit.suitVeteran;
 
@@ -952,7 +957,6 @@ namespace TextureReplacer
             visorMesh[i] = smr.sharedMesh;
         }
 
-        // Install module for KerbalEVA part to enable EVA suit toggle.
         if (evas[i].GetComponent<TREvaModule>() == null)
           evas[i].gameObject.AddComponent<TREvaModule>();
       }

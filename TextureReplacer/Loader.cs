@@ -21,6 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#if TR_LOADER
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -314,3 +316,5 @@ namespace TextureReplacer
     }
   }
 }
+
+#endif

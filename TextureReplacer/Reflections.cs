@@ -39,10 +39,10 @@ namespace TextureReplacer
 
     public class Script
     {
-      struct TransformLayer
+      struct MeshState
       {
-        public GameObject gameObject;
-        public int layer;
+        public Renderer renderer;
+        public bool isEnabled;
       }
 
       // List of all created reflection scripts.
@@ -51,7 +51,6 @@ namespace TextureReplacer
 
       readonly RenderTexture envMap;
       readonly Transform transform;
-      readonly TransformLayer[] transformLayers;
       readonly bool isEva;
       readonly int interval;
       int counter;
@@ -66,19 +65,6 @@ namespace TextureReplacer
         envMap.isCubemap = true;
 
         transform = part.transform;
-
-        Transform[] transforms = part.GetComponentsInChildren<Transform>(true)
-          .Where(t => t.gameObject != null).ToArray();
-
-        transformLayers = new TransformLayer[transforms.Length];
-        for (int i = 0; i < transformLayers.Length; ++i)
-        {
-          GameObject gameObject = transforms[i].gameObject;
-
-          transformLayers[i].gameObject = gameObject;
-          transformLayers[i].layer = gameObject.layer;
-        }
-
         isEva = part.GetComponent<KerbalEVA>() != null;
 
         if (isEva)
@@ -133,11 +119,14 @@ namespace TextureReplacer
       {
         int faceMask = force ? 0x3f : 1 << currentFace;
 
-        // Hide meshes of the current part.
-        foreach (TransformLayer tl in transformLayers)
+        // Hide all meshes of the current part.
+        Renderer[] meshes = transform.GetComponentsInChildren<Renderer>();
+        bool[] meshStates = new bool[meshes.Length];
+
+        for (int i = 0; i < meshes.Length; ++i)
         {
-          if (tl.gameObject != null)
-            tl.gameObject.layer = 31;
+          meshStates[i] = meshes[i].enabled;
+          meshes[i].enabled = false;
         }
 
         // Skybox.
@@ -158,11 +147,9 @@ namespace TextureReplacer
         camera.cullingMask = (1 << 0) | (1 << 1) | (1 << 5) | (1 << 15);
         camera.RenderToCubemap(envMap, faceMask);
 
-        foreach (TransformLayer tl in transformLayers)
-        {
-          if (tl.gameObject != null)
-            tl.gameObject.layer = tl.layer;
-        }
+        // Restore mesh visibility.
+        for (int i = 0; i < meshes.Length; ++i)
+          meshes[i].enabled = meshStates[i];
 
         currentFace = (currentFace + 1) % 6;
       }
@@ -296,24 +283,25 @@ namespace TextureReplacer
 
       reflectionType = type;
 
-      // Set visor texture and reflection on proto-EVA Kerbal.
-      foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
+      Part[] evas = {
+        PartLoader.getPartInfoByName("kerbalEVA").partPrefab,
+        PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab
+      };
+
+      for (int i = 0; i < 2; ++i)
       {
-        if (smr.name != "visor")
-          continue;
+        // Set visor texture and reflection on proto-EVA Kerbal.
+        SkinnedMeshRenderer visor = evas[i].GetComponentsInChildren<SkinnedMeshRenderer>(true)
+          .First(m => m.name == "visor");
 
-        bool isEva = smr.transform.root.GetComponent<KerbalEVA>() != null;
-        if (isEva)
-        {
-          Material material = smr.sharedMaterial;
-          bool enableStatic = isVisorReflectionEnabled && reflectionType == Type.STATIC;
+        Material material = visor.sharedMaterial;
+        bool enableStatic = isVisorReflectionEnabled && reflectionType == Type.STATIC;
 
-          // We apply visor shader for real reflections later, through TREvaModule since we don't
-          // want corrupted reflections in the main menu.
-          material.shader = enableStatic ? visorShader : Util.transparentSpecularShader;
-          material.SetTexture(Util.CUBE_PROPERTY, enableStatic ? staticEnvMap : null);
-          material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
-        }
+        // We apply visor shader for real reflections later, through TREvaModule since we don't
+        // want corrupted reflections in the main menu.
+        material.shader = enableStatic ? visorShader : Util.transparentSpecularShader;
+        material.SetTexture(Util.CUBE_PROPERTY, enableStatic ? staticEnvMap : null);
+        material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
       }
     }
 

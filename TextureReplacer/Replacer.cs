@@ -59,9 +59,6 @@ namespace TextureReplacer
         if (logTextures)
           Util.log("[{0}] {1}", material.name, texture.name);
 
-        if (texture.filterMode == FilterMode.Bilinear)
-          texture.filterMode = FilterMode.Trilinear;
-
         Texture2D newTexture;
         mappedTextures.TryGetValue(texture.name, out newTexture);
 
@@ -80,9 +77,6 @@ namespace TextureReplacer
         Texture normalMap = material.GetTexture(Util.BUMPMAP_PROPERTY);
         if (normalMap == null)
           continue;
-
-        if (normalMap.filterMode == FilterMode.Bilinear)
-          normalMap.filterMode = FilterMode.Trilinear;
 
         Texture2D newNormalMap;
         mappedTextures.TryGetValue(normalMap.name, out newNormalMap);
@@ -195,6 +189,18 @@ namespace TextureReplacer
      */
     public void load()
     {
+      foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
+      {
+        if (skinningQuality != SkinQuality.Auto)
+          smr.quality = skinningQuality;
+      }
+
+      foreach (Texture texture in Resources.FindObjectsOfTypeAll<Texture>())
+      {
+        if (texture.filterMode == FilterMode.Bilinear)
+          texture.filterMode = FilterMode.Trilinear;
+      }
+
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
@@ -202,9 +208,6 @@ namespace TextureReplacer
           continue;
 
         string originalName = texture.name.Substring(DIR_TEXTURES.Length);
-
-        if (texture.filterMode == FilterMode.Bilinear)
-          texture.filterMode = FilterMode.Trilinear;
 
         if (originalName.StartsWith("GalaxyTex_", StringComparison.Ordinal))
           texture.wrapMode = TextureWrapMode.Clamp;
@@ -231,27 +234,21 @@ namespace TextureReplacer
       if (mappedTextures.TryGetValue("EVAvisor", out evaVisorTexture))
         mappedTextures.Remove("EVAvisor");
 
-      foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
-      {
-        if (skinningQuality != SkinQuality.Auto)
-          smr.quality = skinningQuality;
-      }
-
       // Fix female shaders, set normal-mapped shader for head and visor texture on proto-IVA and -EVA Kerbals.
       Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
-      Material teethMaterialMaterial = null;
+      Material teethMaterial = null;
 
       Kerbal maleIva = kerbals.First(k => k.transform.name == "kerbalMale");
-      updateKerbalMeshes(maleIva.transform, headNormalMaps[0], ivaVisorTexture, ref teethMaterialMaterial);
+      updateKerbalMeshes(maleIva.transform, headNormalMaps[0], ivaVisorTexture, ref teethMaterial);
 
       Kerbal femaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
-      updateKerbalMeshes(femaleIva.transform, headNormalMaps[1], ivaVisorTexture, ref teethMaterialMaterial);
+      updateKerbalMeshes(femaleIva.transform, headNormalMaps[1], ivaVisorTexture, ref teethMaterial);
 
       Part maleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
-      updateKerbalMeshes(maleEva.transform, headNormalMaps[0], evaVisorTexture, ref teethMaterialMaterial);
+      updateKerbalMeshes(maleEva.transform, headNormalMaps[0], evaVisorTexture, ref teethMaterial);
 
       Part femaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
-      updateKerbalMeshes(femaleEva.transform, headNormalMaps[1], evaVisorTexture, ref teethMaterialMaterial);
+      updateKerbalMeshes(femaleEva.transform, headNormalMaps[1], evaVisorTexture, ref teethMaterial);
 
       // Find NavBall replacement textures if available.
       if (mappedTextures.TryGetValue(HUD_NAVBALL, out hudNavBallTexture))

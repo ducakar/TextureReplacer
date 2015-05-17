@@ -300,6 +300,12 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.4
+    - disabling spawning in IVA suits also disables "Toggle EVA Suit" in
+      Kerbal's context menu
+    - disabled texture compression, mipmap generation and unloading by default,
+      these functions will be removed in the next major release
+    - fixed radial attachment and click ignoring for reflective parts
 * 2.4.3
     - all Kerbals' teeth now use `Default/kerbalHead` texture and are not
       personalised any more to solve the female teeth texturing problem
