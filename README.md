@@ -16,10 +16,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * assign suits based on class and experience level,
 * remove IVA helmets in safe situations,
 * toggle between EVA suit and IVA suit without helmet in breathable atmosphere,
-* add reflections to parts and helmet visors,
-* generate missing mipmaps for PNG and JPEG model textures,
-* compress uncompressed textures from `GameData/` to shrink textures in VRAM,
-* unload textures from RAM after KSP finishes loading to reduce RAM usage and
+* add reflections to parts and helmet visors and
 * change bilinear texture filter to trilinear to improve mipmap quality.
 
 Special thanks to:
@@ -270,16 +267,7 @@ Notes
 
 * Use DDS format for optimal RAM usage and loading times since DDS textures are
   not shadowed in RAM and can be pre-compressed and can have pre-built mipmaps.
-* TGA and JPEG images are not suitable for normal maps.
 * Try to keep dimensions of all textures powers of two.
-* KSP can only load TGAs with RGB or RGBA colours. Paletteised 256-colour TGAs
-  cause corruptions in the game database!
-* By default, texture compression and mipmap generation are handled by ATM when
-  it is present rather than by TextureReplacer.
-* KSP never generates mipmaps for PNGs and JPEGs. TextureReplacer fixes this by
-  generating mipmaps under paths specified in the configuration file. Other
-  images are omitted to avoid making UI icons of various plugins blurry when not
-  using the full texture quality.
 * The planet textures being replaced are the high-altitude textures, which are
   also used in the map mode and in the tracking station. When getting closer to
   the surface those textures are slowly interpolated into the high-resolution
@@ -299,6 +287,9 @@ Known Issues
 Change Log
 ----------
 
+* 2.5
+    - removed texture unloading, compression and mipmap generation as the use of
+      DDS textures makes these functions unnecessary
 * 2.4.4
     - disabling spawning in IVA suits also disables "Toggle EVA Suit" in
       Kerbal's context menu

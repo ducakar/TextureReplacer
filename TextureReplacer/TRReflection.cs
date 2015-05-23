@@ -100,8 +100,7 @@ namespace TextureReplacer
           script = null;
         }
 
-        Util.log("Failed to replace any shader on \"{0}\" with its reflective counterpart",
-                 part.name);
+        Util.log("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
       }
     }
 

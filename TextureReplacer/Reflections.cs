@@ -132,7 +132,7 @@ namespace TextureReplacer
         // Skybox.
         camera.transform.position = GalaxyCubeControl.Instance.transform.position;
         camera.farClipPlane = 100.0f;
-        camera.cullingMask = (1 << 9) | (1 << 18);
+        camera.cullingMask = 1 << 18;
         camera.RenderToCubemap(envMap, faceMask);
 
         // Scaled space.
