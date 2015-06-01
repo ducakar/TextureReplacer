@@ -5,8 +5,8 @@ TextureReplacer
 
 * [Forum thread](http://forum.kerbalspaceprogram.com/threads/107471)
 * [GitHub page](http://github.com/ducakar/TextureReplacer)
+* [CurseForge page](http://kerbal.curseforge.com/plugins/220217)
 * [Kerbal Stuff page](https://kerbalstuff.com/mod/150/TextureReplacer)
-* [CurseForge page](http://kerbal.curseforge.com/plugins/220217-texturereplacer)
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
@@ -293,7 +293,8 @@ Change Log
 * 2.4.5
     - fixing female model is more consistent, female helmet normal map enabled
     - (hopefully) fixed a rare toolbar icon crash that breaks space centre scene
-    - the top quad of atmosphere skybox is not rendered any more
+    - the top quad of atmospheric skybox is not rendered any more
+    - re-enabled texture compression, mipmap generation and unloading
 * 2.4.4
     - disabling spawning in IVA suits also disables "Toggle EVA Suit" in
       Kerbal's context menu
