@@ -16,7 +16,10 @@ stock textures and customise your Kerbals. More specifically, it can:
 * assign suits based on class and experience level,
 * remove IVA helmets in safe situations,
 * toggle between EVA suit and IVA suit without helmet in breathable atmosphere,
-* add reflections to parts and helmet visors and
+* add reflections to parts and helmet visors,
+* generate missing mipmaps for PNG and JPEG model textures,
+* compress uncompressed textures from `GameData/` to shrink textures in VRAM,
+* unload textures from RAM after KSP finishes loading to reduce RAM usage and
 * change bilinear texture filter to trilinear to improve mipmap quality.
 
 Special thanks to:
@@ -287,11 +290,10 @@ Known Issues
 Change Log
 ----------
 
-* 2.5
-    - removed texture unloading, compression and mipmap generation as the use of
-      DDS textures makes these functions unnecessary
+* 2.4.5
     - fixing female model is more consistent, female helmet normal map enabled
     - (hopefully) fixed a rare toolbar icon crash that breaks space centre scene
+    - the top quad of atmosphere skybox is not rendered any more
 * 2.4.4
     - disabling spawning in IVA suits also disables "Toggle EVA Suit" in
       Kerbal's context menu

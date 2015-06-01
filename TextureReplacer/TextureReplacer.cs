@@ -29,6 +29,7 @@ namespace TextureReplacer
   public class TextureReplacer : MonoBehaviour
   {
     // Status.
+    public static bool isInitialised = false;
     public static bool isLoaded = false;
 
     public void Start()
@@ -37,26 +38,42 @@ namespace TextureReplacer
 
       DontDestroyOnLoad(this);
 
+      isInitialised = false;
       isLoaded = false;
 
       if (Reflections.instance != null)
         Reflections.instance.destroy();
 
+      Loader.instance = new Loader();
       Replacer.instance = new Replacer();
       Reflections.instance = new Reflections();
       Personaliser.instance = new Personaliser();
 
       foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
       {
+        Loader.instance.readConfig(file.config);
         Replacer.instance.readConfig(file.config);
         Reflections.instance.readConfig(file.config);
         Personaliser.instance.readConfig(file.config);
       }
+
+      Loader.instance.configure();
     }
 
     public void LateUpdate()
     {
-      if (PartLoader.Instance.IsReady())
+      if (!isInitialised)
+      {
+        // Compress textures, generate mipmaps, convert DXT5 -> DXT1 if necessary etc.
+        Loader.instance.processTextures();
+
+        if (GameDatabase.Instance.IsReady())
+        {
+          Loader.instance.initialise();
+          isInitialised = true;
+        }
+      }
+      else if (PartLoader.Instance.IsReady())
       {
         Replacer.instance.load();
         Reflections.instance.load();
