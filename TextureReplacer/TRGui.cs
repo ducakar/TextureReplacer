@@ -309,10 +309,22 @@ namespace TextureReplacer
       rosterScroll = Vector2.zero;
     }
 
-    void onGUIApplicationLauncherUnreadifying(GameScenes scenes)
+    void addAppButton()
     {
-      if (appButton)
+      if (appButton == null)
+      {
+        appButton = ApplicationLauncher.Instance.AddModApplication(
+          enable, disable, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
+      }
+    }
+
+    void removeAppButton(GameScenes scenes)
+    {
+      if (appButton != null)
+      {
         ApplicationLauncher.Instance.RemoveModApplication(appButton);
+        appButton = null;
+      }
     }
 
     public void Awake()
@@ -333,14 +345,15 @@ namespace TextureReplacer
         if (appIcon == null)
           Util.log("Application icon missing: {0}", APP_ICON_PATH);
 
-        GameEvents.onGUIApplicationLauncherUnreadifying.Add(onGUIApplicationLauncherUnreadifying);
+        GameEvents.onGUIApplicationLauncherReady.Add(addAppButton);
+        GameEvents.onGameSceneLoadRequested.Add(removeAppButton);
       }
     }
 
     public void Start()
     {
-      appButton = ApplicationLauncher.Instance.
-        AddModApplication(enable, disable, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
+      if (ApplicationLauncher.Ready)
+        addAppButton();
     }
 
     public void OnGUI()
@@ -356,7 +369,8 @@ namespace TextureReplacer
 
     public void OnDestroy()
     {
-      GameEvents.onGUIApplicationLauncherUnreadifying.Remove(onGUIApplicationLauncherUnreadifying);
+      GameEvents.onGUIApplicationLauncherReady.Remove(addAppButton);
+      GameEvents.onGameSceneLoadRequested.Remove(removeAppButton);
     }
   }
 }

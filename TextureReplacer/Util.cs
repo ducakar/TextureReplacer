@@ -37,8 +37,6 @@ namespace TextureReplacer
     public static readonly int BUMPMAP_PROPERTY = Shader.PropertyToID("_BumpMap");
     public static readonly int CUBE_PROPERTY = Shader.PropertyToID("_Cube");
     public static readonly int REFLECT_COLOR_PROPERTY = Shader.PropertyToID("_ReflectColor");
-    public static readonly Shader transparentSpecularShader = Shader.Find("Transparent/Specular");
-    public static readonly Shader diffuseShader = Shader.Find("Diffuse");
     public static readonly System.Random random = new System.Random();
 
     /**

@@ -184,7 +184,7 @@ namespace TextureReplacer
               }
             }
           }
-          while(currentScript != startScript);
+          while (currentScript != startScript);
         }
       }
     }
@@ -215,6 +215,7 @@ namespace TextureReplacer
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
     };
+    static readonly Shader transparentSpecularShader = Shader.Find("Transparent/Specular");
     readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflective shader material.
     Material shaderMaterial = null;
@@ -299,7 +300,7 @@ namespace TextureReplacer
 
         // We apply visor shader for real reflections later, through TREvaModule since we don't
         // want corrupted reflections in the main menu.
-        material.shader = enableStatic ? visorShader : Util.transparentSpecularShader;
+        material.shader = enableStatic ? visorShader : transparentSpecularShader;
         material.SetTexture(Util.CUBE_PROPERTY, enableStatic ? staticEnvMap : null);
         material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
       }

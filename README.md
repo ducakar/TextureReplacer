@@ -277,10 +277,10 @@ Notes
 Known Issues
 ------------
 
-* Atmospheric skybox is not wholly reflected, there's a black strip around.
+* Atmospheric skybox is not reflected.
 * Reflections disable part highlighting.
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
-* Clouds from the development version of EVE are not properly reflected.
+* Clouds from EVE Overhaul are not correctly reflected.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
 
 
@@ -290,6 +290,8 @@ Change Log
 * 2.5
     - removed texture unloading, compression and mipmap generation as the use of
       DDS textures makes these functions unnecessary
+    - fixing female model is more consistent, female helmet normal map enabled
+    - (hopefully) fixed a rare toolbar icon crash that breaks space centre scene
 * 2.4.4
     - disabling spawning in IVA suits also disables "Toggle EVA Suit" in
       Kerbal's context menu
