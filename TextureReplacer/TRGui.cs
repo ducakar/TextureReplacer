@@ -55,6 +55,8 @@ namespace TextureReplacer
       GUILayout.BeginVertical();
       GUILayout.BeginHorizontal();
 
+      GUILayout.BeginVertical();
+
       // Roster area.
       rosterScroll = GUILayout.BeginScrollView(rosterScroll, GUILayout.Width(200));
       GUILayout.BeginVertical();
@@ -99,6 +101,11 @@ namespace TextureReplacer
 
       GUILayout.EndVertical();
       GUILayout.EndScrollView();
+
+      if (GUILayout.Button("Reset to Defaults"))
+        personaliser.resetKerbals();
+
+      GUILayout.EndVertical();
 
       // Textures.
       Personaliser.Head defaultHead = personaliser.defaultHead[0];

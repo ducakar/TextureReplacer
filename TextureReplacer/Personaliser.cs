@@ -299,11 +299,11 @@ namespace TextureReplacer
     // Backed-up personalised textures from main configuration files. These are used to initialise kerbals if a saved
     // game doesn't contain `TRScenario`.
     ConfigNode customKerbalsNode = new ConfigNode();
-    // Cabin-specific suits.
-    readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
     // Class-specific suits.
     public readonly Dictionary<string, Suit> classSuits = new Dictionary<string, Suit>();
     public readonly Dictionary<string, Suit> defaultClassSuits = new Dictionary<string, Suit>();
+    // Cabin-specific suits.
+    readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
     // Helmet removal.
     Mesh[] helmetMesh = { null, null };
     Mesh[] visorMesh = { null, null };
@@ -513,7 +513,8 @@ namespace TextureReplacer
               else
                 smr.sharedMesh = needsSuit ? helmetMesh[(int) kerbal.gender] : null;
 
-              if (needsSuit && suit != null)
+              // Textures have to be replaced even when hidden since it may become visible later on situation change.
+              if (suit != null)
               {
                 newTexture = isEva ? suit.getEvaHelmet(kerbal.experienceLevel) : suit.getHelmet(kerbal.experienceLevel);
                 newNormalMap = suit.helmetNRM;
@@ -527,7 +528,8 @@ namespace TextureReplacer
               else
                 smr.sharedMesh = needsSuit ? visorMesh[(int) kerbal.gender] : null;
 
-              if (needsSuit && suit != null)
+              // Textures have to be replaced even when hidden since it may become visible later on situation change.
+              if (suit != null)
               {
                 newTexture = isEva ? suit.evaVisor : suit.visor;
 
@@ -537,12 +539,15 @@ namespace TextureReplacer
               break;
 
             default: // Jetpack.
-              smr.enabled = needsSuit;
-
-              if (isEva && needsSuit && suit != null)
+              if (isEva)
               {
-                newTexture = suit.evaJetpack;
-                newNormalMap = suit.evaJetpackNRM;
+                smr.enabled = needsSuit;
+
+                if (needsSuit && suit != null)
+                {
+                  newTexture = suit.evaJetpack;
+                  newNormalMap = suit.evaJetpackNRM;
+                }
               }
               break;
           }
@@ -633,31 +638,27 @@ namespace TextureReplacer
 
         KerbalData kerbalData = getKerbalData(kerbal);
 
-        if (node != null)
+        string value = node.GetValue(kerbal.name);
+        if (value != null)
         {
-          string value = node.GetValue(kerbal.name);
-          if (value != null)
+          string[] tokens = Util.splitConfigValue(value);
+          string genderName = tokens.Length >= 1 ? tokens[0] : null;
+          string headName = tokens.Length >= 2 ? tokens[1] : null;
+          string suitName = tokens.Length >= 3 ? tokens[2] : null;
+
+          if (genderName != null)
+            kerbalData.gender = genderName == "F" ? 1 : 0;
+
+          if (headName != null && headName != "GENERIC")
           {
-            string[] tokens = Util.splitConfigValue(value);
-            string genderName = tokens.Length >= 1 ? tokens[0] : null;
-            string headName = tokens.Length >= 2 ? tokens[1] : null;
-            string suitName = tokens.Length >= 3 ? tokens[2] : null;
-
-            if (genderName != null)
-              kerbalData.gender = genderName == "F" ? 1 : 0;
-
-            if (headName != null && headName != "GENERIC")
-            {
-              kerbalData.head = headName == "DEFAULT" ? defaultHead[(int) kerbal.gender]
-                : heads.Find(h => h.name == headName);
-            }
-
-            if (suitName != null && suitName != "GENERIC")
-              kerbalData.suit = suitName == "DEFAULT" ? defaultSuit : suits.Find(s => s.name == suitName);
-
-            kerbal.gender = forceLegacyFemales ? ProtoCrewMember.Gender.Male
-              : (ProtoCrewMember.Gender) kerbalData.gender;
+            kerbalData.head = headName == "DEFAULT" ? defaultHead[(int) kerbal.gender]
+              : heads.Find(h => h.name == headName);
           }
+
+          if (suitName != null && suitName != "GENERIC")
+            kerbalData.suit = suitName == "DEFAULT" ? defaultSuit : suits.Find(s => s.name == suitName);
+
+          kerbal.gender = forceLegacyFemales ? ProtoCrewMember.Gender.Male : (ProtoCrewMember.Gender) kerbalData.gender;
         }
       }
     }
@@ -691,7 +692,7 @@ namespace TextureReplacer
     {
       if (node == null)
       {
-        if (defaultSuit != null)
+        if (defaultMap != null)
         {
           foreach (var entry in defaultMap)
             map[entry.Key] = entry.Value;
@@ -933,6 +934,17 @@ namespace TextureReplacer
 
       foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>())
       {
+        int gender = kerbal.transform.name == "kerbalFemale" ? 1 : 0;
+
+        // Save pointer to helmet & visor meshes so helmet removal can restore them.
+        foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+        {
+          if (smr.name.EndsWith("helmet", StringComparison.Ordinal))
+            helmetMesh[gender] = smr.sharedMesh;
+          else if (smr.name.EndsWith("visor", StringComparison.Ordinal))
+            visorMesh[gender] = smr.sharedMesh;
+        }
+
         // After na IVA space is initialised, suits are reset to these values. Replace stock textures with default ones.
         kerbal.textureStandard = defaultSuit.suit;
         kerbal.textureVeteran = defaultSuit.suitVeteran;
@@ -946,19 +958,10 @@ namespace TextureReplacer
         PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab
       };
 
-      for (int i = 0; i < 2; ++i)
+      foreach (Part eva in evas)
       {
-        // Save pointer to helmet & visor meshes so helmet removal can restore them.
-        foreach (SkinnedMeshRenderer smr in evas[i].GetComponentsInChildren<SkinnedMeshRenderer>(true))
-        {
-          if (smr.name == "helmet")
-            helmetMesh[i] = smr.sharedMesh;
-          else if (smr.name == "visor")
-            visorMesh[i] = smr.sharedMesh;
-        }
-
-        if (evas[i].GetComponent<TREvaModule>() == null)
-          evas[i].gameObject.AddComponent<TREvaModule>();
+        if (eva.GetComponent<TREvaModule>() == null)
+          eva.gameObject.AddComponent<TREvaModule>();
       }
 
       // Re-read scenario if database is reloaded during the space centre scene to avoid losing all per-game settings.
@@ -1001,6 +1004,15 @@ namespace TextureReplacer
 
       node.AddValue("isHelmetRemovalEnabled", isHelmetRemovalEnabled);
       node.AddValue("isAtmSuitEnabled", isAtmSuitEnabled);
+    }
+
+    public void resetKerbals()
+    {
+      gameKerbals.Clear();
+      classSuits.Clear();
+
+      loadKerbals(null);
+      loadSuitMap(null, classSuits, defaultClassSuits);
     }
   }
 }

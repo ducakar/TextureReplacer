@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>TextureReplacer</RootNamespace>
     <AssemblyName>TextureReplacer</AssemblyName>
-    <ReleaseVersion>2.4.5</ReleaseVersion>
+    <ReleaseVersion>2.4.6</ReleaseVersion>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">

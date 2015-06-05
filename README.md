@@ -290,6 +290,10 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.6
+    - added GUI button to reset head/suit assignments to ones from config files
+    - fixed male -> female material copy mixing IVA and EVA textures on females
+    - fixed IVA helmet personalisation when helmets are hidden on scene start
 * 2.4.5
     - fixing female model is more consistent, female helmet normal map enabled
     - (hopefully) fixed a rare toolbar icon crash that breaks space centre scene
