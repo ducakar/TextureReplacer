@@ -229,8 +229,8 @@ inside its own directory:
       Suits/[<subDir>/]<suit>/EVAjetpack         // EVA jetpack
       Suits/[<subDir>/]<suit>/EVAjetpackNRM      // EVA jetpack normal map
 
-The level textures are optional. If missing, level 0 texture will be used for
-all levels for that part of suit.
+The level textures are optional. If a level texture is missing, the one from the
+previous level is inherited.
 
 ### Configuration File ###
 
@@ -290,6 +290,8 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.7
+    - suit's level textures are inherited from the previous level when missing
 * 2.4.6
     - added GUI button to reset head/suit assignments to ones from config files
     - fixed male -> female material copy mixing IVA and EVA textures on females

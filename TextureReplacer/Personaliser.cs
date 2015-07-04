@@ -143,7 +143,9 @@ namespace TextureReplacer
           case "kerbalMainGrey5":
             level = originalName.Last() - 0x30;
             levelSuits = levelSuits ?? new Texture2D[5];
-            levelSuits[level - 1] = levelSuits[level - 1] ?? texture;
+
+            for (int i = level - 1; i < 5; ++i)
+              levelSuits[i] = levelSuits[i] ?? texture;
             return true;
 
           case "kerbalHelmetGrey1":
@@ -153,7 +155,9 @@ namespace TextureReplacer
           case "kerbalHelmetGrey5":
             level = originalName.Last() - 0x30;
             levelHelmets = levelHelmets ?? new Texture2D[5];
-            levelHelmets[level - 1] = levelHelmets[level - 1] ?? texture;
+
+            for (int i = level - 1; i < 5; ++i)
+              levelHelmets[i] = levelHelmets[i] ?? texture;
             return true;
 
           case "EVAtexture1":
@@ -163,7 +167,9 @@ namespace TextureReplacer
           case "EVAtexture5":
             level = originalName.Last() - 0x30;
             levelEvaSuits = levelEvaSuits ?? new Texture2D[5];
-            levelEvaSuits[level - 1] = levelEvaSuits[level - 1] ?? texture;
+
+            for (int i = level - 1; i < 5; ++i)
+              levelEvaSuits[i] = levelEvaSuits[i] ?? texture;
             return true;
 
           case "EVAhelmet1":
@@ -173,7 +179,9 @@ namespace TextureReplacer
           case "EVAhelmet5":
             level = originalName.Last() - 0x30;
             levelEvaHelmets = levelEvaHelmets ?? new Texture2D[5];
-            levelEvaHelmets[level - 1] = levelEvaHelmets[level - 1] ?? texture;
+
+            for (int i = level - 1; i < 5; ++i)
+              levelEvaHelmets[i] = levelEvaHelmets[i] ?? texture;
             return true;
 
           default:
