@@ -290,6 +290,9 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.8
+    - fixed some contract-related issues by keeping agencies' flags loaded
+    - fixed Reset to Defaults button resizing
 * 2.4.7
     - suit's level textures are inherited from the previous level when missing
 * 2.4.6

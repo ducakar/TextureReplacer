@@ -55,10 +55,10 @@ namespace TextureReplacer
       GUILayout.BeginVertical();
       GUILayout.BeginHorizontal();
 
-      GUILayout.BeginVertical();
+      GUILayout.BeginVertical(GUILayout.Width(200));
 
       // Roster area.
-      rosterScroll = GUILayout.BeginScrollView(rosterScroll, GUILayout.Width(200));
+      rosterScroll = GUILayout.BeginScrollView(rosterScroll);
       GUILayout.BeginVertical();
 
       foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew)
