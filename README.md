@@ -290,6 +290,9 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.9
+    - head and suit names shown in GUI
+    - fixed inheritance of level textures for suits
 * 2.4.8
     - fixed some contract-related issues by keeping agencies' flags loaded
     - fixed Reset to Defaults button resizing

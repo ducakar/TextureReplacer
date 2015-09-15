@@ -145,7 +145,7 @@ namespace TextureReplacer
             levelSuits = levelSuits ?? new Texture2D[5];
 
             for (int i = level - 1; i < 5; ++i)
-              levelSuits[i] = levelSuits[i] ?? texture;
+              levelSuits[i] = texture;
             return true;
 
           case "kerbalHelmetGrey1":
@@ -157,7 +157,7 @@ namespace TextureReplacer
             levelHelmets = levelHelmets ?? new Texture2D[5];
 
             for (int i = level - 1; i < 5; ++i)
-              levelHelmets[i] = levelHelmets[i] ?? texture;
+              levelHelmets[i] = texture;
             return true;
 
           case "EVAtexture1":
@@ -169,7 +169,7 @@ namespace TextureReplacer
             levelEvaSuits = levelEvaSuits ?? new Texture2D[5];
 
             for (int i = level - 1; i < 5; ++i)
-              levelEvaSuits[i] = levelEvaSuits[i] ?? texture;
+              levelEvaSuits[i] = texture;
             return true;
 
           case "EVAhelmet1":
@@ -181,7 +181,7 @@ namespace TextureReplacer
             levelEvaHelmets = levelEvaHelmets ?? new Texture2D[5];
 
             for (int i = level - 1; i < 5; ++i)
-              levelEvaHelmets[i] = levelEvaHelmets[i] ?? texture;
+              levelEvaHelmets[i] = texture;
             return true;
 
           default:

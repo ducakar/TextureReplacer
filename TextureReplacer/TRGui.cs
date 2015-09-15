@@ -37,7 +37,7 @@ namespace TextureReplacer
     // Classes from config files.
     readonly List<string> classes = new List<string>();
     // UI state.
-    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 575);
+    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 610);
     Vector2 rosterScroll = Vector2.zero;
     ProtoCrewMember selectedKerbal = null;
     string selectedClass = null;
@@ -141,7 +141,8 @@ namespace TextureReplacer
       if (head != null)
       {
         GUILayout.Box(head.head, GUILayout.Width(200), GUILayout.Height(200));
-        GUILayout.Space(20);
+
+        GUILayout.Label(head.name);
       }
 
       if (suit != null)
@@ -165,6 +166,8 @@ namespace TextureReplacer
         GUILayout.Space(10);
         GUILayout.Box(evaHelmetTex, GUILayout.Width(100), GUILayout.Height(100));
         GUILayout.EndHorizontal();
+
+        GUILayout.Label(suit.name);
       }
 
       GUILayout.EndVertical();
@@ -201,12 +204,12 @@ namespace TextureReplacer
           kerbalData.head = null;
 
         GUI.color = Color.white;
-
-        GUILayout.Space(120);
       }
 
       if (kerbalData != null || selectedClass != null)
       {
+        GUILayout.Space(130);
+
         GUILayout.BeginHorizontal();
         GUI.enabled = personaliser.suits.Count != 0;
 
