@@ -683,8 +683,11 @@ namespace TextureReplacer
 
       foreach (ProtoCrewMember kerbal in roster.Crew.Concat(roster.Tourist).Concat(roster.Unowned))
       {
-        if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead)
+        if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead
+            && kerbal.type != ProtoCrewMember.KerbalType.Unowned)
+        {
           continue;
+        }
 
         KerbalData kerbalData = getKerbalData(kerbal);
 
