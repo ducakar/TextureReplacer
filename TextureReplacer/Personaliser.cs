@@ -27,7 +27,7 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  class Personaliser
+  public class Personaliser
   {
     public class Head
     {
@@ -572,7 +572,7 @@ namespace TextureReplacer
     /**
      * Personalise Kerbals in an internal space of a vessel. Used by IvaModule.
      */
-    void personaliseIva(Kerbal kerbal)
+    public void personaliseIva(Kerbal kerbal)
     {
       bool needsSuit = !isHelmetRemovalEnabled || !isSituationSafe(kerbal.InVessel);
 
@@ -641,8 +641,11 @@ namespace TextureReplacer
 
       foreach (ProtoCrewMember kerbal in roster.Crew.Concat(roster.Tourist).Concat(roster.Unowned))
       {
-        if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead)
+        if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead
+            && kerbal.type != ProtoCrewMember.KerbalType.Unowned)
+        {
           continue;
+        }
 
         KerbalData kerbalData = getKerbalData(kerbal);
 

@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -84,6 +85,25 @@ namespace TextureReplacer
           selectedClass = null;
         }
       }
+
+      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Unowned)
+      {
+        switch (kerbal.rosterStatus)
+        {
+          case ProtoCrewMember.RosterStatus.Dead:
+            GUI.contentColor = Color.cyan;
+            break;
+          default:
+            continue;
+        }
+
+        if (GUILayout.Button(kerbal.name))
+        {
+          selectedKerbal = kerbal;
+          selectedClass = null;
+        }
+      }
+
       GUI.contentColor = Color.white;
       GUI.color = CLASS_COLOUR;
 

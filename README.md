@@ -290,6 +290,8 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.10
+    - added compatibility for DeepFreeze
 * 2.4.9
     - head and suit names shown in GUI
     - fixed inheritance of level textures for suits
