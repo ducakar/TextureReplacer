@@ -35,6 +35,7 @@ Special thanks to:
 * sarbian for fixing an issue with non-mupliple-of-4 texture dimensions,
 * therealcrow999 for testing and benchmarking this plugin,
 * Ippo343 for contributing KSP-AVC configuration,
+* JPLRepo for contributing DeepFreeze compatibility fixes,
 * Proot, Scart91, Green Skull and others for creating texture packs and
 * Sylith and Scart91 for giving others permissions to make derivatives of their
   texture packs.
