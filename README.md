@@ -291,6 +291,8 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.11
+    - added alternate directories for general texture replacement
 * 2.4.10
     - added compatibility for DeepFreeze
 * 2.4.9

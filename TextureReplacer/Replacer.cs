@@ -33,6 +33,7 @@ namespace TextureReplacer
     public static readonly string HUD_NAVBALL = "HUDNavBall";
     public static readonly string IVA_NAVBALL = "IVANavBall";
     // General texture replacements.
+    readonly List<string> paths = new List<string> { DIR_TEXTURES };
     readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
     // NavBalls' textures.
     Texture2D hudNavBallTexture = null;
@@ -122,6 +123,7 @@ namespace TextureReplacer
      */
     public void readConfig(ConfigNode rootNode)
     {
+      Util.addLists(rootNode.GetValues("paths"), paths);
       Util.parse(rootNode.GetValue("skinningQuality"), ref skinningQuality);
       Util.parse(rootNode.GetValue("logTextures"), ref logTextures);
     }
@@ -146,18 +148,26 @@ namespace TextureReplacer
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
       {
         Texture2D texture = texInfo.texture;
-        if (texture == null || !texture.name.StartsWith(DIR_TEXTURES, StringComparison.Ordinal))
+        if (texture == null)
           continue;
 
-        string originalName = texture.name.Substring(DIR_TEXTURES.Length);
+        foreach (string path in paths)
+        {
+          if (!texture.name.StartsWith(path, StringComparison.Ordinal))
+            continue;
 
-        if (originalName.StartsWith("GalaxyTex_", StringComparison.Ordinal))
-          texture.wrapMode = TextureWrapMode.Clamp;
+          string originalName = texture.name.Substring(path.Length);
 
-        // This in wrapped inside an 'if' clause just in case if corrupted GameDatabase contains
-        // non-consecutive duplicated entries for some strange reason.
-        if (!mappedTextures.ContainsKey(originalName))
-          mappedTextures.Add(originalName, texture);
+          // Since we are merging multiple directories, we must expect conflicts.
+          if (!mappedTextures.ContainsKey(originalName))
+          {
+            if (originalName.StartsWith("GalaxyTex_", StringComparison.Ordinal))
+              texture.wrapMode = TextureWrapMode.Clamp;
+
+            mappedTextures.Add(originalName, texture);
+          }
+          break;
+        }
       }
 
       Shader headShader = Shader.Find("Bumped Diffuse");
