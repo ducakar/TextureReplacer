@@ -3,10 +3,9 @@
 TextureReplacer
 ===============
 
-* [Forum thread](http://forum.kerbalspaceprogram.com/threads/107471)
+* [Forum thread](http://forum.kerbalspaceprogram.com/index.php?/topic/96851-/)
 * [GitHub page](http://github.com/ducakar/TextureReplacer)
 * [CurseForge page](http://kerbal.curseforge.com/plugins/220217)
-* [Kerbal Stuff page](https://kerbalstuff.com/mod/150/TextureReplacer)
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
@@ -291,6 +290,9 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.12
+    - removed / replaced Kerbal Stuff links
+    - possibly fixed a reflections-related crash
 * 2.4.11
     - added alternate directories for general texture replacement
 * 2.4.10

@@ -1,11 +1,11 @@
 {
   "NAME": "TextureReplacer",
   "URL": "https://raw.githubusercontent.com/ducakar/TextureReplacer/master/GameData/TextureReplacer/TextureReplacer.version",
-  "DOWNLOAD": "https://kerbalstuff.com/mod/150/TextureReplacer",
+  "DOWNLOAD": "http://kerbal.curseforge.com/projects/texturereplacer",
   "VERSION": {
     "MAJOR": 2,
     "MINOR": 4,
-    "PATCH": 11,
+    "PATCH": 12,
     "BUILD": 0
   },
   "KSP_VERSION": {

@@ -361,7 +361,7 @@ namespace TextureReplacer
       }
 
       // Generate generic reflection cube map texture.
-      if (envMapFaces.Any(t => t == null))
+      if (envMapFaces.Contains(null))
       {
         Util.log("Some environment map faces are missing. Static reflections disabled.");
       }
@@ -423,15 +423,14 @@ namespace TextureReplacer
       for (int i = 0; i < SHADER_MAP.GetLength(0); ++i)
       {
         Shader original = Shader.Find(SHADER_MAP[i, 0]);
-        Shader reflective = SHADER_MAP[i, 1] == visorShader.name ?
-                            visorShader : Shader.Find(SHADER_MAP[i, 1]);
+        Shader reflective = Shader.Find(SHADER_MAP[i, 1]);
 
         if (original == null)
           Util.log("Shader \"{0}\" missing", SHADER_MAP[i, 0]);
         else if (reflective == null)
           Util.log("Shader \"{0}\" missing", SHADER_MAP[i, 1]);
         else
-          shaderMap.Add(original, reflective);
+          shaderMap[original] = reflective;
       }
 
       setReflectionType(reflectionType);
