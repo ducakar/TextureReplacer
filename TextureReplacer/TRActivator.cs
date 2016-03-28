@@ -28,52 +28,51 @@ namespace TextureReplacer
   public class TRActivator : MonoBehaviour
   {
     /**
-     * Reflection updater. We don't want this to run every frame unless real reflections are enabled
-     * so it's wrapped inside another component and enabled only when needed.
+     * Reflection updater. We don't want this to run every frame unless real reflections are enabled so it's wrapped
+     * inside another component and enabled only when needed.
      */
-    class TRReflectionUpdater : MonoBehaviour
+    public class TRReflectionUpdater : MonoBehaviour
     {
       public void Update()
       {
-        Reflections.Script.updateScripts();
+        Reflections.Script.UpdateScripts();
       }
     }
 
-    bool hasFlightHandlers = false;
-    TRReflectionUpdater reflectionUpdater = null;
+    TRReflectionUpdater reflectionUpdater;
+    bool hasFlightHandlers;
 
     public void Start()
     {
-      if (!TextureReplacer.isLoaded)
+      if (!TextureReplacer.IsLoaded) {
         return;
+      }
 
-      Replacer.instance.beginScene();
+      Replacer.Instance.OnBeginScene();
 
-      if (HighLogic.LoadedSceneIsFlight)
-      {
-        Replacer.instance.beginFlight();
-        Personaliser.instance.beginFlight();
+      if (HighLogic.LoadedSceneIsFlight) {
+        Replacer.Instance.OnBeginFlight();
+        Personaliser.Instance.OnBeginFlight();
 
         hasFlightHandlers = true;
       }
 
-      if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
-          && Reflections.instance.reflectionType == Reflections.Type.REAL)
-      {
+      if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) &&
+          Reflections.Instance.ReflectionType == Reflections.Type.Real) {
         reflectionUpdater = gameObject.AddComponent<TRReflectionUpdater>();
       }
     }
 
     public void OnDestroy()
     {
-      if (hasFlightHandlers)
-      {
-        Replacer.instance.endFlight();
-        Personaliser.instance.endFlight();
+      if (hasFlightHandlers) {
+        Replacer.Instance.OnEndFlight();
+        Personaliser.Instance.OnEndFlight();
       }
 
-      if (reflectionUpdater != null)
+      if (reflectionUpdater != null) {
         Destroy(reflectionUpdater);
+      }
     }
   }
 }
