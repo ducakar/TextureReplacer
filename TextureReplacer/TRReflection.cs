@@ -76,10 +76,10 @@ namespace TextureReplacer
 
       foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
       {
-        if (meshFilter.renderer == null)
+        if (meshFilter.GetComponent<Renderer>() == null)
           continue;
 
-        Material material = meshFilter.renderer.material;
+        Material material = meshFilter.GetComponent<Renderer>().material;
 
         if (reflections.logReflectiveMeshes)
           Util.log("+ {0} [{1}]", meshFilter.name, material.shader.name);

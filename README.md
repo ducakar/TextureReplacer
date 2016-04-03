@@ -1,4 +1,4 @@
-![logo](http://i.imgur.com/0esQrqA.jpg)
+﻿![logo](http://i.imgur.com/0esQrqA.jpg)
 
 TextureReplacer
 ===============
@@ -32,9 +32,10 @@ Special thanks to:
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
   reflections,
 * sarbian for fixing an issue with non-mupliple-of-4 texture dimensions,
-* therealcrow999 for testing and benchmarking this plugin,
 * Ippo343 for contributing KSP-AVC configuration,
 * JPLRepo for contributing DeepFreeze compatibility fixes,
+* RangeMachine for update to 1.1,
+* therealcrow999 for testing and benchmarking this plugin,
 * Proot, Scart91, Green Skull and others for creating texture packs and
 * Sylith and Scart91 for giving others permissions to make derivatives of their
   texture packs.
@@ -290,6 +291,9 @@ Known Issues
 Change Log
 ----------
 
+* 2.4.13
+    - fixed for 1.1 thanks to RangeMachine
+    - visor reflections still not working
 * 2.4.12
     - removed / replaced Kerbal Stuff links
     - possibly fixed a reflections-related crash

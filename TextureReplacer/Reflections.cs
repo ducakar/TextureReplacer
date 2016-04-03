@@ -196,8 +196,8 @@ namespace TextureReplacer
       { "KSP/Specular", "Reflective/Bumped Diffuse" },
       { "KSP/Bumped", "Reflective/Bumped Diffuse" },
       { "KSP/Bumped Specular", "Reflective/Bumped Diffuse" },
-      { "KSP/Alpha/Translucent", "TR/Visor" },
-      { "KSP/Alpha/Translucent Specular", "TR/Visor" }
+      { "KSP/Alpha/Translucent", "Reflective/Bumped Diffuse" },
+      { "KSP/Alpha/Translucent Specular", "Reflective/Bumped Diffuse" }
     };
 
     // Render layers:
@@ -244,7 +244,7 @@ namespace TextureReplacer
     {
       if (camera == null)
       {
-        camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).camera;
+        camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).GetComponent<Camera>();
         camera.enabled = false;
         camera.clearFlags = CameraClearFlags.Depth;
         // Any smaller number and visors will refect internals of helmets.

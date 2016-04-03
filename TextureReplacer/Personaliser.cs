@@ -427,7 +427,7 @@ namespace TextureReplacer
       Transform flag = isEva ? component.transform.Find("model/kbEVA_flagDecals") : null;
 
       if (isEva)
-        flag.renderer.enabled = needsSuit;
+        flag.GetComponent<Renderer>().enabled = needsSuit;
 
       // We must include hidden meshes, since flares are hidden when light is turned off.
       // All other meshes are always visible, so no performance hit here.
