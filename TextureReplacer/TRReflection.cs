@@ -48,47 +48,46 @@ namespace TextureReplacer
 
     public override void OnStart(StartState state)
     {
-      Reflections reflections = Reflections.instance;
+      Reflections reflections = Reflections.Instance;
 
       Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
       Color reflectionColour = new Color(0.5f, 0.5f, 0.5f);
       int updateInterval = 1;
 
-      Util.parse(ReflectionColor, ref reflectionColour);
-      Util.parse(colour, ref reflectionColour);
-      Util.parse(interval, ref updateInterval);
+      Util.Parse(ReflectionColor, ref reflectionColour);
+      Util.Parse(colour, ref reflectionColour);
+      Util.Parse(interval, ref updateInterval);
 
       updateInterval = Math.Max(updateInterval, 1);
 
-      List<string> meshNames = Util.splitConfigValue(meshes).ToList();
+      List<string> meshNames = Util.SplitConfigValue(meshes).ToList();
       if (MeshesToChange != "all")
-        meshNames.AddUniqueRange(Util.splitConfigValue(MeshesToChange));
+        meshNames.AddUniqueRange(Util.SplitConfigValue(MeshesToChange));
 
-      if (reflections.reflectionType == Reflections.Type.NONE)
+      if (reflections.ReflectionType == Reflections.Type.None)
         return;
-      if (reflections.reflectionType == Reflections.Type.REAL)
+      if (reflections.ReflectionType == Reflections.Type.Real)
         script = new Reflections.Script(part, updateInterval);
 
-      if (reflections.logReflectiveMeshes)
-        Util.log("Part \"{0}\"", part.name);
+      if (reflections.LogReflectiveMeshes)
+        Util.Log("Part \"{0}\"", part.name);
 
       bool success = false;
 
       foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
       {
-        if (meshFilter.renderer == null)
+        if (meshFilter.GetComponent<MeshRenderer>() == null)
           continue;
 
-        Material material = meshFilter.renderer.material;
+        Material material = meshFilter.GetComponent<MeshRenderer>().material;
 
-        if (reflections.logReflectiveMeshes)
-          Util.log("+ {0} [{1}]", meshFilter.name, material.shader.name);
+        if (reflections.LogReflectiveMeshes)
+          Util.Log("+ {0} [{1}]", meshFilter.name, material.shader.name);
 
         if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name))
         {
-          success |= script == null ?
-                     reflections.applyStatic(material, reflectiveShader, reflectionColour) :
-                     script.apply(material, reflectiveShader, reflectionColour);
+          success |= script == null ? reflections.ApplyStatic(material, reflectiveShader, reflectionColour)
+            : script.Apply(material, reflectiveShader, reflectionColour);
         }
       }
 
@@ -96,18 +95,18 @@ namespace TextureReplacer
       {
         if (script != null)
         {
-          script.destroy();
+          script.Destroy();
           script = null;
         }
 
-        Util.log("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
+        Util.Log("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
       }
     }
 
     public void OnDestroy()
     {
       if (script != null)
-        script.destroy();
+        script.Destroy();
     }
   }
 }

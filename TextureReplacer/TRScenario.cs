@@ -27,14 +27,14 @@ namespace TextureReplacer
   {
     public override void OnLoad(ConfigNode node)
     {
-      Reflections.instance.loadScenario(node);
-      Personaliser.instance.loadScenario(node);
+      Reflections.Instance.OnLoadScenario(node);
+      Personaliser.Instance.OnLoadScenario(node);
     }
 
     public override void OnSave(ConfigNode node)
     {
-      Reflections.instance.saveScenario(node);
-      Personaliser.instance.saveScenario(node);
+      Reflections.Instance.OnSaveScenario(node);
+      Personaliser.Instance.OoSaveScenario(node);
     }
   }
 }

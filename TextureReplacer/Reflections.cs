@@ -32,22 +32,22 @@ namespace TextureReplacer
   {
     public enum Type
     {
-      NONE,
-      STATIC,
-      REAL
+      None,
+      Static,
+      Real
     }
 
     public class Script
     {
       struct MeshState
       {
-        public Renderer renderer;
-        public bool isEnabled;
+        public Renderer Renderer;
+        public bool IsEnabled;
       }
 
       // List of all created reflection scripts.
       static readonly List<Script> scripts = new List<Script>();
-      static int currentScript = 0;
+      static int currentScript;
 
       readonly RenderTexture envMap;
       readonly Transform transform;
@@ -67,55 +67,52 @@ namespace TextureReplacer
         transform = part.transform;
         isEva = part.GetComponent<KerbalEVA>() != null;
 
-        if (isEva)
-        {
+        if (isEva) {
           transform = transform.Find("model01");
 
           SkinnedMeshRenderer visor = transform.GetComponentsInChildren<SkinnedMeshRenderer>(true)
             .FirstOrDefault(m => m.name == "visor");
 
-          if (visor != null)
-          {
+          if (visor != null) {
             Material material = visor.material;
 
-            material.shader = instance.visorShader;
-            material.SetTexture(Util.CUBE_PROPERTY, envMap);
-            material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
+            material.shader = Instance.visorShader;
+            material.SetTexture(Util.CubeProperty, envMap);
+            material.SetColor(Util.ReflectColorProperty, visorReflectionColour);
           }
         }
 
         interval = updateInterval;
-        counter = Util.random.Next(updateInterval);
-        currentFace = Util.random.Next(6);
+        counter = Util.Random.Next(updateInterval);
+        currentFace = Util.Random.Next(6);
 
-        ensureCamera();
-        update(true);
+        EnsureCamera();
+        Update(true);
 
         scripts.Add(this);
       }
 
-      public bool apply(Material material, Shader shader, Color reflectionColour)
+      public bool Apply(Material material, Shader shader, Color reflectionColour)
       {
-        Shader reflectiveShader = shader ?? instance.toReflective(material.shader);
+        Shader reflectiveShader = shader ?? Instance.ToReflective(material.shader);
 
-        if (reflectiveShader != null)
-        {
+        if (reflectiveShader != null) {
           material.shader = reflectiveShader;
-          material.SetTexture(Util.CUBE_PROPERTY, envMap);
-          material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectionColour);
+          material.SetTexture(Util.CubeProperty, envMap);
+          material.SetColor(Util.ReflectColorProperty, reflectionColour);
           return true;
         }
         return false;
       }
 
-      public void destroy()
+      public void Destroy()
       {
         scripts.Remove(this);
 
         Object.DestroyImmediate(envMap);
       }
 
-      void update(bool force)
+      void Update(bool force)
       {
         int faceMask = force ? 0x3f : 1 << currentFace;
 
@@ -123,8 +120,7 @@ namespace TextureReplacer
         Renderer[] meshes = transform.GetComponentsInChildren<Renderer>();
         bool[] meshStates = new bool[meshes.Length];
 
-        for (int i = 0; i < meshes.Length; ++i)
-        {
+        for (int i = 0; i < meshes.Length; ++i) {
           meshStates[i] = meshes[i].enabled;
           meshes[i].enabled = false;
         }
@@ -154,32 +150,28 @@ namespace TextureReplacer
         currentFace = (currentFace + 1) % 6;
       }
 
-      public void setActive(bool value)
+      public void SetActive(bool value)
       {
         if (!isActive && value)
-          update(true);
+          Update(true);
 
         isActive = value;
       }
 
-      public static void updateScripts()
+      public static void UpdateScripts()
       {
-        if (scripts.Count != 0 && Time.frameCount % reflectionInterval == 0)
-        {
+        if (scripts.Count != 0 && Time.frameCount % reflectionInterval == 0) {
           currentScript %= scripts.Count;
 
           int startScript = currentScript;
-          do
-          {
+          do {
             Script script = scripts[currentScript];
             currentScript = (currentScript + 1) % scripts.Count;
 
-            if (script.isActive)
-            {
+            if (script.isActive) {
               script.counter = (script.counter + 1) % script.interval;
-              if (script.counter == 0)
-              {
-                script.update(false);
+              if (script.counter == 0) {
+                script.Update(false);
                 break;
               }
             }
@@ -189,13 +181,15 @@ namespace TextureReplacer
       }
     }
 
-    public static readonly string DIR_ENVMAP = Util.DIR + "EnvMap/";
+    public static readonly string EnvMapDirectory = Util.Directory + "EnvMap/";
     // Reflective shader map.
-    static readonly string[,] SHADER_MAP = {
+    static readonly string[,] shaderNameMap = {
       { "KSP/Diffuse", "Reflective/Bumped Diffuse" },
       { "KSP/Specular", "Reflective/Bumped Diffuse" },
       { "KSP/Bumped", "Reflective/Bumped Diffuse" },
       { "KSP/Bumped Specular", "Reflective/Bumped Diffuse" },
+      { "KSP/Alpha/Translucent", "Reflective/Bumped Diffuse" },
+      { "KSP/Alpha/Translucent Specular", "Reflective/Bumped Diffuse" },
       { "KSP/Alpha/Translucent", "TR/Visor" },
       { "KSP/Alpha/Translucent Specular", "TR/Visor" }
     };
@@ -209,7 +203,7 @@ namespace TextureReplacer
     // 15 - buildings, terrain
     // 18 - skybox
     // 23 - sun
-    static readonly float[] CULL_DISTANCES = {
+    static readonly float[] cullDistances = {
       1000.0f, 100.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -218,13 +212,13 @@ namespace TextureReplacer
     static readonly Shader transparentSpecularShader = Shader.Find("Transparent/Specular");
     readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflective shader material.
-    Material shaderMaterial = null;
+    Material shaderMaterial;
     // Reflection camera.
-    static Camera camera = null;
+    static Camera camera;
     // Environment map textures.
-    Cubemap staticEnvMap = null;
+    Cubemap staticEnvMap;
     // Reflection type.
-    public Type reflectionType = Type.REAL;
+    public Type ReflectionType { get; private set; }
     // Real reflection resolution.
     static int reflectionResolution = 128;
     // Interval in frames for updating environment map faces.
@@ -232,110 +226,118 @@ namespace TextureReplacer
     // Reflection colour.
     static Color visorReflectionColour = new Color(0.5f, 0.5f, 0.5f);
     // Visor reflection feature.
-    public bool isVisorReflectionEnabled = true;
+    public bool IsVisorReflectionEnabled { get; private set; }
     // Print names of meshes and their shaders in parts with TRReflection module.
-    public bool logReflectiveMeshes = false;
+    public bool LogReflectiveMeshes { get; private set; }
     // Reflective shader.
-    Shader visorShader = null;
+    Shader visorShader;
     // Instance.
-    public static Reflections instance = null;
+    public static Reflections Instance { get; private set; }
 
-    static void ensureCamera()
+    static void EnsureCamera()
     {
-      if (camera == null)
-      {
-        camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).camera;
+      if (camera == null) {
+        camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).GetComponent<Camera>();
         camera.enabled = false;
         camera.clearFlags = CameraClearFlags.Depth;
         // Any smaller number and visors will refect internals of helmets.
         camera.nearClipPlane = 0.125f;
-        camera.layerCullDistances = CULL_DISTANCES;
+        camera.layerCullDistances = cullDistances;
       }
     }
 
     /**
      * Get reflective version of a shader.
      */
-    public Shader toReflective(Shader shader)
+    public Shader ToReflective(Shader shader)
     {
       Shader newShader;
       shaderMap.TryGetValue(shader, out newShader);
       return newShader;
     }
 
-    public bool applyStatic(Material material, Shader shader, Color reflectionColour)
+    public bool ApplyStatic(Material material, Shader shader, Color reflectionColour)
     {
-      Shader reflectiveShader = shader ?? toReflective(material.shader);
+      Shader reflectiveShader = shader ?? ToReflective(material.shader);
 
-      if (reflectiveShader != null)
-      {
+      if (reflectiveShader != null) {
         material.shader = reflectiveShader;
-        material.SetTexture(Util.CUBE_PROPERTY, staticEnvMap);
-        material.SetColor(Util.REFLECT_COLOR_PROPERTY, reflectionColour);
+        material.SetTexture(Util.CubeProperty, staticEnvMap);
+        material.SetColor(Util.ReflectColorProperty, reflectionColour);
         return true;
       }
       return false;
     }
 
-    public void setReflectionType(Type type)
+    public void SetReflectionType(Type type)
     {
-      if (type == Type.STATIC && staticEnvMap == null)
-        type = Type.NONE;
+      if (type == Type.Static && staticEnvMap == null)
+        type = Type.None;
 
-      reflectionType = type;
+      ReflectionType = type;
 
       Part[] evas = {
         PartLoader.getPartInfoByName("kerbalEVA").partPrefab,
         PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab
       };
 
-      for (int i = 0; i < 2; ++i)
-      {
+      for (int i = 0; i < 2; ++i) {
         // Set visor texture and reflection on proto-EVA Kerbal.
         SkinnedMeshRenderer visor = evas[i].GetComponentsInChildren<SkinnedMeshRenderer>(true)
           .First(m => m.name == "visor");
 
         Material material = visor.sharedMaterial;
-        bool enableStatic = isVisorReflectionEnabled && reflectionType == Type.STATIC;
+        bool enableStatic = IsVisorReflectionEnabled && ReflectionType == Type.Static;
 
         // We apply visor shader for real reflections later, through TREvaModule since we don't
         // want corrupted reflections in the main menu.
         material.shader = enableStatic ? visorShader : transparentSpecularShader;
-        material.SetTexture(Util.CUBE_PROPERTY, enableStatic ? staticEnvMap : null);
-        material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
+        material.SetTexture(Util.CubeProperty, enableStatic ? staticEnvMap : null);
+        material.SetColor(Util.ReflectColorProperty, visorReflectionColour);
       }
+    }
+
+    public static void Recreate()
+    {
+      Instance = new Reflections();
     }
 
     /**
      * Read configuration and perform pre-load initialisation.
      */
-    public void readConfig(ConfigNode rootNode)
+    public void ReadConfig(ConfigNode rootNode)
     {
-      Util.parse(rootNode.GetValue("reflectionType"), ref reflectionType);
-      Util.parse(rootNode.GetValue("reflectionResolution"), ref reflectionResolution);
-      Util.parse(rootNode.GetValue("reflectionInterval"), ref reflectionInterval);
-      Util.parse(rootNode.GetValue("isVisorReflectionEnabled"), ref isVisorReflectionEnabled);
-      Util.parse(rootNode.GetValue("visorReflectionColour"), ref visorReflectionColour);
-      Util.parse(rootNode.GetValue("logReflectiveMeshes"), ref logReflectiveMeshes);
+      Type reflectionType = Type.Real;
+      bool isVisorReflectionEnabled = true;
+      bool logReflectiveMeshes = false;
+
+      Util.Parse(rootNode.GetValue("reflectionType"), ref reflectionType);
+      Util.Parse(rootNode.GetValue("reflectionResolution"), ref reflectionResolution);
+      Util.Parse(rootNode.GetValue("reflectionInterval"), ref reflectionInterval);
+      Util.Parse(rootNode.GetValue("isVisorReflectionEnabled"), ref isVisorReflectionEnabled);
+      Util.Parse(rootNode.GetValue("visorReflectionColour"), ref visorReflectionColour);
+      Util.Parse(rootNode.GetValue("logReflectiveMeshes"), ref logReflectiveMeshes);
+
+      ReflectionType = reflectionType;
+      IsVisorReflectionEnabled = isVisorReflectionEnabled;
+      LogReflectiveMeshes = logReflectiveMeshes;
     }
 
     /**
      * Post-load initialisation.
      */
-    public void load()
+    public void Load()
     {
       Texture2D[] envMapFaces = new Texture2D[6];
 
-      foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
-      {
+      foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture) {
         Texture2D texture = texInfo.texture;
-        if (texture == null || !texture.name.StartsWith(DIR_ENVMAP, System.StringComparison.Ordinal))
+        if (texture == null || !texture.name.StartsWith(EnvMapDirectory, System.StringComparison.Ordinal)) {
           continue;
+        }
 
-        string originalName = texture.name.Substring(DIR_ENVMAP.Length);
-
-        switch (originalName)
-        {
+        string originalName = texture.name.Substring(EnvMapDirectory.Length);
+        switch (originalName) {
           case "PositiveX":
             envMapFaces[0] = texture;
             break;
@@ -355,29 +357,24 @@ namespace TextureReplacer
             envMapFaces[5] = texture;
             break;
           default:
-            Util.log("Invalid enironment map texture name {0}", texture.name);
+            Util.Log("Invalid enironment map texture name {0}", texture.name);
             break;
         }
       }
 
       // Generate generic reflection cube map texture.
-      if (envMapFaces.Contains(null))
-      {
-        Util.log("Some environment map faces are missing. Static reflections disabled.");
+      if (envMapFaces.Contains(null)) {
+        Util.Log("Some environment map faces are missing. Static reflections disabled.");
       }
-      else
-      {
+      else {
         int envMapSize = envMapFaces[0].width;
 
-        if (envMapFaces.Any(t => t.width != envMapSize || t.height != envMapSize)
-            || envMapFaces.Any(t => !Util.isPow2(t.width) || !Util.isPow2(t.height)))
-        {
-          Util.log("Invalid environment map faces. Static reflections disabled.");
+        if (envMapFaces.Any(t => t.width != envMapSize || t.height != envMapSize) ||
+            envMapFaces.Any(t => !Util.IsPow2(t.width) || !Util.IsPow2(t.height))) {
+          Util.Log("Invalid environment map faces. Static reflections disabled.");
         }
-        else
-        {
-          try
-          {
+        else {
+          try {
             staticEnvMap = new Cubemap(envMapSize, TextureFormat.RGB24, true);
             staticEnvMap.hideFlags = HideFlags.HideAndDontSave;
             staticEnvMap.wrapMode = TextureWrapMode.Clamp;
@@ -389,22 +386,20 @@ namespace TextureReplacer
             staticEnvMap.SetPixels(envMapFaces[5].GetPixels(), CubemapFace.NegativeZ);
             staticEnvMap.Apply(true, false);
 
-            Util.log("Static environment map cube texture generated.");
+            Util.Log("Static environment map cube texture generated.");
           }
-          catch (UnityException)
-          {
-            if (staticEnvMap != null)
+          catch (UnityException) {
+            if (staticEnvMap != null) {
               Object.DestroyImmediate(staticEnvMap);
-
+            }
             staticEnvMap = null;
 
-            Util.log("Failed to set up static reflections. Textures not readable?");
+            Util.Log("Failed to set up static reflections. Textures not readable?");
           }
         }
       }
 
-      try
-      {
+      try {
         Assembly assembly = Assembly.GetExecutingAssembly();
         Stream stream = assembly.GetManifestResourceStream("TextureReplacer.Visor-compiled.shader");
         StreamReader reader = new StreamReader(stream);
@@ -412,54 +407,56 @@ namespace TextureReplacer
         shaderMaterial = new Material(reader.ReadToEnd());
         visorShader = shaderMaterial.shader;
 
-        Util.log("Visor shader sucessfully compiled.");
+        Util.Log("Visor shader sucessfully compiled.");
       }
-      catch
-      {
-        isVisorReflectionEnabled = false;
-        Util.log("Visor shader loading failed. Visor reflections disabled.");
+      catch {
+        IsVisorReflectionEnabled = false;
+        Util.Log("Visor shader loading failed. Visor reflections disabled.");
       }
 
-      for (int i = 0; i < SHADER_MAP.GetLength(0); ++i)
-      {
-        Shader original = Shader.Find(SHADER_MAP[i, 0]);
-        Shader reflective = Shader.Find(SHADER_MAP[i, 1]);
+      for (int i = 0; i < shaderNameMap.GetLength(0); ++i) {
+        Shader original = Shader.Find(shaderNameMap[i, 0]);
+        Shader reflective = Shader.Find(shaderNameMap[i, 1]);
 
-        if (original == null)
-          Util.log("Shader \"{0}\" missing", SHADER_MAP[i, 0]);
-        else if (reflective == null)
-          Util.log("Shader \"{0}\" missing", SHADER_MAP[i, 1]);
-        else
+        if (original == null) {
+          Util.Log("Shader \"{0}\" missing", shaderNameMap[i, 0]);
+        }
+        else if (reflective == null) {
+          Util.Log("Shader \"{0}\" missing", shaderNameMap[i, 1]);
+        }
+        else {
           shaderMap[original] = reflective;
+        }
       }
 
-      setReflectionType(reflectionType);
+      SetReflectionType(ReflectionType);
     }
 
-    public void destroy()
+    public void Destroy()
     {
-      if (staticEnvMap != null)
+      if (staticEnvMap != null) {
         Object.DestroyImmediate(staticEnvMap);
-
-      if (camera != null)
+      }
+      if (camera != null) {
         Object.DestroyImmediate(camera.gameObject);
-
-      if (shaderMaterial != null)
+      }
+      if (shaderMaterial != null) {
         Object.DestroyImmediate(shaderMaterial);
+      }
     }
 
-    public void loadScenario(ConfigNode node)
+    public void OnLoadScenario(ConfigNode node)
     {
-      Type type = reflectionType;
-      Util.parse(node.GetValue("reflectionType"), ref type);
+      Type type = ReflectionType;
+      Util.Parse(node.GetValue("reflectionType"), ref type);
 
-      if (type != reflectionType)
-        setReflectionType(type);
+      if (type != ReflectionType)
+        SetReflectionType(type);
     }
 
-    public void saveScenario(ConfigNode node)
+    public void OnSaveScenario(ConfigNode node)
     {
-      node.AddValue("reflectionType", reflectionType);
+      node.AddValue("reflectionType", ReflectionType);
     }
   }
 }
