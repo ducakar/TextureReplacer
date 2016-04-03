@@ -29,7 +29,7 @@ namespace TextureReplacer
 {
   public class TRReflection : PartModule
   {
-    Reflections.Script script = null;
+    Reflections.Script script;
 
     [KSPField(isPersistant = false)]
     public string shader = "";
@@ -61,52 +61,51 @@ namespace TextureReplacer
       updateInterval = Math.Max(updateInterval, 1);
 
       List<string> meshNames = Util.SplitConfigValue(meshes).ToList();
-      if (MeshesToChange != "all")
+      if (MeshesToChange != "all") {
         meshNames.AddUniqueRange(Util.SplitConfigValue(MeshesToChange));
-
-      if (reflections.ReflectionType == Reflections.Type.None)
+      }
+      if (reflections.ReflectionType == Reflections.Type.None) {
         return;
-      if (reflections.ReflectionType == Reflections.Type.Real)
+      }
+      if (reflections.ReflectionType == Reflections.Type.Real) {
         script = new Reflections.Script(part, updateInterval);
-
-      if (reflections.LogReflectiveMeshes)
+      }
+      if (reflections.LogReflectiveMeshes) {
         Util.Log("Part \"{0}\"", part.name);
+      }
 
       bool success = false;
 
-      foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
-      {
-        if (meshFilter.GetComponent<Renderer>() == null)
+      foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>()) {
+        if (meshFilter.renderer == null) {
           continue;
+        }
 
         Material material = meshFilter.GetComponent<Renderer>().material;
 
-        if (reflections.LogReflectiveMeshes)
+        if (reflections.LogReflectiveMeshes) {
           Util.Log("+ {0} [{1}]", meshFilter.name, material.shader.name);
-
-        if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name))
-        {
+        }
+        if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name)) {
           success |= script == null ? reflections.ApplyStatic(material, reflectiveShader, reflectionColour)
             : script.Apply(material, reflectiveShader, reflectionColour);
         }
       }
 
-      if (!success)
-      {
-        if (script != null)
-        {
+      if (!success) {
+        if (script != null) {
           script.Destroy();
           script = null;
         }
-
         Util.Log("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
       }
     }
 
     public void OnDestroy()
     {
-      if (script != null)
+      if (script != null) {
         script.Destroy();
+      }
     }
   }
 }

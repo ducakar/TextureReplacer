@@ -41,12 +41,12 @@ namespace TextureReplacer
     {
       struct MeshState
       {
-        public Renderer Renderer;
-        public bool IsEnabled;
+        public Renderer renderer;
+        public bool isEnabled;
       }
 
       // List of all created reflection scripts.
-      static readonly List<Script> scripts = new List<Script>();
+      static readonly List<Script> Scripts = new List<Script>();
       static int currentScript;
 
       readonly RenderTexture envMap;
@@ -89,7 +89,7 @@ namespace TextureReplacer
         EnsureCamera();
         Update(true);
 
-        scripts.Add(this);
+        Scripts.Add(this);
       }
 
       public bool Apply(Material material, Shader shader, Color reflectionColour)
@@ -107,7 +107,7 @@ namespace TextureReplacer
 
       public void Destroy()
       {
-        scripts.Remove(this);
+        Scripts.Remove(this);
 
         Object.DestroyImmediate(envMap);
       }
@@ -144,32 +144,34 @@ namespace TextureReplacer
         camera.RenderToCubemap(envMap, faceMask);
 
         // Restore mesh visibility.
-        for (int i = 0; i < meshes.Length; ++i)
+        for (int i = 0; i < meshes.Length; ++i) {
           meshes[i].enabled = meshStates[i];
+        }
 
         currentFace = (currentFace + 1) % 6;
       }
 
       public void SetActive(bool value)
       {
-        if (!isActive && value)
+        if (!isActive && value) {
           Update(true);
-
+        }
         isActive = value;
       }
 
       public static void UpdateScripts()
       {
-        if (scripts.Count != 0 && Time.frameCount % reflectionInterval == 0) {
-          currentScript %= scripts.Count;
+        if (Scripts.Count != 0 && Time.frameCount % reflectionInterval == 0) {
+          currentScript %= Scripts.Count;
 
           int startScript = currentScript;
           do {
-            Script script = scripts[currentScript];
-            currentScript = (currentScript + 1) % scripts.Count;
+            Script script = Scripts[currentScript];
+            currentScript = (currentScript + 1) % Scripts.Count;
 
             if (script.isActive) {
               script.counter = (script.counter + 1) % script.interval;
+
               if (script.counter == 0) {
                 script.Update(false);
                 break;
@@ -181,9 +183,9 @@ namespace TextureReplacer
       }
     }
 
-    public static readonly string EnvMapDirectory = Util.Directory + "EnvMap/";
+    public const string EnvMapDirectory = Util.Directory + "EnvMap/";
     // Reflective shader map.
-    static readonly string[,] shaderNameMap = {
+    static readonly string[,] ShaderNameMap = {
       { "KSP/Diffuse", "Reflective/Bumped Diffuse" },
       { "KSP/Specular", "Reflective/Bumped Diffuse" },
       { "KSP/Bumped", "Reflective/Bumped Diffuse" },
@@ -201,13 +203,13 @@ namespace TextureReplacer
     // 15 - buildings, terrain
     // 18 - skybox
     // 23 - sun
-    static readonly float[] cullDistances = {
+    static readonly float[] CullDistances = {
       1000.0f, 100.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
     };
-    static readonly Shader transparentSpecularShader = Shader.Find("Transparent/Specular");
+    static readonly Shader TransparentSpecularShader = Shader.Find("Transparent/Specular");
     readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflective shader material.
     Material shaderMaterial;
@@ -240,7 +242,7 @@ namespace TextureReplacer
         camera.clearFlags = CameraClearFlags.Depth;
         // Any smaller number and visors will refect internals of helmets.
         camera.nearClipPlane = 0.125f;
-        camera.layerCullDistances = cullDistances;
+        camera.layerCullDistances = CullDistances;
       }
     }
 
@@ -269,8 +271,9 @@ namespace TextureReplacer
 
     public void SetReflectionType(Type type)
     {
-      if (type == Type.Static && staticEnvMap == null)
+      if (type == Type.Static && staticEnvMap == null) {
         type = Type.None;
+      }
 
       ReflectionType = type;
 
@@ -289,7 +292,7 @@ namespace TextureReplacer
 
         // We apply visor shader for real reflections later, through TREvaModule since we don't
         // want corrupted reflections in the main menu.
-        material.shader = enableStatic ? visorShader : transparentSpecularShader;
+        material.shader = enableStatic ? visorShader : TransparentSpecularShader;
         material.SetTexture(Util.CubeProperty, enableStatic ? staticEnvMap : null);
         material.SetColor(Util.ReflectColorProperty, visorReflectionColour);
       }
@@ -412,15 +415,15 @@ namespace TextureReplacer
         Util.Log("Visor shader loading failed. Visor reflections disabled.");
       }
 
-      for (int i = 0; i < shaderNameMap.GetLength(0); ++i) {
-        Shader original = Shader.Find(shaderNameMap[i, 0]);
-        Shader reflective = Shader.Find(shaderNameMap[i, 1]);
+      for (int i = 0; i < ShaderNameMap.GetLength(0); ++i) {
+        Shader original = Shader.Find(ShaderNameMap[i, 0]);
+        Shader reflective = Shader.Find(ShaderNameMap[i, 1]);
 
         if (original == null) {
-          Util.Log("Shader \"{0}\" missing", shaderNameMap[i, 0]);
+          Util.Log("Shader \"{0}\" missing", ShaderNameMap[i, 0]);
         }
         else if (reflective == null) {
-          Util.Log("Shader \"{0}\" missing", shaderNameMap[i, 1]);
+          Util.Log("Shader \"{0}\" missing", ShaderNameMap[i, 1]);
         }
         else {
           shaderMap[original] = reflective;

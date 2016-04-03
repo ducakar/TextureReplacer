@@ -31,8 +31,9 @@ namespace TextureReplacer
 {
   class Loader
   {
-    static readonly string hudNavball = Replacer.TexturesDirectory + Replacer.HudNavball;
-    static readonly string ivaNavball = Replacer.TexturesDirectory + Replacer.IvaNavball;
+    const string HudNavball = Replacer.TexturesDirectory + Replacer.HudNavball;
+    const string IvaNavball = Replacer.TexturesDirectory + Replacer.IvaNavball;
+
     // Texture compression and mipmap generation parameters.
     int lastTextureCount;
     // List of substrings for paths where mipmap generating is enabled.
@@ -156,7 +157,7 @@ namespace TextureReplacer
         // blurriness when using less-than-full texture quality.
         if (isMipmapGenEnabled.Value && texture.mipmapCount == 1 && (texture.width > 1 || texture.height > 1) &&
             generateMipmapsPaths.Any(r => r.IsMatch(texture.name)) &&
-            texture.name != hudNavball && texture.name != ivaNavball) {
+            texture.name != HudNavball && texture.name != IvaNavball) {
           Color32[] pixels32 = texture.GetPixels32();
 
           // PNGs are always loaded as transparent, so we check if they actually contain any

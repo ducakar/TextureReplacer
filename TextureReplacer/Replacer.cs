@@ -30,9 +30,9 @@ namespace TextureReplacer
 {
   class Replacer
   {
-    public static readonly string TexturesDirectory = Util.Directory + "Default/";
-    public static readonly string HudNavball = "HUDNavBall";
-    public static readonly string IvaNavball = "IVANavBall";
+    public const string TexturesDirectory = Util.Directory + "Default/";
+    public const string HudNavball = "HUDNavBall";
+    public const string IvaNavball = "IVANavBall";
 
     // General texture replacements.
     readonly List<string> paths = new List<string> { TexturesDirectory };

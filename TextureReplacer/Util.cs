@@ -32,10 +32,10 @@ namespace TextureReplacer
 {
   static class Util
   {
-    static readonly char[] configDelimiters = { ' ', '\t', ',' };
+    static readonly char[] ConfigDelimiters = { ' ', '\t', ',' };
 
-    public static readonly string Directory = typeof(Util).Namespace + "/";
-    public static int BumpMapProperty = Shader.PropertyToID("_BumpMap");
+    public const string Directory = "TextureReplacer/";
+    public static readonly int BumpMapProperty = Shader.PropertyToID("_BumpMap");
     public static readonly int CubeProperty = Shader.PropertyToID("_Cube");
     public static readonly int ReflectColorProperty = Shader.PropertyToID("_ReflectColor");
     public static readonly System.Random Random = new System.Random();
@@ -53,7 +53,7 @@ namespace TextureReplacer
      */
     public static string[] SplitConfigValue(string value)
     {
-      return value.Split(configDelimiters, StringSplitOptions.RemoveEmptyEntries);
+      return value.Split(ConfigDelimiters, StringSplitOptions.RemoveEmptyEntries);
     }
 
     /**
