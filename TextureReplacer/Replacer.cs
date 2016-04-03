@@ -20,6 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using KSP.UI.Screens.Flight;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,44 +30,43 @@ namespace TextureReplacer
 {
   class Replacer
   {
-    public static readonly string DIR_TEXTURES = Util.DIR + "Default/";
-    public static readonly string HUD_NAVBALL = "HUDNavBall";
-    public static readonly string IVA_NAVBALL = "IVANavBall";
+    public static readonly string TexturesDirectory = Util.Directory + "Default/";
+    public static readonly string HudNavball = "HUDNavBall";
+    public static readonly string IvaNavball = "IVANavBall";
+
     // General texture replacements.
-    readonly List<string> paths = new List<string> { DIR_TEXTURES };
+    readonly List<string> paths = new List<string> { TexturesDirectory };
     readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
     // NavBalls' textures.
-    Texture2D hudNavBallTexture = null;
-    Texture2D ivaNavBallTexture = null;
+    Texture2D hudNavBallTexture;
+    Texture2D ivaNavBallTexture;
     // Change shinning quality.
     SkinQuality skinningQuality = SkinQuality.Auto;
     // Print material/texture names when performing texture replacement pass.
-    bool logTextures = false;
+    bool logTextures;
     // Instance.
-    public static Replacer instance = null;
+    public static Replacer Instance { get; private set; }
 
     /**
      * General texture replacement step.
      */
-    void replaceTextures()
+    void ReplaceTextures()
     {
-      foreach (Material material in Resources.FindObjectsOfTypeAll<Material>())
-      {
+      foreach (Material material in Resources.FindObjectsOfTypeAll<Material>()) {
         Texture texture = material.mainTexture;
-
-        if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp", StringComparison.Ordinal))
+        if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp", StringComparison.Ordinal)) {
           continue;
+        }
 
-        if (logTextures)
-          Util.log("[{0}] {1}", material.name, texture.name);
+        if (logTextures) {
+          Util.Log("[{0}] {1}", material.name, texture.name);
+        }
 
         Texture2D newTexture;
         mappedTextures.TryGetValue(texture.name, out newTexture);
 
-        if (newTexture != null)
-        {
-          if (newTexture != texture)
-          {
+        if (newTexture != null) {
+          if (newTexture != texture) {
             newTexture.anisoLevel = texture.anisoLevel;
             newTexture.wrapMode = texture.wrapMode;
 
@@ -75,21 +75,20 @@ namespace TextureReplacer
           }
         }
 
-        Texture normalMap = material.GetTexture(Util.BUMPMAP_PROPERTY);
-        if (normalMap == null)
+        Texture normalMap = material.GetTexture(Util.BumpMapProperty);
+        if (normalMap == null) {
           continue;
+        }
 
         Texture2D newNormalMap;
         mappedTextures.TryGetValue(normalMap.name, out newNormalMap);
 
-        if (newNormalMap != null)
-        {
-          if (newNormalMap != normalMap)
-          {
+        if (newNormalMap != null) {
+          if (newNormalMap != normalMap) {
             newNormalMap.anisoLevel = normalMap.anisoLevel;
             newNormalMap.wrapMode = normalMap.wrapMode;
 
-            material.SetTexture(Util.BUMPMAP_PROPERTY, newNormalMap);
+            material.SetTexture(Util.BumpMapProperty, newNormalMap);
             UnityEngine.Object.Destroy(normalMap);
           }
         }
@@ -99,71 +98,73 @@ namespace TextureReplacer
     /**
      * Replace NavBalls' textures.
      */
-    void updateNavball(Vessel vessel)
+    void UpdateNavball(Vessel vessel)
     {
-      if (hudNavBallTexture != null)
-      {
+      if (hudNavBallTexture != null) {
         NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
-
-        if (hudNavball != null)
-          hudNavball.navBall.renderer.sharedMaterial.mainTexture = hudNavBallTexture;
+        if (hudNavball != null) {
+          hudNavball.navBall.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = hudNavBallTexture;
+        }
       }
 
-      if (ivaNavBallTexture != null && InternalSpace.Instance != null)
-      {
+      if (ivaNavBallTexture != null && InternalSpace.Instance != null) {
         InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
-
-        if (ivaNavball != null)
-          ivaNavball.navBall.renderer.sharedMaterial.mainTexture = ivaNavBallTexture;
+        if (ivaNavball != null) {
+          ivaNavball.navBall.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = ivaNavBallTexture;
+        }
       }
+    }
+
+    public static void Recreate()
+    {
+      Instance = new Replacer();
     }
 
     /**
      * Read configuration and perform pre-load initialisation.
      */
-    public void readConfig(ConfigNode rootNode)
+    public void ReadConfig(ConfigNode rootNode)
     {
-      Util.addLists(rootNode.GetValues("paths"), paths);
-      Util.parse(rootNode.GetValue("skinningQuality"), ref skinningQuality);
-      Util.parse(rootNode.GetValue("logTextures"), ref logTextures);
+      Util.AddLists(rootNode.GetValues("paths"), paths);
+      Util.Parse(rootNode.GetValue("skinningQuality"), ref skinningQuality);
+      Util.Parse(rootNode.GetValue("logTextures"), ref logTextures);
     }
 
     /**
      * Post-load initialisation.
      */
-    public void load()
+    public void Load()
     {
-      foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>())
-      {
-        if (skinningQuality != SkinQuality.Auto)
+      foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>()) {
+        if (skinningQuality != SkinQuality.Auto) {
           smr.quality = skinningQuality;
+        }
       }
 
-      foreach (Texture texture in Resources.FindObjectsOfTypeAll<Texture>())
-      {
-        if (texture.filterMode == FilterMode.Bilinear)
+      foreach (Texture texture in Resources.FindObjectsOfTypeAll<Texture>()) {
+        if (texture.filterMode == FilterMode.Bilinear) {
           texture.filterMode = FilterMode.Trilinear;
+        }
       }
 
-      foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
-      {
+      foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture) {
         Texture2D texture = texInfo.texture;
-        if (texture == null)
+        if (texture == null) {
           continue;
+        }
 
-        foreach (string path in paths)
-        {
-          if (!texture.name.StartsWith(path, StringComparison.Ordinal))
+        foreach (string path in paths) {
+          if (!texture.name.StartsWith(path, StringComparison.Ordinal)) {
             continue;
+          }
 
           string originalName = texture.name.Substring(path.Length);
 
           // Since we are merging multiple directories, we must expect conflicts.
-          if (!mappedTextures.ContainsKey(originalName))
-          {
-            if (originalName.StartsWith("GalaxyTex_", StringComparison.Ordinal))
+          if (!mappedTextures.ContainsKey(originalName)) {
+            if (originalName.StartsWith("GalaxyTex_", StringComparison.Ordinal)) {
               texture.wrapMode = TextureWrapMode.Clamp;
-
+            }
             mappedTextures.Add(originalName, texture);
           }
           break;
@@ -177,17 +178,18 @@ namespace TextureReplacer
       Texture2D ivaVisorTexture = null;
       Texture2D evaVisorTexture = null;
 
-      if (mappedTextures.TryGetValue("kerbalHeadNRM", out headNormalMaps[0]))
+      if (mappedTextures.TryGetValue("kerbalHeadNRM", out headNormalMaps[0])) {
         mappedTextures.Remove("kerbalHeadNRM");
-
-      if (mappedTextures.TryGetValue("kerbalGirl_06_BaseColorNRM", out headNormalMaps[1]))
+      }
+      if (mappedTextures.TryGetValue("kerbalGirl_06_BaseColorNRM", out headNormalMaps[1])) {
         mappedTextures.Remove("kerbalGirl_06_BaseColorNRM");
-
-      if (mappedTextures.TryGetValue("kerbalVisor", out ivaVisorTexture))
+      }
+      if (mappedTextures.TryGetValue("kerbalVisor", out ivaVisorTexture)) {
         mappedTextures.Remove("kerbalVisor");
-
-      if (mappedTextures.TryGetValue("EVAvisor", out evaVisorTexture))
+      }
+      if (mappedTextures.TryGetValue("EVAvisor", out evaVisorTexture)) {
         mappedTextures.Remove("EVAvisor");
+      }
 
       // Fix female shaders, set normal-mapped shader for head and visor texture on proto-IVA and -EVA Kerbals.
       Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
@@ -215,19 +217,17 @@ namespace TextureReplacer
       Material[] visorMaterials = { null, null };
       Material jetpackMaterial = null;
 
-      for (int i = 0; i < 2; ++i)
-      {
-        foreach (SkinnedMeshRenderer smr in maleMeshes[i])
-        {
+      for (int i = 0; i < 2; ++i) {
+        foreach (SkinnedMeshRenderer smr in maleMeshes[i]) {
           // Many meshes share material, so it suffices to enumerate only one mesh for each material.
-          switch (smr.name)
-          {
+          switch (smr.name) {
             case "headMesh01":
               // Replace with bump-mapped shader so normal maps for heads will work.
               smr.sharedMaterial.shader = headShader;
 
-              if (headNormalMaps[0] != null)
-                smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMaps[0]);
+              if (headNormalMaps[0] != null) {
+                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, headNormalMaps[0]);
+              }
 
               headMaterial = smr.sharedMaterial;
               break;
@@ -254,13 +254,11 @@ namespace TextureReplacer
               break;
 
             case "visor":
-              if (smr.transform.root == maleIva.transform && ivaVisorTexture != null)
-              {
+              if (smr.transform.root == maleIva.transform && ivaVisorTexture != null) {
                 smr.sharedMaterial.mainTexture = ivaVisorTexture;
                 smr.sharedMaterial.color = Color.white;
               }
-              else if (smr.transform.root == maleEva.transform && evaVisorTexture != null)
-              {
+              else if (smr.transform.root == maleEva.transform && evaVisorTexture != null) {
                 smr.sharedMaterial.mainTexture = evaVisorTexture;
                 smr.sharedMaterial.color = Color.white;
               }
@@ -271,18 +269,16 @@ namespace TextureReplacer
         }
       }
 
-      for (int i = 0; i < 2; ++i)
-      {
-        foreach (SkinnedMeshRenderer smr in femaleMeshes[i])
-        {
+      for (int i = 0; i < 2; ++i) {
+        foreach (SkinnedMeshRenderer smr in femaleMeshes[i]) {
           // Here we must enumarate all meshes wherever we are replacing the material.
-          switch (smr.name)
-          {
+          switch (smr.name) {
             case "headMesh":
               smr.sharedMaterial.shader = headShader;
 
-              if (headNormalMaps[1] != null)
-                smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMaps[1]);
+              if (headNormalMaps[1] != null) {
+                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, headNormalMaps[1]);
+              }
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
@@ -319,41 +315,40 @@ namespace TextureReplacer
       }
 
       // Find NavBall replacement textures if available.
-      if (mappedTextures.TryGetValue(HUD_NAVBALL, out hudNavBallTexture))
-      {
-        mappedTextures.Remove(HUD_NAVBALL);
+      if (mappedTextures.TryGetValue(HudNavball, out hudNavBallTexture)) {
+        mappedTextures.Remove(HudNavball);
 
-        if (hudNavBallTexture.mipmapCount != 1)
-          Util.log("HUDNavBall texture should not have mipmaps!");
+        if (hudNavBallTexture.mipmapCount != 1) {
+          Util.Log("HUDNavBall texture should not have mipmaps!");
+        }
       }
 
-      if (mappedTextures.TryGetValue(IVA_NAVBALL, out ivaNavBallTexture))
-      {
-        mappedTextures.Remove(IVA_NAVBALL);
+      if (mappedTextures.TryGetValue(IvaNavball, out ivaNavBallTexture)) {
+        mappedTextures.Remove(IvaNavball);
 
-        if (ivaNavBallTexture.mipmapCount != 1)
-          Util.log("IVANavBall texture should not have mipmaps!");
+        if (ivaNavBallTexture.mipmapCount != 1) {
+          Util.Log("IVANavBall texture should not have mipmaps!");
+        }
       }
     }
 
-    public void beginFlight()
+    public void OnBeginFlight()
+    {
+      if (hudNavBallTexture != null || ivaNavBallTexture != null) {
+        UpdateNavball(FlightGlobals.ActiveVessel);
+        GameEvents.onVesselChange.Add(UpdateNavball);
+      }
+    }
+
+    public void OnEndFlight()
     {
       if (hudNavBallTexture != null || ivaNavBallTexture != null)
-      {
-        updateNavball(FlightGlobals.ActiveVessel);
-        GameEvents.onVesselChange.Add(updateNavball);
-      }
+        GameEvents.onVesselChange.Remove(UpdateNavball);
     }
 
-    public void endFlight()
+    public void OnBeginScene()
     {
-      if (hudNavBallTexture != null || ivaNavBallTexture != null)
-        GameEvents.onVesselChange.Remove(updateNavball);
-    }
-
-    public void beginScene()
-    {
-      replaceTextures();
+      ReplaceTextures();
     }
   }
 }

@@ -19,7 +19,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
+ 
 using System.Reflection;
 using UnityEngine;
 
@@ -28,58 +28,56 @@ namespace TextureReplacer
   [KSPAddon(KSPAddon.Startup.Instantly, true)]
   public class TextureReplacer : MonoBehaviour
   {
-    // Status.
-    public static bool isInitialised = false;
-    public static bool isLoaded = false;
+    bool isInitialised;
 
-    public void Start()
+    public static bool IsLoaded { get; private set; }
+
+        public void Start()
     {
-      Util.log("Started {0}", Assembly.GetExecutingAssembly().GetName().Version);
+      Util.Log("Started, Version {0}", Assembly.GetExecutingAssembly().GetName().Version);
 
       DontDestroyOnLoad(this);
 
-      isInitialised = false;
-      isLoaded = false;
+      IsLoaded = false;
 
-      if (Reflections.instance != null)
-        Reflections.instance.destroy();
-
-      Loader.instance = new Loader();
-      Replacer.instance = new Replacer();
-      Reflections.instance = new Reflections();
-      Personaliser.instance = new Personaliser();
-
-      foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
-      {
-        Loader.instance.readConfig(file.config);
-        Replacer.instance.readConfig(file.config);
-        Reflections.instance.readConfig(file.config);
-        Personaliser.instance.readConfig(file.config);
+            if (Reflections.Instance != null) {
+        Reflections.Instance.Destroy();
       }
 
-      Loader.instance.configure();
+      Loader.Recreate();
+      Replacer.Recreate();
+      Reflections.Recreate();
+      Personaliser.Recreate();
+
+      foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer")) {
+        Loader.Instance.ReadConfig(file.config);
+        Replacer.Instance.ReadConfig(file.config);
+        Reflections.Instance.ReadConfig(file.config);
+        Personaliser.Instance.ReadConfig(file.config);
+      }
+
+      Loader.Instance.Configure();
     }
 
     public void LateUpdate()
     {
-      if (!isInitialised)
-      {
+      if (!isInitialised) {
         // Compress textures, generate mipmaps, convert DXT5 -> DXT1 if necessary etc.
-        Loader.instance.processTextures();
+        Loader.Instance.ProcessTextures();
 
-        if (GameDatabase.Instance.IsReady())
-        {
-          Loader.instance.initialise();
+        if (GameDatabase.Instance.IsReady()) {
+          Loader.Instance.Initialise();
+          Loader.Destroy();
+
           isInitialised = true;
         }
       }
-      else if (PartLoader.Instance.IsReady())
-      {
-        Replacer.instance.load();
-        Reflections.instance.load();
-        Personaliser.instance.load();
+      else if (PartLoader.Instance.IsReady()) {
+        Replacer.Instance.Load();
+        Reflections.Instance.Load();
+        Personaliser.Instance.Load();
 
-        isLoaded = true;
+        IsLoaded = true;
         Destroy(this);
       }
     }

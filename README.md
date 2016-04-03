@@ -1,4 +1,4 @@
-![logo](http://i.imgur.com/0esQrqA.jpg)
+﻿![logo](http://i.imgur.com/0esQrqA.jpg)
 
 TextureReplacer
 ===============
@@ -38,6 +38,7 @@ Special thanks to:
 * Proot, Scart91, Green Skull and others for creating texture packs and
 * Sylith and Scart91 for giving others permissions to make derivatives of their
   texture packs.
+* RangeMachine for update to 1.1
 
 
 Instructions
@@ -289,7 +290,8 @@ Known Issues
 
 Change Log
 ----------
-
+* 2.5.0
+    - update for 1.1
 * 2.4.12
     - removed / replaced Kerbal Stuff links
     - possibly fixed a reflections-related crash
