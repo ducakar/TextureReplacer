@@ -67,22 +67,22 @@ namespace TextureReplacer
         transform = part.transform;
         isEva = part.GetComponent<KerbalEVA>() != null;
 
-        if (isEva)
-        {
-          transform = transform.Find("model01");
-
-          SkinnedMeshRenderer visor = transform.GetComponentsInChildren<SkinnedMeshRenderer>(true)
-            .FirstOrDefault(m => m.name == "visor");
-
-          if (visor != null)
-          {
-            Material material = visor.material;
-
-            material.shader = instance.visorShader;
-            material.SetTexture(Util.CUBE_PROPERTY, envMap);
-            material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
-          }
-        }
+//        if (isEva)
+//        {
+//          transform = transform.Find("model01");
+//
+//          SkinnedMeshRenderer visor = transform.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+//            .FirstOrDefault(m => m.name == "visor");
+//
+//          if (visor != null)
+//          {
+//            Material material = visor.material;
+//
+//            material.shader = instance.visorShader;
+//            material.SetTexture(Util.CUBE_PROPERTY, envMap);
+//            material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
+//          }
+//        }
 
         interval = updateInterval;
         counter = Util.random.Next(updateInterval);
@@ -236,7 +236,7 @@ namespace TextureReplacer
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool logReflectiveMeshes = false;
     // Reflective shader.
-    Shader visorShader = null;
+//    Shader visorShader = null;
     // Instance.
     public static Reflections instance = null;
 
@@ -300,7 +300,8 @@ namespace TextureReplacer
 
         // We apply visor shader for real reflections later, through TREvaModule since we don't
         // want corrupted reflections in the main menu.
-        material.shader = enableStatic ? visorShader : transparentSpecularShader;
+//        material.shader = enableStatic ? visorShader : transparentSpecularShader;
+        material.shader = transparentSpecularShader;
         material.SetTexture(Util.CUBE_PROPERTY, enableStatic ? staticEnvMap : null);
         material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
       }
@@ -403,22 +404,22 @@ namespace TextureReplacer
         }
       }
 
-      try
-      {
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        Stream stream = assembly.GetManifestResourceStream("TextureReplacer.Visor-compiled.shader");
-        StreamReader reader = new StreamReader(stream);
-
-        shaderMaterial = new Material(reader.ReadToEnd());
-        visorShader = shaderMaterial.shader;
-
-        Util.log("Visor shader sucessfully compiled.");
-      }
-      catch
-      {
-        isVisorReflectionEnabled = false;
-        Util.log("Visor shader loading failed. Visor reflections disabled.");
-      }
+//      try
+//      {
+//        Assembly assembly = Assembly.GetExecutingAssembly();
+//        Stream stream = assembly.GetManifestResourceStream("TextureReplacer.Visor-compiled.shader");
+//        StreamReader reader = new StreamReader(stream);
+//
+//        shaderMaterial = new Material(reader.ReadToEnd());
+//        visorShader = shaderMaterial.shader;
+//
+//        Util.log("Visor shader sucessfully compiled.");
+//      }
+//      catch
+//      {
+//        isVisorReflectionEnabled = false;
+//        Util.log("Visor shader loading failed. Visor reflections disabled.");
+//      }
 
       for (int i = 0; i < SHADER_MAP.GetLength(0); ++i)
       {

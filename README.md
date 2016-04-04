@@ -286,6 +286,7 @@ Known Issues
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
 * Clouds from EVE Overhaul are not correctly reflected.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
+* Visor reflections don't work for KSP 1.1.
 
 
 Change Log
@@ -293,7 +294,7 @@ Change Log
 
 * 2.4.13
     - fixed for 1.1 thanks to RangeMachine
-    - visor reflections still not working
+    - disabled visor reflections because visor shader is broken
 * 2.4.12
     - removed / replaced Kerbal Stuff links
     - possibly fixed a reflections-related crash
