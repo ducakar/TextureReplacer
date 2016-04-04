@@ -77,17 +77,18 @@ namespace TextureReplacer
       bool success = false;
 
       foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>()) {
-        if (meshFilter.renderer == null) {
+        Renderer renderer = meshFilter.GetComponent<Renderer>();
+        if (renderer == null) {
           continue;
         }
 
-        Material material = meshFilter.GetComponent<Renderer>().material;
-
+        Material material = renderer.material;
         if (reflections.LogReflectiveMeshes) {
           Util.Log("+ {0} [{1}]", meshFilter.name, material.shader.name);
         }
         if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name)) {
-          success |= script == null ? reflections.ApplyStatic(material, reflectiveShader, reflectionColour)
+          success |= script == null
+            ? reflections.ApplyStatic(material, reflectiveShader, reflectionColour)
             : script.Apply(material, reflectiveShader, reflectionColour);
         }
       }

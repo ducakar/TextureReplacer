@@ -237,7 +237,7 @@ namespace TextureReplacer
     static void EnsureCamera()
     {
       if (camera == null) {
-        camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).camera;
+        camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).GetComponent<Camera>();
         camera.enabled = false;
         camera.clearFlags = CameraClearFlags.Depth;
         // Any smaller number and visors will refect internals of helmets.
