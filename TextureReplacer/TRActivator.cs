@@ -24,56 +24,57 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  [KSPAddon(KSPAddon.Startup.EveryScene, false)]
-  public class TRActivator : MonoBehaviour
-  {
-    /**
-     * Reflection updater. We don't want this to run every frame unless real reflections are enabled
-     * so it's wrapped inside another component and enabled only when needed.
-     */
-    class TRReflectionUpdater : MonoBehaviour
+    [KSPAddon(KSPAddon.Startup.EveryScene, false)]
+    public class TRActivator : MonoBehaviour
     {
-      public void Update()
-      {
-        Reflections.Script.updateScripts();
-      }
+        /**
+         * Reflection updater. We don't want this to run every frame unless real reflections are enabled
+         * so it's wrapped inside another component and enabled only when needed.
+         */
+
+        private class TRReflectionUpdater : MonoBehaviour
+        {
+            public void Update()
+            {
+                Reflections.Script.updateScripts();
+            }
+        }
+
+        private bool hasFlightHandlers = false;
+        private TRReflectionUpdater reflectionUpdater = null;
+
+        public void Start()
+        {
+            if (!TextureReplacer.isLoaded)
+                return;
+
+            Replacer.instance.beginScene();
+
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                Replacer.instance.beginFlight();
+                Personaliser.instance.beginFlight();
+
+                hasFlightHandlers = true;
+            }
+
+            if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
+                && Reflections.instance.reflectionType == Reflections.Type.REAL)
+            {
+                reflectionUpdater = gameObject.AddComponent<TRReflectionUpdater>();
+            }
+        }
+
+        public void OnDestroy()
+        {
+            if (hasFlightHandlers)
+            {
+                Replacer.instance.endFlight();
+                Personaliser.instance.endFlight();
+            }
+
+            if (reflectionUpdater != null)
+                Destroy(reflectionUpdater);
+        }
     }
-
-    bool hasFlightHandlers = false;
-    TRReflectionUpdater reflectionUpdater = null;
-
-    public void Start()
-    {
-      if (!TextureReplacer.isLoaded)
-        return;
-
-      Replacer.instance.beginScene();
-
-      if (HighLogic.LoadedSceneIsFlight)
-      {
-        Replacer.instance.beginFlight();
-        Personaliser.instance.beginFlight();
-
-        hasFlightHandlers = true;
-      }
-
-      if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
-          && Reflections.instance.reflectionType == Reflections.Type.REAL)
-      {
-        reflectionUpdater = gameObject.AddComponent<TRReflectionUpdater>();
-      }
-    }
-
-    public void OnDestroy()
-    {
-      if (hasFlightHandlers)
-      {
-        Replacer.instance.endFlight();
-        Personaliser.instance.endFlight();
-      }
-
-      if (reflectionUpdater != null)
-        Destroy(reflectionUpdater);
-    }
-  }
 }

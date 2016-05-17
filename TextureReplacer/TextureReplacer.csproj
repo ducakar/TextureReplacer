@@ -9,38 +9,26 @@
     <OutputType>Library</OutputType>
     <RootNamespace>TextureReplacer</RootNamespace>
     <AssemblyName>TextureReplacer</AssemblyName>
-    <ReleaseVersion>2.4.13</ReleaseVersion>
+    <ReleaseVersion>2.4.12</ReleaseVersion>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-    <PlatformTarget>x86</PlatformTarget>
-    <CustomCommands>
-      <CustomCommands>
-        <Command type="AfterBuild" command="cp ${TargetPath} &quot;/run/media/davorin/Windows 7/KSP-test/GameData/TextureReplacer/Plugins&quot;" workingdir="${SolutionDir}" />
-      </CustomCommands>
-    </CustomCommands>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>0618</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-    <CustomCommands>
-      <CustomCommands>
-        <Command type="AfterBuild" command="cp ${TargetFile} GameData/TextureReplacer/Plugins" workingdir="${SolutionDir}" />
-        <Command type="AfterBuild" command="cp README.md GameData/TextureReplacer" workingdir="${SolutionDir}" />
-        <Command type="AfterBuild" command="cp ${TargetFile} &quot;/run/media/davorin/Windows 7/KSP-test/GameData/TextureReplacer/Plugins&quot;" workingdir="${SolutionDir}" />
-      </CustomCommands>
-    </CustomCommands>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>0618</NoWarn>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -58,25 +46,25 @@
     <None Include="Visor.shader" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Visor-compiled.shader" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\Dependencies\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\Dependencies\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="KSPUtil">
-      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\KSPUtil.dll</HintPath>
+      <HintPath>..\Dependencies\KSPUtil.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="System" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\Dependencies\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Visor-compiled.shader" />
   </ItemGroup>
 </Project>

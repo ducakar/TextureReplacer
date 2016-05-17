@@ -27,87 +27,91 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  public class TRReflection : PartModule
-  {
-    Reflections.Script script = null;
-
-    [KSPField(isPersistant = false)]
-    public string shader = "";
-    [KSPField(isPersistant = false)]
-    public string colour = "";
-    [KSPField(isPersistant = false)]
-    public string interval = "";
-    [KSPField(isPersistant = false)]
-    public string meshes = "";
-
-    // ReflectionPlugin parameters.
-    [KSPField(isPersistant = false)]
-    public string ReflectionColor = "";
-    [KSPField(isPersistant = false)]
-    public string MeshesToChange = "all";
-
-    public override void OnStart(StartState state)
+    public class TRReflection : PartModule
     {
-      Reflections reflections = Reflections.instance;
+        private Reflections.Script script = null;
 
-      Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
-      Color reflectionColour = new Color(0.5f, 0.5f, 0.5f);
-      int updateInterval = 1;
+        [KSPField(isPersistant = false)]
+        public string shader = "";
 
-      Util.parse(ReflectionColor, ref reflectionColour);
-      Util.parse(colour, ref reflectionColour);
-      Util.parse(interval, ref updateInterval);
+        [KSPField(isPersistant = false)]
+        public string colour = "";
 
-      updateInterval = Math.Max(updateInterval, 1);
+        [KSPField(isPersistant = false)]
+        public string interval = "";
 
-      List<string> meshNames = Util.splitConfigValue(meshes).ToList();
-      if (MeshesToChange != "all")
-        meshNames.AddUniqueRange(Util.splitConfigValue(MeshesToChange));
+        [KSPField(isPersistant = false)]
+        public string meshes = "";
 
-      if (reflections.reflectionType == Reflections.Type.NONE)
-        return;
-      if (reflections.reflectionType == Reflections.Type.REAL)
-        script = new Reflections.Script(part, updateInterval);
+        // ReflectionPlugin parameters.
+        [KSPField(isPersistant = false)]
+        public string ReflectionColor = "";
 
-      if (reflections.logReflectiveMeshes)
-        Util.log("Part \"{0}\"", part.name);
+        [KSPField(isPersistant = false)]
+        public string MeshesToChange = "all";
 
-      bool success = false;
-
-      foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
-      {
-        if (meshFilter.GetComponent<Renderer>() == null)
-          continue;
-
-        Material material = meshFilter.GetComponent<Renderer>().material;
-
-        if (reflections.logReflectiveMeshes)
-          Util.log("+ {0} [{1}]", meshFilter.name, material.shader.name);
-
-        if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name))
+        public override void OnStart(StartState state)
         {
-          success |= script == null ?
-                     reflections.applyStatic(material, reflectiveShader, reflectionColour) :
-                     script.apply(material, reflectiveShader, reflectionColour);
-        }
-      }
+            Reflections reflections = Reflections.instance;
 
-      if (!success)
-      {
-        if (script != null)
+            Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
+            Color reflectionColour = new Color(0.5f, 0.5f, 0.5f);
+            int updateInterval = 1;
+
+            Util.parse(ReflectionColor, ref reflectionColour);
+            Util.parse(colour, ref reflectionColour);
+            Util.parse(interval, ref updateInterval);
+
+            updateInterval = Math.Max(updateInterval, 1);
+
+            List<string> meshNames = Util.splitConfigValue(meshes).ToList();
+            if (MeshesToChange != "all")
+                meshNames.AddUniqueRange(Util.splitConfigValue(MeshesToChange));
+
+            if (reflections.reflectionType == Reflections.Type.NONE)
+                return;
+            if (reflections.reflectionType == Reflections.Type.REAL)
+                script = new Reflections.Script(part, updateInterval);
+
+            if (reflections.logReflectiveMeshes)
+                Util.log("Part \"{0}\"", part.name);
+
+            bool success = false;
+
+            foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
+            {
+                if (meshFilter.GetComponent<Renderer>() == null)
+                    continue;
+
+                Material material = meshFilter.GetComponent<Renderer>().material;
+
+                if (reflections.logReflectiveMeshes)
+                    Util.log("+ {0} [{1}]", meshFilter.name, material.shader.name);
+
+                if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name))
+                {
+                    success |= script == null ?
+                               reflections.applyStatic(material, reflectiveShader, reflectionColour) :
+                               script.apply(material, reflectiveShader, reflectionColour);
+                }
+            }
+
+            if (!success)
+            {
+                if (script != null)
+                {
+                    script.destroy();
+                    script = null;
+                }
+
+                Util.log("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
+            }
+        }
+
+        public void OnDestroy()
         {
-          script.destroy();
-          script = null;
+            if (script != null)
+                script.destroy();
         }
-
-        Util.log("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
-      }
     }
-
-    public void OnDestroy()
-    {
-      if (script != null)
-        script.destroy();
-    }
-  }
 }
