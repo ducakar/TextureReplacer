@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using KSP.UI.Screens.Flight;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -106,7 +107,7 @@ namespace TextureReplacer
         NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
 
         if (hudNavball != null)
-          hudNavball.navBall.renderer.sharedMaterial.mainTexture = hudNavBallTexture;
+          hudNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = hudNavBallTexture;
       }
 
       if (ivaNavBallTexture != null && InternalSpace.Instance != null)
@@ -114,7 +115,7 @@ namespace TextureReplacer
         InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
 
         if (ivaNavball != null)
-          ivaNavball.navBall.renderer.sharedMaterial.mainTexture = ivaNavBallTexture;
+          ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;
       }
     }
 
