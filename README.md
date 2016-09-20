@@ -3,9 +3,8 @@
 TextureReplacer
 ===============
 
-* [Forum thread](http://forum.kerbalspaceprogram.com/index.php?/topic/96851-/)
-* [GitHub page](http://github.com/ducakar/TextureReplacer)
-* [CurseForge page](http://kerbal.curseforge.com/plugins/220217)
+* [Forum thread](http://forum.kerbalspaceprogram.com/index.php?/topic/96851-11-texturereplacer-2413-442016)
+* [GitHub page](http://github.com/RangeMachine/TextureReplacer)
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
@@ -34,7 +33,6 @@ Special thanks to:
 * sarbian for fixing an issue with non-mupliple-of-4 texture dimensions,
 * Ippo343 for contributing KSP-AVC configuration,
 * JPLRepo for contributing DeepFreeze compatibility fixes,
-* RangeMachine for update to 1.1,
 * therealcrow999 for testing and benchmarking this plugin,
 * Proot, Scart91, Green Skull and others for creating texture packs and
 * Sylith and Scart91 for giving others permissions to make derivatives of their
@@ -699,7 +697,7 @@ Change Log
 Licence
 -------
 
-Copyright © 2013-2015 Davorin Učakar, Ryan Bray
+Copyright © 2013-2016 Davorin Učakar, Ryan Bray, RangeMachine
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),

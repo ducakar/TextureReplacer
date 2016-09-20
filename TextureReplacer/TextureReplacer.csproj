@@ -12,23 +12,14 @@
     <ReleaseVersion>2.4.12</ReleaseVersion>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <NoWarn>0618</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>bin\Release\</OutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'TextureReplacer|AnyCPU' ">
+    <OutputPath>..\GameData\TextureReplacer\Plugins\</OutputPath>
     <Optimize>true</Optimize>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <NoWarn>0618</NoWarn>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -43,19 +34,10 @@
     <Compile Include="TRReflection.cs" />
     <Compile Include="TRScenario.cs" />
     <Compile Include="Util.cs" />
-    <None Include="Visor.shader" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\Dependencies\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\Dependencies\Assembly-CSharp-firstpass.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="KSPUtil">
-      <HintPath>..\Dependencies\KSPUtil.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -63,8 +45,5 @@
       <HintPath>..\Dependencies\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Visor-compiled.shader" />
   </ItemGroup>
 </Project>

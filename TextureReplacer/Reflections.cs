@@ -419,6 +419,9 @@ namespace TextureReplacer
 
             try
             {
+                throw new System.Exception();
+
+                /**
                 Assembly assembly = Assembly.GetExecutingAssembly();
                 Stream stream = assembly.GetManifestResourceStream("TextureReplacer.Visor-compiled.shader");
                 StreamReader reader = new StreamReader(stream);
@@ -427,11 +430,14 @@ namespace TextureReplacer
                 visorShader = shaderMaterial.shader;
 
                 Util.log("Visor shader sucessfully compiled.");
+                */
             }
             catch
             {
                 isVisorReflectionEnabled = false;
-                Util.log("Visor shader loading failed. Visor reflections disabled.");
+
+                //isVisorReflectionEnabled = false;
+                //Util.log("Visor shader loading failed. Visor reflections disabled.");
             }
 
             for (int i = 0; i < SHADER_MAP.GetLength(0); ++i)
