@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2015 Davorin Učakar
+ * Copyright © 2013-2016 Davorin Učakar, RangeMachine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -30,7 +30,7 @@ namespace TextureReplacer
     [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
     public class TRGui : MonoBehaviour
     {
-        private static readonly string APP_ICON_PATH = Util.DIR + "Plugins/appIcon";
+        private static readonly string APP_ICON_PATH = Util.DIR + "Plugins/AppIcon";
         private static readonly string[] REFLECTION_TYPES = { "None", "Static", "Real" };
         private static readonly Color SELECTED_COLOUR = new Color(0.7f, 0.9f, 1.0f);
         private static readonly Color CLASS_COLOUR = new Color(1.0f, 0.8f, 1.0f);

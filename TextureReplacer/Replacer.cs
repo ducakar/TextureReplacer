@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2015 Davorin Učakar
+ * Copyright © 2013-2016 Davorin Učakar, RangeMachine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -233,7 +233,7 @@ namespace TextureReplacer
                     {
                         case "headMesh01":
                             // Replace with bump-mapped shader so normal maps for heads will work.
-                            smr.sharedMaterial.shader = headShader;
+                            // smr.sharedMaterial.shader = headShader;
 
                             if (headNormalMaps[0] != null)
                                 smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMaps[0]);
@@ -243,21 +243,21 @@ namespace TextureReplacer
 
                         case "body01":
                             // Also replace shader on EVA suits to match the one on IVA suits and to enable heat effects.
-                            smr.sharedMaterial.shader = suitShader;
+                            // smr.sharedMaterial.shader = suitShader;
 
                             suitMaterials[i] = smr.sharedMaterial;
                             break;
-
+                            
                         case "helmet":
                             // Also replace shader on EVA suits to match the one on IVA suits and to enable heat effects.
-                            smr.sharedMaterial.shader = suitShader;
+                            // smr.sharedMaterial.shader = suitShader;
 
                             helmetMaterials[i] = smr.sharedMaterial;
                             break;
 
                         case "jetpack_base01":
                             // Also replace shader on EVA suits to match the one on IVA suits and to enable heat effects.
-                            smr.sharedMaterial.shader = suitShader;
+                            // smr.sharedMaterial.shader = suitShader;
 
                             jetpackMaterial = smr.sharedMaterial;
                             break;
@@ -309,7 +309,7 @@ namespace TextureReplacer
                         case "body01":
                             smr.sharedMaterial = suitMaterials[i];
                             break;
-
+                            
                         case "mesh_female_kerbalAstronaut01_helmet":
                         case "helmet":
                             smr.sharedMaterial = helmetMaterials[i];

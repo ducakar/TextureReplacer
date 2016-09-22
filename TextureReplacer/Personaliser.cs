@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2015 Davorin Učakar
+ * Copyright © 2013-2016 Davorin Učakar, RangeMachine
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -111,7 +111,8 @@ namespace TextureReplacer
                     case "kerbalVisor":
                         visor = visor ?? texture;
                         return true;
-
+                    
+                    
                     case "EVAtexture":
                         evaSuit = evaSuit ?? texture;
                         return true;
@@ -528,7 +529,7 @@ namespace TextureReplacer
                                 kerbalIVA.textureVeteran = newTexture;
                             }
                             break;
-
+                        
                         case "helmet":
                         case "mesh_female_kerbalAstronaut01_helmet":
                             if (isEva)

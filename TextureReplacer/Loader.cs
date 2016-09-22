@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2015 Davorin Učakar
+ * Copyright © 2013-2016 Davorin Učakar, RangeMachine
  * Copyright © 2013 Ryan Bray
  *
  * Permission is hereby granted, free of charge, to any person obtaining a

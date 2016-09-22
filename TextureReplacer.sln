@@ -5,16 +5,6 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextureReplacer", "TextureReplacer\TextureReplacer.csproj", "{2F4B8231-6DB5-4E24-BD56-4CB6FD27AA0D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E639213F-418D-4B77-96C1-BB2EA653719D}"
-	ProjectSection(SolutionItems) = preProject
-		GameData\TextureReplacer\@Default.cfg = GameData\TextureReplacer\@Default.cfg
-		GameData\TextureReplacer\ATM.cfg = GameData\TextureReplacer\ATM.cfg
-		Extras\DiverseKerbalHeads.cfg = Extras\DiverseKerbalHeads.cfg
-		Extras\MM_ReflectionPluginWrapper.cfg = Extras\MM_ReflectionPluginWrapper.cfg
-		README.md = README.md
-		GameData\TextureReplacer\TextureReplacer.version = GameData\TextureReplacer\TextureReplacer.version
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		TextureReplacer|Any CPU = TextureReplacer|Any CPU
