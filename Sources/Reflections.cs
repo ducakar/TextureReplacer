@@ -190,8 +190,8 @@ namespace TextureReplacer
       { "KSP/Specular", "Reflective/Bumped Diffuse" },
       { "KSP/Bumped", "Reflective/Bumped Diffuse" },
       { "KSP/Bumped Specular", "Reflective/Bumped Diffuse" },
-      { "KSP/Alpha/Translucent", "TR/Visor" },
-      { "KSP/Alpha/Translucent Specular", "TR/Visor" }
+      { "KSP/Alpha/Translucent", "KSP/TR/Visor" },
+      { "KSP/Alpha/Translucent Specular", "KSP/TR/Visor" }
     };
 
         // Render layers:
@@ -307,6 +307,11 @@ namespace TextureReplacer
                 // We apply visor shader for real reflections later, through TREvaModule since we don't
                 // want corrupted reflections in the main menu.
                 material.shader = enableStatic ? visorShader : transparentSpecularShader;
+
+                // In 1.2 visor texture some reason want load by default way
+                if (GameDatabase.Instance.GetTexture("TextureReplacer/Default/EVAVisor", false) != null)
+                    material.SetTexture("_MainTex", GameDatabase.Instance.GetTexture("TextureReplacer/Default/EVAVisor", false));
+
                 material.SetTexture(Util.CUBE_PROPERTY, enableStatic ? staticEnvMap : null);
                 material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
             }
@@ -417,33 +422,13 @@ namespace TextureReplacer
                 }
             }
 
-            try
-            {
-                throw new System.Exception();
-
-                /**
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                Stream stream = assembly.GetManifestResourceStream("TextureReplacer.Visor-compiled.shader");
-                StreamReader reader = new StreamReader(stream);
-
-                shaderMaterial = new Material(reader.ReadToEnd());
-                visorShader = shaderMaterial.shader;
-
-                Util.log("Visor shader sucessfully compiled.");
-                */
-            }
-            catch
-            {
-                isVisorReflectionEnabled = false;
-
-                //isVisorReflectionEnabled = false;
-                //Util.log("Visor shader loading failed. Visor reflections disabled.");
-            }
+            LoadBundle();
+            visorShader = LoadShader("KSP/TR/Visor");
 
             for (int i = 0; i < SHADER_MAP.GetLength(0); ++i)
             {
                 Shader original = Shader.Find(SHADER_MAP[i, 0]);
-                Shader reflective = Shader.Find(SHADER_MAP[i, 1]);
+                Shader reflective = LoadedShaders.ContainsKey(SHADER_MAP[i, 1]) ? LoadShader(SHADER_MAP[i, 1]) : Shader.Find(SHADER_MAP[i, 1]);
 
                 if (original == null)
                     Util.log("Shader \"{0}\" missing", SHADER_MAP[i, 0]);
@@ -454,6 +439,67 @@ namespace TextureReplacer
             }
 
             setReflectionType(reflectionType);
+        }
+
+        private static bool BundleLoaded = false;
+        private static Dictionary<string, Shader> LoadedShaders = new Dictionary<string, Shader>();
+
+        public static void LoadBundle()
+        {
+            if (BundleLoaded)
+                return;
+
+            string bundlePath = "";
+
+            UnityEngine.Rendering.GraphicsDeviceType type = SystemInfo.graphicsDeviceType;
+
+            if (type.ToString().Contains("Direct3D"))
+                bundlePath = "DirectX.bundle";
+            else if (type.ToString().Contains("OpenGL"))
+                bundlePath = "OpenGL.bundle";
+            else
+            {
+                Util.log("Unsupported renderer.");
+                BundleLoaded = true;
+
+                return;
+            }
+
+            if (!System.IO.File.Exists(KSPUtil.ApplicationRootPath + "GameData/TextureReplacer/Shaders/" + bundlePath))
+            {
+                Util.log("Bundle '" + bundlePath + "' not found.");
+                BundleLoaded = true;
+
+                return;
+            }
+
+            using (WWW www = new WWW("file://" + KSPUtil.ApplicationRootPath + "GameData/TextureReplacer/Shaders/" + bundlePath))
+            {
+                Util.log("Bundle '" + bundlePath + "' loaded.");
+                BundleLoaded = true;
+
+                AssetBundle bundle = www.assetBundle;
+                Shader[] shaders = bundle.LoadAllAssets<Shader>();
+
+                foreach (Shader shader in shaders)
+                {
+                    Util.log("Shader " + shader.name + " is loaded");
+                    LoadedShaders.Add(shader.name, shader);
+                }
+
+                bundle.Unload(false);
+                www.Dispose();
+            }
+        }
+
+        public static Shader LoadShader(string name)
+        {
+            if (LoadedShaders.ContainsKey(name))
+                return LoadedShaders[name];
+
+            Util.log("Shader " + name + " not found!");
+
+            return Shader.Find("Hidden/InternalErrorShader");
         }
 
         public void destroy()

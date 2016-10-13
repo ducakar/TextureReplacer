@@ -1,5 +1,10 @@
 Dependencies/Assembly-CSharp.dll
 Dependencies/UnityEngine.dll
-TextureReplacer/obj/*
+Sources/obj/*
 GameData/TextureReplacer/Plugins/*
+Unity/Bundles/*
+Unity/Library/*
+Unity/Temp/*
+Unity/Unity.CSharp.csproj
+Unity/Unity.sln
 *.suo
