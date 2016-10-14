@@ -20,7 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-//#define TR_LOG_HIERARCHY
+#define TR_LOG_HIERARCHY
 
 using System;
 using System.Collections.Generic;
@@ -92,11 +92,9 @@ namespace TextureReplacer
     public static void Parse<T>(string name, ref T variable)
     {
       try {
-        variable = (T) Enum.Parse(typeof(T), name, true);
-      }
-      catch (ArgumentException) {
-      }
-      catch (OverflowException) {
+        variable = (T)Enum.Parse(typeof(T), name, true);
+      } catch (ArgumentException) {
+      } catch (OverflowException) {
       }
     }
 
@@ -106,9 +104,11 @@ namespace TextureReplacer
         case "always":
           variable = true;
           break;
+
         case "never":
           variable = false;
           break;
+
         default:
           variable = null;
           break;
@@ -131,7 +131,7 @@ namespace TextureReplacer
     }
 
     /**
-     *
+     * Add all space-or-comma-separated values from listInstances strings to jointList.
      */
     public static void AddLists(string[] listInstances, ICollection<string> jointList)
     {
@@ -144,6 +144,9 @@ namespace TextureReplacer
       }
     }
 
+    /**
+     * Add all space-or-comma-separated regex values from listInstances strings to jointList.
+     */
     public static void AddRELists(string[] listInstances, ICollection<Regex> jointList)
     {
       foreach (string listInstance in listInstances) {
@@ -157,7 +160,7 @@ namespace TextureReplacer
     /**
      * Print hierarchy under a fransform.
      */
-    public static void LogDownHierarchy(Transform tf, int indent = 0)
+    public static void LogDownHierarchy(Transform tf, int indent)
     {
       string sIndent = "";
       for (int i = 0; i < indent; ++i) {

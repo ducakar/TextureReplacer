@@ -34,8 +34,9 @@ namespace TextureReplacer
     const string HudNavball = Replacer.TexturesDirectory + Replacer.HudNavball;
     const string IvaNavball = Replacer.TexturesDirectory + Replacer.IvaNavball;
 
-    // Texture compression and mipmap generation parameters.
-    int lastTextureCount;
+    // Instance.
+    public static Loader Instance { get; private set; }
+
     // List of substrings for paths where mipmap generating is enabled.
     readonly List<Regex> generateMipmapsPaths = new List<Regex> {
       new Regex("^" + Util.Directory + "(Default|Heads|Suits)/")
@@ -44,13 +45,12 @@ namespace TextureReplacer
     readonly List<Regex> keepLoadedPaths = new List<Regex> {
       new Regex("^" + Reflections.EnvMapDirectory)
     };
+    // Number of loaded textures it the previous update.
+    int lastTextureCount;
     // Features.
     bool? isCompressionEnabled;
     bool? isMipmapGenEnabled;
     bool? isUnloadingEnabled;
-
-    // Instance.
-    public static Loader Instance { get; private set; }
 
     /**
      * Estimate texture size in system RAM.
@@ -108,8 +108,7 @@ namespace TextureReplacer
           isUnloadingEnabled = false;
           Util.Log("Detected Active Texture Management, disabling texture unloading.");
         }
-      }
-      else {
+      } else {
         isCompressionEnabled = isCompressionEnabled ?? true;
         isMipmapGenEnabled = isMipmapGenEnabled ?? true;
         isUnloadingEnabled = isUnloadingEnabled ?? true;
@@ -144,8 +143,7 @@ namespace TextureReplacer
         // cannot be compressed nor mipmaps generated.
         try {
           texture.GetPixel(0, 0);
-        }
-        catch (UnityException) {
+        } catch (UnityException) {
           continue;
         }
 
@@ -197,10 +195,10 @@ namespace TextureReplacer
 
         if (hasGenMipmaps || hasCompressed) {
           Util.Log("{0} {1} [{2}x{3} {4} -> {5}]",
-                   hasGenMipmaps && hasCompressed ? "Generated mipmaps & compressed"
-                   : hasGenMipmaps ? "Generated mipmaps for"
-                   : "Compressed",
-                   texture.name, texture.width, texture.height, format, texture.format);
+            hasGenMipmaps && hasCompressed ? "Generated mipmaps & compressed"
+            : hasGenMipmaps ? "Generated mipmaps for"
+            : "Compressed",
+            texture.name, texture.width, texture.height, format, texture.format);
         }
       }
 
@@ -225,8 +223,7 @@ namespace TextureReplacer
         if (isUnloadingEnabled.Value && !keepLoadedPaths.Any(r => r.IsMatch(texture.name))) {
           try {
             texture.GetPixel(0, 0);
-          }
-          catch (UnityException) {
+          } catch (UnityException) {
             continue;
           }
 
@@ -246,8 +243,8 @@ namespace TextureReplacer
 
       if (memorySpared > 0) {
         Util.Log("Texture unloading freed approximately {0:0.0} MiB = {1:0.0} MB of system RAM",
-                 memorySpared / 1024.0 / 1024.0,
-                 memorySpared / 1000.0 / 1000.0);
+          memorySpared / 1024.0 / 1024.0,
+          memorySpared / 1000.0 / 1000.0);
       }
     }
   }

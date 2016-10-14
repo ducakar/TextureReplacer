@@ -71,8 +71,7 @@ namespace TextureReplacer
 
           isInitialised = true;
         }
-      }
-      else if (PartLoader.Instance.IsReady()) {
+      } else if (PartLoader.Instance.IsReady()) {
         Replacer.Instance.Load();
         Reflections.Instance.Load();
         Personaliser.Instance.Load();

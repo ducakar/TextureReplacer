@@ -1,31 +1,29 @@
-﻿Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextureReplacer", "TextureReplacer\TextureReplacer.csproj", "{2F4B8231-6DB5-4E24-BD56-4CB6FD27AA0D}"
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextureReplacer", "TextureReplacer\TextureReplacer.csproj", "{0CAB768E-C026-4FC1-A0F6-1392C97ADDFA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E639213F-418D-4B77-96C1-BB2EA653719D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{782FAF5C-879C-491B-8DB2-BD3E166B1A57}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 		GameData\TextureReplacer\TextureReplacer.version = GameData\TextureReplacer\TextureReplacer.version
 		GameData\TextureReplacer\%40Default.cfg = GameData\TextureReplacer\%40Default.cfg
 		GameData\TextureReplacer\ATM.cfg = GameData\TextureReplacer\ATM.cfg
-		Extras\DiverseKerbalHeads.cfg = Extras\DiverseKerbalHeads.cfg
 		Extras\MM_ReflectionPluginWrapper.cfg = Extras\MM_ReflectionPluginWrapper.cfg
+		Extras\DiverseKerbalHeads.cfg = Extras\DiverseKerbalHeads.cfg
 	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x86 = Debug|x86
-		Release|x86 = Release|x86
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2F4B8231-6DB5-4E24-BD56-4CB6FD27AA0D}.Debug|x86.ActiveCfg = Debug|x86
-		{2F4B8231-6DB5-4E24-BD56-4CB6FD27AA0D}.Debug|x86.Build.0 = Debug|x86
-		{2F4B8231-6DB5-4E24-BD56-4CB6FD27AA0D}.Release|x86.ActiveCfg = Release|x86
-		{2F4B8231-6DB5-4E24-BD56-4CB6FD27AA0D}.Release|x86.Build.0 = Release|x86
+		{0CAB768E-C026-4FC1-A0F6-1392C97ADDFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CAB768E-C026-4FC1-A0F6-1392C97ADDFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CAB768E-C026-4FC1-A0F6-1392C97ADDFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CAB768E-C026-4FC1-A0F6-1392C97ADDFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		version = 2.4.12
 	EndGlobalSection
 EndGlobal

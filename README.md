@@ -1,4 +1,4 @@
-﻿![logo](http://i.imgur.com/0esQrqA.jpg)
+![logo](http://i.imgur.com/0esQrqA.jpg)
 
 TextureReplacer
 ===============
@@ -32,10 +32,9 @@ Special thanks to:
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
   reflections,
 * sarbian for fixing an issue with non-mupliple-of-4 texture dimensions,
+* therealcrow999 for testing and benchmarking this plugin,
 * Ippo343 for contributing KSP-AVC configuration,
 * JPLRepo for contributing DeepFreeze compatibility fixes,
-* RangeMachine for update to 1.1,
-* therealcrow999 for testing and benchmarking this plugin,
 * Proot, Scart91, Green Skull and others for creating texture packs and
 * Sylith and Scart91 for giving others permissions to make derivatives of their
   texture packs.
@@ -140,7 +139,7 @@ reflect the skybox from `EnvMap/` directory:
       EnvMap/PositiveZ         // fake skybox front face, vertically flipped
       EnvMap/NegativeZ         // fake skybox back face, vertically flipped
 
-Note that all textures must be quares and have the same dimensions that are
+Note that all textures must be squares and have the same dimensions that are
 powers of two. Cube map textures are slow, so keep them as low-res as possible.
 
 `TRReflection` part module can be used as in the following example that adds
@@ -286,15 +285,14 @@ Known Issues
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
 * Clouds from EVE Overhaul are not correctly reflected.
 * Cabin-specific IVA suits don't persist through scene switches while on EVA.
-* Visor reflections don't work for KSP 1.1.
 
 
 Change Log
 ----------
 
-* 2.4.13
-    - fixed for 1.1 thanks to RangeMachine
-    - disabled visor reflections because visor shader is broken
+* 2.5.0
+    - fixed shaders for Unity 5 / KSP 1.1+
+    - code cleanup
 * 2.4.12
     - removed / replaced Kerbal Stuff links
     - possibly fixed a reflections-related crash
@@ -697,7 +695,7 @@ Change Log
 Licence
 -------
 
-Copyright © 2013-2015 Davorin Učakar, Ryan Bray
+Copyright © 2013-2016 Davorin Učakar, Pavel Alekseevich, Ryan Bray
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),

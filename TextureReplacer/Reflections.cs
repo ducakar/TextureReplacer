@@ -41,8 +41,8 @@ namespace TextureReplacer
     {
       struct MeshState
       {
-        public Renderer renderer;
-        public bool isEnabled;
+        public Renderer Renderer;
+        public bool IsEnabled;
       }
 
       // List of all created reflection scripts.
@@ -177,8 +177,7 @@ namespace TextureReplacer
                 break;
               }
             }
-          }
-          while (currentScript != startScript);
+          } while (currentScript != startScript);
         }
       }
     }
@@ -366,15 +365,13 @@ namespace TextureReplacer
       // Generate generic reflection cube map texture.
       if (envMapFaces.Contains(null)) {
         Util.Log("Some environment map faces are missing. Static reflections disabled.");
-      }
-      else {
+      } else {
         int envMapSize = envMapFaces[0].width;
 
         if (envMapFaces.Any(t => t.width != envMapSize || t.height != envMapSize) ||
             envMapFaces.Any(t => !Util.IsPow2(t.width) || !Util.IsPow2(t.height))) {
           Util.Log("Invalid environment map faces. Static reflections disabled.");
-        }
-        else {
+        } else {
           try {
             staticEnvMap = new Cubemap(envMapSize, TextureFormat.RGB24, true);
             staticEnvMap.hideFlags = HideFlags.HideAndDontSave;
@@ -388,8 +385,7 @@ namespace TextureReplacer
             staticEnvMap.Apply(true, false);
 
             Util.Log("Static environment map cube texture generated.");
-          }
-          catch (UnityException) {
+          } catch (UnityException) {
             if (staticEnvMap != null) {
               Object.DestroyImmediate(staticEnvMap);
             }
@@ -409,8 +405,7 @@ namespace TextureReplacer
         visorShader = shaderMaterial.shader;
 
         Util.Log("Visor shader sucessfully compiled.");
-      }
-      catch {
+      } catch {
         IsVisorReflectionEnabled = false;
         Util.Log("Visor shader loading failed. Visor reflections disabled.");
       }
@@ -421,11 +416,9 @@ namespace TextureReplacer
 
         if (original == null) {
           Util.Log("Shader \"{0}\" missing", ShaderNameMap[i, 0]);
-        }
-        else if (reflective == null) {
+        } else if (reflective == null) {
           Util.Log("Shader \"{0}\" missing", ShaderNameMap[i, 1]);
-        }
-        else {
+        } else {
           shaderMap[original] = reflective;
         }
       }

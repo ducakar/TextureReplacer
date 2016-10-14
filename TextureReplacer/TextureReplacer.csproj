@@ -1,75 +1,67 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{2F4B8231-6DB5-4E24-BD56-4CB6FD27AA0D}</ProjectGuid>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0CAB768E-C026-4FC1-A0F6-1392C97ADDFA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>TextureReplacer</RootNamespace>
     <AssemblyName>TextureReplacer</AssemblyName>
-    <ReleaseVersion>2.4.13</ReleaseVersion>
+    <UseMSBuildEngine>False</UseMSBuildEngine>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
+    <OutputPath>..\..\..\..\Apps\KSP\game\GameData\TextureReplacer\Plugins</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
-    <CustomCommands>
-      <CustomCommands>
-        <Command type="AfterBuild" command="cp ${TargetFile} &quot;/run/media/davorin/Windows 7/KSP-test/GameData/TextureReplacer/Plugins&quot;" workingdir="${SolutionDir}" />
-      </CustomCommands>
-    </CustomCommands>
+    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
+    <OutputPath>..\..\..\..\Apps\KSP\game\GameData\TextureReplacer\Plugins</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CustomCommands>
-      <CustomCommands>
-        <Command type="AfterBuild" command="cp ${TargetFile} GameData/TextureReplacer/Plugins" workingdir="${SolutionDir}" />
-        <Command type="AfterBuild" command="cp README.md GameData/TextureReplacer" workingdir="${SolutionDir}" />
-        <Command type="AfterBuild" command="cp ${TargetFile} &quot;/run/media/davorin/Windows 7/KSP-test/GameData/TextureReplacer/Plugins&quot;" workingdir="${SolutionDir}" />
-      </CustomCommands>
-    </CustomCommands>
+    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Loader.cs" />
     <Compile Include="Personaliser.cs" />
     <Compile Include="Reflections.cs" />
     <Compile Include="Replacer.cs" />
-    <Compile Include="TextureReplacer.cs" />
     <Compile Include="TRActivator.cs" />
     <Compile Include="TRGui.cs" />
     <Compile Include="TRReflection.cs" />
     <Compile Include="TRScenario.cs" />
+    <Compile Include="TextureReplacer.cs" />
     <Compile Include="Util.cs" />
-    <None Include="Visor.shader" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <None Include="Shaders\TRBumpedSpecular.shader" />
+    <None Include="Shaders\TRBumpedSpecularEmissive.shader" />
+    <None Include="Shaders\TRSpecular.shader" />
+    <None Include="Shaders\TRSpecularEmissive.shader" />
+    <None Include="Shaders\TRVisor.compiled.shader" />
+    <None Include="Shaders\TRVisor.shader" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Visor-compiled.shader" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="KSPUtil">
-      <HintPath>..\..\..\..\..\..\run\media\davorin\Windows 7\KSP-test\KSP_Data\Managed\KSPUtil.dll</HintPath>
-    </Reference>
+    <Reference Include="System" />
   </ItemGroup>
 </Project>
