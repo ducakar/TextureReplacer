@@ -309,8 +309,8 @@ namespace TextureReplacer
                 material.shader = enableStatic ? visorShader : transparentSpecularShader;
 
                 // In 1.2 visor texture some reason want load by default way
-                if (GameDatabase.Instance.GetTexture("TextureReplacer/Default/EVAVisor", false) != null)
-                    material.SetTexture("_MainTex", GameDatabase.Instance.GetTexture("TextureReplacer/Default/EVAVisor", false));
+                if (GameDatabase.Instance.GetTexture(Util.DIR + "Default/EVAVisor", false) != null)
+                    material.SetTexture("_MainTex", GameDatabase.Instance.GetTexture(Util.DIR + "Default/EVAVisor", false));
 
                 material.SetTexture(Util.CUBE_PROPERTY, enableStatic ? staticEnvMap : null);
                 material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);
