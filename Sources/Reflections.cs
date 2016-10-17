@@ -342,6 +342,7 @@ namespace TextureReplacer
             foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
             {
                 Texture2D texture = texInfo.texture;
+
                 if (texture == null || !texture.name.StartsWith(DIR_ENVMAP, System.StringComparison.Ordinal))
                     continue;
 

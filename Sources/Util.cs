@@ -33,7 +33,7 @@ namespace TextureReplacer
     internal static class Util
     {
         private static readonly char[] CONFIG_DELIMITERS = { ' ', '\t', ',' };
-        public static readonly string DIR = typeof(Util).Namespace + "/";
+        public static readonly string DIR = "TextureReplacer/";
         public static readonly int BUMPMAP_PROPERTY = Shader.PropertyToID("_BumpMap");
         public static readonly int CUBE_PROPERTY = Shader.PropertyToID("_Cube");
         public static readonly int REFLECT_COLOR_PROPERTY = Shader.PropertyToID("_ReflectColor");

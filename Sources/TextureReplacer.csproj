@@ -1,16 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{2F4B8231-6DB5-4E24-BD56-4CB6FD27AA0D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>TextureReplacer</RootNamespace>
     <AssemblyName>TextureReplacer</AssemblyName>
-    <ReleaseVersion>2.4.12</ReleaseVersion>
+    <ReleaseVersion>2.5.1</ReleaseVersion>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <ProjectGuid>{2F4B8231-6DB5-4E24-BD56-4CB6FD27AA0D}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'TextureReplacer|AnyCPU' ">
     <OutputPath>..\GameData\TextureReplacer\Plugins\</OutputPath>
@@ -41,6 +38,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.XML" />
     <Reference Include="UnityEngine">
       <HintPath>D:\Steam\steamapps\common\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
