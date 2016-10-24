@@ -308,9 +308,17 @@ namespace TextureReplacer
                 // want corrupted reflections in the main menu.
                 material.shader = enableStatic ? visorShader : transparentSpecularShader;
 
+                ///////////////////////////////////////////////////////////////////////////////////////////
                 // In 1.2 visor texture some reason want load by default way
-                if (GameDatabase.Instance.GetTexture(Util.DIR + "Default/EVAVisor", false) != null)
-                    material.SetTexture("_MainTex", GameDatabase.Instance.GetTexture(Util.DIR + "Default/EVAVisor", false));
+                ///////////////////////////////////////////////////////////////////////////////////////////
+                Texture visorTex = GameDatabase.Instance.GetTexture(Util.DIR + "Default/EVAVisor", false);
+
+                if (visorTex != null)
+                {
+                    material.SetTexture("_MainTex", visorTex);
+                    material.color = Color.white;
+                }
+                ///////////////////////////////////////////////////////////////////////////////////////////
 
                 material.SetTexture(Util.CUBE_PROPERTY, enableStatic ? staticEnvMap : null);
                 material.SetColor(Util.REFLECT_COLOR_PROPERTY, visorReflectionColour);

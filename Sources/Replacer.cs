@@ -180,11 +180,10 @@ namespace TextureReplacer
             }
 
             Shader headShader = Shader.Find("Bumped Diffuse");
-            Shader suitShader = Shader.Find("KSP/Bumped Specular");
+            Shader suitShader = Shader.Find("Bumped Diffuse");
 
             Texture2D[] headNormalMaps = { null, null };
             Texture2D ivaVisorTexture = null;
-            Texture2D evaVisorTexture = null;
 
             if (mappedTextures.TryGetValue("kerbalHeadNRM", out headNormalMaps[0]))
                 mappedTextures.Remove("kerbalHeadNRM");
@@ -194,9 +193,6 @@ namespace TextureReplacer
 
             if (mappedTextures.TryGetValue("kerbalVisor", out ivaVisorTexture))
                 mappedTextures.Remove("kerbalVisor");
-
-            if (mappedTextures.TryGetValue("EVAvisor", out evaVisorTexture))
-                mappedTextures.Remove("EVAvisor");
 
             // Fix female shaders, set normal-mapped shader for head and visor texture on proto-IVA and -EVA Kerbals.
             Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
@@ -233,7 +229,7 @@ namespace TextureReplacer
                     {
                         case "headMesh01":
                             // Replace with bump-mapped shader so normal maps for heads will work.
-                            // smr.sharedMaterial.shader = headShader;
+                            smr.sharedMaterial.shader = headShader;
 
                             if (headNormalMaps[0] != null)
                                 smr.sharedMaterial.SetTexture(Util.BUMPMAP_PROPERTY, headNormalMaps[0]);
@@ -243,21 +239,21 @@ namespace TextureReplacer
 
                         case "body01":
                             // Also replace shader on EVA suits to match the one on IVA suits and to enable heat effects.
-                            // smr.sharedMaterial.shader = suitShader;
+                            smr.sharedMaterial.shader = suitShader;
 
                             suitMaterials[i] = smr.sharedMaterial;
                             break;
                             
                         case "helmet":
                             // Also replace shader on EVA suits to match the one on IVA suits and to enable heat effects.
-                            // smr.sharedMaterial.shader = suitShader;
+                            smr.sharedMaterial.shader = suitShader;
 
                             helmetMaterials[i] = smr.sharedMaterial;
                             break;
 
                         case "jetpack_base01":
                             // Also replace shader on EVA suits to match the one on IVA suits and to enable heat effects.
-                            // smr.sharedMaterial.shader = suitShader;
+                            smr.sharedMaterial.shader = suitShader;
 
                             jetpackMaterial = smr.sharedMaterial;
                             break;
@@ -266,11 +262,6 @@ namespace TextureReplacer
                             if (smr.transform.root == maleIva.transform && ivaVisorTexture != null)
                             {
                                 smr.sharedMaterial.mainTexture = ivaVisorTexture;
-                                smr.sharedMaterial.color = Color.white;
-                            }
-                            else if (smr.transform.root == maleEva.transform && evaVisorTexture != null)
-                            {
-                                smr.sharedMaterial.mainTexture = evaVisorTexture;
                                 smr.sharedMaterial.color = Color.white;
                             }
 
