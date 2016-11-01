@@ -5,7 +5,9 @@
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TextureReplacer")]
-[assembly: AssemblyCopyright("© 2014 Davorin Učakar, Ryan Bray")]
+[assembly: AssemblyCopyright("© 2013-2016 Davorin Učakar, Ryan Bray, RangeMachine")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: AssemblyVersion("2.4.12.*")]
+[assembly: AssemblyVersion("2.5.3.0")]
+
+[assembly: KSPAssembly("Texture Replacer", 2, 5)]
