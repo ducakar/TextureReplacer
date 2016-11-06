@@ -100,20 +100,26 @@ namespace TextureReplacer
      */
     void UpdateNavball(Vessel vessel)
     {
+      //Util.Log("Navball");
+
       if (hudNavBallTexture != null) {
-        NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
+        var hudNavball = FlightUIModeController.Instance.navBall;
         if (hudNavball != null) {
-          //Util.LogDownHierarchy(hudNavball.transform, 0);
-          hudNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = hudNavBallTexture;
+//          Util.Log("down:");
+//          Util.LogDownHierarchy(hudNavball.transform, 0);
+//          Util.Log("up:");
+//          Util.LogUpHierarchy(hudNavball.transform);
+          //hudNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = hudNavBallTexture;
         }
       }
 
       if (ivaNavBallTexture != null && InternalSpace.Instance != null) {
         InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
         if (ivaNavball != null) {
-          //Util.LogDownHierarchy(ivaNavball.navBall.transform, 0);
+//          Util.Log("iva");
+//          Util.LogDownHierarchy(ivaNavball.transform, 0);
           //Util.Log("{0}", ivaNavball.navBall.GetComponent<Renderer>());
-          ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;
+          //ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;
           //ivaNavball.navBall.Find("NavSphere").GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;;
           //ivaNavball.navBall.Find("indicator").GetComponent<Renderer>().sharedMaterial.mainTexture = null;
           //ivaNavball.navBall.Find("base").GetComponent<Renderer>().sharedMaterial.mainTexture = null;

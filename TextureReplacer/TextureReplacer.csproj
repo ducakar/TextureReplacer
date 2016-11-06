@@ -46,10 +46,17 @@
     <None Include="Shaders\TRBumpedSpecularEmissive.shader" />
     <None Include="Shaders\TRSpecular.shader" />
     <None Include="Shaders\TRSpecularEmissive.shader" />
-    <None Include="Shaders\TRVisor.compiled.shader" />
     <None Include="Shaders\TRVisor.shader" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\mscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\System.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -62,6 +69,8 @@
       <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Shaders\TRVisor.compiled.shader" />
   </ItemGroup>
 </Project>

@@ -183,13 +183,19 @@ of heads and suits is based on Kerbals' names, which ensures the same head/suit
 is always assigned to a given Kerbal. Additionally, special per-class suit can
 be set for each class.
 
-Head textures reside inside `Heads/` directory (and its subdirectories) and have
-arbitrary names. Normal maps are optional. To provide a normal map, name it the
-same as the head texture but add "NRM" suffix.
+Head textures reside inside `Heads/` directory, each in its own subdirectory:
 
     GameData/TextureReplacer/
-      Heads/[<subDir>/]<head>     // Head texture
-      Heads/[<subDir>/]<head>NRM  // Normal map for <head> (optional)
+      Heads/[<subDir>/]<headDir>/kerbalHead     // Head texture
+      Heads/[<subDir>/]<headDir>/kerbalHeadNRM  // Normal map (optional)
+
+for males and
+
+    GameData/TextureReplacer/
+      Heads/[<subDir>/]<headDir>/kerbalGirl_06_BaseColor     // Head texture
+      Heads/[<subDir>/]<headDir>/kerbalGirl_06_BaseColorNRM  // Normal map (opt)
+
+for females.
 
 Suit textures' names are identical as for the default texture replacement except
 that there is no `kerbalMain` texture (`kerbalMainGrey` replaces both) and class
@@ -292,6 +298,8 @@ Change Log
 
 * 2.5.0
     - fixed shaders for Unity 5 / KSP 1.1+
+    - heads now reside in Heads/<name>/<texture>, named as stock textures
+    - female heads are detected from file names rather than from config files
     - code cleanup
 * 2.4.12
     - removed / replaced Kerbal Stuff links

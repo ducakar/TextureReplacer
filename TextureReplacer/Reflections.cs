@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace TextureReplacer
 {
@@ -62,7 +63,7 @@ namespace TextureReplacer
         envMap = new RenderTexture(reflectionResolution, reflectionResolution, 24);
         envMap.hideFlags = HideFlags.HideAndDontSave;
         envMap.wrapMode = TextureWrapMode.Clamp;
-        envMap.isCubemap = true;
+        envMap.dimension = TextureDimension.Cube;
 
         transform = part.transform;
         isEva = part.GetComponent<KerbalEVA>() != null;
