@@ -190,9 +190,11 @@ namespace TextureReplacer
 
       Transform model = isEva ? component.transform.Find("model01") : component.transform.Find("kbIVA@idle/model01");
       Transform flag = isEva ? component.transform.Find("model/kbEVA_flagDecals") : null;
+      Transform parachute = isEva ? component.transform.Find("model/EVAparachute/base") : null;
 
       if (isEva) {
         flag.GetComponent<Renderer>().enabled = needsSuit;
+        parachute.GetComponent<Renderer>().enabled = needsSuit;
       }
 
       // We must include hidden meshes, since flares are hidden when light is turned off.
@@ -200,7 +202,7 @@ namespace TextureReplacer
       foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>(true)) {
         var smr = renderer as SkinnedMeshRenderer;
 
-        // Thruster jets, flag decals and headlight flares.
+        // Parachute backpack, flag decals, headlight flares and thruster jets.
         if (smr == null) {
           if (renderer.name != "screenMessage") {
             renderer.enabled = needsSuit;

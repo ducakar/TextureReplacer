@@ -23,6 +23,8 @@ stock textures and customise your Kerbals. More specifically, it can:
 
 Special thanks to:
 
+* RangeMachine for contributing reflection shaders and maintaing the mod in my
+  absence.
 * rbray89 who contributed a reflective visor shader and for Active Texture
   Management and Visual Enhancements where some code has been borrowed from,
 * Tingle for Universe Replacer; studying his code helped me a lot while
@@ -287,7 +289,7 @@ Known Issues
 ------------
 
 * Nav ball texture replacmeent does not work.
-* Visor reflections do not work.
+* Reflections do not work.
 * Atmospheric skybox is not reflected.
 * Reflections disable part highlighting.
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
@@ -301,8 +303,10 @@ Change Log
 * 3.0.0
     - heads now reside in Heads/<name>/<texture>, named as stock textures
     - female heads are detected from file names rather than from config files
-    - code cleanup
-    - disabled visor reflections and nav ball replacement (to be fixed)
+    - hide parachute pack when in IVA suit
+    - big code refactorisation and cleanup
+    - disabled visor reflections and nav ball replacement since both are broken
+      due to changes in KSP (to be fixed)
 * 2.4.12
     - removed / replaced Kerbal Stuff links
     - possibly fixed a reflections-related crash
