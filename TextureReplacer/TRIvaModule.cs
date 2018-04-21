@@ -20,21 +20,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using UnityEngine;
+
 namespace TextureReplacer
 {
-  [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER)]
-  public class TRScenario : ScenarioModule
+  /**
+   * Component bound to internal models that triggers Kerbal texture personalisation when the
+   * internal model changes.
+   *
+   * It is added to IVA space by Personaliser so it doesn't need to be public.
+   */
+  class TRIvaModule : MonoBehaviour
   {
-    public override void OnLoad(ConfigNode node)
+    public void Start()
     {
-      Reflections.Instance.OnLoadScenario(node);
-      Personaliser.Instance.OnLoadScenario(node);
-    }
-
-    public override void OnSave(ConfigNode node)
-    {
-      Reflections.Instance.OnSaveScenario(node);
-      Personaliser.Instance.OoSaveScenario(node);
+      Personaliser.Instance.PersonaliseIva(GetComponent<Kerbal>());
+      Destroy(this);
     }
   }
 }

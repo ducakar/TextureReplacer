@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2015 Davorin Učakar
+ * Copyright © 2013-2017 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -60,11 +60,11 @@ namespace TextureReplacer
 
       public Script(Part part, int updateInterval)
       {
-        envMap = new RenderTexture(reflectionResolution, reflectionResolution, 24);
-        envMap.hideFlags = HideFlags.HideAndDontSave;
-        envMap.wrapMode = TextureWrapMode.Clamp;
-        envMap.dimension = TextureDimension.Cube;
-
+        envMap = new RenderTexture(reflectionResolution, reflectionResolution, 24) {
+          hideFlags = HideFlags.HideAndDontSave,
+          wrapMode = TextureWrapMode.Clamp,
+          dimension = TextureDimension.Cube
+        };
         transform = part.transform;
         isEva = part.GetComponent<KerbalEVA>() != null;
 
@@ -374,9 +374,10 @@ namespace TextureReplacer
           Util.Log("Invalid environment map faces. Static reflections disabled.");
         } else {
           try {
-            staticEnvMap = new Cubemap(envMapSize, TextureFormat.RGB24, true);
-            staticEnvMap.hideFlags = HideFlags.HideAndDontSave;
-            staticEnvMap.wrapMode = TextureWrapMode.Clamp;
+            staticEnvMap = new Cubemap(envMapSize, TextureFormat.RGB24, true) {
+              hideFlags = HideFlags.HideAndDontSave,
+              wrapMode = TextureWrapMode.Clamp
+            };
             staticEnvMap.SetPixels(envMapFaces[0].GetPixels(), CubemapFace.PositiveX);
             staticEnvMap.SetPixels(envMapFaces[1].GetPixels(), CubemapFace.NegativeX);
             staticEnvMap.SetPixels(envMapFaces[2].GetPixels(), CubemapFace.PositiveY);
@@ -397,19 +398,21 @@ namespace TextureReplacer
         }
       }
 
-      try {
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        Stream stream = assembly.GetManifestResourceStream("TextureReplacer.Visor-compiled.shader");
-        StreamReader reader = new StreamReader(stream);
+      // TODO Fix the visor shader and move it to an asset file.
+      IsVisorReflectionEnabled = false;
+      //try {
+      //  Assembly assembly = Assembly.GetExecutingAssembly();
+      //  Stream stream = assembly.GetManifestResourceStream("TextureReplacer.Visor-compiled.shader");
+      //  StreamReader reader = new StreamReader(stream);
 
-        shaderMaterial = new Material(reader.ReadToEnd());
-        visorShader = shaderMaterial.shader;
+      //  shaderMaterial = new Material(reader.ReadToEnd());
+      //  visorShader = shaderMaterial.shader;
 
-        Util.Log("Visor shader sucessfully compiled.");
-      } catch {
-        IsVisorReflectionEnabled = false;
-        Util.Log("Visor shader loading failed. Visor reflections disabled.");
-      }
+      //  Util.Log("Visor shader sucessfully compiled.");
+      //} catch {
+      //  IsVisorReflectionEnabled = false;
+      //  Util.Log("Visor shader loading failed. Visor reflections disabled.");
+      //}
 
       for (int i = 0; i < ShaderNameMap.GetLength(0); ++i) {
         Shader original = Shader.Find(ShaderNameMap[i, 0]);

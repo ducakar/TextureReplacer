@@ -186,14 +186,14 @@ be set for each class.
 Head textures reside inside `Heads/` directory, each in its own subdirectory:
 
     GameData/TextureReplacer/
-      Heads/[<subDir>/]<headDir>/kerbalHead     // Head texture
-      Heads/[<subDir>/]<headDir>/kerbalHeadNRM  // Normal map (optional)
+      Heads/[<subDir>/]<head>/kerbalHead     // Head texture
+      Heads/[<subDir>/]<head>/kerbalHeadNRM  // Normal map (optional)
 
 for males and
 
     GameData/TextureReplacer/
-      Heads/[<subDir>/]<headDir>/kerbalGirl_06_BaseColor     // Head texture
-      Heads/[<subDir>/]<headDir>/kerbalGirl_06_BaseColorNRM  // Normal map (opt)
+      Heads/[<subDir>/]<head>/kerbalGirl_06_BaseColor     // Head texture
+      Heads/[<subDir>/]<head>/kerbalGirl_06_BaseColorNRM  // Normal map (optional)
 
 for females.
 
@@ -286,6 +286,8 @@ Notes
 Known Issues
 ------------
 
+* Nav ball texture replacmeent does not work.
+* Visor reflections do not work.
 * Atmospheric skybox is not reflected.
 * Reflections disable part highlighting.
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
@@ -296,11 +298,11 @@ Known Issues
 Change Log
 ----------
 
-* 2.5.0
-    - fixed shaders for Unity 5 / KSP 1.1+
+* 3.0.0
     - heads now reside in Heads/<name>/<texture>, named as stock textures
     - female heads are detected from file names rather than from config files
     - code cleanup
+    - disabled visor reflections and nav ball replacement (to be fixed)
 * 2.4.12
     - removed / replaced Kerbal Stuff links
     - possibly fixed a reflections-related crash
@@ -703,7 +705,9 @@ Change Log
 Licence
 -------
 
-Copyright © 2013-2016 Davorin Učakar, Pavel Alekseevich, Ryan Bray
+Copyright © 2013-2017 Davorin Učakar
+Copyright © 2016 Pavel Alekseevich
+Copyright © 2013 Ryan Bray
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),

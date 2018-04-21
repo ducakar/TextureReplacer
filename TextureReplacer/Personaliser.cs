@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2015 Davorin Učakar
+ * Copyright © 2013-2017 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -24,306 +24,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Gender = ProtoCrewMember.Gender;
 
 namespace TextureReplacer
 {
   class Personaliser
   {
-    public class Skin
-    {
-      public string Name;
-      public bool IsFemale;
-      public bool IsEyeless;
-
-      public Texture2D Head;
-      public Texture2D HeadNRM;
-      public Texture2D Arms;
-      public Texture2D ArmsNRM;
-
-      public bool SetTexture(string originalName, Texture2D texture)
-      {
-        switch (originalName) {
-          case "kerbalHead":
-            IsFemale = false;
-            Head = Head ?? texture;
-            return true;
-
-          case "kerbalHeadNRM":
-            IsFemale = false;
-            HeadNRM = HeadNRM ?? texture;
-            return true;
-
-          case "kerbalGirl_06_BaseColor":
-            IsFemale = true;
-            Head = Head ?? texture;
-            return true;
-
-          case "kerbalGirl_06_BaseColorNRM":
-            IsFemale = true;
-            HeadNRM = HeadNRM ?? texture;
-            return true;
-
-          case "kerbal_armHands":
-            Arms = Arms ?? texture;
-            return true;
-
-          case "kerbal_armHandsNRM":
-            ArmsNRM = ArmsNRM ?? texture;
-            return true;
-
-          default:
-            return false;
-        }
-      }
-    }
-
-    public class Suit
-    {
-      Texture2D[] levelBodies;
-      Texture2D[] levelHelmets;
-      Texture2D[] levelEvaBodies;
-      Texture2D[] levelEvaHelmets;
-
-      public string Name;
-      public bool IsFemale;
-
-      public Texture2D BodyVeteran;
-      public Texture2D Body;
-      public Texture2D BodyNRM;
-      public Texture2D Helmet;
-      public Texture2D HelmetNRM;
-      public Texture2D Visor;
-      public Texture2D EvaBody;
-      public Texture2D EvaBodyNRM;
-      public Texture2D EvaHelmet;
-      public Texture2D EvaVisor;
-      public Texture2D EvaJetpack;
-      public Texture2D EvaJetpackNRM;
-
-      public Texture2D GetBody(int level)
-      {
-        return level != 0 && levelBodies != null ? levelBodies[level - 1] : Body;
-      }
-
-      public Texture2D GetHelmet(int level)
-      {
-        return level != 0 && levelHelmets != null ? levelHelmets[level - 1] : Helmet;
-      }
-
-      public Texture2D GetEvaSuit(int level)
-      {
-        return level != 0 && levelEvaBodies != null ? levelEvaBodies[level - 1] : EvaBody;
-      }
-
-      public Texture2D GetEvaHelmet(int level)
-      {
-        return level != 0 && levelEvaHelmets != null ? levelEvaHelmets[level - 1] : EvaHelmet;
-      }
-
-      public bool SetTexture(string originalName, Texture2D texture)
-      {
-        int level;
-
-        switch (originalName) {
-          case "kerbalMain":
-            BodyVeteran = BodyVeteran ?? texture;
-            return true;
-
-          case "kerbalMainGrey":
-            Body = Body ?? texture;
-            return true;
-
-          case "kerbalMainNRM":
-            BodyNRM = BodyNRM ?? texture;
-            return true;
-
-          case "kerbalHelmetGrey":
-            Helmet = Helmet ?? texture;
-            return true;
-
-          case "kerbalHelmetNRM":
-            HelmetNRM = HelmetNRM ?? texture;
-            return true;
-
-          case "kerbalVisor":
-            Visor = Visor ?? texture;
-            return true;
-
-          case "EVAtexture":
-            EvaBody = EvaBody ?? texture;
-            return true;
-
-          case "EVAtextureNRM":
-            EvaBodyNRM = EvaBodyNRM ?? texture;
-            return true;
-
-          case "EVAhelmet":
-            EvaHelmet = EvaHelmet ?? texture;
-            return true;
-
-          case "EVAvisor":
-            EvaVisor = EvaVisor ?? texture;
-            return true;
-
-          case "EVAjetpack":
-            EvaJetpack = EvaJetpack ?? texture;
-            return true;
-
-          case "EVAjetpackNRM":
-            EvaJetpackNRM = EvaJetpackNRM ?? texture;
-            return true;
-
-          case "kerbalMainGrey1":
-          case "kerbalMainGrey2":
-          case "kerbalMainGrey3":
-          case "kerbalMainGrey4":
-          case "kerbalMainGrey5":
-            level = originalName.Last() - 0x30;
-
-            levelBodies = levelBodies ?? new Texture2D[5];
-            for (int i = level - 1; i < 5; ++i) {
-              levelBodies[i] = texture;
-            }
-            return true;
-
-          case "kerbalHelmetGrey1":
-          case "kerbalHelmetGrey2":
-          case "kerbalHelmetGrey3":
-          case "kerbalHelmetGrey4":
-          case "kerbalHelmetGrey5":
-            level = originalName.Last() - 0x30;
-
-            levelHelmets = levelHelmets ?? new Texture2D[5];
-            for (int i = level - 1; i < 5; ++i) {
-              levelHelmets[i] = texture;
-            }
-            return true;
-
-          case "EVAtexture1":
-          case "EVAtexture2":
-          case "EVAtexture3":
-          case "EVAtexture4":
-          case "EVAtexture5":
-            level = originalName.Last() - 0x30;
-
-            levelEvaBodies = levelEvaBodies ?? new Texture2D[5];
-            for (int i = level - 1; i < 5; ++i) {
-              levelEvaBodies[i] = texture;
-            }
-            return true;
-
-          case "EVAhelmet1":
-          case "EVAhelmet2":
-          case "EVAhelmet3":
-          case "EVAhelmet4":
-          case "EVAhelmet5":
-            level = originalName.Last() - 0x30;
-
-            levelEvaHelmets = levelEvaHelmets ?? new Texture2D[5];
-            for (int i = level - 1; i < 5; ++i) {
-              levelEvaHelmets[i] = texture;
-            }
-            return true;
-
-          default:
-            return false;
-        }
-      }
-    }
-
-    public class KerbalData
-    {
-      public int Hash;
-      public int RealGender;
-      public bool IsVeteran;
-
-      public Skin Skin;
-      public Suit Suit;
-      public Suit CabinSuit;
-    }
-
-    /**
-     * Component bound to internal models that triggers Kerbal texture personalisation when the
-     * internal model changes.
-     */
-    class TRIvaModule : MonoBehaviour
-    {
-      public void Start()
-      {
-        Personaliser.Instance.PersonaliseIva(GetComponent<Kerbal>());
-        Destroy(this);
-      }
-    }
-
-    class TREvaModule : PartModule
-    {
-      Reflections.Script reflectionScript;
-
-      [KSPField(isPersistant = true)]
-      bool isInitialised;
-
-      [KSPField(isPersistant = true)]
-      bool hasEvaSuit;
-
-      [KSPEvent(guiActive = true, name = "ToggleEvaSuit", guiName = "Toggle EVA Suit")]
-      public void ToggleEvaSuit()
-      {
-        Personaliser personaliser = Personaliser.Instance;
-
-        if (personaliser.PersonaliseEva(part, !hasEvaSuit)) {
-          hasEvaSuit = !hasEvaSuit;
-          if (reflectionScript != null) {
-            reflectionScript.SetActive(hasEvaSuit);
-          }
-        } else {
-          ScreenMessages.PostScreenMessage("No breathable atmosphere", 5.0f, ScreenMessageStyle.UPPER_CENTER);
-        }
-      }
-
-      public override void OnStart(StartState state)
-      {
-        Personaliser personaliser = Personaliser.Instance;
-
-        if (!isInitialised) {
-          if (!personaliser.isAtmSuitEnabled) {
-            Events["ToggleEvaSuit"].active = false;
-            hasEvaSuit = true;
-          }
-          isInitialised = true;
-        }
-
-        if (!personaliser.PersonaliseEva(part, hasEvaSuit)) {
-          hasEvaSuit = true;
-        }
-        if (Reflections.Instance.IsVisorReflectionEnabled &&
-            Reflections.Instance.ReflectionType == Reflections.Type.Real) {
-          reflectionScript = new Reflections.Script(part, 1);
-          reflectionScript.SetActive(hasEvaSuit);
-        }
-      }
-
-      public void Update()
-      {
-        Personaliser personaliser = Personaliser.Instance;
-
-        if (!hasEvaSuit && !personaliser.IsAtmBreathable()) {
-          personaliser.PersonaliseEva(part, true);
-          hasEvaSuit = true;
-
-          if (reflectionScript != null) {
-            reflectionScript.SetActive(true);
-          }
-        }
-      }
-
-      public void OnDestroy()
-      {
-        if (reflectionScript != null) {
-          reflectionScript.Destroy();
-        }
-      }
-    }
-
     const string DefaultDirectory = Util.Directory + "Default/";
     const string SkinsDirectory = Util.Directory + "Heads/";
     const string SuitsDirectory = Util.Directory + "Suits/";
@@ -334,7 +40,7 @@ namespace TextureReplacer
     readonly List<Skin>[] kerbalSkins = { new List<Skin>(), new List<Skin>() };
     readonly List<Suit>[] kerbalSuits = { new List<Suit>(), new List<Suit>() };
     // Personalised Kerbal textures.
-    readonly Dictionary<string, KerbalData> gameKerbals = new Dictionary<string, KerbalData>();
+    readonly Dictionary<string, Appearance> gameKerbals = new Dictionary<string, Appearance>();
     // Backed-up personalised textures from main configuration files. These are used to initialise kerbals if a saved
     // game doesn't contain `TRScenario`.
     ConfigNode customKerbalsNode = new ConfigNode();
@@ -405,14 +111,14 @@ namespace TextureReplacer
       return suit;
     }
 
-    public KerbalData GetKerbalData(ProtoCrewMember kerbal)
+    public Appearance GetKerbalData(ProtoCrewMember kerbal)
     {
-      KerbalData kerbalData;
+      Appearance kerbalData;
 
       if (!gameKerbals.TryGetValue(kerbal.name, out kerbalData)) {
-        kerbalData = new KerbalData {
+        kerbalData = new Appearance {
           Hash = kerbal.name.GetHashCode(),
-          RealGender = (int)kerbal.gender,
+          RealGender = kerbal.gender,
           IsVeteran = VeteranNames.Any(n => n == kerbal.name)
         };
         gameKerbals.Add(kerbal.name, kerbalData);
@@ -424,13 +130,13 @@ namespace TextureReplacer
       return kerbalData;
     }
 
-    public Skin GetKerbalSkin(ProtoCrewMember kerbal, KerbalData kerbalData)
+    public Skin GetKerbalSkin(ProtoCrewMember kerbal, Appearance kerbalData)
     {
       if (kerbalData.Skin != null) {
         return kerbalData.Skin;
       }
 
-      List<Skin> genderSkins = kerbalSkins[kerbalData.RealGender];
+      List<Skin> genderSkins = kerbalSkins[(int)kerbalData.RealGender];
       if (genderSkins.Count == 0) {
         return DefaultSkin[(int)kerbal.gender];
       }
@@ -441,7 +147,7 @@ namespace TextureReplacer
       return genderSkins[number % genderSkins.Count];
     }
 
-    public Suit GetKerbalSuit(ProtoCrewMember kerbal, KerbalData kerbalData)
+    public Suit GetKerbalSuit(ProtoCrewMember kerbal, Appearance kerbalData)
     {
       Suit suit = kerbalData.Suit ?? GetClassSuit(kerbal);
       if (suit != null) {
@@ -459,7 +165,7 @@ namespace TextureReplacer
 
       // We must use a different prime here to increase randomisation so that the same skin is not always combined with
       // the same suit.
-      int number = ((kerbalData.Hash + kerbal.name.Length) * 2053) & 0x7fffffff;
+      int number = (kerbalData.Hash * 2053) & 0x7fffffff;
       return genderSuits[number % genderSuits.Count];
     }
 
@@ -468,7 +174,7 @@ namespace TextureReplacer
      */
     void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, Part cabin, bool needsSuit)
     {
-      KerbalData kerbalData = GetKerbalData(kerbal);
+      Appearance kerbalData = GetKerbalData(kerbal);
       bool isEva = cabin == null;
 
       Skin skin = GetKerbalSkin(kerbal, kerbalData);
@@ -624,11 +330,29 @@ namespace TextureReplacer
     /**
      * Personalise Kerbals in an internal space of a vessel. Used by IvaModule.
      */
-    void PersonaliseIva(Kerbal kerbal)
+    public void PersonaliseIva(Kerbal kerbal)
     {
       bool needsSuit = !isHelmetRemovalEnabled || !IsSituationSafe(kerbal.InVessel);
 
       PersonaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, needsSuit);
+    }
+
+    /**
+     * Set external EVA/IVA suit. Fails and returns false iff trying to remove an EVA suit outside of breathable
+     * atmosphere. This function is used by EvaModule.
+     */
+    public bool PersonaliseEva(Part evaPart, bool useEvaSuit)
+    {
+      bool isDesiredSuitValid = true;
+
+      if (evaPart.protoModuleCrew.Count != 0) {
+        if (!useEvaSuit && !IsAtmBreathable()) {
+          useEvaSuit = true;
+          isDesiredSuitValid = false;
+        }
+        PersonaliseKerbal(evaPart, evaPart.protoModuleCrew[0], null, useEvaSuit);
+      }
+      return isDesiredSuitValid;
     }
 
     void UpdateHelmets(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> action)
@@ -661,24 +385,6 @@ namespace TextureReplacer
     }
 
     /**
-     * Set external EVA/IVA suit. Fails and returns false iff trying to remove an EVA suit outside of breathable
-     * atmosphere. This function is used by EvaModule.
-     */
-    bool PersonaliseEva(Part evaPart, bool useEvaSuit)
-    {
-      bool isDesiredSuitValid = true;
-
-      if (evaPart.protoModuleCrew.Count != 0) {
-        if (!useEvaSuit && !IsAtmBreathable()) {
-          useEvaSuit = true;
-          isDesiredSuitValid = false;
-        }
-        PersonaliseKerbal(evaPart, evaPart.protoModuleCrew[0], null, useEvaSuit);
-      }
-      return isDesiredSuitValid;
-    }
-
-    /**
      * Load per-game custom kerbals mapping.
      */
     void LoadKerbalsMap(ConfigNode node)
@@ -693,7 +399,7 @@ namespace TextureReplacer
           continue;
         }
 
-        KerbalData kerbalData = GetKerbalData(kerbal);
+        Appearance kerbalData = GetKerbalData(kerbal);
 
         string value = node.GetValue(kerbal.name);
         if (value != null) {
@@ -703,7 +409,7 @@ namespace TextureReplacer
           string suitName = tokens.Length >= 3 ? tokens[2] : null;
 
           if (genderName != null) {
-            kerbalData.RealGender = genderName == "F" ? 1 : 0;
+            kerbalData.RealGender = genderName == "F" ? Gender.Female : Gender.Male;
           }
 
           if (skinName != null && skinName != "GENERIC") {
@@ -738,7 +444,7 @@ namespace TextureReplacer
           continue;
         }
 
-        KerbalData kerbalData = GetKerbalData(kerbal);
+        Appearance kerbalData = GetKerbalData(kerbal);
 
         string genderName = kerbalData.RealGender == 0 ? "M" : "F";
         string skinName = kerbalData.Skin == null ? "GENERIC" : kerbalData.Skin.Name;
@@ -835,16 +541,16 @@ namespace TextureReplacer
       }
       // Tag female suits.
       foreach (Suit suit in Suits) {
-        suit.IsFemale = femaleSuits.Contains(suit.Name);
+        suit.Gender = femaleSuits.Contains(suit.Name) ? Gender.Female : Gender.Male;
       }
 
       // Create lists of male skins and suits.
-      kerbalSkins[0].AddRange(Skins.Where(h => !h.IsFemale && !excludedSkins.Contains(h.Name)));
-      kerbalSuits[0].AddRange(Suits.Where(s => !s.IsFemale && !excludedSuits.Contains(s.Name)));
+      kerbalSkins[0].AddRange(Skins.Where(h => h.Gender == Gender.Male && !excludedSkins.Contains(h.Name)));
+      kerbalSuits[0].AddRange(Suits.Where(s => s.Gender == Gender.Male && !excludedSuits.Contains(s.Name)));
 
       // Create lists of female skins and suits.
-      kerbalSkins[1].AddRange(Skins.Where(h => h.IsFemale && !excludedSkins.Contains(h.Name)));
-      kerbalSuits[1].AddRange(Suits.Where(s => s.IsFemale && !excludedSuits.Contains(s.Name)));
+      kerbalSkins[1].AddRange(Skins.Where(h => h.Gender == Gender.Female && !excludedSkins.Contains(h.Name)));
+      kerbalSuits[1].AddRange(Suits.Where(s => s.Gender == Gender.Female && !excludedSuits.Contains(s.Name)));
 
       // Trim lists.
       Skins.TrimExcess();
@@ -975,14 +681,14 @@ namespace TextureReplacer
       }
 
       foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>()) {
-        int gender = kerbal.transform.name == "kerbalFemale" ? 1 : 0;
+        int genderIndex = kerbal.transform.name == "kerbalFemale" ? 1 : 0;
 
         // Save pointer to helmet & visor meshes so helmet removal can restore them.
         foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>(true)) {
           if (smr.name.EndsWith("helmet", StringComparison.Ordinal)) {
-            helmetMesh[gender] = smr.sharedMesh;
+            helmetMesh[genderIndex] = smr.sharedMesh;
           } else if (smr.name.EndsWith("visor", StringComparison.Ordinal)) {
-            visorMesh[gender] = smr.sharedMesh;
+            visorMesh[genderIndex] = smr.sharedMesh;
           }
         }
 

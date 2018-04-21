@@ -20,21 +20,56 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using UnityEngine;
+using Gender = ProtoCrewMember.Gender;
+
 namespace TextureReplacer
 {
-  [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER)]
-  public class TRScenario : ScenarioModule
+  class Skin
   {
-    public override void OnLoad(ConfigNode node)
-    {
-      Reflections.Instance.OnLoadScenario(node);
-      Personaliser.Instance.OnLoadScenario(node);
-    }
+    public string Name;
+    public Gender Gender;
+    public bool IsEyeless;
 
-    public override void OnSave(ConfigNode node)
+    public Texture2D Head;
+    public Texture2D HeadNRM;
+    public Texture2D Arms;
+    public Texture2D ArmsNRM;
+
+    public bool SetTexture(string originalName, Texture2D texture)
     {
-      Reflections.Instance.OnSaveScenario(node);
-      Personaliser.Instance.OoSaveScenario(node);
+      switch (originalName) {
+        case "kerbalHead":
+          Gender = Gender.Male;
+          Head = Head ?? texture;
+          return true;
+
+        case "kerbalHeadNRM":
+          Gender = Gender.Male;
+          HeadNRM = HeadNRM ?? texture;
+          return true;
+
+        case "kerbalGirl_06_BaseColor":
+          Gender = Gender.Female;
+          Head = Head ?? texture;
+          return true;
+
+        case "kerbalGirl_06_BaseColorNRM":
+          Gender = Gender.Female;
+          HeadNRM = HeadNRM ?? texture;
+          return true;
+
+        case "kerbal_armHands":
+          Arms = Arms ?? texture;
+          return true;
+
+        case "kerbal_armHandsNRM":
+          ArmsNRM = ArmsNRM ?? texture;
+          return true;
+
+        default:
+          return false;
+      }
     }
   }
 }

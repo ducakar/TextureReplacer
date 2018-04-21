@@ -20,21 +20,18 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using Gender = ProtoCrewMember.Gender;
+
 namespace TextureReplacer
 {
-  [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER)]
-  public class TRScenario : ScenarioModule
+  class Appearance
   {
-    public override void OnLoad(ConfigNode node)
-    {
-      Reflections.Instance.OnLoadScenario(node);
-      Personaliser.Instance.OnLoadScenario(node);
-    }
+    public int Hash;
+    public Gender RealGender;
+    public bool IsVeteran;
 
-    public override void OnSave(ConfigNode node)
-    {
-      Reflections.Instance.OnSaveScenario(node);
-      Personaliser.Instance.OoSaveScenario(node);
-    }
+    public Skin Skin;
+    public Suit Suit;
+    public Suit CabinSuit;
   }
 }

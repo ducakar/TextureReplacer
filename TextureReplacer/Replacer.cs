@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2015 Davorin Učakar
+ * Copyright © 2013-2017 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -100,31 +100,21 @@ namespace TextureReplacer
      */
     void UpdateNavball(Vessel vessel)
     {
-      //Util.Log("Navball");
+      // TODO Update NavBall texture replacement for KSP 1.3.
 
-      if (hudNavBallTexture != null) {
-        var hudNavball = FlightUIModeController.Instance.navBall;
-        if (hudNavball != null) {
-//          Util.Log("down:");
-//          Util.LogDownHierarchy(hudNavball.transform, 0);
-//          Util.Log("up:");
-//          Util.LogUpHierarchy(hudNavball.transform);
-          //hudNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = hudNavBallTexture;
-        }
-      }
+      //if (hudNavBallTexture != null) {
+      //  NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
+      //  if (hudNavball != null) {
+      //    hudNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = hudNavBallTexture;
+      //  }
+      //}
 
-      if (ivaNavBallTexture != null && InternalSpace.Instance != null) {
-        InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
-        if (ivaNavball != null) {
-//          Util.Log("iva");
-//          Util.LogDownHierarchy(ivaNavball.transform, 0);
-          //Util.Log("{0}", ivaNavball.navBall.GetComponent<Renderer>());
-          //ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;
-          //ivaNavball.navBall.Find("NavSphere").GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;;
-          //ivaNavball.navBall.Find("indicator").GetComponent<Renderer>().sharedMaterial.mainTexture = null;
-          //ivaNavball.navBall.Find("base").GetComponent<Renderer>().sharedMaterial.mainTexture = null;
-        }
-      }
+      //if (ivaNavBallTexture != null && InternalSpace.Instance != null) {
+      //  InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
+      //  if (ivaNavball != null) {
+      //    ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;
+      //  }
+      //}
     }
 
     public static void Recreate()
@@ -251,18 +241,14 @@ namespace TextureReplacer
               break;
 
             case "visor":
-              if (smr.transform.root == maleIva.transform) {
-                if (ivaVisorTexture != null) {
-                  smr.sharedMaterial.shader = visorShader;
-                  smr.sharedMaterial.mainTexture = ivaVisorTexture;
-                  smr.sharedMaterial.color = Color.white;
-                }
-              } else {
-                if (evaVisorTexture != null) {
-                  smr.sharedMaterial.shader = visorShader;
-                  smr.sharedMaterial.mainTexture = evaVisorTexture;
-                  smr.sharedMaterial.color = Color.white;
-                }
+              if (smr.transform.root == maleIva.transform && ivaVisorTexture != null) {
+                smr.sharedMaterial.shader = visorShader;
+                smr.sharedMaterial.mainTexture = ivaVisorTexture;
+                smr.sharedMaterial.color = Color.white;
+              } else if (smr.transform.root == maleEva.transform && evaVisorTexture != null) {
+                smr.sharedMaterial.shader = visorShader;
+                smr.sharedMaterial.mainTexture = evaVisorTexture;
+                smr.sharedMaterial.color = Color.white;
               }
 
               visorMaterials[i] = smr.sharedMaterial;
