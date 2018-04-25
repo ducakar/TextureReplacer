@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2017 Davorin Učakar
+ * Copyright © 2013-2018 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -77,7 +77,7 @@ namespace TextureReplacer
           if (visor != null) {
             Material material = visor.material;
 
-            material.shader = Instance.visorShader;
+            material.shader = Instance.visorMaterial.shader;
             material.SetTexture(Util.CubeProperty, envMap);
             material.SetColor(Util.ReflectColorProperty, visorReflectionColour);
           }
@@ -109,7 +109,6 @@ namespace TextureReplacer
       public void Destroy()
       {
         Scripts.Remove(this);
-
         Object.DestroyImmediate(envMap);
       }
 
@@ -184,6 +183,7 @@ namespace TextureReplacer
     }
 
     public const string EnvMapDirectory = Util.Directory + "EnvMap/";
+    static readonly Log log = new Log(nameof(Reflections));
     // Reflective shader map.
     static readonly string[,] ShaderNameMap = {
       { "KSP/Diffuse", "Reflective/Bumped Diffuse" },
@@ -211,8 +211,6 @@ namespace TextureReplacer
     };
     static readonly Shader TransparentSpecularShader = Shader.Find("Transparent/Specular");
     readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
-    // Reflective shader material.
-    Material shaderMaterial;
     // Reflection camera.
     static Camera camera;
     // Environment map textures.
@@ -229,8 +227,8 @@ namespace TextureReplacer
     public bool IsVisorReflectionEnabled { get; private set; }
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool LogReflectiveMeshes { get; private set; }
-    // Reflective shader.
-    Shader visorShader;
+    // Reflective visor shader material.
+    Material visorMaterial;
     // Instance.
     public static Reflections Instance { get; private set; }
 
@@ -251,8 +249,7 @@ namespace TextureReplacer
      */
     public Shader ToReflective(Shader shader)
     {
-      Shader newShader;
-      shaderMap.TryGetValue(shader, out newShader);
+      shaderMap.TryGetValue(shader, out Shader newShader);
       return newShader;
     }
 
@@ -292,7 +289,7 @@ namespace TextureReplacer
 
         // We apply visor shader for real reflections later, through TREvaModule since we don't
         // want corrupted reflections in the main menu.
-        material.shader = enableStatic ? visorShader : TransparentSpecularShader;
+        material.shader = enableStatic ? visorMaterial.shader : TransparentSpecularShader;
         material.SetTexture(Util.CubeProperty, enableStatic ? staticEnvMap : null);
         material.SetColor(Util.ReflectColorProperty, visorReflectionColour);
       }
@@ -358,20 +355,20 @@ namespace TextureReplacer
             envMapFaces[5] = texture;
             break;
           default:
-            Util.Log("Invalid enironment map texture name {0}", texture.name);
+            log.Print("Invalid enironment map texture name {0}", texture.name);
             break;
         }
       }
 
       // Generate generic reflection cube map texture.
       if (envMapFaces.Contains(null)) {
-        Util.Log("Some environment map faces are missing. Static reflections disabled.");
+        log.Print("Some environment map faces are missing. Static reflections disabled.");
       } else {
         int envMapSize = envMapFaces[0].width;
 
         if (envMapFaces.Any(t => t.width != envMapSize || t.height != envMapSize) ||
             envMapFaces.Any(t => !Util.IsPow2(t.width) || !Util.IsPow2(t.height))) {
-          Util.Log("Invalid environment map faces. Static reflections disabled.");
+          log.Print("Invalid environment map faces. Static reflections disabled.");
         } else {
           try {
             staticEnvMap = new Cubemap(envMapSize, TextureFormat.RGB24, true) {
@@ -386,32 +383,31 @@ namespace TextureReplacer
             staticEnvMap.SetPixels(envMapFaces[5].GetPixels(), CubemapFace.NegativeZ);
             staticEnvMap.Apply(true, false);
 
-            Util.Log("Static environment map cube texture generated.");
+            log.Print("Static environment map cube texture generated.");
           } catch (UnityException) {
             if (staticEnvMap != null) {
               Object.DestroyImmediate(staticEnvMap);
             }
             staticEnvMap = null;
 
-            Util.Log("Failed to set up static reflections. Textures not readable?");
+            log.Print("Failed to set up static reflections. Textures not readable?");
           }
         }
       }
 
-      // TODO Fix the visor shader and move it to an asset file.
       IsVisorReflectionEnabled = false;
+      // TODO Fix the visor shader and move it to an asset file.
       //try {
       //  Assembly assembly = Assembly.GetExecutingAssembly();
       //  Stream stream = assembly.GetManifestResourceStream("TextureReplacer.Visor-compiled.shader");
       //  StreamReader reader = new StreamReader(stream);
 
-      //  shaderMaterial = new Material(reader.ReadToEnd());
-      //  visorShader = shaderMaterial.shader;
+      //  visorMaterial = new Material(reader.ReadToEnd());
 
-      //  Util.Log("Visor shader sucessfully compiled.");
+      //  log.Print("Visor shader sucessfully compiled.");
       //} catch {
       //  IsVisorReflectionEnabled = false;
-      //  Util.Log("Visor shader loading failed. Visor reflections disabled.");
+      //  log.Print("Visor shader loading failed. Visor reflections disabled.");
       //}
 
       for (int i = 0; i < ShaderNameMap.GetLength(0); ++i) {
@@ -419,9 +415,9 @@ namespace TextureReplacer
         Shader reflective = Shader.Find(ShaderNameMap[i, 1]);
 
         if (original == null) {
-          Util.Log("Shader \"{0}\" missing", ShaderNameMap[i, 0]);
+          log.Print("Shader \"{0}\" missing", ShaderNameMap[i, 0]);
         } else if (reflective == null) {
-          Util.Log("Shader \"{0}\" missing", ShaderNameMap[i, 1]);
+          log.Print("Shader \"{0}\" missing", ShaderNameMap[i, 1]);
         } else {
           shaderMap[original] = reflective;
         }
@@ -438,8 +434,8 @@ namespace TextureReplacer
       if (camera != null) {
         Object.DestroyImmediate(camera.gameObject);
       }
-      if (shaderMaterial != null) {
-        Object.DestroyImmediate(shaderMaterial);
+      if (visorMaterial != null) {
+        Object.DestroyImmediate(visorMaterial);
       }
     }
 

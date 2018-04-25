@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2017 Davorin Učakar
+ * Copyright © 2013-2018 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,9 +31,10 @@ namespace TextureReplacer
   class Personaliser
   {
     const string DefaultDirectory = Util.Directory + "Default/";
-    const string SkinsDirectory = Util.Directory + "Heads/";
+    const string SkinsDirectory = Util.Directory + "Skins/";
     const string SuitsDirectory = Util.Directory + "Suits/";
 
+    static readonly Log log = new Log(nameof(Personaliser));
     static readonly string[] VeteranNames = { "Jebediah Kerman", "Bill Kerman", "Bob Kerman", "Valentina Kerman" };
 
     // Male/female textures (minus excluded).
@@ -62,17 +63,14 @@ namespace TextureReplacer
 
     // Default textures (from `Default/`).
     public Skin[] DefaultSkin = { new Skin { Name = "DEFAULT" }, new Skin { Name = "DEFAULT" } };
-
     public Suit DefaultSuit = new Suit { Name = "DEFAULT" };
 
     // All Kerbal textures, including excluded by configuration.
     public List<Skin> Skins = new List<Skin>();
-
     public List<Suit> Suits = new List<Suit>();
 
     // Class-specific suits.
     public Dictionary<string, Suit> ClassSuits = new Dictionary<string, Suit>();
-
     public Dictionary<string, Suit> DefaultClassSuits = new Dictionary<string, Suit>();
 
     public bool IsHelmetRemovalEnabled {
@@ -106,16 +104,13 @@ namespace TextureReplacer
 
     Suit GetClassSuit(ProtoCrewMember kerbal)
     {
-      Suit suit;
-      ClassSuits.TryGetValue(kerbal.experienceTrait.Config.Name, out suit);
+      ClassSuits.TryGetValue(kerbal.experienceTrait.Config.Name, out Suit suit);
       return suit;
     }
 
     public Appearance GetKerbalData(ProtoCrewMember kerbal)
     {
-      Appearance kerbalData;
-
-      if (!gameKerbals.TryGetValue(kerbal.name, out kerbalData)) {
+      if (!gameKerbals.TryGetValue(kerbal.name, out Appearance kerbalData)) {
         kerbalData = new Appearance {
           Hash = kerbal.name.GetHashCode(),
           RealGender = kerbal.gender,
@@ -124,7 +119,7 @@ namespace TextureReplacer
         gameKerbals.Add(kerbal.name, kerbalData);
 
         if (forceLegacyFemales) {
-          kerbal.gender = ProtoCrewMember.Gender.Male;
+          kerbal.gender = Gender.Male;
         }
       }
       return kerbalData;
@@ -154,12 +149,8 @@ namespace TextureReplacer
         return suit;
       }
 
-      List<Suit> genderSuits = kerbalSuits[0];
-
-      // Use female suits only if available, fall back to male suits otherwise.
-      if (kerbalData.RealGender != 0 && kerbalSuits[1].Count != 0) {
-        genderSuits = kerbalSuits[1];
-      } else if (genderSuits.Count == 0) {
+      List<Suit> genderSuits = kerbalSuits[(int)kerbalData.RealGender];
+      if (genderSuits.Count == 0) {
         return DefaultSuit;
       }
 
@@ -426,9 +417,7 @@ namespace TextureReplacer
               : Suits.Find(s => s.Name == suitName);
           }
 
-          kerbal.gender = forceLegacyFemales
-            ? ProtoCrewMember.Gender.Male
-            : (ProtoCrewMember.Gender)kerbalData.RealGender;
+          kerbal.gender = forceLegacyFemales ? Gender.Male : kerbalData.RealGender;
         }
       }
     }
@@ -550,9 +539,10 @@ namespace TextureReplacer
       kerbalSkins[0].AddRange(Skins.Where(h => h.Gender == Gender.Male && !excludedSkins.Contains(h.Name)));
       kerbalSuits[0].AddRange(Suits.Where(s => s.Gender == Gender.Male && !excludedSuits.Contains(s.Name)));
 
-      // Create lists of female skins and suits.
+      // Create lists of female skins and suits. Use same suits as for males unless special female suits are set.
       kerbalSkins[1].AddRange(Skins.Where(h => h.Gender == Gender.Female && !excludedSkins.Contains(h.Name)));
       kerbalSuits[1].AddRange(Suits.Where(s => s.Gender == Gender.Female && !excludedSuits.Contains(s.Name)));
+      kerbalSuits[1] = kerbalSuits[1].Count == 0 ? kerbalSuits[0] : kerbalSuits[1];
 
       // Trim lists.
       Skins.TrimExcess();
@@ -603,12 +593,11 @@ namespace TextureReplacer
           string originalName = texture.name.Substring(lastSlash + 1);
 
           if (dirNameLength < 1) {
-            Util.Log("Skin texture should be inside a subdirectory: {0}", texture.name);
+            log.Print("Skin texture should be inside a subdirectory: {0}", texture.name);
           } else {
             string dirName = texture.name.Substring(SkinsDirectory.Length, dirNameLength);
 
-            int index;
-            if (!skinDirs.TryGetValue(dirName, out index)) {
+            if (!skinDirs.TryGetValue(dirName, out int index)) {
               index = Skins.Count;
               Skins.Add(new Skin { Name = dirName });
               skinDirs.Add(dirName, index);
@@ -616,7 +605,7 @@ namespace TextureReplacer
 
             Skin skin = Skins[index];
             if (!skin.SetTexture(originalName, texture)) {
-              Util.Log("Unknown skin texture name \"{0}\": {1}", originalName, texture.name);
+              log.Print("Unknown skin texture name \"{0}\": {1}", originalName, texture.name);
             }
           }
         }
@@ -629,12 +618,11 @@ namespace TextureReplacer
           string originalName = texture.name.Substring(lastSlash + 1);
 
           if (dirNameLength < 1) {
-            Util.Log("Suit texture should be inside a subdirectory: {0}", texture.name);
+            log.Print("Suit texture should be inside a subdirectory: {0}", texture.name);
           } else {
             string dirName = texture.name.Substring(SuitsDirectory.Length, dirNameLength);
 
-            int index;
-            if (!suitDirs.TryGetValue(dirName, out index)) {
+            if (!suitDirs.TryGetValue(dirName, out int index)) {
               index = Suits.Count;
               Suits.Add(new Suit { Name = dirName });
               suitDirs.Add(dirName, index);
@@ -642,7 +630,7 @@ namespace TextureReplacer
 
             Suit suit = Suits[index];
             if (!suit.SetTexture(originalName, texture)) {
-              Util.Log("Unknown suit texture name \"{0}\": {1}", originalName, texture.name);
+              log.Print("Unknown suit texture name \"{0}\": {1}", originalName, texture.name);
             }
           }
         } else if (texture.name.StartsWith(DefaultDirectory, StringComparison.Ordinal)) {

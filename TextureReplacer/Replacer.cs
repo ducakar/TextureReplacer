@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2017 Davorin Učakar
+ * Copyright © 2013-2018 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -34,6 +34,8 @@ namespace TextureReplacer
     public const string HudNavball = "HUDNavBall";
     public const string IvaNavball = "IVANavBall";
 
+    static readonly Log log = new Log(nameof(Replacer));
+
     // General texture replacements.
     readonly List<string> paths = new List<string> { TexturesDirectory };
     readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
@@ -44,6 +46,8 @@ namespace TextureReplacer
     SkinQuality skinningQuality = SkinQuality.Auto;
     // Print material/texture names when performing texture replacement pass.
     bool logTextures;
+    bool logKerbalHierarchy;
+
     // Instance.
     public static Replacer Instance { get; private set; }
 
@@ -53,17 +57,20 @@ namespace TextureReplacer
     void ReplaceTextures()
     {
       foreach (Material material in Resources.FindObjectsOfTypeAll<Material>()) {
+        if (!material.HasProperty(Util.MainTexProperty)) {
+          continue;
+        }
+
         Texture texture = material.mainTexture;
         if (texture == null || texture.name.Length == 0 || texture.name.StartsWith("Temp", StringComparison.Ordinal)) {
           continue;
         }
 
         if (logTextures) {
-          Util.Log("[{0}] {1}", material.name, texture.name);
+          log.Print("[{0}] {1}", material.name, texture.name);
         }
 
-        Texture2D newTexture;
-        mappedTextures.TryGetValue(texture.name, out newTexture);
+        mappedTextures.TryGetValue(texture.name, out Texture2D newTexture);
 
         if (newTexture != null) {
           if (newTexture != texture) {
@@ -75,13 +82,16 @@ namespace TextureReplacer
           }
         }
 
+        if (!material.HasProperty(Util.BumpMapProperty)) {
+          continue;
+        }
+
         Texture normalMap = material.GetTexture(Util.BumpMapProperty);
         if (normalMap == null) {
           continue;
         }
 
-        Texture2D newNormalMap;
-        mappedTextures.TryGetValue(normalMap.name, out newNormalMap);
+        mappedTextures.TryGetValue(normalMap.name, out Texture2D newNormalMap);
 
         if (newNormalMap != null) {
           if (newNormalMap != normalMap) {
@@ -102,19 +112,19 @@ namespace TextureReplacer
     {
       // TODO Update NavBall texture replacement for KSP 1.3.
 
-      //if (hudNavBallTexture != null) {
-      //  NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
-      //  if (hudNavball != null) {
-      //    hudNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = hudNavBallTexture;
-      //  }
-      //}
+      if (hudNavBallTexture != null) {
+        NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
+        if (hudNavball != null) {
+          hudNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = hudNavBallTexture;
+        }
+      }
 
-      //if (ivaNavBallTexture != null && InternalSpace.Instance != null) {
-      //  InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
-      //  if (ivaNavball != null) {
-      //    ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;
-      //  }
-      //}
+      if (ivaNavBallTexture != null && InternalSpace.Instance != null) {
+        InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
+        if (ivaNavball != null) {
+          ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;
+        }
+      }
     }
 
     public static void Recreate()
@@ -130,6 +140,7 @@ namespace TextureReplacer
       Util.AddLists(rootNode.GetValues("paths"), paths);
       Util.Parse(rootNode.GetValue("skinningQuality"), ref skinningQuality);
       Util.Parse(rootNode.GetValue("logTextures"), ref logTextures);
+      Util.Parse(rootNode.GetValue("logKerbalHierarchy"), ref logKerbalHierarchy);
     }
 
     /**
@@ -176,14 +187,10 @@ namespace TextureReplacer
       Shader headShader = Shader.Find("Bumped Diffuse");
       Shader visorShader = Shader.Find("Transparent/Diffuse");
 
-      Texture2D[] headNormalMaps = { null, null };
-      Texture2D ivaVisorTexture = null;
-      Texture2D evaVisorTexture = null;
-
-      mappedTextures.TryGetValue("kerbalHeadNRM", out headNormalMaps[0]);
-      mappedTextures.TryGetValue("kerbalGirl_06_BaseColorNRM", out headNormalMaps[1]);
-      mappedTextures.TryGetValue("kerbalVisor", out ivaVisorTexture);
-      mappedTextures.TryGetValue("EVAvisor", out evaVisorTexture);
+      mappedTextures.TryGetValue("kerbalHeadNRM", out Texture2D maleHeadNormalMap);
+      mappedTextures.TryGetValue("kerbalGirl_06_BaseColorNRM", out Texture2D femaleHeadNormalMap);
+      mappedTextures.TryGetValue("kerbalVisor", out Texture2D ivaVisorTexture);
+      mappedTextures.TryGetValue("EVAvisor", out Texture2D evaVisorTexture);
 
       // Shaders between male and female models are inconsistent, female models are missing normal maps and specular
       // lighting. So, we copy shaders from male materials to respective female materials.
@@ -193,6 +200,17 @@ namespace TextureReplacer
       Kerbal femaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
       Part maleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
       Part femaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
+
+      if (logKerbalHierarchy) {
+        log.Print("Male IVA Hierarchy");
+        Util.LogDownHierarchy(maleIva.transform);
+        log.Print("Male EVA Hierarchy");
+        Util.LogDownHierarchy(maleEva.transform);
+        log.Print("Feale IVA Hierarchy");
+        Util.LogDownHierarchy(femaleIva.transform);
+        log.Print("Feale EVA Hierarchy");
+        Util.LogDownHierarchy(femaleEva.transform);
+      }
 
       SkinnedMeshRenderer[][] maleMeshes = {
         maleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
@@ -221,8 +239,8 @@ namespace TextureReplacer
               smr.sharedMaterial.shader = headShader;
 
               // Set normal map on default head if available.
-              if (headNormalMaps[0] != null) {
-                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, headNormalMaps[0]);
+              if (maleHeadNormalMap != null) {
+                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, maleHeadNormalMap);
               }
 
               headMaterial = smr.sharedMaterial;
@@ -264,8 +282,8 @@ namespace TextureReplacer
             case "headMesh":
               smr.sharedMaterial.shader = headShader;
 
-              if (headNormalMaps[1] != null) {
-                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, headNormalMaps[1]);
+              if (femaleHeadNormalMap != null) {
+                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, femaleHeadNormalMap);
               }
               break;
 
@@ -307,7 +325,7 @@ namespace TextureReplacer
         mappedTextures.Remove(HudNavball);
 
         if (hudNavBallTexture.mipmapCount != 1) {
-          Util.Log("HUDNavBall texture should not have mipmaps!");
+          log.Print("HUDNavBall texture should not have mipmaps!");
         }
       }
 
@@ -315,7 +333,7 @@ namespace TextureReplacer
         mappedTextures.Remove(IvaNavball);
 
         if (ivaNavBallTexture.mipmapCount != 1) {
-          Util.Log("IVANavBall texture should not have mipmaps!");
+          log.Print("IVANavBall texture should not have mipmaps!");
         }
       }
     }

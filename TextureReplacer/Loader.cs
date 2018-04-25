@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2017 Davorin Učakar
+ * Copyright © 2013-2018 Davorin Učakar
  * Copyright © 2013 Ryan Bray
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -36,6 +36,8 @@ namespace TextureReplacer
 
     // Instance.
     public static Loader Instance { get; private set; }
+
+    static readonly Log log = new Log(nameof(Loader));
 
     // List of substrings for paths where mipmap generating is enabled.
     readonly List<Regex> generateMipmapsPaths = new List<Regex> {
@@ -98,15 +100,15 @@ namespace TextureReplacer
       if (isATMDetected) {
         if (isCompressionEnabled == null) {
           isCompressionEnabled = false;
-          Util.Log("Detected Active Texture Management, disabling texture compression.");
+          log.Print("Detected Active Texture Management, disabling texture compression.");
         }
         if (isMipmapGenEnabled == null) {
           isMipmapGenEnabled = false;
-          Util.Log("Detected Active Texture Management, disabling mipmap generation.");
+          log.Print("Detected Active Texture Management, disabling mipmap generation.");
         }
         if (isUnloadingEnabled == null) {
           isUnloadingEnabled = false;
-          Util.Log("Detected Active Texture Management, disabling texture unloading.");
+          log.Print("Detected Active Texture Management, disabling texture unloading.");
         }
       } else {
         isCompressionEnabled = isCompressionEnabled ?? true;
@@ -177,9 +179,7 @@ namespace TextureReplacer
           texture.SetPixels32(pixels32);
           texture.Apply(true, false);
 
-          if (quality != QualitySettings.masterTextureLimit) {
-            QualitySettings.masterTextureLimit = quality;
-          }
+          QualitySettings.masterTextureLimit = quality;
 
           hasGenMipmaps = true;
         }
@@ -194,7 +194,7 @@ namespace TextureReplacer
         }
 
         if (hasGenMipmaps || hasCompressed) {
-          Util.Log("{0} {1} [{2}x{3} {4} -> {5}]",
+          log.Print("{0} {1} [{2}x{3} {4} -> {5}]",
             hasGenMipmaps && hasCompressed ? "Generated mipmaps & compressed"
             : hasGenMipmaps ? "Generated mipmaps for"
             : "Compressed",
@@ -232,7 +232,7 @@ namespace TextureReplacer
           texture.Apply(false, true);
           texInfo.isReadable = false;
 
-          Util.Log("Unloaded {0}", texture.name);
+          log.Print("Unloaded {0}", texture.name);
         }
       }
 
@@ -242,7 +242,7 @@ namespace TextureReplacer
       keepLoadedPaths.TrimExcess();
 
       if (memorySpared > 0) {
-        Util.Log("Texture unloading freed approximately {0:0.0} MiB = {1:0.0} MB of system RAM",
+        log.Print("Texture unloading freed approximately {0:0.0} MiB = {1:0.0} MB of system RAM",
           memorySpared / 1024.0 / 1024.0,
           memorySpared / 1000.0 / 1000.0);
       }

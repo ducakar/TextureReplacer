@@ -20,21 +20,25 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using UnityEngine;
+
 namespace TextureReplacer
 {
-  [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER)]
-  public class TRScenario : ScenarioModule
+  class Log
   {
-    public override void OnLoad(ConfigNode node)
+    readonly string header;
+
+    public Log(string className)
     {
-      Reflections.Instance.OnLoadScenario(node);
-      Personaliser.Instance.OnLoadScenario(node);
+      header = "[TR." + className + "] ";
     }
 
-    public override void OnSave(ConfigNode node)
+    /**
+     * Print a log entry for TextureReplacer. `string.Format()`-style formatting is supported.
+     */
+    public void Print(string s, params object[] args)
     {
-      Reflections.Instance.OnSaveScenario(node);
-      Personaliser.Instance.OoSaveScenario(node);
+      Debug.Log(header + string.Format(s, args));
     }
   }
 }

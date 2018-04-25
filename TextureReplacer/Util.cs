@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2017 Davorin Učakar
+ * Copyright © 2013-2018 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,11 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-//#define TR_LOG_HIERARCHY
-
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -35,6 +32,7 @@ namespace TextureReplacer
     static readonly char[] ConfigDelimiters = { ' ', '\t', ',' };
 
     public const string Directory = "TextureReplacer/";
+    public static readonly int MainTexProperty = Shader.PropertyToID("_MainTex");
     public static readonly int BumpMapProperty = Shader.PropertyToID("_BumpMap");
     public static readonly int CubeProperty = Shader.PropertyToID("_Cube");
     public static readonly int ReflectColorProperty = Shader.PropertyToID("_ReflectColor");
@@ -56,35 +54,23 @@ namespace TextureReplacer
       return value.Split(ConfigDelimiters, StringSplitOptions.RemoveEmptyEntries);
     }
 
-    /**
-     * Print a log entry for TextureReplacer. `String.Format()`-style formatting is supported.
-     */
-    public static void Log(string s, params object[] args)
-    {
-      Type callerClass = new StackFrame(1).GetMethod().DeclaringType;
-      UnityEngine.Debug.Log("[TR." + callerClass.Name + "] " + String.Format(s, args));
-    }
-
     public static void Parse(string name, ref bool variable)
     {
-      bool value;
-      if (bool.TryParse(name, out value)) {
+      if (bool.TryParse(name, out bool value)) {
         variable = value;
       }
     }
 
     public static void Parse(string name, ref int variable)
     {
-      int value;
-      if (int.TryParse(name, out value)) {
+      if (int.TryParse(name, out int value)) {
         variable = value;
       }
     }
 
     public static void Parse(string name, ref double variable)
     {
-      double value;
-      if (double.TryParse(name, out value)) {
+      if (double.TryParse(name, out double value)) {
         variable = value;
       }
     }
@@ -156,11 +142,10 @@ namespace TextureReplacer
       }
     }
 
-#if TR_LOG_HIERARCHY
     /**
      * Print hierarchy under a fransform.
      */
-    public static void LogDownHierarchy(Transform tf, int indent)
+    public static void LogDownHierarchy(Transform tf, int indent = 0)
     {
       string sIndent = "";
       for (int i = 0; i < indent; ++i) {
@@ -168,16 +153,15 @@ namespace TextureReplacer
       }
 
       if (tf.gameObject != null) {
-        UnityEngine.Debug.Log(sIndent + "- " + tf.gameObject.name + ": " + tf.gameObject.GetType());
+        Debug.Log(sIndent + "- " + tf.gameObject.name + ": " + tf.gameObject.GetType());
       }
 
       foreach (Component c in tf.GetComponents<Component>()) {
-        UnityEngine.Debug.Log(sIndent + " * " + c);
+        Debug.Log(sIndent + " * " + c);
 
-        Renderer r = c as Renderer;
-        if (r != null) {
-          UnityEngine.Debug.Log(sIndent + "   shader:  " + r.material.shader);
-          UnityEngine.Debug.Log(sIndent + "   texture: " + r.material.mainTexture);
+        if (c is Renderer r) {
+          Debug.Log(sIndent + "   shader:  " + r.material.shader);
+          Debug.Log(sIndent + "   texture: " + r.material.mainTexture);
         }
       }
 
@@ -193,19 +177,17 @@ namespace TextureReplacer
     {
       for (; tf != null; tf = tf.parent) {
         if (tf.gameObject != null) {
-          UnityEngine.Debug.Log("+ " + tf.gameObject.name + ": " + tf.gameObject.GetType());
+          Debug.Log("+ " + tf.gameObject.name + ": " + tf.gameObject.GetType());
         }
         foreach (Component c in tf.GetComponents<Component>()) {
-          UnityEngine.Debug.Log(" * " + c);
+          Debug.Log(" * " + c);
 
-          Renderer r = c as Renderer;
-          if (r != null) {
-            UnityEngine.Debug.Log("   shader:  " + r.material.shader);
-            UnityEngine.Debug.Log("   texture: " + r.material.mainTexture);
+          if (c is Renderer r) {
+            Debug.Log("   shader:  " + r.material.shader);
+            Debug.Log("   texture: " + r.material.mainTexture);
           }
         }
       }
     }
-#endif
   }
 }

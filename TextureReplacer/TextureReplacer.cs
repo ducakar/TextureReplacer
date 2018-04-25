@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2017 Davorin Učakar
+ * Copyright © 2013-2018 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,9 +32,11 @@ namespace TextureReplacer
 
     public static bool IsLoaded { get; private set; }
 
+    static readonly Log log = new Log(nameof(TextureReplacer));
+
     public void Start()
     {
-      Util.Log("Started, Version {0}", Assembly.GetExecutingAssembly().GetName().Version);
+      log.Print("Started, Version {0}", Assembly.GetExecutingAssembly().GetName().Version);
 
       DontDestroyOnLoad(this);
 

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2017 Davorin Učakar
+ * Copyright © 2013-2018 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -32,6 +32,7 @@ namespace TextureReplacer
   {
     const int WindowId = 107056;
     const string AppIconPath = Util.Directory + "Plugins/appIcon";
+    static readonly Log log = new Log(nameof(TRGui));
     static readonly string[] ReflectionTypes = Enum.GetNames(typeof(Reflections.Type));
     static readonly Color SelectedColour = new Color(0.7f, 0.9f, 1.0f);
     static readonly Color ClassColour = new Color(1.0f, 0.8f, 1.0f);
@@ -348,7 +349,7 @@ namespace TextureReplacer
 
         appIcon = GameDatabase.Instance.GetTexture(AppIconPath, false);
         if (appIcon == null) {
-          Util.Log("Application icon missing: {0}", AppIconPath);
+          log.Print("Application icon missing: {0}", AppIconPath);
         }
 
         GameEvents.onGUIApplicationLauncherReady.Add(AddAppButton);

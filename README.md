@@ -185,17 +185,17 @@ of heads and suits is based on Kerbals' names, which ensures the same head/suit
 is always assigned to a given Kerbal. Additionally, special per-class suit can
 be set for each class.
 
-Head textures reside inside `Heads/` directory, each in its own subdirectory:
+Head textures reside inside `Skins/` directory, each in its own subdirectory:
 
     GameData/TextureReplacer/
-      Heads/[<subDir>/]<head>/kerbalHead     // Head texture
-      Heads/[<subDir>/]<head>/kerbalHeadNRM  // Normal map (optional)
+      Skins/[<subDir>/]<skin>/kerbalHead     // Head texture
+      Skins/[<subDir>/]<skin>/kerbalHeadNRM  // Normal map (optional)
 
 for males and
 
     GameData/TextureReplacer/
-      Heads/[<subDir>/]<head>/kerbalGirl_06_BaseColor     // Head texture
-      Heads/[<subDir>/]<head>/kerbalGirl_06_BaseColorNRM  // Normal map (optional)
+      Skins/[<subDir>/]<skin>/kerbalGirl_06_BaseColor     // Head texture
+      Skins/[<subDir>/]<skin>/kerbalGirl_06_BaseColorNRM  // Normal map (optional)
 
 for females.
 
@@ -288,7 +288,6 @@ Notes
 Known Issues
 ------------
 
-* Nav ball texture replacmeent does not work.
 * Reflections do not work.
 * Atmospheric skybox is not reflected.
 * Reflections disable part highlighting.
@@ -300,13 +299,21 @@ Known Issues
 Change Log
 ----------
 
+* 3.1.0
+    - renamed `Heads` directory to `Skins`
+    - fixed nav ball texture replacement
+    - new `logKerbalHierarchy` option to dump structure of Kerbal models to log
+    - README & copyright updates
 * 3.0.0
-    - heads now reside in Heads/<name>/<texture>, named as stock textures
+    - heads now reside in `Heads/<name>/<texture>`, named as stock textures
     - female heads are detected from file names rather than from config files
     - hide parachute pack when in IVA suit
     - big code refactorisation and cleanup
     - disabled visor reflections and nav ball replacement since both are broken
       due to changes in KSP (to be fixed)
+* 2.4.13
+    - fixed for 1.1 thanks to RangeMachine
+    - disabled visor reflections because visor shader is broken
 * 2.4.12
     - removed / replaced Kerbal Stuff links
     - possibly fixed a reflections-related crash
@@ -709,7 +716,7 @@ Change Log
 Licence
 -------
 
-Copyright © 2013-2017 Davorin Učakar
+Copyright © 2013-2018 Davorin Učakar
 Copyright © 2016 Pavel Alekseevich
 Copyright © 2013 Ryan Bray
 

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2013-2017 Davorin Učakar
+ * Copyright © 2013-2018 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -29,8 +29,6 @@ namespace TextureReplacer
 {
   public class TRReflection : PartModule
   {
-    Reflections.Script script;
-
     [KSPField(isPersistant = false)]
     public string shader = "";
     [KSPField(isPersistant = false)]
@@ -45,6 +43,10 @@ namespace TextureReplacer
     public string ReflectionColor = "";
     [KSPField(isPersistant = false)]
     public string MeshesToChange = "all";
+
+    static readonly Log log = new Log(nameof(TRReflection));
+
+    Reflections.Script script;
 
     public override void OnStart(StartState state)
     {
@@ -71,7 +73,7 @@ namespace TextureReplacer
         script = new Reflections.Script(part, updateInterval);
       }
       if (reflections.LogReflectiveMeshes) {
-        Util.Log("Part \"{0}\"", part.name);
+        log.Print("Part \"{0}\"", part.name);
       }
 
       bool success = false;
@@ -84,7 +86,7 @@ namespace TextureReplacer
 
         Material material = renderer.material;
         if (reflections.LogReflectiveMeshes) {
-          Util.Log("+ {0} [{1}]", meshFilter.name, material.shader.name);
+          log.Print("+ {0} [{1}]", meshFilter.name, material.shader.name);
         }
         if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name)) {
           success |= script == null
@@ -98,7 +100,7 @@ namespace TextureReplacer
           script.Destroy();
           script = null;
         }
-        Util.Log("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
+        log.Print("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
       }
     }
 
