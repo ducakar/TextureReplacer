@@ -21,9 +21,7 @@
  */
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -140,7 +138,7 @@ namespace TextureReplacer
         // Scene.
         camera.transform.position = isEva ? transform.position + 0.4f * transform.up : transform.position;
         camera.farClipPlane = 60000.0f;
-        camera.cullingMask = (1 << 0) | (1 << 1) | (1 << 5) | (1 << 15);
+        camera.cullingMask = (1 << 0) | (1 << 1) | (1 << 5) | (1 << 15) | (1 << 17);
         camera.RenderToCubemap(envMap, faceMask);
 
         // Restore mesh visibility.
@@ -201,6 +199,7 @@ namespace TextureReplacer
     //  9 - sky/atmosphere
     // 10 - scaled space bodies
     // 15 - buildings, terrain
+    // 17 - kerbals
     // 18 - skybox
     // 23 - sun
     static readonly float[] CullDistances = {
@@ -218,7 +217,7 @@ namespace TextureReplacer
     // Reflection type.
     public Type ReflectionType { get; private set; }
     // Real reflection resolution.
-    static int reflectionResolution = 128;
+    static int reflectionResolution = 256;
     // Interval in frames for updating environment map faces.
     static int reflectionInterval = 2;
     // Reflection colour.

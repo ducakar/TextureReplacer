@@ -289,7 +289,7 @@ Notes
 Known Issues
 ------------
 
-* Reflections do not work.
+* Visor reflections do not work.
 * Atmospheric skybox is not reflected.
 * Reflections disable part highlighting.
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
@@ -302,8 +302,9 @@ Change Log
 
 * 3.1
     - renamed `Heads` directory to `Skins`
-    - fixed nav ball texture replacement
     - new `logKerbalHierarchy` option to dump structure of Kerbal models to log
+    - fixed nav ball texture replacement
+    - fixed kerbals missing in reflections
     - README & copyright updates
 * 3.0
     - heads now reside in `Heads/<name>/<texture>`, named as stock textures
