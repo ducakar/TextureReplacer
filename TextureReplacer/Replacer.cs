@@ -110,12 +110,10 @@ namespace TextureReplacer
      */
     void UpdateNavball(Vessel vessel)
     {
-      // TODO Update NavBall texture replacement for KSP 1.3.
-
       if (hudNavBallTexture != null) {
         NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
         if (hudNavball != null) {
-          hudNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = hudNavBallTexture;
+          hudNavball.navBall.GetComponent<Renderer>().sharedMaterial.SetTexture("_MainTexture", hudNavBallTexture);
         }
       }
 

@@ -96,10 +96,9 @@ namespace TextureReplacer
      */
     public bool IsAtmBreathable()
     {
-      bool value = !HighLogic.LoadedSceneIsFlight ||
-                   (FlightGlobals.getStaticPressure() >= atmSuitPressure &&
-                   atmSuitBodies.Contains(FlightGlobals.currentMainBody.bodyName));
-      return value;
+      return !HighLogic.LoadedSceneIsFlight ||
+             (FlightGlobals.getStaticPressure() >= atmSuitPressure &&
+             atmSuitBodies.Contains(FlightGlobals.currentMainBody.bodyName));
     }
 
     Suit GetClassSuit(ProtoCrewMember kerbal)

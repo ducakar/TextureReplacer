@@ -4,8 +4,9 @@ TextureReplacer
 ===============
 
 * [Forum thread](http://forum.kerbalspaceprogram.com/index.php?/topic/96851-/)
-* [GitHub page](http://github.com/ducakar/TextureReplacer)
-* [CurseForge page](http://kerbal.curseforge.com/plugins/220217)
+* [GitHub page](https://github.com/ducakar/TextureReplacer)
+* [CurseForge page](https://kerbal.curseforge.com/projects/texturereplacer)
+* [SpaceDock page](https://spacedock.info/mod/1824/TextureReplacer)
 
 TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
@@ -299,12 +300,12 @@ Known Issues
 Change Log
 ----------
 
-* 3.1.0
+* 3.1
     - renamed `Heads` directory to `Skins`
     - fixed nav ball texture replacement
     - new `logKerbalHierarchy` option to dump structure of Kerbal models to log
     - README & copyright updates
-* 3.0.0
+* 3.0
     - heads now reside in `Heads/<name>/<texture>`, named as stock textures
     - female heads are detected from file names rather than from config files
     - hide parachute pack when in IVA suit
@@ -716,24 +717,24 @@ Change Log
 Licence
 -------
 
-Copyright © 2013-2018 Davorin Učakar
-Copyright © 2016 Pavel Alekseevich
-Copyright © 2013 Ryan Bray
+    Copyright © 2013-2018 Davorin Učakar
+    Copyright © 2016 Pavel Alekseevich
+    Copyright © 2013 Ryan Bray
 
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the "Software"),
-to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following conditions:
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
