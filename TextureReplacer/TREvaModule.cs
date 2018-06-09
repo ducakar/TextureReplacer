@@ -22,12 +22,12 @@
 
 namespace TextureReplacer
 {
-  /**
-   * This class takes cares of EVA Kerbal to assign appropriate suit on creation, watch for atmospehere charges (to put
-   * on spacesuit of it leaves breathable atmosphere) and enables "Toggle EVA Suit" action.
-   *
-   * It is added to EVA kerbal by Personaliser so it doesn't need to be public.
-   */
+  /// <summary>
+  /// This class takes cares of EVA Kerbal to assign appropriate suit on creation, watch for atmospehere charges (to put
+  /// on spacesuit of it leaves breathable atmosphere) and enables "Toggle EVA Suit" action.
+  ///
+  /// It is added to EVA kerbal by Personaliser so it doesn't need to be public.
+  /// </summary>
   class TREvaModule : PartModule
   {
     Reflections.Script reflectionScript;

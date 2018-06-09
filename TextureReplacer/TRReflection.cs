@@ -69,12 +69,11 @@ namespace TextureReplacer
       if (reflections.ReflectionType == Reflections.Type.None) {
         return;
       }
-      if (reflections.ReflectionType == Reflections.Type.Real) {
-        script = new Reflections.Script(part, updateInterval);
-      }
       if (reflections.LogReflectiveMeshes) {
         log.Print("Part \"{0}\"", part.name);
       }
+
+      script = new Reflections.Script(part, updateInterval);
 
       bool success = false;
 
@@ -89,9 +88,7 @@ namespace TextureReplacer
           log.Print("+ {0} [{1}]", meshFilter.name, material.shader.name);
         }
         if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name)) {
-          success |= script == null
-            ? reflections.ApplyStatic(material, reflectiveShader, reflectionColour)
-            : script.Apply(material, reflectiveShader, reflectionColour);
+          success |= script.Apply(material, reflectiveShader, reflectionColour);
         }
       }
 

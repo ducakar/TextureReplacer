@@ -300,6 +300,10 @@ Known Issues
 Change Log
 ----------
 
+* 3.2
+    - remove static reflections
+    - remove support for old, non-existent mods from configuration
+    - fix visor texture personalisation
 * 3.1
     - renamed `Heads` directory to `Skins`
     - new `logKerbalHierarchy` option to dump structure of Kerbal models to log

@@ -41,12 +41,10 @@ namespace TextureReplacer
 
     // List of substrings for paths where mipmap generating is enabled.
     readonly List<Regex> generateMipmapsPaths = new List<Regex> {
-      new Regex("^" + Util.Directory + "(Default|Heads|Suits)/")
+      new Regex("^" + Util.Directory + "(Default|Skins|Suits)/")
     };
     // List of substrings for paths where textures shouldn't be unloaded.
-    readonly List<Regex> keepLoadedPaths = new List<Regex> {
-      new Regex("^" + Reflections.EnvMapDirectory)
-    };
+    readonly List<Regex> keepLoadedPaths = new List<Regex>();
     // Number of loaded textures it the previous update.
     int lastTextureCount;
     // Features.
@@ -54,11 +52,11 @@ namespace TextureReplacer
     bool? isMipmapGenEnabled;
     bool? isUnloadingEnabled;
 
-    /**
-     * Estimate texture size in system RAM.
-     *
-     * This is only a rough estimate. It doesn't bother with details like the padding bytes.
-     */
+    /// <summary>
+    /// Estimate texture size in system RAM.
+    //
+    /// This is only a rough estimate.It doesn't bother with details like the padding bytes.
+    /// </summary>
     static int TextureSize(Texture2D texture)
     {
       int nPixels = texture.width * texture.height;
@@ -75,9 +73,9 @@ namespace TextureReplacer
       Instance = null;
     }
 
-    /**
-     * Read configuration and perform pre-load initialisation.
-     */
+    /// <summary>
+    /// Read configuration and perform pre-load initialisation.
+    /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
       Util.Parse(rootNode.GetValue("isCompressionEnabled"), ref isCompressionEnabled);
@@ -87,9 +85,9 @@ namespace TextureReplacer
       Util.AddRELists(rootNode.GetValues("keepLoaded"), keepLoadedPaths);
     }
 
-    /**
-     * This must be run only once after all configuration files are read.
-     */
+    /// <summary>
+    /// This must be run only once after all configuration files are read.
+    /// </summary>
     public void Configure()
     {
       // Prevent conflicts with TextureCompressor. If it is found among loaded plugins, texture
@@ -117,11 +115,11 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Texture compression & mipmap generation pass.
-     *
-     * This is run on each game update until game database is loaded.
-     */
+    /// <summary>
+    /// Texture compression amp mipmap generation pass.
+    ///
+    /// This is run on each game update until game database is loaded.
+    /// </summary>
     public void ProcessTextures()
     {
       List<GameDatabase.TextureInfo> texInfos = GameDatabase.Instance.databaseTexture;
@@ -205,9 +203,9 @@ namespace TextureReplacer
       lastTextureCount = texInfos.Count;
     }
 
-    /**
-     * Unload textures.
-     */
+    /// <summary>
+    /// Unload textures.
+    /// </summary>
     public void Initialise()
     {
       List<GameDatabase.TextureInfo> texInfos = GameDatabase.Instance.databaseTexture;

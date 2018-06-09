@@ -32,7 +32,6 @@ namespace TextureReplacer
     public enum Type
     {
       None,
-      Static,
       Real
     }
 
@@ -180,7 +179,6 @@ namespace TextureReplacer
       }
     }
 
-    public const string EnvMapDirectory = Util.Directory + "EnvMap/";
     static readonly Log log = new Log(nameof(Reflections));
     // Reflective shader map.
     static readonly string[,] ShaderNameMap = {
@@ -209,13 +207,12 @@ namespace TextureReplacer
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
     };
     static readonly Shader TransparentSpecularShader = Shader.Find("Transparent/Specular");
+
     readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflection camera.
     static Camera camera;
-    // Environment map textures.
-    Cubemap staticEnvMap;
     // Reflection type.
-    public Type ReflectionType { get; private set; }
+    public Type ReflectionType { get; set; }
     // Real reflection resolution.
     static int reflectionResolution = 256;
     // Interval in frames for updating environment map faces.
@@ -252,56 +249,14 @@ namespace TextureReplacer
       return newShader;
     }
 
-    public bool ApplyStatic(Material material, Shader shader, Color reflectionColour)
-    {
-      Shader reflectiveShader = shader ?? ToReflective(material.shader);
-
-      if (reflectiveShader != null) {
-        material.shader = reflectiveShader;
-        material.SetTexture(Util.CubeProperty, staticEnvMap);
-        material.SetColor(Util.ReflectColorProperty, reflectionColour);
-        return true;
-      }
-      return false;
-    }
-
-    public void SetReflectionType(Type type)
-    {
-      if (type == Type.Static && staticEnvMap == null) {
-        type = Type.None;
-      }
-
-      ReflectionType = type;
-
-      Part[] evas = {
-        PartLoader.getPartInfoByName("kerbalEVA").partPrefab,
-        PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab
-      };
-
-      for (int i = 0; i < 2; ++i) {
-        // Set visor texture and reflection on proto-EVA Kerbal.
-        SkinnedMeshRenderer visor = evas[i].GetComponentsInChildren<SkinnedMeshRenderer>(true)
-          .First(m => m.name == "visor");
-
-        Material material = visor.sharedMaterial;
-        bool enableStatic = IsVisorReflectionEnabled && ReflectionType == Type.Static;
-
-        // We apply visor shader for real reflections later, through TREvaModule since we don't
-        // want corrupted reflections in the main menu.
-        material.shader = enableStatic ? visorMaterial.shader : TransparentSpecularShader;
-        material.SetTexture(Util.CubeProperty, enableStatic ? staticEnvMap : null);
-        material.SetColor(Util.ReflectColorProperty, visorReflectionColour);
-      }
-    }
-
     public static void Recreate()
     {
       Instance = new Reflections();
     }
 
-    /**
-     * Read configuration and perform pre-load initialisation.
-     */
+    /// <summary>
+    /// Read configuration and perform pre-load initialisation.
+    /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
       Type reflectionType = Type.Real;
@@ -320,80 +275,11 @@ namespace TextureReplacer
       LogReflectiveMeshes = logReflectiveMeshes;
     }
 
-    /**
-     * Post-load initialisation.
-     */
+    /// <summary>
+    /// Post-load initialisation.
+    /// </summary>
     public void Load()
     {
-      Texture2D[] envMapFaces = new Texture2D[6];
-
-      foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture) {
-        Texture2D texture = texInfo.texture;
-        if (texture == null || !texture.name.StartsWith(EnvMapDirectory, System.StringComparison.Ordinal)) {
-          continue;
-        }
-
-        string originalName = texture.name.Substring(EnvMapDirectory.Length);
-        switch (originalName) {
-          case "PositiveX":
-            envMapFaces[0] = texture;
-            break;
-          case "NegativeX":
-            envMapFaces[1] = texture;
-            break;
-          case "PositiveY":
-            envMapFaces[2] = texture;
-            break;
-          case "NegativeY":
-            envMapFaces[3] = texture;
-            break;
-          case "PositiveZ":
-            envMapFaces[4] = texture;
-            break;
-          case "NegativeZ":
-            envMapFaces[5] = texture;
-            break;
-          default:
-            log.Print("Invalid enironment map texture name {0}", texture.name);
-            break;
-        }
-      }
-
-      // Generate generic reflection cube map texture.
-      if (envMapFaces.Contains(null)) {
-        log.Print("Some environment map faces are missing. Static reflections disabled.");
-      } else {
-        int envMapSize = envMapFaces[0].width;
-
-        if (envMapFaces.Any(t => t.width != envMapSize || t.height != envMapSize) ||
-            envMapFaces.Any(t => !Util.IsPow2(t.width) || !Util.IsPow2(t.height))) {
-          log.Print("Invalid environment map faces. Static reflections disabled.");
-        } else {
-          try {
-            staticEnvMap = new Cubemap(envMapSize, TextureFormat.RGB24, true) {
-              hideFlags = HideFlags.HideAndDontSave,
-              wrapMode = TextureWrapMode.Clamp
-            };
-            staticEnvMap.SetPixels(envMapFaces[0].GetPixels(), CubemapFace.PositiveX);
-            staticEnvMap.SetPixels(envMapFaces[1].GetPixels(), CubemapFace.NegativeX);
-            staticEnvMap.SetPixels(envMapFaces[2].GetPixels(), CubemapFace.PositiveY);
-            staticEnvMap.SetPixels(envMapFaces[3].GetPixels(), CubemapFace.NegativeY);
-            staticEnvMap.SetPixels(envMapFaces[4].GetPixels(), CubemapFace.PositiveZ);
-            staticEnvMap.SetPixels(envMapFaces[5].GetPixels(), CubemapFace.NegativeZ);
-            staticEnvMap.Apply(true, false);
-
-            log.Print("Static environment map cube texture generated.");
-          } catch (UnityException) {
-            if (staticEnvMap != null) {
-              Object.DestroyImmediate(staticEnvMap);
-            }
-            staticEnvMap = null;
-
-            log.Print("Failed to set up static reflections. Textures not readable?");
-          }
-        }
-      }
-
       IsVisorReflectionEnabled = false;
       // TODO Fix the visor shader and move it to an asset file.
       //try {
@@ -421,15 +307,10 @@ namespace TextureReplacer
           shaderMap[original] = reflective;
         }
       }
-
-      SetReflectionType(ReflectionType);
     }
 
     public void Destroy()
     {
-      if (staticEnvMap != null) {
-        Object.DestroyImmediate(staticEnvMap);
-      }
       if (camera != null) {
         Object.DestroyImmediate(camera.gameObject);
       }
@@ -442,9 +323,7 @@ namespace TextureReplacer
     {
       Type type = ReflectionType;
       Util.Parse(node.GetValue("reflectionType"), ref type);
-
-      if (type != ReflectionType)
-        SetReflectionType(type);
+      ReflectionType = type;
     }
 
     public void OnSaveScenario(ConfigNode node)

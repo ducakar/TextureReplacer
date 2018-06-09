@@ -33,9 +33,9 @@ namespace TextureReplacer
       header = "[TR." + className + "] ";
     }
 
-    /**
-     * Print a log entry for TextureReplacer. `string.Format()`-style formatting is supported.
-     */
+    /// <summary>
+    /// Print a log entry for TextureReplacer. `string.Format()`-style formatting is supported.
+    /// </summary>
     public void Print(string s, params object[] args)
     {
       Debug.Log(header + string.Format(s, args));

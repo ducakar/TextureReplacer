@@ -27,10 +27,10 @@ namespace TextureReplacer
   [KSPAddon(KSPAddon.Startup.EveryScene, false)]
   public class TRActivator : MonoBehaviour
   {
-    /**
-     * Reflection updater. We don't want this to run every frame unless real reflections are enabled so it's wrapped
-     * inside another component and enabled only when needed.
-     */
+    /// <summary>
+    /// Reflection updater. We don't want this to run every frame unless real reflections are enabled so it's wrapped
+    /// inside another component and enabled only when needed.
+    /// </summary>
     public class TRReflectionUpdater : MonoBehaviour
     {
       public void Update()

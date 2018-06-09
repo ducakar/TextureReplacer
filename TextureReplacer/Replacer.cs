@@ -51,9 +51,9 @@ namespace TextureReplacer
     // Instance.
     public static Replacer Instance { get; private set; }
 
-    /**
-     * General texture replacement step.
-     */
+    /// <summary>
+    /// General texture replacement step.
+    /// </summary>
     void ReplaceTextures()
     {
       foreach (Material material in Resources.FindObjectsOfTypeAll<Material>()) {
@@ -105,9 +105,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Replace NavBalls' textures.
-     */
+    /// <summary>
+    /// Replace NavBalls' textures.
+    /// </summary>
     void UpdateNavball(Vessel vessel)
     {
       if (hudNavBallTexture != null) {
@@ -130,9 +130,9 @@ namespace TextureReplacer
       Instance = new Replacer();
     }
 
-    /**
-     * Read configuration and perform pre-load initialisation.
-     */
+    /// <summary>
+    /// Read configuration and perform pre-load initialisation.
+    /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
       Util.AddLists(rootNode.GetValues("paths"), paths);
@@ -141,9 +141,9 @@ namespace TextureReplacer
       Util.Parse(rootNode.GetValue("logKerbalHierarchy"), ref logKerbalHierarchy);
     }
 
-    /**
-     * Post-load initialisation.
-     */
+    /// <summary>
+    /// Post-load initialisation.
+    /// </summary>
     public void Load()
     {
       foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>()) {

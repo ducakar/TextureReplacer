@@ -38,17 +38,17 @@ namespace TextureReplacer
     public static readonly int ReflectColorProperty = Shader.PropertyToID("_ReflectColor");
     public static readonly System.Random Random = new System.Random();
 
-    /**
-     * True iff `i` is a power of two.
-     */
+    /// <summary>
+    /// True iff `i` is a power of two.
+    /// </summary>
     public static bool IsPow2(int i)
     {
       return i > 0 && (i & (i - 1)) == 0;
     }
 
-    /**
-     * Split a space- and/or comma-separated configuration file value into its tokens.
-     */
+    /// <summary>
+    /// Split a space- and/or comma-separated configuration file value into its tokens.
+    /// </summary>
     public static string[] SplitConfigValue(string value)
     {
       return value.Split(ConfigDelimiters, StringSplitOptions.RemoveEmptyEntries);
@@ -116,9 +116,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Add all space-or-comma-separated values from listInstances strings to jointList.
-     */
+    /// <summary>
+    /// Add all space-or-comma-separated values from listInstances strings to jointList.
+    /// </summary>
     public static void AddLists(string[] listInstances, ICollection<string> jointList)
     {
       foreach (string listInstance in listInstances) {
@@ -130,9 +130,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Add all space-or-comma-separated regex values from listInstances strings to jointList.
-     */
+    /// <summary>
+    /// Add all space-or-comma-separated regex values from listInstances strings to jointList.
+    /// </summary>
     public static void AddRELists(string[] listInstances, ICollection<Regex> jointList)
     {
       foreach (string listInstance in listInstances) {
@@ -142,9 +142,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Print hierarchy under a fransform.
-     */
+    /// <summary>
+    /// Print hierarchy under a fransform.
+    /// </summary>
     public static void LogDownHierarchy(Transform tf, int indent = 0)
     {
       string sIndent = "";
@@ -170,9 +170,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Print hierarchy from a transform up to the root.
-     */
+    /// <summary>
+    /// Print hierarchy from a transform up to the root.
+    /// </summary>
     public static void LogUpHierarchy(Transform tf)
     {
       for (; tf != null; tf = tf.parent) {

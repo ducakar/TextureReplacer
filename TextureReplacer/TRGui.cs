@@ -287,16 +287,11 @@ namespace TextureReplacer
       personaliser.IsAtmSuitEnabled = GUILayout.Toggle(personaliser.IsAtmSuitEnabled,
         "Spawn Kerbals in IVA suits when in breathable atmosphere");
 
-      Reflections.Type reflectionType = reflections.ReflectionType;
-
       GUILayout.BeginHorizontal();
       GUILayout.Label("Reflections", GUILayout.Width(120));
-      reflectionType = (Reflections.Type)GUILayout.SelectionGrid((int)reflectionType, ReflectionTypes, 3);
+      reflections.ReflectionType = (Reflections.Type)GUILayout
+        .SelectionGrid((int)reflections.ReflectionType, ReflectionTypes, ReflectionTypes.Length);
       GUILayout.EndHorizontal();
-
-      if (reflectionType != reflections.ReflectionType) {
-        reflections.SetReflectionType(reflectionType);
-      }
 
       GUILayout.EndVertical();
       GUI.DragWindow(new Rect(0, 0, Screen.width, 30));

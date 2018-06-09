@@ -83,17 +83,17 @@ namespace TextureReplacer
       set { isAtmSuitEnabled = value; }
     }
 
-    /**
-     * Whether a vessel is in a "safe" situation, so Kerbals don't need helmets (i.e. landed/splashed or in orbit).
-     */
+    /// <summary>
+    /// Whether a vessel is in a "safe" situation, so Kerbals don't need helmets (i.e. landed/splashed or in orbit).
+    /// </summary>
     static bool IsSituationSafe(Vessel vessel)
     {
       return vessel.situation != Vessel.Situations.FLYING && vessel.situation != Vessel.Situations.SUB_ORBITAL;
     }
 
-    /**
-     * Whether the atmosphere is breathable.
-     */
+    /// <summary>
+    /// Whether the atmosphere is breathable.
+    /// </summary>
     public bool IsAtmBreathable()
     {
       return !HighLogic.LoadedSceneIsFlight ||
@@ -159,9 +159,9 @@ namespace TextureReplacer
       return genderSuits[number % genderSuits.Count];
     }
 
-    /**
-     * Replace textures on a Kerbal model.
-     */
+    /// <summary>
+    /// Replace textures on a Kerbal model.
+    /// </summary>
     void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, Part cabin, bool needsSuit)
     {
       Appearance kerbalData = GetKerbalData(kerbal);
@@ -319,9 +319,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Personalise Kerbals in an internal space of a vessel. Used by IvaModule.
-     */
+    /// <summary>
+    /// Personalise Kerbals in an internal space of a vessel. Used by IvaModule.
+    /// </summary>
     public void PersonaliseIva(Kerbal kerbal)
     {
       bool needsSuit = !isHelmetRemovalEnabled || !IsSituationSafe(kerbal.InVessel);
@@ -329,10 +329,10 @@ namespace TextureReplacer
       PersonaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, needsSuit);
     }
 
-    /**
-     * Set external EVA/IVA suit. Fails and returns false iff trying to remove an EVA suit outside of breathable
-     * atmosphere. This function is used by EvaModule.
-     */
+    /// <summary>
+    /// Set external EVA/IVA suit. Fails and returns false iff trying to remove an EVA suit outside of breathable
+    /// atmosphere.This function is used by EvaModule.
+    /// </summary>
     public bool PersonaliseEva(Part evaPart, bool useEvaSuit)
     {
       bool isDesiredSuitValid = true;
@@ -376,9 +376,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Load per-game custom kerbals mapping.
-     */
+    /// <summary>
+    /// Load per-game custom kerbals mapping.
+    /// </summary>
     void LoadKerbalsMap(ConfigNode node)
     {
       node = node ?? customKerbalsNode;
@@ -421,9 +421,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Save per-game custom Kerbals mapping.
-     */
+    /// <summary>
+    /// Save per-game custom Kerbals mapping.
+    /// </summary>
     void SaveKerbals(ConfigNode node)
     {
       KerbalRoster roster = HighLogic.CurrentGame.CrewRoster;
@@ -444,9 +444,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Load suit mapping.
-     */
+    /// <summary>
+    /// Load suit mapping.
+    /// </summary>
     void LoadSuitMap(ConfigNode node, IDictionary<string, Suit> map, IDictionary<string, Suit> defaultMap)
     {
       if (node == null) {
@@ -474,9 +474,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Save suit mapping.
-     */
+    /// <summary>
+    /// Save suit mapping.
+    /// </summary>
     static void SaveSuitMap(Dictionary<string, Suit> map, ConfigNode node)
     {
       foreach (var entry in map) {
@@ -486,9 +486,9 @@ namespace TextureReplacer
       }
     }
 
-    /**
-     * Fill config for custom Kerbal skinss and suits.
-     */
+    /// <summary>
+    /// Fill config for custom Kerbal skins and suits.
+    /// </summary>
     void ReadKerbalsConfigs()
     {
       var excludedSkins = new List<string>();
@@ -557,9 +557,9 @@ namespace TextureReplacer
       Instance = new Personaliser();
     }
 
-    /**
-     * Read configuration and perform pre-load initialisation.
-     */
+    /// <summary>
+    /// Read configuration and perform pre-load initialisation.
+    /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
       Util.Parse(rootNode.GetValue("isHelmetRemovalEnabled"), ref isHelmetRemovalEnabled);
@@ -569,9 +569,9 @@ namespace TextureReplacer
       Util.Parse(rootNode.GetValue("forceLegacyFemales"), ref forceLegacyFemales);
     }
 
-    /**
-     * Post-load initialisation.
-     */
+    /// <summary>
+    /// Post-load initialisation.
+    /// </summary>
     public void Load()
     {
       var skinDirs = new Dictionary<string, int>();
@@ -654,6 +654,13 @@ namespace TextureReplacer
         }
       }
 
+      // Visor needs to be replaced every time, not only on the proto-Kerbal model, so the visor from the default suit
+      // must be set on all suits without a custom visor.
+      foreach (var suit in Suits) {
+        suit.Visor = suit.Visor ?? DefaultSuit.Visor;
+        suit.EvaVisor = suit.EvaVisor ?? DefaultSuit.EvaVisor;
+      }
+
       ReadKerbalsConfigs();
 
       // Initialise default Kerbal, which is only loaded when the main menu shows.
@@ -667,6 +674,10 @@ namespace TextureReplacer
             DefaultSuit.SetTexture(texture.name, texture);
           }
         }
+      }
+
+      foreach (var space in Resources.FindObjectsOfTypeAll<InternalSpace>()) {
+        Util.LogDownHierarchy(space.transform);
       }
 
       foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>()) {

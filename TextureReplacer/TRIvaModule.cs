@@ -24,12 +24,11 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  /**
-   * Component bound to internal models that triggers Kerbal texture personalisation when the
-   * internal model changes.
-   *
-   * It is added to IVA space by Personaliser so it doesn't need to be public.
-   */
+  /// <summary>
+  /// Component bound to internal models that triggers Kerbal texture personalisation when the internal model changes.
+  ///
+  /// It is added to IVA space by Personaliser so it doesn't need to be public.
+  /// </summary>
   class TRIvaModule : MonoBehaviour
   {
     public void Start()
