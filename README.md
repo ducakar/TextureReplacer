@@ -294,14 +294,14 @@ Known Issues
 * Reflections disable part highlighting.
 * Clouds from EVE are only reflected when on/near the ground or over 160 km.
 * Clouds from EVE Overhaul are not correctly reflected.
-* Cabin-specific IVA suits don't persist through scene switches while on EVA.
 
 
 Change Log
 ----------
 
 * 3.2
-    - remove static reflections
+    - removed static reflections
+    - removed cabin-specific suits
     - remove support for old, non-existent mods from configuration
     - fix visor texture personalisation
 * 3.1

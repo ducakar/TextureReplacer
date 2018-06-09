@@ -235,7 +235,6 @@ namespace TextureReplacer
             personaliser.ClassSuits[selectedClass] = personaliser.Suits[suitIndex];
           } else {
             appearance.Suit = personaliser.Suits[suitIndex];
-            appearance.CabinSuit = null;
           }
         }
         if (GUILayout.Button(">")) {
@@ -245,7 +244,6 @@ namespace TextureReplacer
             personaliser.ClassSuits[selectedClass] = personaliser.Suits[suitIndex];
           } else {
             appearance.Suit = personaliser.Suits[suitIndex];
-            appearance.CabinSuit = null;
           }
         }
 
@@ -260,7 +258,6 @@ namespace TextureReplacer
             personaliser.ClassSuits[selectedClass] = defaultSuit;
           } else {
             appearance.Suit = defaultSuit;
-            appearance.CabinSuit = null;
           }
         }
 
@@ -270,7 +267,6 @@ namespace TextureReplacer
             personaliser.ClassSuits[selectedClass] = null;
           } else {
             appearance.Suit = null;
-            appearance.CabinSuit = null;
           }
         }
 

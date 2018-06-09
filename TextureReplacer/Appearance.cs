@@ -32,6 +32,5 @@ namespace TextureReplacer
 
     public Skin Skin;
     public Suit Suit;
-    public Suit CabinSuit;
   }
 }

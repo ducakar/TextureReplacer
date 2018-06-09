@@ -45,8 +45,6 @@ namespace TextureReplacer
     // Backed-up personalised textures from main configuration files. These are used to initialise kerbals if a saved
     // game doesn't contain `TRScenario`.
     ConfigNode customKerbalsNode = new ConfigNode();
-    // Cabin-specific suits.
-    readonly Dictionary<string, Suit> cabinSuits = new Dictionary<string, Suit>();
     // Helmet removal.
     Mesh[] helmetMesh = { null, null };
     Mesh[] visorMesh = { null, null };
@@ -162,20 +160,15 @@ namespace TextureReplacer
     /// <summary>
     /// Replace textures on a Kerbal model.
     /// </summary>
-    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, Part cabin, bool needsSuit)
+    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, Part pod, bool needsSuit)
     {
       Appearance kerbalData = GetKerbalData(kerbal);
-      bool isEva = cabin == null;
+      bool isEva = pod == null;
 
       Skin skin = GetKerbalSkin(kerbal, kerbalData);
-      Suit suit = null;
-
-      if (isEva || !cabinSuits.TryGetValue(cabin.partInfo.name, out kerbalData.CabinSuit)) {
-        suit = GetKerbalSuit(kerbal, kerbalData);
-      }
+      Suit suit = GetKerbalSuit(kerbal, kerbalData);
 
       skin = skin == DefaultSkin[(int)kerbal.gender] ? null : skin;
-      suit = (isEva && needsSuit) || kerbalData.CabinSuit == null ? suit : kerbalData.CabinSuit;
       suit = suit == DefaultSuit ? null : suit;
 
       Transform model = isEva ? component.transform.Find("model01") : component.transform.Find("kbIVA@idle/model01");
@@ -517,11 +510,6 @@ namespace TextureReplacer
         ConfigNode classNode = file.config.GetNode("ClassSuits");
         if (classNode != null) {
           LoadSuitMap(classNode, DefaultClassSuits, null);
-        }
-
-        ConfigNode cabinNode = file.config.GetNode("CabinSuits");
-        if (cabinNode != null) {
-          LoadSuitMap(cabinNode, cabinSuits, null);
         }
       }
 
