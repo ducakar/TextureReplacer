@@ -104,52 +104,52 @@ namespace TextureReplacer
       return suit;
     }
 
-    public Appearance GetKerbalData(ProtoCrewMember kerbal)
+    public Appearance GetAppearance(ProtoCrewMember kerbal)
     {
-      if (!gameKerbals.TryGetValue(kerbal.name, out Appearance kerbalData)) {
-        kerbalData = new Appearance {
+      if (!gameKerbals.TryGetValue(kerbal.name, out Appearance appearance)) {
+        appearance = new Appearance {
           Hash = kerbal.name.GetHashCode(),
           RealGender = kerbal.gender
         };
-        gameKerbals.Add(kerbal.name, kerbalData);
+        gameKerbals.Add(kerbal.name, appearance);
       }
 
-      kerbal.gender = forceLegacyFemales ? Gender.Male : kerbalData.RealGender;
-      return kerbalData;
+      kerbal.gender = forceLegacyFemales ? Gender.Male : appearance.RealGender;
+      return appearance;
     }
 
-    public Skin GetKerbalSkin(ProtoCrewMember kerbal, Appearance kerbalData)
+    public Skin GetKerbalSkin(ProtoCrewMember kerbal, Appearance appearance)
     {
-      if (kerbalData.Skin != null) {
-        return kerbalData.Skin;
+      if (appearance.Skin != null) {
+        return appearance.Skin;
       }
 
-      List<Skin> genderSkins = kerbalSkins[(int)kerbalData.RealGender];
+      List<Skin> genderSkins = kerbalSkins[(int)appearance.RealGender];
       if (genderSkins.Count == 0) {
         return DefaultSkin[(int)kerbal.gender];
       }
 
       // Hash is multiplied with a large prime to increase randomisation, since hashes returned by `GetHashCode()` are
       // close together if strings only differ in the last (few) char(s).
-      int number = (kerbalData.Hash * 4099) & 0x7fffffff;
+      int number = (appearance.Hash * 4099) & 0x7fffffff;
       return genderSkins[number % genderSkins.Count];
     }
 
-    public Suit GetKerbalSuit(ProtoCrewMember kerbal, Appearance kerbalData)
+    public Suit GetKerbalSuit(ProtoCrewMember kerbal, Appearance appearance)
     {
-      Suit suit = kerbalData.Suit ?? GetClassSuit(kerbal);
+      Suit suit = appearance.Suit ?? GetClassSuit(kerbal);
       if (suit != null) {
         return suit;
       }
 
-      List<Suit> genderSuits = kerbalSuits[(int)kerbalData.RealGender];
+      List<Suit> genderSuits = kerbalSuits[(int)appearance.RealGender];
       if (genderSuits.Count == 0) {
         return DefaultSuit;
       }
 
       // We must use a different prime here to increase randomisation so that the same skin is not always combined with
       // the same suit.
-      int number = (kerbalData.Hash * 2053) & 0x7fffffff;
+      int number = (appearance.Hash * 2053) & 0x7fffffff;
       return genderSuits[number % genderSuits.Count];
     }
 
@@ -158,11 +158,11 @@ namespace TextureReplacer
     /// </summary>
     void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, Part pod, bool needsSuit)
     {
-      Appearance kerbalData = GetKerbalData(kerbal);
+      Appearance appearance = GetAppearance(kerbal);
       bool isEva = pod == null;
 
-      Skin skin = GetKerbalSkin(kerbal, kerbalData);
-      Suit suit = GetKerbalSuit(kerbal, kerbalData);
+      Skin skin = GetKerbalSkin(kerbal, appearance);
+      Suit suit = GetKerbalSuit(kerbal, appearance);
 
       skin = skin == DefaultSkin[(int)kerbal.gender] ? null : skin;
       suit = suit == DefaultSuit ? null : suit;
@@ -386,7 +386,7 @@ namespace TextureReplacer
           continue;
         }
 
-        Appearance kerbalData = GetKerbalData(kerbal);
+        Appearance appearance = GetAppearance(kerbal);
 
         string value = node.GetValue(kerbal.name);
         if (value != null) {
@@ -396,18 +396,18 @@ namespace TextureReplacer
           string suitName = tokens.Length >= 3 ? tokens[2] : null;
 
           if (genderName != null) {
-            kerbalData.RealGender = genderName == "F" ? Gender.Female : Gender.Male;
-            kerbal.gender = forceLegacyFemales ? Gender.Male : kerbalData.RealGender;
+            appearance.RealGender = genderName == "F" ? Gender.Female : Gender.Male;
+            kerbal.gender = forceLegacyFemales ? Gender.Male : appearance.RealGender;
           }
 
           if (skinName != null && skinName != "GENERIC") {
-            kerbalData.Skin = skinName == "DEFAULT"
+            appearance.Skin = skinName == "DEFAULT"
               ? DefaultSkin[(int)kerbal.gender]
               : Skins.Find(h => h.Name == skinName);
           }
 
           if (suitName != null && suitName != "GENERIC") {
-            kerbalData.Suit = suitName == "DEFAULT"
+            appearance.Suit = suitName == "DEFAULT"
               ? DefaultSuit
               : Suits.Find(s => s.Name == suitName);
           }
@@ -428,11 +428,11 @@ namespace TextureReplacer
           continue;
         }
 
-        Appearance kerbalData = GetKerbalData(kerbal);
+        Appearance appearance = GetAppearance(kerbal);
 
-        string genderName = kerbalData.RealGender == 0 ? "M" : "F";
-        string skinName = kerbalData.Skin == null ? "GENERIC" : kerbalData.Skin.Name;
-        string suitName = kerbalData.Suit == null ? "GENERIC" : kerbalData.Suit.Name;
+        string genderName = appearance.RealGender == 0 ? "M" : "F";
+        string skinName = appearance.Skin == null ? "GENERIC" : appearance.Skin.Name;
+        string suitName = appearance.Suit == null ? "GENERIC" : appearance.Suit.Name;
 
         node.AddValue(kerbal.name, genderName + " " + skinName + " " + suitName);
       }
@@ -742,6 +742,12 @@ namespace TextureReplacer
 
     public void ResetKerbals()
     {
+      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Kerbals()) {
+        if (gameKerbals.TryGetValue(kerbal.name, out Appearance appearance)) {
+          kerbal.gender = appearance.RealGender;
+        }
+      }
+
       gameKerbals.Clear();
       ClassSuits.Clear();
 

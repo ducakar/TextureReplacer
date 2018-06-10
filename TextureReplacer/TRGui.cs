@@ -132,7 +132,7 @@ namespace TextureReplacer
       int suitIndex = -1;
 
       if (selectedKerbal != null) {
-        appearance = personaliser.GetKerbalData(selectedKerbal);
+        appearance = personaliser.GetAppearance(selectedKerbal);
         defaultSkin = personaliser.DefaultSkin[(int)selectedKerbal.gender];
 
         skin = personaliser.GetKerbalSkin(selectedKerbal, appearance);
@@ -223,7 +223,9 @@ namespace TextureReplacer
       }
 
       if (isKerbalSelected || isClassSelected) {
-        GUILayout.Space(130);
+        if (isKerbalSelected) {
+          GUILayout.Space(100);
+        }
 
         GUILayout.BeginHorizontal();
         GUI.enabled = personaliser.Suits.Count != 0;
@@ -273,9 +275,11 @@ namespace TextureReplacer
 
         GUI.color = Color.white;
 
-        bool isVintage = selectedKerbal.suit == ProtoCrewMember.KerbalSuit.Vintage;
-        isVintage = GUILayout.Toggle(isVintage, "Vintage");
-        selectedKerbal.suit = isVintage ? ProtoCrewMember.KerbalSuit.Vintage : ProtoCrewMember.KerbalSuit.Default;
+        if (isKerbalSelected) {
+          bool isVintage = selectedKerbal.suit == ProtoCrewMember.KerbalSuit.Vintage;
+          isVintage = GUILayout.Toggle(isVintage, "Vintage");
+          selectedKerbal.suit = isVintage ? ProtoCrewMember.KerbalSuit.Vintage : ProtoCrewMember.KerbalSuit.Default;
+        }
       }
 
       GUILayout.EndVertical();
