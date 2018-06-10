@@ -34,7 +34,7 @@ namespace TextureReplacer
     public override void OnSave(ConfigNode node)
     {
       Reflections.Instance.OnSaveScenario(node);
-      Personaliser.Instance.OoSaveScenario(node);
+      Personaliser.Instance.OnSaveScenario(node);
     }
   }
 }

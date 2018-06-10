@@ -28,7 +28,6 @@ namespace TextureReplacer
   {
     public int Hash;
     public Gender RealGender;
-    public bool IsVeteran;
 
     public Skin Skin;
     public Suit Suit;

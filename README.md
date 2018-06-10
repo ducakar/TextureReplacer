@@ -300,6 +300,7 @@ Change Log
 ----------
 
 * 3.2
+    - add Veteran and Vintage [suit] toggles in GUI
     - removed static reflections
     - removed cabin-specific suits
     - remove support for old, non-existent mods from configuration

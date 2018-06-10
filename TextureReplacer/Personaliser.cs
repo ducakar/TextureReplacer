@@ -35,7 +35,6 @@ namespace TextureReplacer
     const string SuitsDirectory = Util.Directory + "Suits/";
 
     static readonly Log log = new Log(nameof(Personaliser));
-    static readonly string[] VeteranNames = { "Jebediah Kerman", "Bill Kerman", "Bob Kerman", "Valentina Kerman" };
 
     // Male/female textures (minus excluded).
     readonly List<Skin>[] kerbalSkins = { new List<Skin>(), new List<Skin>() };
@@ -110,15 +109,12 @@ namespace TextureReplacer
       if (!gameKerbals.TryGetValue(kerbal.name, out Appearance kerbalData)) {
         kerbalData = new Appearance {
           Hash = kerbal.name.GetHashCode(),
-          RealGender = kerbal.gender,
-          IsVeteran = VeteranNames.Any(n => n == kerbal.name)
+          RealGender = kerbal.gender
         };
         gameKerbals.Add(kerbal.name, kerbalData);
-
-        if (forceLegacyFemales) {
-          kerbal.gender = Gender.Male;
-        }
       }
+
+      kerbal.gender = forceLegacyFemales ? Gender.Male : kerbalData.RealGender;
       return kerbalData;
     }
 
@@ -187,11 +183,10 @@ namespace TextureReplacer
 
         // Parachute backpack, flag decals, headlight flares and thruster jets.
         if (smr == null) {
-          if (renderer.name != "screenMessage") {
-            renderer.enabled = needsSuit;
-          }
+          renderer.enabled = needsSuit;
         } else {
           Material material = renderer.material;
+          Shader newShader = null;
           Texture2D newTexture = null;
           Texture2D newNormalMap = null;
 
@@ -217,6 +212,10 @@ namespace TextureReplacer
               if (skin != null) {
                 newTexture = skin.Head;
                 newNormalMap = skin.HeadNRM;
+
+                if (newNormalMap != null) {
+                  newShader = Replacer.BumpedHeadShader;
+                }
               }
               break;
 
@@ -238,10 +237,10 @@ namespace TextureReplacer
               }
 
               if (newTexture == null) {
-                // This required for two reasons: to fix IVA suits after KSP resetting them to the stock ones all the
+                // This is required for two reasons: to fix IVA suits after KSP resetting them to the stock ones all the
                 // time and to fix the switch from non-default to default texture during EVA suit toggle.
                 newTexture = isEvaSuit ? DefaultSuit.EvaBody
-                  : kerbalData.IsVeteran ? DefaultSuit.BodyVeteran
+                  : kerbal.veteran ? DefaultSuit.BodyVeteran
                   : DefaultSuit.Body;
               }
 
@@ -302,6 +301,9 @@ namespace TextureReplacer
               break;
           }
 
+          if (newShader != null) {
+            material.shader = newShader;
+          }
           if (newTexture != null) {
             material.mainTexture = newTexture;
           }
@@ -340,7 +342,7 @@ namespace TextureReplacer
       return isDesiredSuitValid;
     }
 
-    void UpdateHelmets(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> action)
+    void UpdateIvaHelmets(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> action)
     {
       Vessel vessel = action.host;
 
@@ -395,6 +397,7 @@ namespace TextureReplacer
 
           if (genderName != null) {
             kerbalData.RealGender = genderName == "F" ? Gender.Female : Gender.Male;
+            kerbal.gender = forceLegacyFemales ? Gender.Male : kerbalData.RealGender;
           }
 
           if (skinName != null && skinName != "GENERIC") {
@@ -408,8 +411,6 @@ namespace TextureReplacer
               ? DefaultSuit
               : Suits.Find(s => s.Name == suitName);
           }
-
-          kerbal.gender = forceLegacyFemales ? Gender.Male : kerbalData.RealGender;
         }
       }
     }
@@ -664,12 +665,9 @@ namespace TextureReplacer
         }
       }
 
-      foreach (var space in Resources.FindObjectsOfTypeAll<InternalSpace>()) {
-        Util.LogDownHierarchy(space.transform);
-      }
-
+      // NOTE This skips the vintage Kerbals. It seems they are created on instantiation not cloned from a proto-model.
       foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>()) {
-        int genderIndex = kerbal.transform.name == "kerbalFemale" ? 1 : 0;
+        int genderIndex = (int)kerbal.protoCrewMember.gender;
 
         // Save pointer to helmet & visor meshes so helmet removal can restore them.
         foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>(true)) {
@@ -713,12 +711,12 @@ namespace TextureReplacer
 
     public void OnBeginFlight()
     {
-      GameEvents.onVesselSituationChange.Add(UpdateHelmets);
+      GameEvents.onVesselSituationChange.Add(UpdateIvaHelmets);
     }
 
     public void OnEndFlight()
     {
-      GameEvents.onVesselSituationChange.Remove(UpdateHelmets);
+      GameEvents.onVesselSituationChange.Remove(UpdateIvaHelmets);
     }
 
     public void OnLoadScenario(ConfigNode node)
@@ -733,7 +731,7 @@ namespace TextureReplacer
       Util.Parse(node.GetValue("isAtmSuitEnabled"), ref isAtmSuitEnabled);
     }
 
-    public void OoSaveScenario(ConfigNode node)
+    public void OnSaveScenario(ConfigNode node)
     {
       SaveKerbals(node.AddNode("Kerbals"));
       SaveSuitMap(ClassSuits, node.AddNode("ClassSuits"));

@@ -33,7 +33,6 @@ namespace TextureReplacer
     const int WindowId = 107056;
     const string AppIconPath = Util.Directory + "Plugins/appIcon";
     static readonly Log log = new Log(nameof(TRGui));
-    static readonly string[] ReflectionTypes = Enum.GetNames(typeof(Reflections.Type));
     static readonly Color SelectedColour = new Color(0.7f, 0.9f, 1.0f);
     static readonly Color ClassColour = new Color(1.0f, 0.8f, 1.0f);
 
@@ -159,7 +158,7 @@ namespace TextureReplacer
       }
 
       if (suit != null) {
-        Texture2D suitTex = suit == defaultSuit && appearance != null && appearance.IsVeteran
+        Texture2D suitTex = suit == defaultSuit && selectedKerbal != null && selectedKerbal.veteran
           ? defaultSuit.BodyVeteran
           : (suit.Body ?? defaultSuit.Body);
         Texture2D helmetTex = suit.Helmet ?? defaultSuit.Helmet;
@@ -219,6 +218,8 @@ namespace TextureReplacer
         }
 
         GUI.color = Color.white;
+
+        selectedKerbal.veteran = GUILayout.Toggle(selectedKerbal.veteran, "Veteran");
       }
 
       if (isKerbalSelected || isClassSelected) {
@@ -271,6 +272,10 @@ namespace TextureReplacer
         }
 
         GUI.color = Color.white;
+
+        bool isVintage = selectedKerbal.suit == ProtoCrewMember.KerbalSuit.Vintage;
+        isVintage = GUILayout.Toggle(isVintage, "Vintage");
+        selectedKerbal.suit = isVintage ? ProtoCrewMember.KerbalSuit.Vintage : ProtoCrewMember.KerbalSuit.Default;
       }
 
       GUILayout.EndVertical();
@@ -283,11 +288,9 @@ namespace TextureReplacer
       personaliser.IsAtmSuitEnabled = GUILayout.Toggle(personaliser.IsAtmSuitEnabled,
         "Spawn Kerbals in IVA suits when in breathable atmosphere");
 
-      GUILayout.BeginHorizontal();
-      GUILayout.Label("Reflections", GUILayout.Width(120));
-      reflections.ReflectionType = (Reflections.Type)GUILayout
-        .SelectionGrid((int)reflections.ReflectionType, ReflectionTypes, ReflectionTypes.Length);
-      GUILayout.EndHorizontal();
+      bool enableReflections = reflections.ReflectionType == Reflections.Type.Real;
+      enableReflections = GUILayout.Toggle(enableReflections, "Enable real-time reflections for visors and parts");
+      reflections.ReflectionType = enableReflections ? Reflections.Type.Real : Reflections.Type.None;
 
       GUILayout.EndVertical();
       GUI.DragWindow(new Rect(0, 0, Screen.width, 30));

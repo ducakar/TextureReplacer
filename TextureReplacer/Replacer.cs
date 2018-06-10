@@ -33,8 +33,10 @@ namespace TextureReplacer
     public const string TexturesDirectory = Util.Directory + "Default/";
     public const string HudNavball = "HUDNavBall";
     public const string IvaNavball = "IVANavBall";
+    public static readonly Shader BumpedHeadShader = Shader.Find("Bumped Diffuse");
 
     static readonly Log log = new Log(nameof(Replacer));
+    static readonly Shader BasicVisorShader = Shader.Find("Transparent/Diffuse");
 
     // General texture replacements.
     readonly List<string> paths = new List<string> { TexturesDirectory };
@@ -108,7 +110,7 @@ namespace TextureReplacer
     /// <summary>
     /// Replace NavBalls' textures.
     /// </summary>
-    void UpdateNavball(Vessel vessel)
+    void UpdateNavball()
     {
       if (hudNavBallTexture != null) {
         NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
@@ -121,6 +123,141 @@ namespace TextureReplacer
         InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
         if (ivaNavball != null) {
           ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;
+        }
+      }
+    }
+
+    void FixKerbalModels()
+    {
+      mappedTextures.TryGetValue("kerbalHeadNRM", out Texture2D maleHeadNormalMap);
+      mappedTextures.TryGetValue("kerbalGirl_06_BaseColorNRM", out Texture2D femaleHeadNormalMap);
+      mappedTextures.TryGetValue("kerbalVisor", out Texture2D ivaVisorTexture);
+      mappedTextures.TryGetValue("EVAvisor", out Texture2D evaVisorTexture);
+
+      // Shaders between male and female models are inconsistent, female models are missing normal maps and specular
+      // lighting. So, we copy shaders from male materials to respective female materials.
+      Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
+
+      Kerbal maleIva = kerbals.First(k => k.transform.name == "kerbalMale");
+      Kerbal femaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
+      Part maleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
+      Part femaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
+
+      if (logKerbalHierarchy) {
+        log.Print("Male IVA Hierarchy");
+        Util.LogDownHierarchy(maleIva.transform);
+        log.Print("Male EVA Hierarchy");
+        Util.LogDownHierarchy(maleEva.transform);
+        log.Print("Feale IVA Hierarchy");
+        Util.LogDownHierarchy(femaleIva.transform);
+        log.Print("Feale EVA Hierarchy");
+        Util.LogDownHierarchy(femaleEva.transform);
+      }
+
+      SkinnedMeshRenderer[][] maleMeshes = {
+        maleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
+        maleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+      };
+
+      SkinnedMeshRenderer[][] femaleMeshes = {
+        femaleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
+        femaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+      };
+
+      // Male materials to be copied to females to fix tons of female issues (missing normal maps, non-bumpmapped
+      // shaders, missing teeth texture ...)
+      Material headMaterial = null;
+      Material[] suitMaterials = { null, null };
+      Material[] helmetMaterials = { null, null };
+      Material[] visorMaterials = { null, null };
+      Material jetpackMaterial = null;
+
+      for (int i = 0; i < 2; ++i) {
+        foreach (SkinnedMeshRenderer smr in maleMeshes[i]) {
+          // Many meshes share the same material, so it suffices to enumerate only one mesh for each material.
+          switch (smr.name) {
+            case "headMesh01":
+              if (maleHeadNormalMap != null) {
+                // Replace with bump-mapped shader so normal maps for heads will work.
+                smr.sharedMaterial.shader = BumpedHeadShader;
+                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, maleHeadNormalMap);
+              }
+
+              headMaterial = smr.sharedMaterial;
+              break;
+
+            case "body01":
+              suitMaterials[i] = smr.sharedMaterial;
+              break;
+
+            case "helmet":
+              helmetMaterials[i] = smr.sharedMaterial;
+              break;
+
+            case "jetpack_base01":
+              jetpackMaterial = smr.sharedMaterial;
+              break;
+
+            case "visor":
+              // It will be raplaced with reflective shader later, if reflections are enabled.
+              if (smr.transform.root == maleIva.transform && ivaVisorTexture != null) {
+                smr.sharedMaterial.shader = BasicVisorShader;
+                smr.sharedMaterial.mainTexture = ivaVisorTexture;
+                smr.sharedMaterial.color = Color.white;
+              } else if (smr.transform.root == maleEva.transform && evaVisorTexture != null) {
+                smr.sharedMaterial.shader = BasicVisorShader;
+                smr.sharedMaterial.mainTexture = evaVisorTexture;
+                smr.sharedMaterial.color = Color.white;
+              }
+
+              visorMaterials[i] = smr.sharedMaterial;
+              break;
+          }
+        }
+      }
+
+      for (int i = 0; i < 2; ++i) {
+        foreach (SkinnedMeshRenderer smr in femaleMeshes[i]) {
+          // Here we must enumarate all meshes wherever we are replacing the material.
+          switch (smr.name) {
+            case "headMesh":
+              if (femaleHeadNormalMap != null) {
+                // Replace with bump-mapped shader so normal maps for heads will work.
+                smr.sharedMaterial.shader = BumpedHeadShader;
+                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, femaleHeadNormalMap);
+              }
+              break;
+
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
+            case "upTeeth01":
+            case "downTeeth01":
+              // Females don't have textured teeth, they use the same material as for the eyeballs. Extending female
+              // head material/texture to their teeth is not possible since teeth overlap with some ponytail subtexture.
+              // However, female teeth map to the same texture coordinates as male teeth, so we fix this by applying
+              // male head & teeth material for female teeth.
+              smr.sharedMaterial = headMaterial;
+              break;
+
+            case "mesh_female_kerbalAstronaut01_body01":
+            case "body01":
+              smr.sharedMaterial = suitMaterials[i];
+              break;
+
+            case "mesh_female_kerbalAstronaut01_helmet":
+            case "helmet":
+              smr.sharedMaterial = helmetMaterials[i];
+              break;
+
+            case "jetpack_base01":
+              smr.sharedMaterial = jetpackMaterial;
+              break;
+
+            case "mesh_female_kerbalAstronaut01_visor":
+            case "visor":
+              smr.sharedMaterial = visorMaterials[i];
+              break;
+          }
         }
       }
     }
@@ -182,141 +319,7 @@ namespace TextureReplacer
         }
       }
 
-      Shader headShader = Shader.Find("Bumped Diffuse");
-      Shader visorShader = Shader.Find("Transparent/Diffuse");
-
-      mappedTextures.TryGetValue("kerbalHeadNRM", out Texture2D maleHeadNormalMap);
-      mappedTextures.TryGetValue("kerbalGirl_06_BaseColorNRM", out Texture2D femaleHeadNormalMap);
-      mappedTextures.TryGetValue("kerbalVisor", out Texture2D ivaVisorTexture);
-      mappedTextures.TryGetValue("EVAvisor", out Texture2D evaVisorTexture);
-
-      // Shaders between male and female models are inconsistent, female models are missing normal maps and specular
-      // lighting. So, we copy shaders from male materials to respective female materials.
-      Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
-
-      Kerbal maleIva = kerbals.First(k => k.transform.name == "kerbalMale");
-      Kerbal femaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
-      Part maleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
-      Part femaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
-
-      if (logKerbalHierarchy) {
-        log.Print("Male IVA Hierarchy");
-        Util.LogDownHierarchy(maleIva.transform);
-        log.Print("Male EVA Hierarchy");
-        Util.LogDownHierarchy(maleEva.transform);
-        log.Print("Feale IVA Hierarchy");
-        Util.LogDownHierarchy(femaleIva.transform);
-        log.Print("Feale EVA Hierarchy");
-        Util.LogDownHierarchy(femaleEva.transform);
-      }
-
-      SkinnedMeshRenderer[][] maleMeshes = {
-        maleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        maleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true)
-      };
-
-      SkinnedMeshRenderer[][] femaleMeshes = {
-        femaleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        femaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true)
-      };
-
-      // Male materials to be copied to females to fix tons of female issues (missing normal maps, non-bumpmapped
-      // shaders, missing teeth texture ...)
-      Material headMaterial = null;
-      Material[] suitMaterials = { null, null };
-      Material[] helmetMaterials = { null, null };
-      Material[] visorMaterials = { null, null };
-      Material jetpackMaterial = null;
-
-      for (int i = 0; i < 2; ++i) {
-        foreach (SkinnedMeshRenderer smr in maleMeshes[i]) {
-          // Many meshes share the same material, so it suffices to enumerate only one mesh for each material.
-          switch (smr.name) {
-            case "headMesh01":
-              // Replace with bump-mapped shader so normal maps for heads will work.
-              smr.sharedMaterial.shader = headShader;
-
-              // Set normal map on default head if available.
-              if (maleHeadNormalMap != null) {
-                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, maleHeadNormalMap);
-              }
-
-              headMaterial = smr.sharedMaterial;
-              break;
-
-            case "body01":
-              suitMaterials[i] = smr.sharedMaterial;
-              break;
-
-            case "helmet":
-              helmetMaterials[i] = smr.sharedMaterial;
-              break;
-
-            case "jetpack_base01":
-              jetpackMaterial = smr.sharedMaterial;
-              break;
-
-            case "visor":
-              if (smr.transform.root == maleIva.transform && ivaVisorTexture != null) {
-                smr.sharedMaterial.shader = visorShader;
-                smr.sharedMaterial.mainTexture = ivaVisorTexture;
-                smr.sharedMaterial.color = Color.white;
-              } else if (smr.transform.root == maleEva.transform && evaVisorTexture != null) {
-                smr.sharedMaterial.shader = visorShader;
-                smr.sharedMaterial.mainTexture = evaVisorTexture;
-                smr.sharedMaterial.color = Color.white;
-              }
-
-              visorMaterials[i] = smr.sharedMaterial;
-              break;
-          }
-        }
-      }
-
-      for (int i = 0; i < 2; ++i) {
-        foreach (SkinnedMeshRenderer smr in femaleMeshes[i]) {
-          // Here we must enumarate all meshes wherever we are replacing the material.
-          switch (smr.name) {
-            case "headMesh":
-              smr.sharedMaterial.shader = headShader;
-
-              if (femaleHeadNormalMap != null) {
-                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, femaleHeadNormalMap);
-              }
-              break;
-
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
-            case "upTeeth01":
-            case "downTeeth01":
-              // Females don't have textured teeth, they use the same material as for the eyeballs. Extending female
-              // head material/texture to their teeth is not possible since teeth overlap with some ponytail subtexture.
-              // However, female teeth map to the same texture coordinates as male teeth, so we fix this by applying
-              // male head & teeth material for female teeth.
-              smr.sharedMaterial = headMaterial;
-              break;
-
-            case "mesh_female_kerbalAstronaut01_body01":
-            case "body01":
-              smr.sharedMaterial = suitMaterials[i];
-              break;
-
-            case "mesh_female_kerbalAstronaut01_helmet":
-            case "helmet":
-              smr.sharedMaterial = helmetMaterials[i];
-              break;
-
-            case "jetpack_base01":
-              smr.sharedMaterial = jetpackMaterial;
-              break;
-
-            case "mesh_female_kerbalAstronaut01_visor":
-            case "visor":
-              smr.sharedMaterial = visorMaterials[i];
-              break;
-          }
-        }
-      }
+      FixKerbalModels();
 
       // Find NavBall replacement textures if available.
       if (mappedTextures.TryGetValue(HudNavball, out hudNavBallTexture)) {
@@ -339,15 +342,8 @@ namespace TextureReplacer
     public void OnBeginFlight()
     {
       if (hudNavBallTexture != null || ivaNavBallTexture != null) {
-        UpdateNavball(FlightGlobals.ActiveVessel);
-        GameEvents.onVesselChange.Add(UpdateNavball);
+        UpdateNavball();
       }
-    }
-
-    public void OnEndFlight()
-    {
-      if (hudNavBallTexture != null || ivaNavBallTexture != null)
-        GameEvents.onVesselChange.Remove(UpdateNavball);
     }
 
     public void OnBeginScene()

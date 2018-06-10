@@ -66,7 +66,6 @@ namespace TextureReplacer
     public void OnDestroy()
     {
       if (hasFlightHandlers) {
-        Replacer.Instance.OnEndFlight();
         Personaliser.Instance.OnEndFlight();
       }
 
