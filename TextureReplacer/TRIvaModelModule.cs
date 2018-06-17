@@ -25,13 +25,25 @@ using UnityEngine;
 namespace TextureReplacer
 {
   /// <summary>
-  /// Component for personalisation of IVA Kerbals, similar as TREvaModule, but much simpler.
+  /// Component bound to internal models that triggers adds another component to IVA Kerbals that actually personalises
+  /// them.
+  ///
+  /// Directly personalising Kerbals doesn't work, they are reset to default suits after that in some situation
+  /// (e.g. crew transfer). So we have to personalise Kerbals by using another component (TRIvaModule) bound directly
+  /// to IVA Kerbals. So why don't we add this component to proto models when Personaliser is initialised as we do for
+  /// EVAs? Once we did, but the vintage Kerbals that came with Making History Expansion don't have preexisting
+  /// proto-models that are cloned. Instead, they are created anew each time. So, this is the only nice way to get
+  /// TRIvaModule on all IVA Kerbals, both standard and vintage ones.
   /// </summary>
-  class TRIvaModule : MonoBehaviour
+  class TRIvaModelModule : MonoBehaviour
   {
     public void Start()
     {
-      Personaliser.Instance.PersonaliseIva(GetComponent<Kerbal>());
+      foreach (Kerbal kerbal in GetComponentsInChildren<Kerbal>()) {
+        if (kerbal.GetComponent<TRIvaModule>() == null) {
+          kerbal.gameObject.AddComponent<TRIvaModule>();
+        }
+      }
       Destroy(this);
     }
   }

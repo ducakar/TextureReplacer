@@ -45,6 +45,7 @@
     <Compile Include="TRIvaModule.cs" />
     <Compile Include="Appearance.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="TRIvaModelModule.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

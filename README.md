@@ -304,6 +304,7 @@ Change Log
     - removed static reflections
     - removed cabin-specific suits
     - remove support for old, non-existent mods from configuration
+    - fix vintage kerbal personalisation
     - fix visor texture personalisation
 * 3.1
     - renamed `Heads` directory to `Skins`

@@ -132,6 +132,10 @@ namespace TextureReplacer
       int suitIndex = -1;
 
       if (selectedKerbal != null) {
+        if (selectedKerbal.suit == ProtoCrewMember.KerbalSuit.Vintage) {
+          defaultSuit = personaliser.VintageSuit;
+        }
+
         appearance = personaliser.GetAppearance(selectedKerbal);
         defaultSkin = personaliser.DefaultSkin[(int)selectedKerbal.gender];
 
@@ -159,8 +163,8 @@ namespace TextureReplacer
 
       if (suit != null) {
         Texture2D suitTex = suit == defaultSuit && selectedKerbal != null && selectedKerbal.veteran
-          ? defaultSuit.BodyVeteran
-          : (suit.Body ?? defaultSuit.Body);
+          ? suit.BodyVeteran
+          : suit.Body;
         Texture2D helmetTex = suit.Helmet ?? defaultSuit.Helmet;
         Texture2D evaSuitTex = suit.EvaBody ?? defaultSuit.EvaBody;
         Texture2D evaHelmetTex = suit.EvaHelmet ?? defaultSuit.EvaHelmet;
@@ -223,7 +227,10 @@ namespace TextureReplacer
       }
 
       if (isKerbalSelected || isClassSelected) {
+        bool isVintage = false;
+
         if (isKerbalSelected) {
+          isVintage = selectedKerbal.suit == ProtoCrewMember.KerbalSuit.Vintage;
           GUILayout.Space(100);
         }
 
@@ -276,7 +283,6 @@ namespace TextureReplacer
         GUI.color = Color.white;
 
         if (isKerbalSelected) {
-          bool isVintage = selectedKerbal.suit == ProtoCrewMember.KerbalSuit.Vintage;
           isVintage = GUILayout.Toggle(isVintage, "Vintage");
           selectedKerbal.suit = isVintage ? ProtoCrewMember.KerbalSuit.Vintage : ProtoCrewMember.KerbalSuit.Default;
         }
