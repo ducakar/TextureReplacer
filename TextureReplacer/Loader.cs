@@ -21,7 +21,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -48,9 +47,9 @@ namespace TextureReplacer
     // Number of loaded textures it the previous update.
     int lastTextureCount;
     // Features.
-    bool? isCompressionEnabled;
-    bool? isMipmapGenEnabled;
-    bool? isUnloadingEnabled;
+    bool isCompressionEnabled;
+    bool isMipmapGenEnabled;
+    bool isUnloadingEnabled;
 
     /// <summary>
     /// Estimate texture size in system RAM.
@@ -83,36 +82,6 @@ namespace TextureReplacer
       Util.AddRELists(rootNode.GetValues("generateMipmaps"), generateMipmapsPaths);
       Util.Parse(rootNode.GetValue("isUnloadingEnabled"), ref isUnloadingEnabled);
       Util.AddRELists(rootNode.GetValues("keepLoaded"), keepLoadedPaths);
-    }
-
-    /// <summary>
-    /// This must be run only once after all configuration files are read.
-    /// </summary>
-    public void Configure()
-    {
-      // Prevent conflicts with TextureCompressor. If it is found among loaded plugins, texture
-      // compression step will be skipped since TextureCompressor should handle it (better).
-      bool isATMDetected = AssemblyLoader.loadedAssemblies
-        .Any(a => a.name.StartsWith("ActiveTextureManagement", StringComparison.Ordinal));
-
-      if (isATMDetected) {
-        if (isCompressionEnabled == null) {
-          isCompressionEnabled = false;
-          log.Print("Detected Active Texture Management, disabling texture compression.");
-        }
-        if (isMipmapGenEnabled == null) {
-          isMipmapGenEnabled = false;
-          log.Print("Detected Active Texture Management, disabling mipmap generation.");
-        }
-        if (isUnloadingEnabled == null) {
-          isUnloadingEnabled = false;
-          log.Print("Detected Active Texture Management, disabling texture unloading.");
-        }
-      } else {
-        isCompressionEnabled = isCompressionEnabled ?? true;
-        isMipmapGenEnabled = isMipmapGenEnabled ?? true;
-        isUnloadingEnabled = isUnloadingEnabled ?? true;
-      }
     }
 
     /// <summary>
@@ -153,7 +122,7 @@ namespace TextureReplacer
 
         // Generate mipmaps if necessary. Images that may be UI icons should be excluded to prevent
         // blurriness when using less-than-full texture quality.
-        if (isMipmapGenEnabled.Value && texture.mipmapCount == 1 && (texture.width > 1 || texture.height > 1) &&
+        if (isMipmapGenEnabled && texture.mipmapCount == 1 && (texture.width > 1 || texture.height > 1) &&
             generateMipmapsPaths.Any(r => r.IsMatch(texture.name)) &&
             texture.name != HudNavball && texture.name != IvaNavball) {
           Color32[] pixels32 = texture.GetPixels32();
@@ -166,7 +135,7 @@ namespace TextureReplacer
           // Workaround for a Unity + D3D bug.
           int quality = QualitySettings.masterTextureLimit;
 
-          if (isCompressionEnabled.Value && quality > 0 &&
+          if (isCompressionEnabled && quality > 0 &&
               (texture.width >> quality) % 4 != 0 && (texture.width >> quality) % 4 != 0) {
             QualitySettings.masterTextureLimit = 0;
           }
@@ -183,8 +152,7 @@ namespace TextureReplacer
         }
 
         // Compress if necessary.
-        if (isCompressionEnabled.Value &&
-            texture.format != TextureFormat.DXT1 && texture.format != TextureFormat.DXT5) {
+        if (isCompressionEnabled && texture.format != TextureFormat.DXT1 && texture.format != TextureFormat.DXT5) {
           texture.Compress(true);
           texInfos[i].isCompressed = true;
 
@@ -218,7 +186,7 @@ namespace TextureReplacer
         }
 
         // Unload texture from RAM (a.k.a. "make it unreadable") unless set otherwise.
-        if (isUnloadingEnabled.Value && !keepLoadedPaths.Any(r => r.IsMatch(texture.name))) {
+        if (isUnloadingEnabled && !keepLoadedPaths.Any(r => r.IsMatch(texture.name))) {
           try {
             texture.GetPixel(0, 0);
           } catch (UnityException) {

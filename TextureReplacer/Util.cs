@@ -84,23 +84,6 @@ namespace TextureReplacer
       }
     }
 
-    public static void Parse(string name, ref bool? variable)
-    {
-      switch (name) {
-        case "always":
-          variable = true;
-          break;
-
-        case "never":
-          variable = false;
-          break;
-
-        default:
-          variable = null;
-          break;
-      }
-    }
-
     public static void Parse(string name, ref Color variable)
     {
       if (name != null) {

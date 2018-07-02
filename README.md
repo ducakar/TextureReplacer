@@ -303,6 +303,8 @@ Change Log
     - add Veteran and Vintage [suit] toggles in GUI
     - removed static reflections
     - removed cabin-specific suits
+    - only true/false values for `isCompressionEnabled`, `isMipmapGenEnabled`
+      and `isUnloadingEnabled` options
     - remove support for old, non-existent mods from configuration
     - fix vintage kerbal personalisation
     - fix visor texture personalisation

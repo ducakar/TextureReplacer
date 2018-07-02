@@ -57,8 +57,6 @@ namespace TextureReplacer
         Reflections.Instance.ReadConfig(file.config);
         Personaliser.Instance.ReadConfig(file.config);
       }
-
-      Loader.Instance.Configure();
     }
 
     public void LateUpdate()
