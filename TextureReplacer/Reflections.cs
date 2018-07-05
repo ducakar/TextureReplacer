@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using KSP.IO;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -37,12 +38,6 @@ namespace TextureReplacer
 
     public class Script
     {
-      struct MeshState
-      {
-        public Renderer Renderer;
-        public bool IsEnabled;
-      }
-
       // List of all created reflection scripts.
       static readonly List<Script> Scripts = new List<Script>();
       static int currentScript;
@@ -74,7 +69,7 @@ namespace TextureReplacer
           if (visor != null) {
             Material material = visor.material;
 
-            material.shader = Instance.visorMaterial.shader;
+            material.shader = Instance.visorShader;
             material.SetTexture(Util.CubeProperty, envMap);
             material.SetColor(Util.ReflectColorProperty, visorReflectionColour);
           }
@@ -223,8 +218,8 @@ namespace TextureReplacer
     public bool IsVisorReflectionEnabled { get; private set; }
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool LogReflectiveMeshes { get; private set; }
-    // Reflective visor shader material.
-    Material visorMaterial;
+    // Reflective visor shader.
+    Shader visorShader;
     // Instance.
     public static Reflections Instance { get; private set; }
 
@@ -281,19 +276,34 @@ namespace TextureReplacer
     public void Load()
     {
       IsVisorReflectionEnabled = false;
-      // TODO Fix the visor shader and move it to an asset file.
-      //try {
-      //  Assembly assembly = Assembly.GetExecutingAssembly();
-      //  Stream stream = assembly.GetManifestResourceStream("TextureReplacer.Visor-compiled.shader");
-      //  StreamReader reader = new StreamReader(stream);
 
-      //  visorMaterial = new Material(reader.ReadToEnd());
+      string shadersFileName = "shaders.linux";
+      switch (Application.platform) {
+        case RuntimePlatform.WindowsPlayer:
+          shadersFileName = "shaders.windows";
+          break;
+        case RuntimePlatform.OSXPlayer:
+          shadersFileName = "shaders.osx";
+          break;
+      }
+      string shadersPath = IOUtils.GetFilePathFor(GetType(), shadersFileName);
 
-      //  log.Print("Visor shader sucessfully compiled.");
-      //} catch {
-      //  IsVisorReflectionEnabled = false;
-      //  log.Print("Visor shader loading failed. Visor reflections disabled.");
-      //}
+      AssetBundle shadersBoundle = null;
+      try {
+        shadersBoundle = AssetBundle.LoadFromFile(shadersPath);
+        visorShader = shadersBoundle.LoadAsset<Shader>("assets/visor.shader");
+        if (visorShader == null) {
+          log.Print("Visor shader missing in the asset file.");
+        } else {
+          IsVisorReflectionEnabled = true;
+        }
+      } catch (System.Exception ex) {
+        log.Print("Visor shader loading failed: {0}", ex);
+      } finally {
+        if (shadersBoundle != null) {
+          shadersBoundle.Unload(false);
+        }
+      }
 
       for (int i = 0; i < ShaderNameMap.GetLength(0); ++i) {
         Shader original = Shader.Find(ShaderNameMap[i, 0]);
@@ -314,8 +324,8 @@ namespace TextureReplacer
       if (camera != null) {
         Object.DestroyImmediate(camera.gameObject);
       }
-      if (visorMaterial != null) {
-        Object.DestroyImmediate(visorMaterial);
+      if (visorShader != null) {
+        Object.DestroyImmediate(visorShader);
       }
     }
 

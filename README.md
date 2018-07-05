@@ -300,14 +300,16 @@ Change Log
 ----------
 
 * 3.2
-    - add Veteran and Vintage [suit] toggles in GUI
+    - added Veteran and Vintage [suit] toggles in GUI
     - removed static reflections
     - removed cabin-specific suits
+    - removed support for old, non-existent mods from configuration
+    - removed detection of ATM
     - only true/false values for `isCompressionEnabled`, `isMipmapGenEnabled`
-      and `isUnloadingEnabled` options
-    - remove support for old, non-existent mods from configuration
-    - fix vintage kerbal personalisation
-    - fix visor texture personalisation
+      and `isUnloadingEnabled` options (no more ATM-specific auto option)
+    - fixed visor shader
+    - fixed visor texture personalisation
+    - fixed vintage kerbal personalisation
 * 3.1
     - renamed `Heads` directory to `Skins`
     - new `logKerbalHierarchy` option to dump structure of Kerbal models to log

@@ -290,7 +290,7 @@ namespace TextureReplacer
 
       GUILayout.EndVertical();
       GUILayout.EndHorizontal();
-      GUILayout.Space(10);
+      GUILayout.Space(5);
 
       personaliser.IsHelmetRemovalEnabled = GUILayout.Toggle(personaliser.IsHelmetRemovalEnabled,
         "Remove IVA helmets in safe situations");
