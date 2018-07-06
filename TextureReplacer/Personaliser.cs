@@ -45,11 +45,9 @@ namespace TextureReplacer
     // game doesn't contain `TRScenario`.
     ConfigNode customKerbalsNode = new ConfigNode();
     // Helmet removal.
-    Mesh[] helmetMesh = { null, null };
-    Mesh[] visorMesh = { null, null };
+    readonly Mesh[] helmetMesh = { null, null };
+    readonly Mesh[] visorMesh = { null, null };
     bool isHelmetRemovalEnabled = true;
-    // Convert all females to males but still use female textures for them.
-    bool forceLegacyFemales;
     // Atmospheric IVA suit parameters.
     bool isAtmSuitEnabled = true;
     double atmSuitPressure = 50.0;
@@ -113,13 +111,10 @@ namespace TextureReplacer
     {
       if (!gameKerbals.TryGetValue(kerbal.name, out Appearance appearance)) {
         appearance = new Appearance {
-          Hash = kerbal.name.GetHashCode(),
-          RealGender = kerbal.gender
+          Hash = kerbal.name.GetHashCode()
         };
         gameKerbals.Add(kerbal.name, appearance);
       }
-
-      kerbal.gender = forceLegacyFemales ? Gender.Male : appearance.RealGender;
       return appearance;
     }
 
@@ -132,7 +127,7 @@ namespace TextureReplacer
         return appearance.Skin;
       }
 
-      List<Skin> genderSkins = kerbalSkins[(int)appearance.RealGender];
+      List<Skin> genderSkins = kerbalSkins[(int)kerbal.gender];
       if (genderSkins.Count == 0) {
         return DefaultSkin[(int)kerbal.gender];
       }
@@ -154,7 +149,7 @@ namespace TextureReplacer
         return suit;
       }
 
-      List<Suit> genderSuits = kerbalSuits[(int)appearance.RealGender];
+      List<Suit> genderSuits = kerbalSuits[(int)kerbal.gender];
       if (genderSuits.Count == 0) {
         return DefaultSuit;
       }
@@ -410,14 +405,9 @@ namespace TextureReplacer
         string value = node.GetValue(kerbal.name);
         if (value != null) {
           string[] tokens = Util.SplitConfigValue(value);
-          string genderName = tokens.Length >= 1 ? tokens[0] : null;
-          string skinName = tokens.Length >= 2 ? tokens[1] : null;
-          string suitName = tokens.Length >= 3 ? tokens[2] : null;
+          string skinName = tokens.Length >= 1 ? tokens[0] : null;
+          string suitName = tokens.Length >= 2 ? tokens[1] : null;
 
-          if (genderName != null) {
-            appearance.RealGender = genderName == "F" ? Gender.Female : Gender.Male;
-            kerbal.gender = forceLegacyFemales ? Gender.Male : appearance.RealGender;
-          }
 
           if (skinName != null && skinName != "GENERIC") {
             appearance.Skin = skinName == "DEFAULT"
@@ -449,11 +439,10 @@ namespace TextureReplacer
 
         Appearance appearance = GetAppearance(kerbal);
 
-        string genderName = appearance.RealGender == 0 ? "M" : "F";
         string skinName = appearance.Skin == null ? "GENERIC" : appearance.Skin.Name;
         string suitName = appearance.Suit == null ? "GENERIC" : appearance.Suit.Name;
 
-        node.AddValue(kerbal.name, genderName + " " + skinName + " " + suitName);
+        node.AddValue(kerbal.name, skinName + " " + suitName);
       }
     }
 
@@ -576,7 +565,6 @@ namespace TextureReplacer
       Util.Parse(rootNode.GetValue("isAtmSuitEnabled"), ref isAtmSuitEnabled);
       Util.Parse(rootNode.GetValue("atmSuitPressure"), ref atmSuitPressure);
       Util.AddLists(rootNode.GetValues("atmSuitBodies"), atmSuitBodies);
-      Util.Parse(rootNode.GetValue("forceLegacyFemales"), ref forceLegacyFemales);
     }
 
     /// <summary>
@@ -786,12 +774,6 @@ namespace TextureReplacer
 
     public void ResetKerbals()
     {
-      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Kerbals()) {
-        if (gameKerbals.TryGetValue(kerbal.name, out Appearance appearance)) {
-          kerbal.gender = appearance.RealGender;
-        }
-      }
-
       gameKerbals.Clear();
       ClassSuits.Clear();
 

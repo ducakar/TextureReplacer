@@ -20,15 +20,11 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using Gender = ProtoCrewMember.Gender;
-
 namespace TextureReplacer
 {
   class Appearance
   {
     public int Hash;
-    public Gender RealGender;
-
     public Skin Skin;
     public Suit Suit;
   }

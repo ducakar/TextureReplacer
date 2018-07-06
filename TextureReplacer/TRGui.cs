@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using KSP.UI.Screens;
 using UnityEngine;
+using KerbalSuit = ProtoCrewMember.KerbalSuit;
 
 namespace TextureReplacer
 {
@@ -132,7 +133,7 @@ namespace TextureReplacer
       int suitIndex = -1;
 
       if (selectedKerbal != null) {
-        if (selectedKerbal.suit == ProtoCrewMember.KerbalSuit.Vintage) {
+        if (selectedKerbal.suit == KerbalSuit.Vintage) {
           defaultSuit = personaliser.VintageSuit;
         }
 
@@ -230,7 +231,7 @@ namespace TextureReplacer
         bool isVintage = false;
 
         if (isKerbalSelected) {
-          isVintage = selectedKerbal.suit == ProtoCrewMember.KerbalSuit.Vintage;
+          isVintage = selectedKerbal.suit == KerbalSuit.Vintage;
           GUILayout.Space(100);
         }
 
@@ -284,7 +285,7 @@ namespace TextureReplacer
 
         if (isKerbalSelected) {
           isVintage = GUILayout.Toggle(isVintage, "Vintage");
-          selectedKerbal.suit = isVintage ? ProtoCrewMember.KerbalSuit.Vintage : ProtoCrewMember.KerbalSuit.Default;
+          selectedKerbal.suit = isVintage ? KerbalSuit.Vintage : KerbalSuit.Default;
         }
       }
 

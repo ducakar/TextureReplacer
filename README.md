@@ -301,6 +301,7 @@ Change Log
 
 * 3.2
     - added Veteran and Vintage [suit] toggles in GUI
+    - removed leagacy females option
     - removed static reflections
     - removed cabin-specific suits
     - removed support for old, non-existent mods from configuration
