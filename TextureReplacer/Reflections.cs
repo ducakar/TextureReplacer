@@ -291,11 +291,15 @@ namespace TextureReplacer
       AssetBundle shadersBoundle = null;
       try {
         shadersBoundle = AssetBundle.LoadFromFile(shadersPath);
-        visorShader = shadersBoundle.LoadAsset<Shader>("assets/visor.shader");
-        if (visorShader == null) {
-          log.Print("Visor shader missing in the asset file.");
+        if (shadersBoundle == null) {
+          log.Print("Failed to load shader asset file: {0}", shadersPath);
         } else {
-          IsVisorReflectionEnabled = true;
+          visorShader = shadersBoundle.LoadAsset<Shader>("assets/visor.shader");
+          if (visorShader == null) {
+            log.Print("Visor shader missing in the asset file");
+          } else {
+            IsVisorReflectionEnabled = true;
+          }
         }
       } catch (System.Exception ex) {
         log.Print("Visor shader loading failed: {0}", ex);

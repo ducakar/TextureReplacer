@@ -289,11 +289,9 @@ Notes
 Known Issues
 ------------
 
-* Visor reflections do not work.
+* Reflections disable part highlighting along reflective surfaces.
 * Atmospheric skybox is not reflected.
-* Reflections disable part highlighting.
-* Clouds from EVE are only reflected when on/near the ground or over 160 km.
-* Clouds from EVE Overhaul are not correctly reflected.
+* Clouds from EVE are not correctly reflected in all situations.
 
 
 Change Log
@@ -307,7 +305,7 @@ Change Log
     - removed support for old, non-existent mods from configuration
     - removed detection of ATM
     - only true/false values for `isCompressionEnabled`, `isMipmapGenEnabled`
-      and `isUnloadingEnabled` options (no more ATM-specific auto option)
+      and `isUnloadingEnabled` options (no more ATM-specific `auto` option)
     - fixed visor shader
     - fixed visor texture personalisation
     - fixed vintage kerbal personalisation

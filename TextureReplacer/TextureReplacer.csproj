@@ -49,14 +49,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="Shaders\TRBumpedSpecular.shader" />
-    <None Include="Shaders\TRBumpedSpecularEmissive.shader" />
-    <None Include="Shaders\TRSpecular.shader" />
-    <None Include="Shaders\TRSpecularEmissive.shader" />
-    <None Include="Shaders\TRVisor.shader" />
-    <None Include="Shaders\TRVisor.compiled.shader" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="mscorlib">
       <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\mscorlib.dll</HintPath>
       <Private>False</Private>

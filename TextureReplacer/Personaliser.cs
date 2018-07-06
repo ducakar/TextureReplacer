@@ -676,7 +676,7 @@ namespace TextureReplacer
 
       // The previous loop filled the default suit, we still have to get the vintage one. Since IVA textures for vintage
       // suit are only instantiated when the Kerbals are created, we are in trouble here. Let's just use vintage EVA
-      // suit in IVA too and be happy with that :)
+      // suit for IVA too and be happy with that :)
       Part vintageEva = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
 
       foreach (SkinnedMeshRenderer smr in vintageEva.GetComponentsInChildren<SkinnedMeshRenderer>()) {
