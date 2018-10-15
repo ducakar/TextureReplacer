@@ -37,7 +37,7 @@ void surf(Input IN, inout SurfaceOutput o)
 	o.Albedo = tex.rgb * _Color.rgb;
 	o.Specular = _Shininess;
 	o.Emission = texCUBE(_Cube, IN.worldRefl).rgb * _ReflectColor.rgb;
-	o.Alpha = tex.a;
+	o.Alpha = tex.a * _Color.a;
 }
 ENDCG
 	}
