@@ -297,6 +297,10 @@ Known Issues
 Change Log
 ----------
 
+* 3.2.1
+    - updated default configuration files
+    - skin tweaks: removed teeth and fixed some artefacts
+    - fixed transparency for non-textured visors
 * 3.2
     - added Veteran and Vintage [suit] toggles in GUI
     - removed leagacy females option
@@ -727,9 +731,11 @@ Change Log
 Licence
 -------
 
+### Plugin: MIT
+
     Copyright © 2013-2018 Davorin Učakar
-    Copyright © 2016 Pavel Alekseevich
-    Copyright © 2013 Ryan Bray
+    Copyright © 2016 RangeMachine
+    Copyright © 2013 rbray89
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),
@@ -748,3 +754,9 @@ Licence
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
+
+### Skins: CC BY 4.0
+
+    This pack can be modified and distributed under the terms of CC BY 4.0
+    licence. The original author is Sylith, with additional modifications by
+    shaw and IOI-655362.
