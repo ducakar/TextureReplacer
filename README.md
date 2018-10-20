@@ -72,8 +72,7 @@ Examples:
       Default/EVAjetpack                  // EVA jetpack
       Default/EVAjetpackNRM               // EVA jetpack normal map
 
-      Default/HUDNavBall                  // HUD NavBall
-      Default/IVANavBall                  // IVA NavBall flipped horizontally
+      Default/NavBall                     // HUD & IVA NavBall
 
       Default/GalaxyTex_PositiveX         // skybox right face
       Default/GalaxyTex_NegativeX         // skybox left face
@@ -282,6 +281,8 @@ Known Issues
 Change Log
 ----------
 
+* 3.4
+    - unified navball textures as `Default/NavBall`
 * 3.3
     - updated for KSP 1.5
     - updated default configuration files

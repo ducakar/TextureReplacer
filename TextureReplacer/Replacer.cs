@@ -31,8 +31,8 @@ namespace TextureReplacer
   class Replacer
   {
     public const string TexturesDirectory = Util.Directory + "Default/";
-    public const string HudNavball = "HUDNavBall";
-    public const string IvaNavball = "IVANavBall";
+    public const string Navball = "NavBall";
+    public static readonly Vector2 NavballScale = new Vector2(-1.0f, 1.0f);
     public static readonly Shader BumpedHeadShader = Shader.Find("Bumped Diffuse");
 
     static readonly Log log = new Log(nameof(Replacer));
@@ -41,9 +41,8 @@ namespace TextureReplacer
     // General texture replacements.
     readonly List<string> paths = new List<string> { TexturesDirectory };
     readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
-    // NavBalls' textures.
-    Texture2D hudNavBallTexture;
-    Texture2D ivaNavBallTexture;
+    // NavBall texture.
+    Texture2D navBallTexture;
     // Change shinning quality.
     SkinQuality skinningQuality = SkinQuality.Auto;
     // Print material/texture names when performing texture replacement pass.
@@ -112,19 +111,20 @@ namespace TextureReplacer
     /// </summary>
     void UpdateNavball()
     {
-      if (hudNavBallTexture != null) {
+      if (navBallTexture != null) {
         NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
         if (hudNavball != null) {
           Material material = hudNavball.navBall.GetComponent<Renderer>().sharedMaterial;
-          material.SetTexture(Util.MainTextureProperty, hudNavBallTexture);
-        }
-      }
 
-      if (ivaNavBallTexture != null && InternalSpace.Instance != null) {
+          material.SetTexture(Util.MainTextureProperty, navBallTexture);
+        }
+
         InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
         if (ivaNavball != null) {
           Material material = ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial;
-          material.mainTexture = ivaNavBallTexture;
+
+          material.mainTexture = navBallTexture;
+          material.SetTextureScale(Util.MainTexProperty, NavballScale);
         }
       }
     }
@@ -323,26 +323,18 @@ namespace TextureReplacer
       FixKerbalModels();
 
       // Find NavBall replacement textures if available.
-      if (mappedTextures.TryGetValue(HudNavball, out hudNavBallTexture)) {
-        mappedTextures.Remove(HudNavball);
+      if (mappedTextures.TryGetValue(Navball, out navBallTexture)) {
+        mappedTextures.Remove(Navball);
 
-        if (hudNavBallTexture.mipmapCount != 1) {
-          log.Print("HUDNavBall texture should not have mipmaps!");
-        }
-      }
-
-      if (mappedTextures.TryGetValue(IvaNavball, out ivaNavBallTexture)) {
-        mappedTextures.Remove(IvaNavball);
-
-        if (ivaNavBallTexture.mipmapCount != 1) {
-          log.Print("IVANavBall texture should not have mipmaps!");
+        if (navBallTexture.mipmapCount != 1) {
+          log.Print("NavBall texture should not have mipmaps!");
         }
       }
     }
 
     public void OnBeginFlight()
     {
-      if (hudNavBallTexture != null || ivaNavBallTexture != null) {
+      if (navBallTexture != null) {
         UpdateNavball();
       }
     }

@@ -30,8 +30,7 @@ namespace TextureReplacer
 {
   class Loader
   {
-    const string HudNavball = Replacer.TexturesDirectory + Replacer.HudNavball;
-    const string IvaNavball = Replacer.TexturesDirectory + Replacer.IvaNavball;
+    const string Navball = Replacer.TexturesDirectory + Replacer.Navball;
 
     // Instance.
     public static Loader Instance { get; private set; }
@@ -124,7 +123,7 @@ namespace TextureReplacer
         // blurriness when using less-than-full texture quality.
         if (isMipmapGenEnabled && texture.mipmapCount == 1 && (texture.width > 1 || texture.height > 1) &&
             generateMipmapsPaths.Any(r => r.IsMatch(texture.name)) &&
-            texture.name != HudNavball && texture.name != IvaNavball) {
+            texture.name != Navball) {
           Color32[] pixels32 = texture.GetPixels32();
 
           // PNGs are always loaded as transparent, so we check if they actually contain any
