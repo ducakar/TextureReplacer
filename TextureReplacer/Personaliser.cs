@@ -99,7 +99,7 @@ namespace TextureReplacer
 
     /// <summary>
     /// Get appearance of a Kerbal. If the skin or the suit is generic it is set to null. If an appearance does not
-    /// yet exist for that Kerbal it is created (and gender is fixed according to forceLegacyFemales).
+    /// yet exist for that Kerbal it is created.
     /// </summary>
     public Appearance GetAppearance(ProtoCrewMember kerbal)
     {

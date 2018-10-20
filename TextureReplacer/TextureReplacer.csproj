@@ -29,7 +29,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Loader.cs" />
     <Compile Include="Personaliser.cs" />
     <Compile Include="Reflections.cs" />
     <Compile Include="Replacer.cs" />

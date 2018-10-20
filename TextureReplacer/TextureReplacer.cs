@@ -28,8 +28,6 @@ namespace TextureReplacer
   [KSPAddon(KSPAddon.Startup.Instantly, true)]
   public class TextureReplacer : MonoBehaviour
   {
-    bool isInitialised;
-
     public static bool IsLoaded { get; private set; }
 
     static readonly Log log = new Log(nameof(TextureReplacer));
@@ -46,13 +44,11 @@ namespace TextureReplacer
         Reflections.Instance.Destroy();
       }
 
-      Loader.Recreate();
       Replacer.Recreate();
       Reflections.Recreate();
       Personaliser.Recreate();
 
       foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer")) {
-        Loader.Instance.ReadConfig(file.config);
         Replacer.Instance.ReadConfig(file.config);
         Reflections.Instance.ReadConfig(file.config);
         Personaliser.Instance.ReadConfig(file.config);
@@ -61,17 +57,7 @@ namespace TextureReplacer
 
     public void LateUpdate()
     {
-      if (!isInitialised) {
-        // Compress textures, generate mipmaps, convert DXT5 -> DXT1 if necessary etc.
-        Loader.Instance.ProcessTextures();
-
-        if (GameDatabase.Instance.IsReady()) {
-          Loader.Instance.Initialise();
-          Loader.Destroy();
-
-          isInitialised = true;
-        }
-      } else if (PartLoader.Instance.IsReady()) {
+      if (PartLoader.Instance.IsReady()) {
         Replacer.Instance.Load();
         Reflections.Instance.Load();
         Personaliser.Instance.Load();
