@@ -44,7 +44,7 @@ namespace TextureReplacer
     public Texture2D EvaJetpack;
     public Texture2D EvaJetpackNRM;
 
-    public Texture2D GetIvaBody(ProtoCrewMember kerbal)
+    public Texture2D GetIvaSuit(ProtoCrewMember kerbal)
     {
       int level = kerbal.experienceLevel;
       return level != 0 && levelIvaBodies != null ? levelIvaBodies[level - 1]
@@ -52,7 +52,7 @@ namespace TextureReplacer
         : IvaBody;
     }
 
-    public Texture2D GetEvaBody(ProtoCrewMember kerbal)
+    public Texture2D GetEvaSuit(ProtoCrewMember kerbal)
     {
       int level = kerbal.experienceLevel;
       return level != 0 && levelEvaBodies != null ? levelEvaBodies[level - 1] : EvaBody;

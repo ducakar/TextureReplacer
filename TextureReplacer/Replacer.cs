@@ -115,14 +115,16 @@ namespace TextureReplacer
       if (hudNavBallTexture != null) {
         NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
         if (hudNavball != null) {
-          hudNavball.navBall.GetComponent<Renderer>().sharedMaterial.SetTexture("_MainTexture", hudNavBallTexture);
+          Material material = hudNavball.navBall.GetComponent<Renderer>().sharedMaterial;
+          material.SetTexture(Util.MainTexProperty, hudNavBallTexture);
         }
       }
 
       if (ivaNavBallTexture != null && InternalSpace.Instance != null) {
         InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
         if (ivaNavball != null) {
-          ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial.mainTexture = ivaNavBallTexture;
+          Material material = ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial;
+          material.SetTexture(Util.MainTexProperty, ivaNavBallTexture);
         }
       }
     }

@@ -43,7 +43,7 @@ namespace TextureReplacer
     readonly Dictionary<string, Appearance> gameKerbals = new Dictionary<string, Appearance>();
     // Backed-up personalised textures from main configuration files. These are used to initialise kerbals if a saved
     // game doesn't contain `TRScenario`.
-    ConfigNode customKerbalsNode = new ConfigNode();
+    readonly ConfigNode customKerbalsNode = new ConfigNode();
     // Helmet removal.
     readonly Mesh[] helmetMesh = { null, null };
     readonly Mesh[] visorMesh = { null, null };
@@ -57,17 +57,17 @@ namespace TextureReplacer
     public static Personaliser Instance { get; private set; }
 
     // Default textures (from `Default/`).
-    public Skin[] DefaultSkin = { new Skin { Name = "DEFAULT" }, new Skin { Name = "DEFAULT" } };
-    public Suit DefaultSuit = new Suit { Name = "DEFAULT" };
-    public Suit VintageSuit = new Suit { Name = "VINTAGE" };
+    public readonly Skin[] DefaultSkin = { new Skin { Name = "DEFAULT" }, new Skin { Name = "DEFAULT" } };
+    public readonly Suit DefaultSuit = new Suit { Name = "DEFAULT" };
+    public readonly Suit VintageSuit = new Suit { Name = "VINTAGE" };
 
     // All Kerbal textures, including excluded by configuration.
-    public List<Skin> Skins = new List<Skin>();
-    public List<Suit> Suits = new List<Suit>();
+    public readonly List<Skin> Skins = new List<Skin>();
+    public readonly List<Suit> Suits = new List<Suit>();
 
     // Class-specific suits.
-    public Dictionary<string, Suit> ClassSuits = new Dictionary<string, Suit>();
-    public Dictionary<string, Suit> DefaultClassSuits = new Dictionary<string, Suit>();
+    public readonly Dictionary<string, Suit> ClassSuits = new Dictionary<string, Suit>();
+    public readonly Dictionary<string, Suit> DefaultClassSuits = new Dictionary<string, Suit>();
 
     public bool IsHelmetRemovalEnabled {
       get { return isHelmetRemovalEnabled; }
@@ -167,15 +167,20 @@ namespace TextureReplacer
     {
       Appearance appearance = GetAppearance(kerbal);
       bool isEva = pod == null;
+      bool isEvaSuit = isEva && needsSuit;
       bool isVintage = kerbal.suit == ProtoCrewMember.KerbalSuit.Vintage;
 
       Skin skin = GetKerbalSkin(kerbal, appearance);
       Suit suit = GetKerbalSuit(kerbal, appearance);
+      Suit defaultSuit = isVintage ? VintageSuit : DefaultSuit;
 
       Transform model = isEva || !isVintage ? component.transform.Find("model01")
         : component.transform.Find("kbIVA@idle/model01");
       Transform flag = isEva ? component.transform.Find("model/kbEVA_flagDecals") : null;
       Transform parachute = isEva ? component.transform.Find("model/EVAparachute/base") : null;
+
+      Texture2D suitTexture = isEvaSuit ? suit.GetEvaSuit(kerbal) : suit.GetIvaSuit(kerbal);
+      Texture2D suitNormalMap = isEvaSuit ? suit.EvaBodyNRM : suit.IvaBodyNRM;
 
       if (isEva) {
         flag.GetComponent<Renderer>().enabled = needsSuit;
@@ -231,25 +236,17 @@ namespace TextureReplacer
 
             case "body01":
             case "mesh_female_kerbalAstronaut01_body01":
-              bool isEvaSuit = isEva && needsSuit;
-
-              newTexture = isEvaSuit ? suit.GetEvaBody(kerbal) : suit.GetIvaBody(kerbal);
-              newNormalMap = isEvaSuit ? suit.EvaBodyNRM : suit.IvaBodyNRM;
+              newTexture = suitTexture;
+              newNormalMap = suitNormalMap;
 
               if (newTexture == null) {
                 // Setting the suit explicitly is necessary for two reasons: to fix IVA suits after KSP resetting them
                 // to the stock ones all the time and to fix the switch from non-default to default texture during EVA
                 // suit toggle.
-                Suit defaultSuit = isVintage ? VintageSuit : DefaultSuit;
-
-                newTexture = isEvaSuit ? defaultSuit.EvaBody
-                  : kerbal.veteran ? defaultSuit.IvaBodyVeteran
-                  : defaultSuit.IvaBody;
+                newTexture = isEvaSuit ? defaultSuit.GetEvaSuit(kerbal) : defaultSuit.GetIvaSuit(kerbal);
               }
 
               if (newNormalMap == null) {
-                Suit defaultSuit = isVintage ? VintageSuit : DefaultSuit;
-
                 newNormalMap = isEvaSuit ? defaultSuit.EvaBodyNRM : defaultSuit.IvaBodyNRM;
               }
 
@@ -264,6 +261,9 @@ namespace TextureReplacer
 
             case "helmet":
             case "mesh_female_kerbalAstronaut01_helmet":
+              newTexture = suitTexture;
+              newNormalMap = suitNormalMap;
+
               if (isEva) {
                 smr.enabled = needsSuit;
               } else {
@@ -391,7 +391,6 @@ namespace TextureReplacer
           string[] tokens = Util.SplitConfigValue(value);
           string skinName = tokens.Length >= 1 ? tokens[0] : null;
           string suitName = tokens.Length >= 2 ? tokens[1] : null;
-
 
           if (skinName != null && skinName != "GENERIC") {
             appearance.Skin = skinName == "DEFAULT"

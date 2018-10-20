@@ -63,7 +63,7 @@ Examples:
       Default/kerbalGirl_06_BaseColor     // female head
       Default/kerbalGirl_06_BaseColorNRM  // female head normal map
       Default/kerbalMain                  // IVA suit (veteran/orange)
-      Default/kerbalMainGrey              // IVA suit (standard/grey)
+      Default/kerbalMainGrey              // IVA suit (standard/grey blue)
       Default/kerbalMainNRM               // IVA suit normal map
       Default/kerbalVisor                 // IVA helmet visor
       Default/EVAtexture                  // EVA suit
@@ -73,7 +73,7 @@ Examples:
       Default/EVAjetpackNRM               // EVA jetpack normal map
 
       Default/HUDNavBall                  // HUD NavBall
-      Default/IVANavBall                  // IVA NavBall, horizontally flipped
+      Default/IVANavBall                  // IVA NavBall flipped horizontally
 
       Default/GalaxyTex_PositiveX         // skybox right face
       Default/GalaxyTex_NegativeX         // skybox left face
@@ -198,29 +198,30 @@ for males and
 for females.
 
 Suit textures' names are identical as for the default texture replacement except
-that there is no `kerbalMain` texture (`kerbalMainGrey` replaces both) and class
-level variants of suit and helmet textures are possible. Each suit must reside
-inside its own directory:
+that class level variants of suit texture are possible. If `kerbalMain` is not
+present `kerbalMainGrey` is used for veterans. Each suit must reside inside its
+own directory:
 
     GameData/TextureReplacer/
-      Suits/[<subDir>/]<suit>/kerbalMainGrey     // IVA suit
-      Suits/[<subDir>/]<suit>/kerbalMainGrey1    // IVA suit (level 1)
-      Suits/[<subDir>/]<suit>/kerbalMainGrey2    // IVA suit (level 2)
-      Suits/[<subDir>/]<suit>/kerbalMainGrey3    // IVA suit (level 3)
-      Suits/[<subDir>/]<suit>/kerbalMainGrey4    // IVA suit (level 4)
-      Suits/[<subDir>/]<suit>/kerbalMainGrey5    // IVA suit (level 5)
-      Suits/[<subDir>/]<suit>/kerbalMainNRM      // IVA suit normal map
-      Suits/[<subDir>/]<suit>/kerbalVisor        // IVA helmet visor
-      Suits/[<subDir>/]<suit>/EVAtexture         // EVA suit
-      Suits/[<subDir>/]<suit>/EVAtexture1        // EVA suit (level 1)
-      Suits/[<subDir>/]<suit>/EVAtexture2        // EVA suit (level 2)
-      Suits/[<subDir>/]<suit>/EVAtexture3        // EVA suit (level 3)
-      Suits/[<subDir>/]<suit>/EVAtexture4        // EVA suit (level 4)
-      Suits/[<subDir>/]<suit>/EVAtexture5        // EVA suit (level 5)
-      Suits/[<subDir>/]<suit>/EVAtextureNRM      // EVA suit normal map
-      Suits/[<subDir>/]<suit>/EVAvisor           // EVA helmet visor
-      Suits/[<subDir>/]<suit>/EVAjetpack         // EVA jetpack
-      Suits/[<subDir>/]<suit>/EVAjetpackNRM      // EVA jetpack normal map
+      Suits/[<subDir>/]<suit>/kerbalMain       // IVA suit (level 0 veteran)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey   // IVA suit (level 0 standard)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey1  // IVA suit (level 1)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey2  // IVA suit (level 2)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey3  // IVA suit (level 3)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey4  // IVA suit (level 4)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey5  // IVA suit (level 5)
+      Suits/[<subDir>/]<suit>/kerbalMainNRM    // IVA suit normal map
+      Suits/[<subDir>/]<suit>/kerbalVisor      // IVA helmet visor
+      Suits/[<subDir>/]<suit>/EVAtexture       // EVA suit
+      Suits/[<subDir>/]<suit>/EVAtexture1      // EVA suit (level 1)
+      Suits/[<subDir>/]<suit>/EVAtexture2      // EVA suit (level 2)
+      Suits/[<subDir>/]<suit>/EVAtexture3      // EVA suit (level 3)
+      Suits/[<subDir>/]<suit>/EVAtexture4      // EVA suit (level 4)
+      Suits/[<subDir>/]<suit>/EVAtexture5      // EVA suit (level 5)
+      Suits/[<subDir>/]<suit>/EVAtextureNRM    // EVA suit normal map
+      Suits/[<subDir>/]<suit>/EVAvisor         // EVA helmet visor
+      Suits/[<subDir>/]<suit>/EVAjetpack       // EVA jetpack
+      Suits/[<subDir>/]<suit>/EVAjetpackNRM    // EVA jetpack normal map
 
 The level textures are optional. If a level texture is missing, the one from the
 previous level is inherited.
@@ -252,10 +253,10 @@ it is in DDS format.
 
 In short: you should supply "blue" normal maps when a texture has "NRM" suffix
 and is in PNG format (JPEGs and TGAs are not recommended for normal maps) and
-"grey" normal map for textures in DDS format or without "NRM" suffix.
+"grey" normal maps for textures in DDS format or without "NRM" suffix.
 
-"Grey" normal maps can be created by saving the standard "blue" normal map as a
-DDS with DXT5nm compression or by manually shuffling its channels RGBA -> GGGR.
+"Grey" normal maps can be created by saving the standard "blue" normal maps as
+DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 
 Notes
@@ -274,9 +275,8 @@ Known Issues
 ------------
 
 * Stock vintage veteran suits don't work.
-* Reflections disable part highlighting of reflective surfaces.
-* Atmospheric skybox is not (entirely) reflected.
-* Clouds from EVE are not correctly reflected in all situations.
+* Reflections disable part highlighting along reflective surfaces.
+* Only the top face of the atmospheric skybox is reflected.
 
 
 Change Log
