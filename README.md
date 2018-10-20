@@ -65,12 +65,9 @@ Examples:
       Default/kerbalMain                  // IVA suit (veteran/orange)
       Default/kerbalMainGrey              // IVA suit (standard/grey)
       Default/kerbalMainNRM               // IVA suit normal map
-      Default/kerbalHelmetGrey            // IVA helmet
-      Default/kerbalHelmetNRM             // IVA & EVA helmet normal map
       Default/kerbalVisor                 // IVA helmet visor
       Default/EVAtexture                  // EVA suit
       Default/EVAtextureNRM               // EVA suit normal map
-      Default/EVAhelmet                   // EVA helmet
       Default/EVAvisor                    // EVA helmet visor
       Default/EVAjetpack                  // EVA jetpack
       Default/EVAjetpackNRM               // EVA jetpack normal map
@@ -213,13 +210,6 @@ inside its own directory:
       Suits/[<subDir>/]<suit>/kerbalMainGrey4    // IVA suit (level 4)
       Suits/[<subDir>/]<suit>/kerbalMainGrey5    // IVA suit (level 5)
       Suits/[<subDir>/]<suit>/kerbalMainNRM      // IVA suit normal map
-      Suits/[<subDir>/]<suit>/kerbalHelmetGrey   // IVA helmet
-      Suits/[<subDir>/]<suit>/kerbalHelmetGrey1  // IVA helmet (level 1)
-      Suits/[<subDir>/]<suit>/kerbalHelmetGrey2  // IVA helmet (level 2)
-      Suits/[<subDir>/]<suit>/kerbalHelmetGrey3  // IVA helmet (level 3)
-      Suits/[<subDir>/]<suit>/kerbalHelmetGrey4  // IVA helmet (level 4)
-      Suits/[<subDir>/]<suit>/kerbalHelmetGrey5  // IVA helmet (level 5)
-      Suits/[<subDir>/]<suit>/kerbalHelmetNRM    // IVA & EVA helmet normal map
       Suits/[<subDir>/]<suit>/kerbalVisor        // IVA helmet visor
       Suits/[<subDir>/]<suit>/EVAtexture         // EVA suit
       Suits/[<subDir>/]<suit>/EVAtexture1        // EVA suit (level 1)
@@ -228,12 +218,6 @@ inside its own directory:
       Suits/[<subDir>/]<suit>/EVAtexture4        // EVA suit (level 4)
       Suits/[<subDir>/]<suit>/EVAtexture5        // EVA suit (level 5)
       Suits/[<subDir>/]<suit>/EVAtextureNRM      // EVA suit normal map
-      Suits/[<subDir>/]<suit>/EVAhelmet          // EVA helmet
-      Suits/[<subDir>/]<suit>/EVAhelmet1         // EVA helmet (level 1)
-      Suits/[<subDir>/]<suit>/EVAhelmet2         // EVA helmet (level 2)
-      Suits/[<subDir>/]<suit>/EVAhelmet3         // EVA helmet (level 3)
-      Suits/[<subDir>/]<suit>/EVAhelmet4         // EVA helmet (level 4)
-      Suits/[<subDir>/]<suit>/EVAhelmet5         // EVA helmet (level 5)
       Suits/[<subDir>/]<suit>/EVAvisor           // EVA helmet visor
       Suits/[<subDir>/]<suit>/EVAjetpack         // EVA jetpack
       Suits/[<subDir>/]<suit>/EVAjetpackNRM      // EVA jetpack normal map
@@ -289,8 +273,9 @@ Notes
 Known Issues
 ------------
 
-* Reflections disable part highlighting along reflective surfaces.
-* Atmospheric skybox is not reflected.
+* Stock vintage veteran suits don't work.
+* Reflections disable part highlighting of reflective surfaces.
+* Atmospheric skybox is not (entirely) reflected.
 * Clouds from EVE are not correctly reflected in all situations.
 
 
@@ -298,9 +283,11 @@ Change Log
 ----------
 
 * 3.2.1
+    - updated for KSP 1.5
     - updated default configuration files
-    - skin tweaks: removed teeth and fixed some artefacts
+    - changed suit texture names to reflect suit model changes
     - fixed transparency for non-textured visors
+    - skin tweaks: removed teeth, softer eyelashes and fixed some artefacts
 * 3.2
     - added Veteran and Vintage [suit] toggles in GUI
     - removed leagacy females option

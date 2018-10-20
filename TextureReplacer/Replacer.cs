@@ -148,9 +148,9 @@ namespace TextureReplacer
         Util.LogDownHierarchy(maleIva.transform);
         log.Print("Male EVA Hierarchy");
         Util.LogDownHierarchy(maleEva.transform);
-        log.Print("Feale IVA Hierarchy");
+        log.Print("Female IVA Hierarchy");
         Util.LogDownHierarchy(femaleIva.transform);
-        log.Print("Feale EVA Hierarchy");
+        log.Print("Female EVA Hierarchy");
         Util.LogDownHierarchy(femaleEva.transform);
       }
 
@@ -177,6 +177,7 @@ namespace TextureReplacer
           // Many meshes share the same material, so it suffices to enumerate only one mesh for each material.
           switch (smr.name) {
             case "headMesh01":
+            case "headMesh02":
               if (maleHeadNormalMap != null) {
                 // Replace with bump-mapped shader so normal maps for heads will work.
                 smr.sharedMaterial.shader = BumpedHeadShader;
@@ -220,18 +221,19 @@ namespace TextureReplacer
         foreach (SkinnedMeshRenderer smr in femaleMeshes[i]) {
           // Here we must enumarate all meshes wherever we are replacing the material.
           switch (smr.name) {
-            case "headMesh":
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
               if (femaleHeadNormalMap != null) {
                 // Replace with bump-mapped shader so normal maps for heads will work.
                 smr.sharedMaterial.shader = BumpedHeadShader;
                 smr.sharedMaterial.SetTexture(Util.BumpMapProperty, femaleHeadNormalMap);
               }
+
+              smr.sharedMaterial = headMaterial;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
-            case "upTeeth01":
-            case "downTeeth01":
               // Females don't have textured teeth, they use the same material as for the eyeballs. Extending female
               // head material/texture to their teeth is not possible since teeth overlap with some ponytail subtexture.
               // However, female teeth map to the same texture coordinates as male teeth, so we fix this by applying
@@ -240,12 +242,10 @@ namespace TextureReplacer
               break;
 
             case "mesh_female_kerbalAstronaut01_body01":
-            case "body01":
               smr.sharedMaterial = suitMaterials[i];
               break;
 
             case "mesh_female_kerbalAstronaut01_helmet":
-            case "helmet":
               smr.sharedMaterial = helmetMaterials[i];
               break;
 
@@ -254,7 +254,6 @@ namespace TextureReplacer
               break;
 
             case "mesh_female_kerbalAstronaut01_visor":
-            case "visor":
               smr.sharedMaterial = visorMaterials[i];
               break;
           }

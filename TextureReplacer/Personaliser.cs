@@ -172,10 +172,8 @@ namespace TextureReplacer
       Skin skin = GetKerbalSkin(kerbal, appearance);
       Suit suit = GetKerbalSuit(kerbal, appearance);
 
-      skin = skin == DefaultSkin[(int)kerbal.gender] ? null : skin;
-      suit = suit == DefaultSuit || suit == VintageSuit ? null : suit;
-
-      Transform model = isEva ? component.transform.Find("model01") : component.transform.Find("kbIVA@idle/model01");
+      Transform model = isEva || !isVintage ? component.transform.Find("model01")
+        : component.transform.Find("kbIVA@idle/model01");
       Transform flag = isEva ? component.transform.Find("model/kbEVA_flagDecals") : null;
       Transform parachute = isEva ? component.transform.Find("model/EVAparachute/base") : null;
 
@@ -207,23 +205,20 @@ namespace TextureReplacer
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
-              if (skin != null && skin.IsEyeless) {
+              if (skin.IsEyeless) {
                 smr.sharedMesh = null;
               }
               break;
 
             case "headMesh01":
+            case "headMesh02":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-            case "headMesh":
-            case "ponytail":
-              if (skin != null) {
-                newTexture = skin.Head;
-                newNormalMap = skin.HeadNRM;
+              newTexture = skin.Head;
+              newNormalMap = skin.HeadNRM;
 
-                if (newNormalMap != null) {
-                  newShader = Replacer.BumpedHeadShader;
-                }
+              if (newNormalMap != null) {
+                newShader = Replacer.BumpedHeadShader;
               }
               break;
 
@@ -232,17 +227,14 @@ namespace TextureReplacer
             case "upTeeth02":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
-            case "downTeeth01":
               break;
 
             case "body01":
             case "mesh_female_kerbalAstronaut01_body01":
               bool isEvaSuit = isEva && needsSuit;
 
-              if (suit != null) {
-                newTexture = isEvaSuit ? suit.GetEvaSuit(kerbal.experienceLevel) : suit.GetBody(kerbal.experienceLevel);
-                newNormalMap = isEvaSuit ? suit.EvaBodyNRM : suit.BodyNRM;
-              }
+              newTexture = isEvaSuit ? suit.GetEvaBody(kerbal) : suit.GetIvaBody(kerbal);
+              newNormalMap = isEvaSuit ? suit.EvaBodyNRM : suit.IvaBodyNRM;
 
               if (newTexture == null) {
                 // Setting the suit explicitly is necessary for two reasons: to fix IVA suits after KSP resetting them
@@ -251,18 +243,18 @@ namespace TextureReplacer
                 Suit defaultSuit = isVintage ? VintageSuit : DefaultSuit;
 
                 newTexture = isEvaSuit ? defaultSuit.EvaBody
-                  : kerbal.veteran ? defaultSuit.BodyVeteran
-                  : defaultSuit.Body;
+                  : kerbal.veteran ? defaultSuit.IvaBodyVeteran
+                  : defaultSuit.IvaBody;
               }
 
               if (newNormalMap == null) {
                 Suit defaultSuit = isVintage ? VintageSuit : DefaultSuit;
 
-                newNormalMap = isEvaSuit ? defaultSuit.EvaBodyNRM : defaultSuit.BodyNRM;
+                newNormalMap = isEvaSuit ? defaultSuit.EvaBodyNRM : defaultSuit.IvaBodyNRM;
               }
 
               // Update textures in Kerbal IVA object since KSP resets them to these values a few frames later.
-              if (!isEva && suit != null) {
+              if (!isEva) {
                 var kerbalIva = (Kerbal)component;
 
                 kerbalIva.textureStandard = newTexture;
@@ -277,12 +269,6 @@ namespace TextureReplacer
               } else {
                 smr.sharedMesh = needsSuit ? helmetMesh[(int)kerbal.gender] : null;
               }
-
-              // Textures have to be replaced even when hidden since it may become visible later on situation change.
-              if (suit != null) {
-                newTexture = isEva ? suit.GetEvaHelmet(kerbal.experienceLevel) : suit.GetHelmet(kerbal.experienceLevel);
-                newNormalMap = suit.HelmetNRM;
-              }
               break;
 
             case "visor":
@@ -294,12 +280,10 @@ namespace TextureReplacer
               }
 
               // Textures have to be replaced even when hidden since it may become visible later on situation change.
-              if (suit != null) {
-                newTexture = isEva ? suit.EvaVisor : suit.Visor;
+              newTexture = isEva ? suit.EvaVisor : suit.IvaVisor;
 
-                if (newTexture != null) {
-                  material.color = Color.white;
-                }
+              if (newTexture != null) {
+                material.color = Color.white;
               }
               break;
 
@@ -307,7 +291,7 @@ namespace TextureReplacer
               if (isEva) {
                 smr.enabled = needsSuit;
 
-                if (needsSuit && suit != null) {
+                if (needsSuit) {
                   newTexture = suit.EvaJetpack;
                   newNormalMap = suit.EvaJetpackNRM;
                 }
@@ -655,7 +639,7 @@ namespace TextureReplacer
       // Visor needs to be replaced every time, not only on the proto-Kerbal model, so the visor from the default suit
       // must be set on all suits without a custom visor.
       foreach (var suit in Suits) {
-        suit.Visor = suit.Visor ?? DefaultSuit.Visor;
+        suit.IvaVisor = suit.IvaVisor ?? DefaultSuit.IvaVisor;
         suit.EvaVisor = suit.EvaVisor ?? DefaultSuit.EvaVisor;
       }
 
@@ -680,17 +664,10 @@ namespace TextureReplacer
       Part vintageEva = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
 
       foreach (SkinnedMeshRenderer smr in vintageEva.GetComponentsInChildren<SkinnedMeshRenderer>()) {
-        switch (smr.name) {
-          case "helmet":
-            VintageSuit.Helmet = smr.material.mainTexture as Texture2D;
-            VintageSuit.EvaHelmet = smr.material.mainTexture as Texture2D;
-            break;
-
-          case "body01":
-            VintageSuit.Body = smr.material.mainTexture as Texture2D;
-            VintageSuit.BodyVeteran = smr.material.mainTexture as Texture2D;
-            VintageSuit.EvaBody = smr.material.mainTexture as Texture2D;
-            break;
+        if (smr.name == "body01") {
+          VintageSuit.IvaBody = smr.material.mainTexture as Texture2D;
+          VintageSuit.IvaBodyVeteran = smr.material.mainTexture as Texture2D;
+          VintageSuit.EvaBody = smr.material.mainTexture as Texture2D;
         }
       }
 
@@ -707,8 +684,8 @@ namespace TextureReplacer
         }
 
         // After na IVA space is initialised, suits are reset to these values. Replace stock textures with default ones.
-        kerbal.textureStandard = DefaultSuit.Body;
-        kerbal.textureVeteran = DefaultSuit.BodyVeteran;
+        kerbal.textureStandard = DefaultSuit.IvaBody;
+        kerbal.textureVeteran = DefaultSuit.IvaBodyVeteran;
       }
 
       foreach (InternalModel model in Resources.FindObjectsOfTypeAll<InternalModel>()) {

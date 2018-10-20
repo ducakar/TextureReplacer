@@ -144,7 +144,13 @@ namespace TextureReplacer
 
         if (c is Renderer r) {
           Debug.Log(sIndent + "   shader:  " + r.material.shader);
-          Debug.Log(sIndent + "   texture: " + r.material.mainTexture);
+
+          if (r.material.HasProperty(MainTexProperty)) {
+            Debug.Log(sIndent + "   maintex: " + r.material.GetTexture(MainTexProperty));
+          }
+          if (r.material.HasProperty(BumpMapProperty)) {
+            Debug.Log(sIndent + "   bumpmap: " + r.material.GetTexture(BumpMapProperty));
+          }
         }
       }
 

@@ -42,7 +42,7 @@ namespace TextureReplacer
     ApplicationLauncherButton appButton;
     bool isGuiEnabled = true;
     // UI state.
-    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 620);
+    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 580);
     Vector2 rosterScroll = Vector2.zero;
     bool isEnabled;
     // Classes from config files.
@@ -164,24 +164,14 @@ namespace TextureReplacer
 
       if (suit != null) {
         Texture2D suitTex = suit == defaultSuit && selectedKerbal != null && selectedKerbal.veteran
-          ? suit.BodyVeteran
-          : suit.Body;
-        Texture2D helmetTex = suit.Helmet ?? defaultSuit.Helmet;
+          ? suit.IvaBodyVeteran
+          : suit.IvaBody;
         Texture2D evaSuitTex = suit.EvaBody ?? defaultSuit.EvaBody;
-        Texture2D evaHelmetTex = suit.EvaHelmet ?? defaultSuit.EvaHelmet;
 
         GUILayout.BeginHorizontal();
         GUILayout.Box(suitTex, GUILayout.Width(100), GUILayout.Height(100));
         GUILayout.Space(10);
-        GUILayout.Box(helmetTex, GUILayout.Width(100), GUILayout.Height(100));
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(10);
-
-        GUILayout.BeginHorizontal();
         GUILayout.Box(evaSuitTex, GUILayout.Width(100), GUILayout.Height(100));
-        GUILayout.Space(10);
-        GUILayout.Box(evaHelmetTex, GUILayout.Width(100), GUILayout.Height(100));
         GUILayout.EndHorizontal();
 
         GUILayout.Label(suit.Name);

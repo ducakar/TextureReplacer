@@ -28,45 +28,34 @@ namespace TextureReplacer
 {
   class Suit
   {
-    Texture2D[] levelBodies;
-    Texture2D[] levelHelmets;
+    Texture2D[] levelIvaBodies;
     Texture2D[] levelEvaBodies;
-    Texture2D[] levelEvaHelmets;
 
     public string Name;
     public Gender Gender;
 
-    public Texture2D BodyVeteran;
-    public Texture2D Body;
-    public Texture2D BodyNRM;
-    public Texture2D Helmet;
-    public Texture2D HelmetNRM;
-    public Texture2D Visor;
+    public Texture2D IvaBodyVeteran;
+    public Texture2D IvaBody;
+    public Texture2D IvaBodyNRM;
+    public Texture2D IvaVisor;
     public Texture2D EvaBody;
     public Texture2D EvaBodyNRM;
-    public Texture2D EvaHelmet;
     public Texture2D EvaVisor;
     public Texture2D EvaJetpack;
     public Texture2D EvaJetpackNRM;
 
-    public Texture2D GetBody(int level)
+    public Texture2D GetIvaBody(ProtoCrewMember kerbal)
     {
-      return level != 0 && levelBodies != null ? levelBodies[level - 1] : Body;
+      int level = kerbal.experienceLevel;
+      return level != 0 && levelIvaBodies != null ? levelIvaBodies[level - 1]
+        : kerbal.veteran ? IvaBodyVeteran ?? IvaBody
+        : IvaBody;
     }
 
-    public Texture2D GetHelmet(int level)
+    public Texture2D GetEvaBody(ProtoCrewMember kerbal)
     {
-      return level != 0 && levelHelmets != null ? levelHelmets[level - 1] : Helmet;
-    }
-
-    public Texture2D GetEvaSuit(int level)
-    {
+      int level = kerbal.experienceLevel;
       return level != 0 && levelEvaBodies != null ? levelEvaBodies[level - 1] : EvaBody;
-    }
-
-    public Texture2D GetEvaHelmet(int level)
-    {
-      return level != 0 && levelEvaHelmets != null ? levelEvaHelmets[level - 1] : EvaHelmet;
     }
 
     public bool SetTexture(string originalName, Texture2D texture)
@@ -75,39 +64,35 @@ namespace TextureReplacer
 
       switch (originalName) {
         case "kerbalMain":
-          BodyVeteran = BodyVeteran ?? texture;
+        case "orangeSuite_diffuse":
+          IvaBodyVeteran = IvaBodyVeteran ?? texture;
           return true;
 
         case "kerbalMainGrey":
-          Body = Body ?? texture;
+        case "paleBlueSuite_diffuse":
+          IvaBody = IvaBody ?? texture;
           return true;
 
         case "kerbalMainNRM":
-          BodyNRM = BodyNRM ?? texture;
+          IvaBodyNRM = IvaBodyNRM ?? texture;
           return true;
 
-        case "kerbalHelmetGrey":
-          Helmet = Helmet ?? texture;
-          return true;
-
-        case "kerbalHelmetNRM":
-          HelmetNRM = HelmetNRM ?? texture;
+        case "orangeSuite_normal":
+          IvaBodyNRM = IvaBodyNRM ?? texture;
+          EvaBodyNRM = EvaBodyNRM ?? texture;
           return true;
 
         case "kerbalVisor":
-          Visor = Visor ?? texture;
+          IvaVisor = IvaVisor ?? texture;
           return true;
 
         case "EVAtexture":
+        case "whiteSuite_diffuse":
           EvaBody = EvaBody ?? texture;
           return true;
 
         case "EVAtextureNRM":
           EvaBodyNRM = EvaBodyNRM ?? texture;
-          return true;
-
-        case "EVAhelmet":
-          EvaHelmet = EvaHelmet ?? texture;
           return true;
 
         case "EVAvisor":
@@ -129,22 +114,9 @@ namespace TextureReplacer
         case "kerbalMainGrey5":
           level = originalName.Last() - 0x30;
 
-          levelBodies = levelBodies ?? new Texture2D[5];
+          levelIvaBodies = levelIvaBodies ?? new Texture2D[5];
           for (int i = level - 1; i < 5; ++i) {
-            levelBodies[i] = texture;
-          }
-          return true;
-
-        case "kerbalHelmetGrey1":
-        case "kerbalHelmetGrey2":
-        case "kerbalHelmetGrey3":
-        case "kerbalHelmetGrey4":
-        case "kerbalHelmetGrey5":
-          level = originalName.Last() - 0x30;
-
-          levelHelmets = levelHelmets ?? new Texture2D[5];
-          for (int i = level - 1; i < 5; ++i) {
-            levelHelmets[i] = texture;
+            levelIvaBodies[i] = texture;
           }
           return true;
 
@@ -158,19 +130,6 @@ namespace TextureReplacer
           levelEvaBodies = levelEvaBodies ?? new Texture2D[5];
           for (int i = level - 1; i < 5; ++i) {
             levelEvaBodies[i] = texture;
-          }
-          return true;
-
-        case "EVAhelmet1":
-        case "EVAhelmet2":
-        case "EVAhelmet3":
-        case "EVAhelmet4":
-        case "EVAhelmet5":
-          level = originalName.Last() - 0x30;
-
-          levelEvaHelmets = levelEvaHelmets ?? new Texture2D[5];
-          for (int i = level - 1; i < 5; ++i) {
-            levelEvaHelmets[i] = texture;
           }
           return true;
 
