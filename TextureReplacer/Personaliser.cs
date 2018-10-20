@@ -44,10 +44,6 @@ namespace TextureReplacer
     // Backed-up personalised textures from main configuration files. These are used to initialise kerbals if a saved
     // game doesn't contain `TRScenario`.
     readonly ConfigNode customKerbalsNode = new ConfigNode();
-    // Helmet removal.
-    readonly Mesh[] helmetMesh = { null, null };
-    readonly Mesh[] visorMesh = { null, null };
-    bool isHelmetRemovalEnabled = true;
     // Atmospheric IVA suit parameters.
     bool isAtmSuitEnabled = true;
     double atmSuitPressure = 50.0;
@@ -68,11 +64,6 @@ namespace TextureReplacer
     // Class-specific suits.
     public readonly Dictionary<string, Suit> ClassSuits = new Dictionary<string, Suit>();
     public readonly Dictionary<string, Suit> DefaultClassSuits = new Dictionary<string, Suit>();
-
-    public bool IsHelmetRemovalEnabled {
-      get { return isHelmetRemovalEnabled; }
-      set { isHelmetRemovalEnabled = value; }
-    }
 
     public bool IsAtmSuitEnabled {
       get { return isAtmSuitEnabled; }
@@ -266,8 +257,6 @@ namespace TextureReplacer
 
               if (isEva) {
                 smr.enabled = needsSuit;
-              } else {
-                smr.sharedMesh = needsSuit ? helmetMesh[(int)kerbal.gender] : null;
               }
               break;
 
@@ -275,8 +264,6 @@ namespace TextureReplacer
             case "mesh_female_kerbalAstronaut01_visor":
               if (isEva) {
                 smr.enabled = needsSuit;
-              } else {
-                smr.sharedMesh = needsSuit ? visorMesh[(int)kerbal.gender] : null;
               }
 
               // Textures have to be replaced even when hidden since it may become visible later on situation change.
@@ -317,9 +304,7 @@ namespace TextureReplacer
     /// </summary>
     public void PersonaliseIva(Kerbal kerbal)
     {
-      bool needsSuit = !isHelmetRemovalEnabled || !IsSituationSafe(kerbal.InVessel);
-
-      PersonaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, needsSuit);
+      PersonaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, true);
     }
 
     /// <summary>
@@ -338,35 +323,6 @@ namespace TextureReplacer
         PersonaliseKerbal(evaPart, evaPart.protoModuleCrew[0], null, useEvaSuit);
       }
       return isDesiredSuitValid;
-    }
-
-    void UpdateIvaHelmets(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> action)
-    {
-      Vessel vessel = action.host;
-
-      if (!isHelmetRemovalEnabled || vessel == null) {
-        return;
-      }
-
-      foreach (Part part in vessel.parts.Where(p => p.internalModel != null)) {
-        Kerbal[] kerbals = part.internalModel.GetComponentsInChildren<Kerbal>();
-
-        if (kerbals.Length != 0) {
-          bool hideHelmets = IsSituationSafe(vessel);
-
-          foreach (Kerbal kerbal in kerbals.Where(k => k.showHelmet)) {
-            // `Kerbal.ShowHelmet(false)` irreversibly removes a helmet while
-            // `Kerbal.ShowHelmet(true)` has no effect at all. We need the following workaround.
-            foreach (SkinnedMeshRenderer smr in kerbal.helmetTransform.GetComponentsInChildren<SkinnedMeshRenderer>()) {
-              if (smr.name.EndsWith("helmet", StringComparison.Ordinal)) {
-                smr.sharedMesh = hideHelmets ? null : helmetMesh[(int)kerbal.protoCrewMember.gender];
-              } else if (smr.name.EndsWith("visor", StringComparison.Ordinal)) {
-                smr.sharedMesh = hideHelmets ? null : visorMesh[(int)kerbal.protoCrewMember.gender];
-              }
-            }
-          }
-        }
-      }
     }
 
     /// <summary>
@@ -544,7 +500,6 @@ namespace TextureReplacer
     /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
-      Util.Parse(rootNode.GetValue("isHelmetRemovalEnabled"), ref isHelmetRemovalEnabled);
       Util.Parse(rootNode.GetValue("isAtmSuitEnabled"), ref isAtmSuitEnabled);
       Util.Parse(rootNode.GetValue("atmSuitPressure"), ref atmSuitPressure);
       Util.AddLists(rootNode.GetValues("atmSuitBodies"), atmSuitBodies);
@@ -671,17 +626,6 @@ namespace TextureReplacer
       }
 
       foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>()) {
-        int genderIndex = (int)kerbal.protoCrewMember.gender;
-
-        // Save pointer to helmet & visor meshes so helmet removal can restore them.
-        foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>(true)) {
-          if (smr.name.EndsWith("helmet", StringComparison.Ordinal)) {
-            helmetMesh[genderIndex] = smr.sharedMesh;
-          } else if (smr.name.EndsWith("visor", StringComparison.Ordinal)) {
-            visorMesh[genderIndex] = smr.sharedMesh;
-          }
-        }
-
         // After na IVA space is initialised, suits are reset to these values. Replace stock textures with default ones.
         kerbal.textureStandard = DefaultSuit.IvaBody;
         kerbal.textureVeteran = DefaultSuit.IvaBodyVeteran;
@@ -717,16 +661,6 @@ namespace TextureReplacer
       }
     }
 
-    public void OnBeginFlight()
-    {
-      GameEvents.onVesselSituationChange.Add(UpdateIvaHelmets);
-    }
-
-    public void OnEndFlight()
-    {
-      GameEvents.onVesselSituationChange.Remove(UpdateIvaHelmets);
-    }
-
     public void OnLoadScenario(ConfigNode node)
     {
       gameKerbals.Clear();
@@ -735,7 +669,6 @@ namespace TextureReplacer
       LoadKerbalsMap(node.GetNode("Kerbals"));
       LoadSuitMap(node.GetNode("ClassSuits"), ClassSuits, DefaultClassSuits);
 
-      Util.Parse(node.GetValue("isHelmetRemovalEnabled"), ref isHelmetRemovalEnabled);
       Util.Parse(node.GetValue("isAtmSuitEnabled"), ref isAtmSuitEnabled);
     }
 
@@ -744,7 +677,6 @@ namespace TextureReplacer
       SaveKerbals(node.AddNode("Kerbals"));
       SaveSuitMap(ClassSuits, node.AddNode("ClassSuits"));
 
-      node.AddValue("isHelmetRemovalEnabled", isHelmetRemovalEnabled);
       node.AddValue("isAtmSuitEnabled", isAtmSuitEnabled);
     }
 

@@ -40,7 +40,6 @@ namespace TextureReplacer
     }
 
     TRReflectionUpdater reflectionUpdater;
-    bool hasFlightHandlers;
 
     public void Start()
     {
@@ -52,9 +51,6 @@ namespace TextureReplacer
 
       if (HighLogic.LoadedSceneIsFlight) {
         Replacer.Instance.OnBeginFlight();
-        Personaliser.Instance.OnBeginFlight();
-
-        hasFlightHandlers = true;
       }
 
       if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) &&
@@ -65,10 +61,6 @@ namespace TextureReplacer
 
     public void OnDestroy()
     {
-      if (hasFlightHandlers) {
-        Personaliser.Instance.OnEndFlight();
-      }
-
       if (reflectionUpdater != null) {
         Destroy(reflectionUpdater);
       }

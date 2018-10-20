@@ -283,9 +283,6 @@ namespace TextureReplacer
       GUILayout.EndHorizontal();
       GUILayout.Space(5);
 
-      personaliser.IsHelmetRemovalEnabled = GUILayout.Toggle(personaliser.IsHelmetRemovalEnabled,
-        "Remove IVA helmets in safe situations");
-
       personaliser.IsAtmSuitEnabled = GUILayout.Toggle(personaliser.IsAtmSuitEnabled,
         "Spawn Kerbals in IVA suits when in breathable atmosphere");
 

@@ -14,7 +14,6 @@ stock textures and customise your Kerbals. More specifically, it can:
 * replace stock textures with custom ones,
 * assign personalised head and suit textures for each Kerbal,
 * assign suits based on class and experience level,
-* remove IVA helmets in safe situations,
 * toggle between EVA suit and IVA suit without helmet in breathable atmosphere,
 * add reflections to parts and helmet visors,
 * generate missing mipmaps for PNG and JPEG model textures,
@@ -282,10 +281,11 @@ Known Issues
 Change Log
 ----------
 
-* 3.2.1
+* 3.3
     - updated for KSP 1.5
     - updated default configuration files
     - changed suit texture names to reflect suit model changes
+    - removed IVA helmet removal for safe situations
     - fixed transparency for non-textured visors
     - skin tweaks: removed teeth, softer eyelashes and fixed some artefacts
 * 3.2

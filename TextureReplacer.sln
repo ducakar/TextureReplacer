@@ -25,7 +25,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		version = 3.2
+		version = 3.3
 		Policies = $0
 		$0.TextStylePolicy = $1
 		$1.EolMarker = Unix
