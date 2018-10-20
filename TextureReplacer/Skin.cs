@@ -30,6 +30,7 @@ namespace TextureReplacer
     public string Name;
     public Gender Gender;
     public bool IsEyeless;
+    public bool IsDefault;
 
     public Texture2D Head;
     public Texture2D HeadNRM;

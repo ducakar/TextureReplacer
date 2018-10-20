@@ -33,6 +33,7 @@ namespace TextureReplacer
 
     public string Name;
     public Gender Gender;
+    public bool IsDefault;
 
     public Texture2D IvaBodyVeteran;
     public Texture2D IvaBody;
@@ -63,13 +64,28 @@ namespace TextureReplacer
       int level;
 
       switch (originalName) {
-        case "kerbalMain":
         case "orangeSuite_diffuse":
+          IvaBodyVeteran = texture;
+          return true;
+
+        case "paleBlueSuite_diffuse":
+          IvaBody = texture;
+          return true;
+
+        case "whiteSuite_diffuse":
+          EvaBody = texture;
+          return true;
+
+        case "orangeSuite_normal":
+          IvaBodyNRM = texture;
+          EvaBodyNRM = texture;
+          return true;
+
+        case "kerbalMain":
           IvaBodyVeteran = IvaBodyVeteran ?? texture;
           return true;
 
         case "kerbalMainGrey":
-        case "paleBlueSuite_diffuse":
           IvaBody = IvaBody ?? texture;
           return true;
 
@@ -77,17 +93,11 @@ namespace TextureReplacer
           IvaBodyNRM = IvaBodyNRM ?? texture;
           return true;
 
-        case "orangeSuite_normal":
-          IvaBodyNRM = IvaBodyNRM ?? texture;
-          EvaBodyNRM = EvaBodyNRM ?? texture;
-          return true;
-
         case "kerbalVisor":
           IvaVisor = IvaVisor ?? texture;
           return true;
 
         case "EVAtexture":
-        case "whiteSuite_diffuse":
           EvaBody = EvaBody ?? texture;
           return true;
 

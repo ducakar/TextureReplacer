@@ -53,9 +53,12 @@ namespace TextureReplacer
     public static Personaliser Instance { get; private set; }
 
     // Default textures (from `Default/`).
-    public readonly Skin[] DefaultSkin = { new Skin { Name = "DEFAULT" }, new Skin { Name = "DEFAULT" } };
-    public readonly Suit DefaultSuit = new Suit { Name = "DEFAULT" };
-    public readonly Suit VintageSuit = new Suit { Name = "VINTAGE" };
+    public readonly Skin[] DefaultSkin = {
+      new Skin { Name = "DEFAULT", IsDefault = true },
+      new Skin { Name = "DEFAULT", IsDefault = true }
+    };
+    public readonly Suit DefaultSuit = new Suit { Name = "DEFAULT", IsDefault = true };
+    public readonly Suit VintageSuit = new Suit { Name = "VINTAGE", IsDefault = true };
 
     // All Kerbal textures, including excluded by configuration.
     public readonly List<Skin> Skins = new List<Skin>();
@@ -210,11 +213,13 @@ namespace TextureReplacer
             case "headMesh02":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-              newTexture = skin.Head;
-              newNormalMap = skin.HeadNRM;
+              if (!skin.IsDefault) {
+                newTexture = skin.Head;
+                newNormalMap = skin.HeadNRM;
 
-              if (newNormalMap != null) {
-                newShader = Replacer.BumpedHeadShader;
+                if (newNormalMap != null) {
+                  newShader = Replacer.BumpedHeadShader;
+                }
               }
               break;
 
@@ -227,19 +232,11 @@ namespace TextureReplacer
 
             case "body01":
             case "mesh_female_kerbalAstronaut01_body01":
+              // Setting the suit explicitly is necessary for two reasons: to fix IVA suits after KSP resetting them to
+              // the stock ones all the time and to fix the switch from non-default to default texture during EVA suit
+              // toggle.
               newTexture = suitTexture;
               newNormalMap = suitNormalMap;
-
-              if (newTexture == null) {
-                // Setting the suit explicitly is necessary for two reasons: to fix IVA suits after KSP resetting them
-                // to the stock ones all the time and to fix the switch from non-default to default texture during EVA
-                // suit toggle.
-                newTexture = isEvaSuit ? defaultSuit.GetEvaSuit(kerbal) : defaultSuit.GetIvaSuit(kerbal);
-              }
-
-              if (newNormalMap == null) {
-                newNormalMap = isEvaSuit ? defaultSuit.EvaBodyNRM : defaultSuit.IvaBodyNRM;
-              }
 
               // Update textures in Kerbal IVA object since KSP resets them to these values a few frames later.
               if (!isEva) {
@@ -252,11 +249,13 @@ namespace TextureReplacer
 
             case "helmet":
             case "mesh_female_kerbalAstronaut01_helmet":
-              newTexture = suitTexture;
-              newNormalMap = suitNormalMap;
-
               if (isEva) {
                 smr.enabled = needsSuit;
+              }
+
+              if (!suit.IsDefault) {
+                newTexture = suitTexture;
+                newNormalMap = suitNormalMap;
               }
               break;
 
@@ -266,11 +265,13 @@ namespace TextureReplacer
                 smr.enabled = needsSuit;
               }
 
-              // Textures have to be replaced even when hidden since it may become visible later on situation change.
-              newTexture = isEva ? suit.EvaVisor : suit.IvaVisor;
+              if (!suit.IsDefault) {
+                // Textures have to be replaced even when hidden since it may become visible later on situation change.
+                newTexture = isEva ? suit.EvaVisor : suit.IvaVisor;
 
-              if (newTexture != null) {
-                material.color = Color.white;
+                if (newTexture != null) {
+                  material.color = Color.white;
+                }
               }
               break;
 

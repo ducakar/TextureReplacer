@@ -5,6 +5,7 @@ TextureReplacer
 
 * [Forum thread](http://forum.kerbalspaceprogram.com/index.php?/topic/96851-/)
 * [GitHub page](https://github.com/ducakar/TextureReplacer)
+* [Default texture pack](https://github.com/ducakar/TextureReplacer-pack)
 * [CurseForge page](https://kerbal.curseforge.com/projects/texturereplacer)
 * [SpaceDock page](https://spacedock.info/mod/1824/TextureReplacer)
 
@@ -273,7 +274,7 @@ Notes
 Known Issues
 ------------
 
-* Stock vintage veteran suits don't work.
+* For vintage suits, EVA suit is used for IVA.
 * Reflections disable part highlighting along reflective surfaces.
 * Only the top face of the atmospheric skybox is reflected.
 

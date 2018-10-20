@@ -116,7 +116,7 @@ namespace TextureReplacer
         NavBall hudNavball = UnityEngine.Object.FindObjectOfType<NavBall>();
         if (hudNavball != null) {
           Material material = hudNavball.navBall.GetComponent<Renderer>().sharedMaterial;
-          material.SetTexture(Util.MainTexProperty, hudNavBallTexture);
+          material.SetTexture(Util.MainTextureProperty, hudNavBallTexture);
         }
       }
 
@@ -124,7 +124,7 @@ namespace TextureReplacer
         InternalNavBall ivaNavball = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
         if (ivaNavball != null) {
           Material material = ivaNavball.navBall.GetComponent<Renderer>().sharedMaterial;
-          material.SetTexture(Util.MainTexProperty, ivaNavBallTexture);
+          material.mainTexture = ivaNavBallTexture;
         }
       }
     }
@@ -284,8 +284,8 @@ namespace TextureReplacer
     /// </summary>
     public void Load()
     {
-      foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>()) {
-        if (skinningQuality != SkinQuality.Auto) {
+      if (skinningQuality != SkinQuality.Auto) {
+        foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>()) {
           smr.quality = skinningQuality;
         }
       }

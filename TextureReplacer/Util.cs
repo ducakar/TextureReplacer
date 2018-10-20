@@ -33,6 +33,7 @@ namespace TextureReplacer
 
     public const string Directory = "TextureReplacer/";
     public static readonly int MainTexProperty = Shader.PropertyToID("_MainTex");
+    public static readonly int MainTextureProperty = Shader.PropertyToID("_MainTexture");
     public static readonly int BumpMapProperty = Shader.PropertyToID("_BumpMap");
     public static readonly int CubeProperty = Shader.PropertyToID("_Cube");
     public static readonly int ReflectColorProperty = Shader.PropertyToID("_ReflectColor");
