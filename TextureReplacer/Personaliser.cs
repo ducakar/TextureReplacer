@@ -157,11 +157,11 @@ namespace TextureReplacer
     /// <summary>
     /// Replace textures on a Kerbal model.
     /// </summary>
-    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, Part pod, bool needsSuit)
+    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, Part pod, bool hasHelmet)
     {
       Appearance appearance = GetAppearance(kerbal);
       bool isEva = pod == null;
-      bool isEvaSuit = isEva && needsSuit;
+      bool isEvaSuit = isEva && hasHelmet;
       bool isVintage = kerbal.suit == ProtoCrewMember.KerbalSuit.Vintage;
 
       Skin skin = GetKerbalSkin(kerbal, appearance);
@@ -177,8 +177,8 @@ namespace TextureReplacer
       Texture2D suitNormalMap = isEvaSuit ? suit.EvaBodyNRM : suit.IvaBodyNRM;
 
       if (isEva) {
-        flag.GetComponent<Renderer>().enabled = needsSuit;
-        parachute.GetComponent<Renderer>().enabled = needsSuit;
+        flag.GetComponent<Renderer>().enabled = hasHelmet;
+        parachute.GetComponent<Renderer>().enabled = hasHelmet;
       }
 
       // We must include hidden meshes, since flares are hidden when light is turned off.
@@ -188,10 +188,9 @@ namespace TextureReplacer
 
         // Parachute backpack, flag decals, headlight flares and thruster jets.
         if (smr == null) {
-          renderer.enabled = needsSuit;
+          renderer.enabled = hasHelmet;
         } else {
           Material material = renderer.material;
-          Shader newShader = null;
           Texture2D newTexture = null;
           Texture2D newNormalMap = null;
 
@@ -218,7 +217,7 @@ namespace TextureReplacer
                 newNormalMap = skin.HeadNRM;
 
                 if (newNormalMap != null) {
-                  newShader = Replacer.BumpedHeadShader;
+                  material.shader = Replacer.BumpedHeadShader;
                 }
               }
               break;
@@ -250,23 +249,23 @@ namespace TextureReplacer
             case "helmet":
             case "mesh_female_kerbalAstronaut01_helmet":
               if (isEva) {
-                smr.enabled = needsSuit;
+                smr.enabled = hasHelmet;
               }
-
-              if (!suit.IsDefault) {
-                newTexture = suitTexture;
-                newNormalMap = suitNormalMap;
+              if (hasHelmet) {
+                if (!suit.IsDefault) {
+                  newTexture = suitTexture;
+                  newNormalMap = suitNormalMap;
+                }
               }
               break;
 
             case "visor":
             case "mesh_female_kerbalAstronaut01_visor":
               if (isEva) {
-                smr.enabled = needsSuit;
+                smr.enabled = hasHelmet;
               }
-
-              if (!suit.IsDefault) {
-                // Textures have to be replaced even when hidden since it may become visible later on situation change.
+              if (hasHelmet) {
+                // Visor texture has to be replaced every time.
                 newTexture = isEva ? suit.EvaVisor : suit.IvaVisor;
 
                 if (newTexture != null) {
@@ -277,9 +276,9 @@ namespace TextureReplacer
 
             default: // Jetpack.
               if (isEva) {
-                smr.enabled = needsSuit;
+                smr.enabled = hasHelmet;
 
-                if (needsSuit) {
+                if (hasHelmet) {
                   newTexture = suit.EvaJetpack;
                   newNormalMap = suit.EvaJetpackNRM;
                 }
@@ -287,9 +286,6 @@ namespace TextureReplacer
               break;
           }
 
-          if (newShader != null) {
-            material.shader = newShader;
-          }
           if (newTexture != null) {
             material.mainTexture = newTexture;
           }
@@ -593,6 +589,9 @@ namespace TextureReplacer
 
       // Visor needs to be replaced every time, not only on the proto-Kerbal model, so the visor from the default suit
       // must be set on all suits without a custom visor.
+      VintageSuit.IvaVisor = VintageSuit.IvaVisor ?? DefaultSuit.IvaVisor;
+      VintageSuit.EvaVisor = VintageSuit.EvaVisor ?? DefaultSuit.EvaVisor;
+
       foreach (var suit in Suits) {
         suit.IvaVisor = suit.IvaVisor ?? DefaultSuit.IvaVisor;
         suit.EvaVisor = suit.EvaVisor ?? DefaultSuit.EvaVisor;

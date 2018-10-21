@@ -64,7 +64,7 @@ namespace TextureReplacer
           transform = transform.Find("model01");
 
           SkinnedMeshRenderer visor = transform.GetComponentsInChildren<SkinnedMeshRenderer>(true)
-            .FirstOrDefault(m => m.name == "visor");
+            .FirstOrDefault(m => m.name == "visor" || m.name == "mesh_female_kerbalAstronaut01_visor");
 
           if (visor != null) {
             Material material = visor.material;

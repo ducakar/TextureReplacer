@@ -144,37 +144,42 @@ namespace TextureReplacer
       Kerbal femaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
       Part maleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
       Part femaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
+      Part maleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
+      Part femaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAfemaleVintage").partPrefab;
 
       if (logKerbalHierarchy) {
         log.Print("Male IVA Hierarchy");
         Util.LogDownHierarchy(maleIva.transform);
         log.Print("Male EVA Hierarchy");
         Util.LogDownHierarchy(maleEva.transform);
+        log.Print("Male EVA Vintage Hierarchy");
+        Util.LogDownHierarchy(maleEvaVintage.transform);
         log.Print("Female IVA Hierarchy");
         Util.LogDownHierarchy(femaleIva.transform);
         log.Print("Female EVA Hierarchy");
         Util.LogDownHierarchy(femaleEva.transform);
+        log.Print("Female EVA Vintage Hierarchy");
+        Util.LogDownHierarchy(femaleEvaVintage.transform);
       }
 
       SkinnedMeshRenderer[][] maleMeshes = {
         maleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        maleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+        maleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
+        maleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true)
       };
 
       SkinnedMeshRenderer[][] femaleMeshes = {
         femaleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        femaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+        femaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
+        femaleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true)
       };
 
       // Male materials to be copied to females to fix tons of female issues (missing normal maps, non-bumpmapped
       // shaders, missing teeth texture ...)
       Material headMaterial = null;
-      Material[] suitMaterials = { null, null };
-      Material[] helmetMaterials = { null, null };
-      Material[] visorMaterials = { null, null };
-      Material jetpackMaterial = null;
+      Material[] visorMaterials = { null, null, null };
 
-      for (int i = 0; i < 2; ++i) {
+      for (int i = 0; i < 3; ++i) {
         foreach (SkinnedMeshRenderer smr in maleMeshes[i]) {
           // Many meshes share the same material, so it suffices to enumerate only one mesh for each material.
           switch (smr.name) {
@@ -189,18 +194,6 @@ namespace TextureReplacer
               headMaterial = smr.sharedMaterial;
               break;
 
-            case "body01":
-              suitMaterials[i] = smr.sharedMaterial;
-              break;
-
-            case "helmet":
-              helmetMaterials[i] = smr.sharedMaterial;
-              break;
-
-            case "jetpack_base01":
-              jetpackMaterial = smr.sharedMaterial;
-              break;
-
             case "visor":
               // It will be raplaced with reflective shader later, if reflections are enabled.
               if (smr.transform.root == maleIva.transform && ivaVisorTexture != null) {
@@ -208,6 +201,10 @@ namespace TextureReplacer
                 smr.sharedMaterial.mainTexture = ivaVisorTexture;
                 smr.sharedMaterial.color = Color.white;
               } else if (smr.transform.root == maleEva.transform && evaVisorTexture != null) {
+                smr.sharedMaterial.shader = BasicVisorShader;
+                smr.sharedMaterial.mainTexture = evaVisorTexture;
+                smr.sharedMaterial.color = Color.white;
+              } else if (smr.transform.root == maleEvaVintage.transform && evaVisorTexture != null) {
                 smr.sharedMaterial.shader = BasicVisorShader;
                 smr.sharedMaterial.mainTexture = evaVisorTexture;
                 smr.sharedMaterial.color = Color.white;
@@ -219,7 +216,7 @@ namespace TextureReplacer
         }
       }
 
-      for (int i = 0; i < 2; ++i) {
+      for (int i = 0; i < 3; ++i) {
         foreach (SkinnedMeshRenderer smr in femaleMeshes[i]) {
           // Here we must enumarate all meshes wherever we are replacing the material.
           switch (smr.name) {
@@ -229,9 +226,10 @@ namespace TextureReplacer
                 // Replace with bump-mapped shader so normal maps for heads will work.
                 smr.sharedMaterial.shader = BumpedHeadShader;
                 smr.sharedMaterial.SetTexture(Util.BumpMapProperty, femaleHeadNormalMap);
+              } else {
+                // Some female heads use specular shader. Fix it.
+                smr.sharedMaterial.shader = headMaterial.shader;
               }
-
-              smr.sharedMaterial = headMaterial;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
@@ -243,18 +241,7 @@ namespace TextureReplacer
               smr.sharedMaterial = headMaterial;
               break;
 
-            case "mesh_female_kerbalAstronaut01_body01":
-              smr.sharedMaterial = suitMaterials[i];
-              break;
-
-            case "mesh_female_kerbalAstronaut01_helmet":
-              smr.sharedMaterial = helmetMaterials[i];
-              break;
-
-            case "jetpack_base01":
-              smr.sharedMaterial = jetpackMaterial;
-              break;
-
+            case "visor":
             case "mesh_female_kerbalAstronaut01_visor":
               smr.sharedMaterial = visorMaterials[i];
               break;
