@@ -16,10 +16,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 * assign personalised head and suit textures for each Kerbal,
 * assign suits based on class and experience level,
 * toggle between EVA suit and IVA suit without helmet in breathable atmosphere,
-* add reflections to parts and helmet visors,
-* generate missing mipmaps for PNG and JPEG model textures,
-* compress uncompressed textures from `GameData/` to shrink textures in VRAM,
-* unload textures from RAM after KSP finishes loading to reduce RAM usage and
+* add reflections to parts and helmet visors and
 * change bilinear texture filter to trilinear to improve mipmap quality.
 
 Special thanks to:
@@ -273,7 +270,7 @@ Notes
 Known Issues
 ------------
 
-* For vintage suits, EVA suit is used for IVA.
+* When using stock vintage suits, EVA suit is used for IVA.
 * Reflections disable part highlighting along reflective surfaces.
 * Only the top face of the atmospheric skybox is reflected.
 
@@ -282,12 +279,16 @@ Change Log
 ----------
 
 * 3.4
+    - removed texture compression, mipmap generation and unloading
     - unified navball textures as `Default/NavBall`
+    - added vintage EVA models to `logKerbalHierarchy` dumps
+    - fixed visor texture replacement and visor reflections for females
 * 3.3
     - updated for KSP 1.5
     - updated default configuration files
     - changed suit texture names to reflect suit model changes
     - removed IVA helmet removal for safe situations
+    - added normal maps to `logKerbalHierarchy` dumps
     - fixed transparency for non-textured visors
     - skin tweaks: removed teeth, softer eyelashes and fixed some artefacts
 * 3.2
