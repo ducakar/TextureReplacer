@@ -23,7 +23,7 @@
 namespace TextureReplacer
 {
   /// <summary>
-  /// This class takes cares of EVA Kerbal to assign appropriate suit on creation, watch for atmospehere charges (to put
+  /// This class takes cares of EVA Kerbal to assign appropriate suit on creation, watch for atmosphere charges (to put
   /// on spacesuit of it leaves breathable atmosphere) and enables "Toggle EVA Suit" action.
   ///
   /// It is added to EVA kerbal by Personaliser so it doesn't need to be public.

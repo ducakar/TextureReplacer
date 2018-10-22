@@ -1,0 +1,12 @@
+{
+  "FormattingOptions": {
+    "TabSize": 8,
+    "IndentationSize": 2,
+    "NewLinesForBracesInProperties": false,
+    "NewLinesForBracesInControlBlocks": false,
+    "NewLinesForBracesInObjectCollectionArrayInitializers": false,
+    "NewLineForElse": false,
+    "NewLineForCatch": false,
+    "NewLineForFinally": false
+  }
+}

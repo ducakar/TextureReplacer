@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -38,14 +37,6 @@ namespace TextureReplacer
     public static readonly int CubeProperty = Shader.PropertyToID("_Cube");
     public static readonly int ReflectColorProperty = Shader.PropertyToID("_ReflectColor");
     public static readonly System.Random Random = new System.Random();
-
-    /// <summary>
-    /// True iff `i` is a power of two.
-    /// </summary>
-    public static bool IsPow2(int i)
-    {
-      return i > 0 && (i & (i - 1)) == 0;
-    }
 
     /// <summary>
     /// Split a space- and/or comma-separated configuration file value into its tokens.
@@ -115,19 +106,7 @@ namespace TextureReplacer
     }
 
     /// <summary>
-    /// Add all space-or-comma-separated regex values from listInstances strings to jointList.
-    /// </summary>
-    public static void AddRELists(string[] listInstances, ICollection<Regex> jointList)
-    {
-      foreach (string listInstance in listInstances) {
-        foreach (string item in SplitConfigValue(listInstance)) {
-          jointList.Add(new Regex(item));
-        }
-      }
-    }
-
-    /// <summary>
-    /// Print hierarchy under a fransform.
+    /// Print hierarchy under a transform.
     /// </summary>
     public static void LogDownHierarchy(Transform tf, int indent = 0)
     {
@@ -160,6 +139,7 @@ namespace TextureReplacer
       }
     }
 
+#if false
     /// <summary>
     /// Print hierarchy from a transform up to the root.
     /// </summary>
@@ -179,5 +159,6 @@ namespace TextureReplacer
         }
       }
     }
+#endif
   }
 }

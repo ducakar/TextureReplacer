@@ -21,7 +21,7 @@ stock textures and customise your Kerbals. More specifically, it can:
 
 Special thanks to:
 
-* RangeMachine for contributing reflection shaders and maintaing the mod in my
+* RangeMachine for contributing reflection shaders and maintaining the mod in my
   absence.
 * rbray89 who contributed a reflective visor shader and for Active Texture
   Management and Visual Enhancements where some code has been borrowed from,
@@ -31,7 +31,7 @@ Special thanks to:
   determination and role-based suit assignment,
 * Razchek and Starwaster for Reflection Plugin where I learnt how to implement
   reflections,
-* sarbian for fixing an issue with non-mupliple-of-4 texture dimensions,
+* sarbian for fixing an issue with non-multiple-of-4 texture dimensions,
 * therealcrow999 for testing and benchmarking this plugin,
 * Ippo343 for contributing KSP-AVC configuration,
 * JPLRepo for contributing DeepFreeze compatibility fixes,
@@ -153,12 +153,12 @@ reflections onto the windows of Mk1-2 pod:
 There are several parameters, all optional:
 
 * `shader`: Most shaders should be automatically mapped to their reflective
-  counterparts. In some cases, however, thare are no reflective version of a
+  counterparts. In some cases, however, there are no reflective version of a
   shader, so you will have to manually specify appropriate shader.
 * `colour`: Reflection is pre-multiplied by this RGB value before added to the
   material. "0.5 0.5 0.5" by default.
 * `interval`: Once in how many steps the reflection is updated. "1" by default.
-* `meshes`: Space- and/or comma-sparated list of mesh names where to apply
+* `meshes`: Space- and/or comma-separated list of mesh names where to apply
   reflections. Reflection is applied to whole part if this parameter is empty or
   non-existent. You may find `logReflectiveMeshes` configuration option very
   helpful as it prints names of all meshes for each part with `TRReflection`
@@ -293,7 +293,7 @@ Change Log
     - skin tweaks: removed teeth, softer eyelashes and fixed some artefacts
 * 3.2
     - added Veteran and Vintage [suit] toggles in GUI
-    - removed leagacy females option
+    - removed legacy females option
     - removed static reflections
     - removed cabin-specific suits
     - removed support for old, non-existent mods from configuration
@@ -430,7 +430,7 @@ Change Log
     - cabin suits are now persistent until embarking another capsule
     - changed experiance-based suit assignment to work with stock exp. traits
       rather than KerbalStats exp.
-    - completely changed settings for experiance-based suits
+    - completely changed settings for experience-based suits
     - removed KerbalStats support
     - removed `headMultiplier` and `suitMultiplier` settings
 * 2.0.2

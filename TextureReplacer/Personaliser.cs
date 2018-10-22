@@ -74,14 +74,6 @@ namespace TextureReplacer
     }
 
     /// <summary>
-    /// Whether a vessel is in a "safe" situation, so Kerbals don't need helmets (i.e. landed/splashed or in orbit).
-    /// </summary>
-    static bool IsSituationSafe(Vessel vessel)
-    {
-      return vessel.situation != Vessel.Situations.FLYING && vessel.situation != Vessel.Situations.SUB_ORBITAL;
-    }
-
-    /// <summary>
     /// Whether the atmosphere is breathable.
     /// </summary>
     public bool IsAtmBreathable()

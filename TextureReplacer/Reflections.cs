@@ -201,7 +201,6 @@ namespace TextureReplacer
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
     };
-    static readonly Shader TransparentSpecularShader = Shader.Find("Transparent/Specular");
 
     readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflection camera.
@@ -229,7 +228,7 @@ namespace TextureReplacer
         camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).GetComponent<Camera>();
         camera.enabled = false;
         camera.clearFlags = CameraClearFlags.Depth;
-        // Any smaller number and visors will refect internals of helmets.
+        // Any smaller number and visors will reflect internals of helmets.
         camera.nearClipPlane = 0.125f;
         camera.layerCullDistances = CullDistances;
       }
@@ -288,13 +287,13 @@ namespace TextureReplacer
       }
       string shadersPath = IOUtils.GetFilePathFor(GetType(), shadersFileName);
 
-      AssetBundle shadersBoundle = null;
+      AssetBundle shadersBundle = null;
       try {
-        shadersBoundle = AssetBundle.LoadFromFile(shadersPath);
-        if (shadersBoundle == null) {
+        shadersBundle = AssetBundle.LoadFromFile(shadersPath);
+        if (shadersBundle == null) {
           log.Print("Failed to load shader asset file: {0}", shadersPath);
         } else {
-          visorShader = shadersBoundle.LoadAsset<Shader>("assets/visor.shader");
+          visorShader = shadersBundle.LoadAsset<Shader>("assets/visor.shader");
           if (visorShader == null) {
             log.Print("Visor shader missing in the asset file");
           } else {
@@ -304,8 +303,8 @@ namespace TextureReplacer
       } catch (System.Exception ex) {
         log.Print("Visor shader loading failed: {0}", ex);
       } finally {
-        if (shadersBoundle != null) {
-          shadersBoundle.Unload(false);
+        if (shadersBundle != null) {
+          shadersBundle.Unload(false);
         }
       }
 
