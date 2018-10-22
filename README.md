@@ -281,7 +281,7 @@ Change Log
 * 3.4
     - removed texture compression, mipmap generation and unloading
     - unified navball textures as `Default/NavBall`
-    - added vintage EVA models to `logKerbalHierarchy` dumps
+    - added vintage EVA models and material names to `logKerbalHierarchy` dumps
     - fixed visor texture replacement and visor reflections for females
 * 3.3
     - updated for KSP 1.5
@@ -292,7 +292,7 @@ Change Log
     - fixed transparency for non-textured visors
     - skin tweaks: removed teeth, softer eyelashes and fixed some artefacts
 * 3.2
-    - added Veteran and Vintage [suit] toggles in GUI
+    - added Veteran and Vintage suit toggles in GUI
     - removed legacy females option
     - removed static reflections
     - removed cabin-specific suits

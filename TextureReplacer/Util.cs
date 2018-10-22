@@ -123,13 +123,14 @@ namespace TextureReplacer
         Debug.Log(sIndent + " * " + c);
 
         if (c is Renderer r) {
-          Debug.Log(sIndent + "   shader:  " + r.material.shader);
+          Debug.Log(sIndent + "   material: " + r.material.name);
+          Debug.Log(sIndent + "   shader:   " + r.material.shader);
 
           if (r.material.HasProperty(MainTexProperty)) {
-            Debug.Log(sIndent + "   maintex: " + r.material.GetTexture(MainTexProperty));
+            Debug.Log(sIndent + "   maintex:  " + r.material.GetTexture(MainTexProperty));
           }
           if (r.material.HasProperty(BumpMapProperty)) {
-            Debug.Log(sIndent + "   bumpmap: " + r.material.GetTexture(BumpMapProperty));
+            Debug.Log(sIndent + "   bumpmap:  " + r.material.GetTexture(BumpMapProperty));
           }
         }
       }
@@ -153,8 +154,9 @@ namespace TextureReplacer
           Debug.Log(" * " + c);
 
           if (c is Renderer r) {
-            Debug.Log("   shader:  " + r.material.shader);
-            Debug.Log("   texture: " + r.material.mainTexture);
+            Debug.Log("   material: " + r.material.name);
+            Debug.Log("   shader:   " + r.material.shader);
+            Debug.Log("   texture:  " + r.material.mainTexture);
           }
         }
       }
