@@ -106,61 +106,50 @@ namespace TextureReplacer
     }
 
     /// <summary>
-    /// Print hierarchy under a transform.
+    /// Print transform node with its attached objects.
     /// </summary>
-    public static void LogDownHierarchy(Transform tf, int indent = 0)
+    public static void LogTransform(Transform tf, string indent = "")
     {
-      string sIndent = "";
-      for (int i = 0; i < indent; ++i) {
-        sIndent += "  ";
-      }
-
       if (tf.gameObject != null) {
-        Debug.Log(sIndent + "- " + tf.gameObject.name + ": " + tf.gameObject.GetType());
+        Debug.Log(indent + "* " + tf.gameObject.name + ": " + tf.gameObject.GetType());
       }
-
       foreach (Component c in tf.GetComponents<Component>()) {
-        Debug.Log(sIndent + " * " + c);
+        Debug.Log(indent + " - " + c);
 
         if (c is Renderer r) {
-          Debug.Log(sIndent + "   material: " + r.material.name);
-          Debug.Log(sIndent + "   shader:   " + r.material.shader);
+          Debug.Log(indent + "   material: " + r.material.name);
+          Debug.Log(indent + "   shader:   " + r.material.shader);
 
           if (r.material.HasProperty(MainTexProperty)) {
-            Debug.Log(sIndent + "   maintex:  " + r.material.GetTexture(MainTexProperty));
+            Debug.Log(indent + "   maintex:  " + r.material.GetTexture(MainTexProperty));
           }
           if (r.material.HasProperty(BumpMapProperty)) {
-            Debug.Log(sIndent + "   bumpmap:  " + r.material.GetTexture(BumpMapProperty));
+            Debug.Log(indent + "   bumpmap:  " + r.material.GetTexture(BumpMapProperty));
           }
         }
       }
+    }
+
+    /// <summary>
+    /// Print hierarchy under a transform.
+    /// </summary>
+    public static void LogDownHierarchy(Transform tf, string indent = "")
+    {
+      LogTransform(tf, indent);
 
       for (int i = 0; i < tf.childCount; ++i) {
-        LogDownHierarchy(tf.GetChild(i), indent + 1);
+        LogDownHierarchy(tf.GetChild(i), indent + "  ");
       }
     }
 
-#if false
     /// <summary>
     /// Print hierarchy from a transform up to the root.
     /// </summary>
-    public static void LogUpHierarchy(Transform tf)
+    public static void LogUpHierarchy(Transform tf, string indent = "")
     {
       for (; tf != null; tf = tf.parent) {
-        if (tf.gameObject != null) {
-          Debug.Log("+ " + tf.gameObject.name + ": " + tf.gameObject.GetType());
-        }
-        foreach (Component c in tf.GetComponents<Component>()) {
-          Debug.Log(" * " + c);
-
-          if (c is Renderer r) {
-            Debug.Log("   material: " + r.material.name);
-            Debug.Log("   shader:   " + r.material.shader);
-            Debug.Log("   texture:  " + r.material.mainTexture);
-          }
-        }
+        LogTransform(tf, indent);
       }
     }
-#endif
   }
 }
