@@ -149,11 +149,9 @@ namespace TextureReplacer
     /// <summary>
     /// Replace textures on a Kerbal model.
     /// </summary>
-    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, Part pod, bool hasHelmet)
+    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, bool isEva, bool useEvaSuit)
     {
       Appearance appearance = GetAppearance(kerbal);
-      bool isEva = pod == null;
-      bool isEvaSuit = isEva && hasHelmet;
       bool isVintage = kerbal.suit == ProtoCrewMember.KerbalSuit.Vintage;
 
       Skin skin = GetKerbalSkin(kerbal, appearance);
@@ -165,12 +163,16 @@ namespace TextureReplacer
       Transform flag = isEva ? component.transform.Find("model/kbEVA_flagDecals") : null;
       Transform parachute = isEva ? component.transform.Find("model/EVAparachute/base") : null;
 
-      Texture2D suitTexture = isEvaSuit ? suit.GetEvaSuit(kerbal) : suit.GetIvaSuit(kerbal);
-      Texture2D suitNormalMap = isEvaSuit ? suit.EvaBodyNRM : suit.IvaBodyNRM;
+      // We determine body/helmet texture here to avoid code duplication in the following switch.
+      // Setting the suit explicitly -- even when default -- is necessary for two reasons: to fix IVA suits after KSP
+      // resetting them to the stock ones all the time and to fix the switch to default texture on start of EVA walk or
+      // EVA suit toggle.
+      Texture2D suitTexture = suit.GetSuit(useEvaSuit, kerbal) ?? defaultSuit.GetSuit(useEvaSuit, kerbal);
+      Texture2D suitNormalMap = suit.GetSuitNRM(useEvaSuit) ?? defaultSuit.GetSuitNRM(useEvaSuit);
 
       if (isEva) {
-        flag.GetComponent<Renderer>().enabled = hasHelmet;
-        parachute.GetComponent<Renderer>().enabled = hasHelmet;
+        flag.GetComponent<Renderer>().enabled = useEvaSuit;
+        parachute.GetComponent<Renderer>().enabled = useEvaSuit;
       }
 
       // We must include hidden meshes, since flares are hidden when light is turned off.
@@ -180,7 +182,7 @@ namespace TextureReplacer
 
         // Parachute backpack, flag decals, headlight flares and thruster jets.
         if (smr == null) {
-          renderer.enabled = hasHelmet;
+          renderer.enabled = useEvaSuit;
         } else {
           Material material = renderer.material;
           Texture2D newTexture = null;
@@ -223,16 +225,12 @@ namespace TextureReplacer
 
             case "body01":
             case "mesh_female_kerbalAstronaut01_body01":
-              // Setting the suit explicitly is necessary for two reasons: to fix IVA suits after KSP resetting them to
-              // the stock ones all the time and to fix the switch from non-default to default texture during EVA suit
-              // toggle.
               newTexture = suitTexture;
               newNormalMap = suitNormalMap;
 
               // Update textures in Kerbal IVA object since KSP resets them to these values a few frames later.
-              if (!isEva) {
-                var kerbalIva = (Kerbal)component;
-
+              var kerbalIva = component as Kerbal;
+              if (kerbalIva != null) {
                 kerbalIva.textureStandard = newTexture;
                 kerbalIva.textureVeteran = newTexture;
               }
@@ -241,24 +239,21 @@ namespace TextureReplacer
             case "helmet":
             case "mesh_female_kerbalAstronaut01_helmet":
               if (isEva) {
-                smr.enabled = hasHelmet;
+                smr.enabled = useEvaSuit;
               }
-              if (hasHelmet) {
-                if (!suit.IsDefault) {
-                  newTexture = suitTexture;
-                  newNormalMap = suitNormalMap;
-                }
-              }
+
+              newTexture = suitTexture;
+              newNormalMap = suitNormalMap;
               break;
 
             case "visor":
             case "mesh_female_kerbalAstronaut01_visor":
               if (isEva) {
-                smr.enabled = hasHelmet;
+                smr.enabled = useEvaSuit;
               }
-              if (hasHelmet) {
+              if (useEvaSuit) {
                 // Visor texture has to be replaced every time.
-                newTexture = isEva ? suit.EvaVisor : suit.IvaVisor;
+                newTexture = suit.GetVisor(useEvaSuit);
 
                 if (newTexture != null) {
                   material.color = Color.white;
@@ -268,9 +263,9 @@ namespace TextureReplacer
 
             default: // Jetpack.
               if (isEva) {
-                smr.enabled = hasHelmet;
+                smr.enabled = useEvaSuit;
 
-                if (hasHelmet) {
+                if (useEvaSuit) {
                   newTexture = suit.EvaJetpack;
                   newNormalMap = suit.EvaJetpackNRM;
                 }
@@ -293,7 +288,7 @@ namespace TextureReplacer
     /// </summary>
     public void PersonaliseIva(Kerbal kerbal)
     {
-      PersonaliseKerbal(kerbal, kerbal.protoCrewMember, kerbal.InPart, true);
+      PersonaliseKerbal(kerbal, kerbal.protoCrewMember, false, false);
     }
 
     /// <summary>
@@ -309,7 +304,7 @@ namespace TextureReplacer
           useEvaSuit = true;
           isDesiredSuitValid = false;
         }
-        PersonaliseKerbal(evaPart, evaPart.protoModuleCrew[0], null, useEvaSuit);
+        PersonaliseKerbal(evaPart, evaPart.protoModuleCrew[0], true, useEvaSuit);
       }
       return isDesiredSuitValid;
     }
@@ -606,21 +601,23 @@ namespace TextureReplacer
 
       // The previous loop filled the default suit, we still have to get the vintage one. Since IVA textures for vintage
       // suit are only instantiated when the Kerbals are created, we are in trouble here. Let's just use vintage EVA
-      // suit for IVA too and be happy with that :)
+      // suit for IVA too (both veteran and standard) and be happy with that :)
       Part vintageEva = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
 
       foreach (SkinnedMeshRenderer smr in vintageEva.GetComponentsInChildren<SkinnedMeshRenderer>()) {
         if (smr.name == "body01") {
-          VintageSuit.IvaBody = smr.material.mainTexture as Texture2D;
-          VintageSuit.IvaBodyVeteran = smr.material.mainTexture as Texture2D;
-          VintageSuit.EvaBody = smr.material.mainTexture as Texture2D;
+          var suitTexture = smr.material.mainTexture as Texture2D;
+
+          VintageSuit.IvaSuitVeteran = suitTexture;
+          VintageSuit.SetIvaSuit(suitTexture, 0, true);
+          VintageSuit.SetEvaSuit(suitTexture, 0, true);
         }
       }
 
       foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>()) {
         // After na IVA space is initialised, suits are reset to these values. Replace stock textures with default ones.
-        kerbal.textureStandard = DefaultSuit.IvaBody;
-        kerbal.textureVeteran = DefaultSuit.IvaBodyVeteran;
+        kerbal.textureStandard = DefaultSuit.IvaSuit[0];
+        kerbal.textureVeteran = DefaultSuit.IvaSuitVeteran;
       }
 
       foreach (InternalModel model in Resources.FindObjectsOfTypeAll<InternalModel>()) {

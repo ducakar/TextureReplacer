@@ -164,9 +164,9 @@ namespace TextureReplacer
 
       if (suit != null) {
         Texture2D suitTex = suit == defaultSuit && selectedKerbal != null && selectedKerbal.veteran
-          ? suit.IvaBodyVeteran
-          : suit.IvaBody;
-        Texture2D evaSuitTex = suit.EvaBody ?? defaultSuit.EvaBody;
+          ? suit.IvaSuitVeteran
+          : suit.IvaSuit[0];
+        Texture2D evaSuitTex = suit.EvaSuit[0] ?? defaultSuit.EvaSuit[0];
 
         GUILayout.BeginHorizontal();
         GUILayout.Box(suitTex, GUILayout.Width(100), GUILayout.Height(100));

@@ -20,6 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using System.Linq;
 using UnityEngine;
 using Gender = ProtoCrewMember.Gender;
@@ -28,35 +29,50 @@ namespace TextureReplacer
 {
   class Suit
   {
-    Texture2D[] levelIvaBodies;
-    Texture2D[] levelEvaBodies;
-
     public string Name;
     public Gender Gender;
     public bool IsDefault;
 
-    public Texture2D IvaBodyVeteran;
-    public Texture2D IvaBody;
+    public Texture2D IvaSuitVeteran;
+    public readonly Texture2D[] IvaSuit = new Texture2D[6];
     public Texture2D IvaBodyNRM;
     public Texture2D IvaVisor;
-    public Texture2D EvaBody;
+    public readonly Texture2D[] EvaSuit = new Texture2D[6];
     public Texture2D EvaBodyNRM;
     public Texture2D EvaVisor;
     public Texture2D EvaJetpack;
     public Texture2D EvaJetpackNRM;
 
-    public Texture2D GetIvaSuit(ProtoCrewMember kerbal)
+    public Texture2D GetSuit(bool useEvaSuit, ProtoCrewMember kerbal)
     {
       int level = kerbal.experienceLevel;
-      return level != 0 && levelIvaBodies != null ? levelIvaBodies[level - 1]
-        : kerbal.veteran ? IvaBodyVeteran ?? IvaBody
-        : IvaBody;
+      return useEvaSuit ? EvaSuit[level]
+        : level == 0 && kerbal.veteran ? IvaSuitVeteran
+        : IvaSuit[level];
     }
 
-    public Texture2D GetEvaSuit(ProtoCrewMember kerbal)
+    public Texture2D GetSuitNRM(bool useEvaSuit)
     {
-      int level = kerbal.experienceLevel;
-      return level != 0 && levelEvaBodies != null ? levelEvaBodies[level - 1] : EvaBody;
+      return useEvaSuit ? EvaBodyNRM : IvaBodyNRM;
+    }
+
+    public Texture2D GetVisor(bool useEvaSuit)
+    {
+      return useEvaSuit ? EvaVisor : IvaVisor;
+    }
+
+    public void SetIvaSuit(Texture2D texture, int fromLevel, bool force)
+    {
+      for (int i = fromLevel; i < IvaSuit.Length; ++i) {
+        IvaSuit[i] = force ? texture : IvaSuit[i] ?? texture;
+      }
+    }
+
+    public void SetEvaSuit(Texture2D texture, int fromLevel, bool force)
+    {
+      for (int i = fromLevel; i < EvaSuit.Length; ++i) {
+        EvaSuit[i] = force ? texture : EvaSuit[i] ?? texture;
+      }
     }
 
     public bool SetTexture(string originalName, Texture2D texture)
@@ -65,15 +81,15 @@ namespace TextureReplacer
 
       switch (originalName) {
         case "orangeSuite_diffuse":
-          IvaBodyVeteran = texture;
+          IvaSuitVeteran = texture;
           return true;
 
         case "paleBlueSuite_diffuse":
-          IvaBody = texture;
+          SetIvaSuit(texture, 0, true);
           return true;
 
         case "whiteSuite_diffuse":
-          EvaBody = texture;
+          SetIvaSuit(texture, 0, true);
           return true;
 
         case "orangeSuite_normal":
@@ -82,11 +98,11 @@ namespace TextureReplacer
           return true;
 
         case "kerbalMain":
-          IvaBodyVeteran = IvaBodyVeteran ?? texture;
+          IvaSuitVeteran = IvaSuitVeteran ?? texture;
           return true;
 
         case "kerbalMainGrey":
-          IvaBody = IvaBody ?? texture;
+          SetIvaSuit(texture, 0, false);
           return true;
 
         case "kerbalMainNRM":
@@ -98,7 +114,7 @@ namespace TextureReplacer
           return true;
 
         case "EVAtexture":
-          EvaBody = EvaBody ?? texture;
+          SetEvaSuit(texture, 0, false);
           return true;
 
         case "EVAtextureNRM":
@@ -122,12 +138,8 @@ namespace TextureReplacer
         case "kerbalMainGrey3":
         case "kerbalMainGrey4":
         case "kerbalMainGrey5":
-          level = originalName.Last() - 0x30;
-
-          levelIvaBodies = levelIvaBodies ?? new Texture2D[5];
-          for (int i = level - 1; i < 5; ++i) {
-            levelIvaBodies[i] = texture;
-          }
+          level = originalName.Last() - '0';
+          SetIvaSuit(texture, level, false);
           return true;
 
         case "EVAtexture1":
@@ -135,12 +147,8 @@ namespace TextureReplacer
         case "EVAtexture3":
         case "EVAtexture4":
         case "EVAtexture5":
-          level = originalName.Last() - 0x30;
-
-          levelEvaBodies = levelEvaBodies ?? new Texture2D[5];
-          for (int i = level - 1; i < 5; ++i) {
-            levelEvaBodies[i] = texture;
-          }
+          level = originalName.Last() - '0';
+          SetEvaSuit(texture, level, false);
           return true;
 
         default:
