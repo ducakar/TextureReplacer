@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -142,6 +143,8 @@ namespace TextureReplacer
       }
     }
 
+    // Development utilities.
+#if true
     /// <summary>
     /// Print hierarchy from a transform up to the root.
     /// </summary>
@@ -151,5 +154,26 @@ namespace TextureReplacer
         LogTransform(tf, indent);
       }
     }
+
+    /// <summary>
+    /// Export any texture (even if not loaded in RAM) as a PNG.
+    /// </summary>
+    public static void DumpToPNG(Texture texture, string path)
+    {
+      Texture2D targetTex = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
+      RenderTexture renderTex = new RenderTexture(texture.width, texture.height, 32);
+      RenderTexture originalRenderTex = RenderTexture.active;
+
+      Graphics.Blit(texture, renderTex);
+      RenderTexture.active = renderTex;
+      targetTex.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
+      RenderTexture.active = originalRenderTex;
+
+      byte[] data = targetTex.EncodeToPNG();
+      using (FileStream fs = new FileStream(path, FileMode.Create)) {
+        fs.Write(data, 0, data.Length);
+      }
+    }
+#endif
   }
 }
