@@ -196,8 +196,8 @@ present `kerbalMainGrey` is used for veterans. Each suit must reside inside its
 own directory:
 
     GameData/TextureReplacer/
-      Suits/[<subDir>/]<suit>/kerbalMain       // IVA suit (level 0 veteran)
-      Suits/[<subDir>/]<suit>/kerbalMainGrey   // IVA suit (level 0 standard)
+      Suits/[<subDir>/]<suit>/kerbalMain       // IVA suit (veteran)
+      Suits/[<subDir>/]<suit>/kerbalMainGrey   // IVA suit (level 0)
       Suits/[<subDir>/]<suit>/kerbalMainGrey1  // IVA suit (level 1)
       Suits/[<subDir>/]<suit>/kerbalMainGrey2  // IVA suit (level 2)
       Suits/[<subDir>/]<suit>/kerbalMainGrey3  // IVA suit (level 3)
@@ -205,7 +205,7 @@ own directory:
       Suits/[<subDir>/]<suit>/kerbalMainGrey5  // IVA suit (level 5)
       Suits/[<subDir>/]<suit>/kerbalMainNRM    // IVA suit normal map
       Suits/[<subDir>/]<suit>/kerbalVisor      // IVA helmet visor
-      Suits/[<subDir>/]<suit>/EVAtexture       // EVA suit
+      Suits/[<subDir>/]<suit>/EVAtexture       // EVA suit (level 0)
       Suits/[<subDir>/]<suit>/EVAtexture1      // EVA suit (level 1)
       Suits/[<subDir>/]<suit>/EVAtexture2      // EVA suit (level 2)
       Suits/[<subDir>/]<suit>/EVAtexture3      // EVA suit (level 3)
@@ -216,8 +216,9 @@ own directory:
       Suits/[<subDir>/]<suit>/EVAjetpack       // EVA jetpack
       Suits/[<subDir>/]<suit>/EVAjetpackNRM    // EVA jetpack normal map
 
-The level textures are optional. If a level texture is missing, the one from the
-previous level is inherited.
+The level textures are optional. If a level texture is missing the one from the
+previous level is inherited. If the veteran texture is present it is used for
+all levels on veterans.
 
 ### Configuration File ###
 
@@ -274,6 +275,7 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
   - unified navball textures as `Default/NavBall`
   - added vintage EVA models and material names to `logKerbalHierarchy` dumps
   - fixed visor texture replacement and visor reflections for females
+  - fixed veteran suit replacement for atmospheric EVA
 * 3.3
   - updated for KSP 1.5
   - updated default configuration files

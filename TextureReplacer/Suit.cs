@@ -35,10 +35,10 @@ namespace TextureReplacer
 
     public Texture2D IvaSuitVeteran;
     public readonly Texture2D[] IvaSuit = new Texture2D[6];
-    public Texture2D IvaBodyNRM;
+    public Texture2D IvaSuitNRM;
     public Texture2D IvaVisor;
     public readonly Texture2D[] EvaSuit = new Texture2D[6];
-    public Texture2D EvaBodyNRM;
+    public Texture2D EvaSuitNRM;
     public Texture2D EvaVisor;
     public Texture2D EvaJetpack;
     public Texture2D EvaJetpackNRM;
@@ -47,13 +47,13 @@ namespace TextureReplacer
     {
       int level = kerbal.experienceLevel;
       return useEvaSuit ? EvaSuit[level]
-        : level == 0 && kerbal.veteran ? IvaSuitVeteran
+        : kerbal.veteran && IvaSuitVeteran != null ? IvaSuitVeteran
         : IvaSuit[level];
     }
 
     public Texture2D GetSuitNRM(bool useEvaSuit)
     {
-      return useEvaSuit ? EvaBodyNRM : IvaBodyNRM;
+      return useEvaSuit ? EvaSuitNRM : IvaSuitNRM;
     }
 
     public Texture2D GetVisor(bool useEvaSuit)
@@ -64,14 +64,14 @@ namespace TextureReplacer
     public void SetIvaSuit(Texture2D texture, int fromLevel, bool force)
     {
       for (int i = fromLevel; i < IvaSuit.Length; ++i) {
-        IvaSuit[i] = force ? texture : IvaSuit[i] ?? texture;
+        IvaSuit[i] = force ? texture : (IvaSuit[i] ?? texture);
       }
     }
 
     public void SetEvaSuit(Texture2D texture, int fromLevel, bool force)
     {
       for (int i = fromLevel; i < EvaSuit.Length; ++i) {
-        EvaSuit[i] = force ? texture : EvaSuit[i] ?? texture;
+        EvaSuit[i] = force ? texture : (EvaSuit[i] ?? texture);
       }
     }
 
@@ -93,8 +93,8 @@ namespace TextureReplacer
           return true;
 
         case "orangeSuite_normal":
-          IvaBodyNRM = texture;
-          EvaBodyNRM = texture;
+          IvaSuitNRM = texture;
+          EvaSuitNRM = texture;
           return true;
 
         case "kerbalMain":
@@ -106,7 +106,7 @@ namespace TextureReplacer
           return true;
 
         case "kerbalMainNRM":
-          IvaBodyNRM = IvaBodyNRM ?? texture;
+          IvaSuitNRM = IvaSuitNRM ?? texture;
           return true;
 
         case "kerbalVisor":
@@ -118,7 +118,7 @@ namespace TextureReplacer
           return true;
 
         case "EVAtextureNRM":
-          EvaBodyNRM = EvaBodyNRM ?? texture;
+          EvaSuitNRM = EvaSuitNRM ?? texture;
           return true;
 
         case "EVAvisor":

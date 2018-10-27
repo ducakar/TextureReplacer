@@ -163,7 +163,8 @@ namespace TextureReplacer
       Transform flag = isEva ? component.transform.Find("model/kbEVA_flagDecals") : null;
       Transform parachute = isEva ? component.transform.Find("model/EVAparachute/base") : null;
 
-      // We determine body/helmet texture here to avoid code duplication in the following switch.
+      // We determine body and helmet texture here to avoid code duplication between suit and helmet cases in the
+      // following switch.
       // Setting the suit explicitly -- even when default -- is necessary for two reasons: to fix IVA suits after KSP
       // resetting them to the stock ones all the time and to fix the switch to default texture on start of EVA walk or
       // EVA suit toggle.
