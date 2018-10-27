@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright © 2013-2018 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
