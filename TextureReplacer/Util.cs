@@ -144,7 +144,7 @@ namespace TextureReplacer
     }
 
     // Development utilities.
-#if true
+#if false
     /// <summary>
     /// Print hierarchy from a transform up to the root.
     /// </summary>
@@ -172,6 +172,56 @@ namespace TextureReplacer
       byte[] data = targetTex.EncodeToPNG();
       using (FileStream fs = new FileStream(path, FileMode.Create)) {
         fs.Write(data, 0, data.Length);
+      }
+    }
+
+    static bool isDefaultVeteranIvaExported;
+    static bool isDefaultIvaExported;
+    static bool isDefaultEvaExported;
+    static bool isVintageVeteranIvaExported;
+    static bool isVintageIvaExported;
+    static bool isVintageEvaExported;
+
+    public static void DumpSuitOnce(ProtoCrewMember kerbal, Texture texture, bool isEva, string dir)
+    {
+      if (isEva) {
+        if (kerbal.suit == ProtoCrewMember.KerbalSuit.Vintage) {
+          if (!isVintageEvaExported) {
+            Util.DumpToPNG(texture, dir + "EVAtexture.vintage.png");
+            isVintageEvaExported = true;
+          }
+        } else {
+          if (!isDefaultEvaExported) {
+            Util.DumpToPNG(texture, dir + "EVAtexture.png");
+            isDefaultEvaExported = true;
+          }
+        }
+      } else {
+        if (kerbal.suit == ProtoCrewMember.KerbalSuit.Vintage) {
+          if (kerbal.veteran) {
+            if (!isVintageVeteranIvaExported) {
+              Util.DumpToPNG(texture, dir + "kerbalMain.vintage.png");
+              isVintageVeteranIvaExported = true;
+            }
+          } else {
+            if (!isVintageIvaExported) {
+              Util.DumpToPNG(texture, dir + "kerbalMainGrey.vintage.png");
+              isVintageIvaExported = true;
+            }
+          }
+        } else {
+          if (kerbal.veteran) {
+            if (!isDefaultVeteranIvaExported) {
+              Util.DumpToPNG(texture, dir + "kerbalMain.png");
+              isDefaultVeteranIvaExported = true;
+            }
+          } else {
+            if (!isDefaultIvaExported) {
+              Util.DumpToPNG(texture, dir + "kerbalMainGrey.png");
+              isDefaultIvaExported = true;
+            }
+          }
+        }
       }
     }
 #endif
