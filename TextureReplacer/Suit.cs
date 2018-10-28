@@ -89,7 +89,7 @@ namespace TextureReplacer
           return true;
 
         case "whiteSuite_diffuse":
-          SetIvaSuit(texture, 0, true);
+          SetEvaSuit(texture, 0, true);
           return true;
 
         case "orangeSuite_normal":
