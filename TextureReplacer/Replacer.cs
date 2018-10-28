@@ -35,9 +35,9 @@ namespace TextureReplacer
     public static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
     public static readonly Shader StandardShader = Shader.Find("Standard");
     public static readonly Shader BumpedDiffuseShader = Shader.Find("Bumped Diffuse");
+    public static readonly Shader BasicVisorShader = Shader.Find("Transparent/Specular");
 
     static readonly Log log = new Log(nameof(Replacer));
-    static readonly Shader BasicVisorShader = Shader.Find("Transparent/Specular");
 
     // General texture replacements.
     readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
@@ -222,18 +222,26 @@ namespace TextureReplacer
 
             case "visor":
               // It will be raplaced with reflective shader later, if reflections are enabled.
-              if (smr.transform.root == maleIva.transform && ivaVisorTexture != null) {
-                smr.sharedMaterial.shader = BasicVisorShader;
-                smr.sharedMaterial.mainTexture = ivaVisorTexture;
-                smr.sharedMaterial.color = Color.white;
-              } else if (smr.transform.root == maleEva.transform && evaVisorTexture != null) {
-                smr.sharedMaterial.shader = BasicVisorShader;
-                smr.sharedMaterial.mainTexture = evaVisorTexture;
-                smr.sharedMaterial.color = Color.white;
-              } else if (smr.transform.root == maleEvaVintage.transform && evaVisorTexture != null) {
-                smr.sharedMaterial.shader = BasicVisorShader;
-                smr.sharedMaterial.mainTexture = evaVisorTexture;
-                smr.sharedMaterial.color = Color.white;
+              switch (i) {
+                case 0: // maleIva
+                  if (ivaVisorTexture != null) {
+                    smr.sharedMaterial.shader = BasicVisorShader;
+                    smr.sharedMaterial.mainTexture = ivaVisorTexture;
+                    smr.sharedMaterial.color = Color.white;
+                  }
+                  break;
+
+                case 1: // maleEva
+                  if (evaVisorTexture != null) {
+                    smr.sharedMaterial.shader = BasicVisorShader;
+                    smr.sharedMaterial.mainTexture = evaVisorTexture;
+                    smr.sharedMaterial.color = Color.white;
+                  }
+                  break;
+
+                case 2: // maleEvaVintage
+                  smr.sharedMaterial = visorMaterials[1];
+                  break;
               }
 
               visorMaterials[i] = smr.sharedMaterial;

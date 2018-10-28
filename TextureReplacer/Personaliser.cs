@@ -293,13 +293,11 @@ namespace TextureReplacer
               if (isEva) {
                 smr.enabled = useEvaSuit;
               }
-              if (useEvaSuit) {
-                // Visor texture has to be replaced every time.
-                newTexture = suit.GetVisor(useEvaSuit);
 
-                if (newTexture != null) {
-                  smr.material.color = Color.white;
-                }
+              // Visor texture has to be replaced every time.
+              newTexture = suit.GetVisor(useEvaSuit);
+              if (newTexture != null) {
+                smr.material.color = Color.white;
               }
               break;
 
