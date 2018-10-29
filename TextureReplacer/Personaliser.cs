@@ -30,9 +30,9 @@ namespace TextureReplacer
 {
   class Personaliser
   {
-    const string DefaultDirectory = Util.Directory + "Default/";
-    const string SkinsDirectory = Util.Directory + "Skins/";
-    const string SuitsDirectory = Util.Directory + "Suits/";
+    const string DefaultPrefix = "/TextureReplacer/Default/";
+    const string SkinsPrefix = "/TextureReplacer/Skins/";
+    const string SuitsPrefix = "/TextureReplacer/Suits/";
 
     static readonly Log log = new Log(nameof(Personaliser));
 
@@ -500,62 +500,63 @@ namespace TextureReplacer
 
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture) {
         Texture2D texture = texInfo.texture;
-        if (texture == null || !texture.name.StartsWith(Util.Directory, StringComparison.Ordinal)) {
+        if (texture == null) {
           continue;
         }
 
-        // Add a skin texture.
-        if (texture.name.StartsWith(SkinsDirectory, StringComparison.Ordinal)) {
-          texture.wrapMode = TextureWrapMode.Clamp;
+        int skinsPrefixIndex = texture.name.IndexOf(SkinsPrefix, StringComparison.Ordinal);
+        int suitsPrefixIndex = texture.name.IndexOf(SuitsPrefix, StringComparison.Ordinal);
+        int defaultPrefixIndex = texture.name.IndexOf(DefaultPrefix, StringComparison.Ordinal);
 
-          int lastSlash = texture.name.LastIndexOf('/');
-          int dirNameLength = lastSlash - SkinsDirectory.Length;
-          string originalName = texture.name.Substring(lastSlash + 1);
+        if (skinsPrefixIndex != -1) {
+          int prefixLength = skinsPrefixIndex + SkinsPrefix.Length;
+          int skinNameLength = texture.name.LastIndexOf('/') - prefixLength;
 
-          if (dirNameLength < 1) {
-            log.Print("Skin texture should be inside a subdirectory: {0}", texture.name);
-          } else {
-            string dirName = texture.name.Substring(SkinsDirectory.Length, dirNameLength);
+          if (skinNameLength < 1) {
+            log.Print("Skin texture is not inside a subdirectory: {0}", texture.name);
+          } else { // Add a skin texture.
+            string skinName = texture.name.Substring(prefixLength, skinNameLength);
+            string originalName = texture.name.Substring(prefixLength + skinNameLength + 1);
 
-            if (!skinDirs.TryGetValue(dirName, out int index)) {
+            if (!skinDirs.TryGetValue(skinName, out int index)) {
               index = Skins.Count;
-              Skins.Add(new Skin { Name = dirName });
-              skinDirs.Add(dirName, index);
+              Skins.Add(new Skin { Name = skinName });
+              skinDirs.Add(skinName, index);
             }
 
             Skin skin = Skins[index];
-            if (!skin.SetTexture(originalName, texture)) {
+            if (skin.SetTexture(originalName, texture)) {
+              texture.wrapMode = TextureWrapMode.Clamp;
+            } else {
               log.Print("Unknown skin texture name \"{0}\": {1}", originalName, texture.name);
             }
           }
-        }
-        // Add a suit texture.
-        else if (texture.name.StartsWith(SuitsDirectory, StringComparison.Ordinal)) {
-          texture.wrapMode = TextureWrapMode.Clamp;
+        } else if (suitsPrefixIndex != -1) {
+          int prefixLength = suitsPrefixIndex + SuitsPrefix.Length;
+          int suitNameLength = texture.name.LastIndexOf('/') - prefixLength;
 
-          int lastSlash = texture.name.LastIndexOf('/');
-          int dirNameLength = lastSlash - SuitsDirectory.Length;
-          string originalName = texture.name.Substring(lastSlash + 1);
+          if (suitNameLength < 1) {
+            log.Print("Suit texture is not inside a subdirectory: {0}", texture.name);
+          } else { // Add a suit texture.
+            string suitName = texture.name.Substring(prefixLength, suitNameLength);
+            string originalName = texture.name.Substring(prefixLength + suitNameLength + 1);
 
-          if (dirNameLength < 1) {
-            log.Print("Suit texture should be inside a subdirectory: {0}", texture.name);
-          } else {
-            string dirName = texture.name.Substring(SuitsDirectory.Length, dirNameLength);
-
-            if (!suitDirs.TryGetValue(dirName, out int index)) {
+            if (!suitDirs.TryGetValue(suitName, out int index)) {
               index = Suits.Count;
-              Suits.Add(new Suit { Name = dirName });
-              suitDirs.Add(dirName, index);
+              Suits.Add(new Suit { Name = suitName });
+              suitDirs.Add(suitName, index);
             }
 
             Suit suit = Suits[index];
-            if (!suit.SetTexture(originalName, texture)) {
+            if (suit.SetTexture(originalName, texture)) {
+              texture.wrapMode = TextureWrapMode.Clamp;
+            } else {
               log.Print("Unknown suit texture name \"{0}\": {1}", originalName, texture.name);
             }
           }
-        } else if (texture.name.StartsWith(DefaultDirectory, StringComparison.Ordinal)) {
-          int lastSlash = texture.name.LastIndexOf('/');
-          string originalName = texture.name.Substring(lastSlash + 1);
+        } else if (defaultPrefixIndex != -1) {
+          int prefixLength = defaultPrefixIndex + DefaultPrefix.Length;
+          string originalName = texture.name.Substring(prefixLength);
 
           if (originalName == "kerbalHead") {
             DefaultSkin[0].SetTexture(originalName, texture);

@@ -30,17 +30,18 @@ namespace TextureReplacer
 {
   class Replacer
   {
-    public const string TexturesDirectory = Util.Directory + "Default/";
     public const string NavBall = "NavBall";
     public static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
     public static readonly Shader BumpedHeadShader = Shader.Find("Bumped Diffuse");
+
+    const string TexturePrefix = "/TextureReplacer/Default/";
 
     static readonly Log log = new Log(nameof(Replacer));
     static readonly Shader BasicVisorShader = Shader.Find("Transparent/Specular");
 
     // General texture replacements.
-    readonly List<string> paths = new List<string> { TexturesDirectory };
     readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
+
     // NavBall texture.
     Texture2D navBallTexture;
     // Change shinning quality.
@@ -260,7 +261,6 @@ namespace TextureReplacer
     /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
-      Util.AddLists(rootNode.GetValues("paths"), paths);
       Util.Parse(rootNode.GetValue("skinningQuality"), ref skinningQuality);
       Util.Parse(rootNode.GetValue("logTextures"), ref logTextures);
       Util.Parse(rootNode.GetValue("logKerbalHierarchy"), ref logKerbalHierarchy);
@@ -285,16 +285,13 @@ namespace TextureReplacer
 
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture) {
         Texture2D texture = texInfo.texture;
-        if (texture == null) {
+        if (texture == null || texture.name.Length == 0) {
           continue;
         }
 
-        foreach (string path in paths) {
-          if (!texture.name.StartsWith(path, StringComparison.Ordinal)) {
-            continue;
-          }
-
-          string originalName = texture.name.Substring(path.Length);
+        int pathPrefixIndex = texture.name.IndexOf(TexturePrefix, StringComparison.Ordinal);
+        if (pathPrefixIndex != -1) {
+          string originalName = texture.name.Substring(pathPrefixIndex + TexturePrefix.Length);
 
           // Since we are merging multiple directories, we must expect conflicts.
           if (!mappedTextures.ContainsKey(originalName)) {

@@ -120,22 +120,7 @@ Note that all texture and directory names are case-sensitive!
 ### Reflections ###
 
 Reflections are shown on visors of Kerbals' helmets and on parts that include
-`TRReflection` module. There are two types of reflections: real and static.
-Real reflections reflect the environment of a part while static reflections
-reflect the skybox from `EnvMap/` directory:
-
-    GameData/TextureReplacer/
-      EnvMap/PositiveX         // fake skybox right face, vertically flipped
-      EnvMap/NegativeX         // fake skybox left face, vertically flipped
-      EnvMap/PositiveY         // fake skybox top face, vertically flipped
-      EnvMap/NegativeY         // fake skybox bottom face, vertically flipped
-      EnvMap/PositiveZ         // fake skybox front face, vertically flipped
-      EnvMap/NegativeZ         // fake skybox back face, vertically flipped
-
-Note that all textures must be squares and have the same dimensions that are
-powers of two. Cube map textures are slow, so keep them as low-res as possible.
-
-`TRReflection` part module can be used as in the following example that adds
+`TRReflection` module that can be used like in the following example adding
 reflections onto the windows of Mk1-2 pod:
 
     MODULE
@@ -178,13 +163,13 @@ be set for each class.
 
 Head textures reside inside `Skins/` directory, each in its own subdirectory:
 
-    GameData/TextureReplacer/
+    GameData/**/TextureReplacer/
       Skins/[<subDir>/]<skin>/kerbalHead     // Head texture
       Skins/[<subDir>/]<skin>/kerbalHeadNRM  // Normal map (optional)
 
 for males and
 
-    GameData/TextureReplacer/
+    GameData/**/TextureReplacer/
       Skins/[<subDir>/]<skin>/kerbalGirl_06_BaseColor     // Head texture
       Skins/[<subDir>/]<skin>/kerbalGirl_06_BaseColorNRM  // Normal map (optional)
 
@@ -195,7 +180,7 @@ that class level variants of suit texture are possible. If `kerbalMain` is not
 present `kerbalMainGrey` is used for veterans. Each suit must reside inside its
 own directory:
 
-    GameData/TextureReplacer/
+    GameData/**/TextureReplacer/
       Suits/[<subDir>/]<suit>/kerbalMain       // IVA suit (veteran)
       Suits/[<subDir>/]<suit>/kerbalMainGrey   // IVA suit (level 0)
       Suits/[<subDir>/]<suit>/kerbalMainGrey1  // IVA suit (level 1)
@@ -270,6 +255,9 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Change Log ##
 
+* 3.5
+  - textures are now searched in `GameData/**/TextureReplacer/...`, not just in
+    `GameData/TextureReplacer/...`.
 * 3.4
   - removed texture compression, mipmap generation and unloading
   - unified navball textures as `Default/NavBall`
