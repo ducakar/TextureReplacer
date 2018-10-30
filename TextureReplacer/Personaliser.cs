@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Gender = ProtoCrewMember.Gender;
+using KerbalSuit = ProtoCrewMember.KerbalSuit;
 
 namespace TextureReplacer
 {
@@ -136,7 +137,7 @@ namespace TextureReplacer
 
       List<Suit> genderSuits = kerbalSuits[(int)kerbal.gender];
       if (genderSuits.Count == 0) {
-        return DefaultSuit;
+        return kerbal.suit == KerbalSuit.Vintage ? VintageSuit : DefaultSuit;
       }
 
       // We must use a different prime here to increase randomisation so that the same skin is not always combined with
@@ -151,7 +152,7 @@ namespace TextureReplacer
     void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, bool isEva, bool useEvaSuit)
     {
       Appearance appearance = GetAppearance(kerbal);
-      bool isVintage = kerbal.suit == ProtoCrewMember.KerbalSuit.Vintage;
+      bool isVintage = kerbal.suit == KerbalSuit.Vintage;
 
       Skin skin = GetKerbalSkin(kerbal, appearance);
       Suit suit = GetKerbalSuit(kerbal, appearance);
