@@ -74,14 +74,12 @@ namespace TextureReplacer
 
         mappedTextures.TryGetValue(texture.name, out Texture2D newTexture);
 
-        if (newTexture != null) {
-          if (newTexture != texture) {
-            newTexture.anisoLevel = texture.anisoLevel;
-            newTexture.wrapMode = texture.wrapMode;
+        if (newTexture != null && newTexture != texture) {
+          newTexture.anisoLevel = texture.anisoLevel;
+          newTexture.wrapMode = texture.wrapMode;
 
-            material.mainTexture = newTexture;
-            UnityEngine.Object.Destroy(texture);
-          }
+          material.mainTexture = newTexture;
+          UnityEngine.Object.Destroy(texture);
         }
 
         if (!material.HasProperty(Util.BumpMapProperty)) {
@@ -95,14 +93,12 @@ namespace TextureReplacer
 
         mappedTextures.TryGetValue(normalMap.name, out Texture2D newNormalMap);
 
-        if (newNormalMap != null) {
-          if (newNormalMap != normalMap) {
-            newNormalMap.anisoLevel = normalMap.anisoLevel;
-            newNormalMap.wrapMode = normalMap.wrapMode;
+        if (newNormalMap != null && newNormalMap != normalMap) {
+          newNormalMap.anisoLevel = normalMap.anisoLevel;
+          newNormalMap.wrapMode = normalMap.wrapMode;
 
-            material.SetTexture(Util.BumpMapProperty, newNormalMap);
-            UnityEngine.Object.Destroy(normalMap);
-          }
+          material.SetTexture(Util.BumpMapProperty, newNormalMap);
+          UnityEngine.Object.Destroy(normalMap);
         }
       }
     }
@@ -189,7 +185,6 @@ namespace TextureReplacer
           // Many meshes share the same material, so it suffices to enumerate only one mesh for each material.
           switch (smr.name) {
             case "eyeballLeft":
-              log.Print("{0}", eyeballLeft);
               smr.sharedMaterial.shader = StandardShader;
               smr.sharedMaterial.mainTexture = eyeballLeft;
               break;
@@ -255,18 +250,22 @@ namespace TextureReplacer
           // Here we must enumerate all meshes wherever we are replacing the material.
           switch (smr.name) {
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
+              smr.sharedMaterial.shader = StandardShader;
               smr.sharedMaterial.mainTexture = eyeballLeft;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
+              smr.sharedMaterial.shader = StandardShader;
               smr.sharedMaterial.mainTexture = eyeballRight;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
+              smr.sharedMaterial.shader = StandardShader;
               smr.sharedMaterial.mainTexture = pupilLeft;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
+              smr.sharedMaterial.shader = StandardShader;
               smr.sharedMaterial.mainTexture = pupilRight;
               break;
 

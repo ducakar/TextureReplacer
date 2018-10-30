@@ -194,7 +194,7 @@ namespace TextureReplacer
                 smr.sharedMesh = null;
               } else {
                 newTexture = skin.EyeballLeft;
-                // Vintage IVA is missing a proto-model so it has to be replaced always.
+                // Vintage IVA is missing a proto-model so it always has to be replaced.
                 if (!isEva && isVintage) {
                   smr.material.shader = Replacer.StandardShader;
                   newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballLeft;
@@ -208,7 +208,7 @@ namespace TextureReplacer
                 smr.sharedMesh = null;
               } else {
                 newTexture = skin.EyeballRight;
-                // Vintage IVA is missing a proto-model so it has to be replaced always.
+                // Vintage IVA is missing a proto-model so it always has to be replaced.
                 if (!isEva && isVintage) {
                   smr.material.shader = Replacer.StandardShader;
                   newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballRight;
@@ -222,7 +222,7 @@ namespace TextureReplacer
                 smr.sharedMesh = null;
               } else {
                 newTexture = skin.PupilLeft;
-                // Vintage IVA is missing a proto-model so it has to be replaced always.
+                // Vintage IVA is missing a proto-model so it always has to be replaced.
                 if (!isEva && isVintage) {
                   smr.material.shader = Replacer.StandardShader;
                   newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilLeft;

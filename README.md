@@ -267,7 +267,9 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
   - textures are now searched in `GameData/**/TextureReplacer/...`, not just in
     `GameData/TextureReplacer/...`.
   - add eye texture replacements
-  - fix visors in IVA
+  - apply specular shader to all Kerbals' eyes
+  - fixed visors in IVA
+  - fixed level suits
 * 3.4
   - removed texture compression, mipmap generation and unloading
   - unified navball textures as `Default/NavBall`

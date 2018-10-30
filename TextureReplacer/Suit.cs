@@ -139,7 +139,7 @@ namespace TextureReplacer
         case "kerbalMainGrey4":
         case "kerbalMainGrey5":
           level = originalName.Last() - '0';
-          SetIvaSuit(texture, level, false);
+          SetIvaSuit(texture, level, true);
           return true;
 
         case "EVAtexture1":
@@ -148,7 +148,7 @@ namespace TextureReplacer
         case "EVAtexture4":
         case "EVAtexture5":
           level = originalName.Last() - '0';
-          SetEvaSuit(texture, level, false);
+          SetEvaSuit(texture, level, true);
           return true;
 
         default:
