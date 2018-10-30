@@ -30,9 +30,8 @@ namespace TextureReplacer
 {
   class Personaliser
   {
-    const string DefaultPrefix = "/TextureReplacer/Default/";
-    const string SkinsPrefix = "/TextureReplacer/Skins/";
-    const string SuitsPrefix = "/TextureReplacer/Suits/";
+    const string SkinsPrefix = "TextureReplacer/Skins/";
+    const string SuitsPrefix = "TextureReplacer/Suits/";
 
     static readonly Log log = new Log(nameof(Personaliser));
 
@@ -185,21 +184,63 @@ namespace TextureReplacer
         if (smr == null) {
           renderer.enabled = useEvaSuit;
         } else {
-          Material material = renderer.material;
           Texture2D newTexture = null;
           Texture2D newNormalMap = null;
 
           switch (smr.name) {
             case "eyeballLeft":
-            case "eyeballRight":
-            case "pupilLeft":
-            case "pupilRight":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
+              if (skin.IsEyeless) {
+                smr.sharedMesh = null;
+              } else {
+                newTexture = skin.EyeballLeft;
+                // Vintage IVA is missing a proto-model so it has to be replaced always.
+                if (!isEva && isVintage) {
+                  smr.material.shader = Replacer.StandardShader;
+                  newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballLeft;
+                }
+              }
+              break;
+
+            case "eyeballRight":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
+              if (skin.IsEyeless) {
+                smr.sharedMesh = null;
+              } else {
+                newTexture = skin.EyeballRight;
+                // Vintage IVA is missing a proto-model so it has to be replaced always.
+                if (!isEva && isVintage) {
+                  smr.material.shader = Replacer.StandardShader;
+                  newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballRight;
+                }
+              }
+              break;
+
+            case "pupilLeft":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
+              if (skin.IsEyeless) {
+                smr.sharedMesh = null;
+              } else {
+                newTexture = skin.PupilLeft;
+                // Vintage IVA is missing a proto-model so it has to be replaced always.
+                if (!isEva && isVintage) {
+                  smr.material.shader = Replacer.StandardShader;
+                  newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilLeft;
+                }
+              }
+              break;
+
+            case "pupilRight":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
               if (skin.IsEyeless) {
                 smr.sharedMesh = null;
+              } else {
+                newTexture = skin.PupilRight;
+                // Vintage IVA is missing a proto-model so it has to be replaced always.
+                if (!isEva && isVintage) {
+                  smr.material.shader = Replacer.StandardShader;
+                  newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilRight;
+                }
               }
               break;
 
@@ -212,7 +253,7 @@ namespace TextureReplacer
                 newNormalMap = skin.HeadNRM;
 
                 if (newNormalMap != null) {
-                  material.shader = Replacer.BumpedHeadShader;
+                  smr.material.shader = Replacer.BumpedDiffuseShader;
                 }
               }
               break;
@@ -257,7 +298,7 @@ namespace TextureReplacer
                 newTexture = suit.GetVisor(useEvaSuit);
 
                 if (newTexture != null) {
-                  material.color = Color.white;
+                  smr.material.color = Color.white;
                 }
               }
               break;
@@ -275,10 +316,10 @@ namespace TextureReplacer
           }
 
           if (newTexture != null) {
-            material.mainTexture = newTexture;
+            smr.material.mainTexture = newTexture;
           }
           if (newNormalMap != null) {
-            material.SetTexture(Util.BumpMapProperty, newNormalMap);
+            smr.material.SetTexture(Util.BumpMapProperty, newNormalMap);
           }
         }
       }
@@ -506,7 +547,7 @@ namespace TextureReplacer
 
         int skinsPrefixIndex = texture.name.IndexOf(SkinsPrefix, StringComparison.Ordinal);
         int suitsPrefixIndex = texture.name.IndexOf(SuitsPrefix, StringComparison.Ordinal);
-        int defaultPrefixIndex = texture.name.IndexOf(DefaultPrefix, StringComparison.Ordinal);
+        int defaultPrefixIndex = texture.name.IndexOf(Replacer.DefaultPrefix, StringComparison.Ordinal);
 
         if (skinsPrefixIndex != -1) {
           int prefixLength = skinsPrefixIndex + SkinsPrefix.Length;
@@ -555,23 +596,36 @@ namespace TextureReplacer
             }
           }
         } else if (defaultPrefixIndex != -1) {
-          int prefixLength = defaultPrefixIndex + DefaultPrefix.Length;
+          int prefixLength = defaultPrefixIndex + Replacer.DefaultPrefix.Length;
           string originalName = texture.name.Substring(prefixLength);
 
-          if (originalName == "kerbalHead") {
-            DefaultSkin[0].SetTexture(originalName, texture);
-            texture.wrapMode = TextureWrapMode.Clamp;
-          } else if (originalName == "kerbalHeadNRM") {
-            DefaultSkin[0].SetTexture(originalName, texture);
-            texture.wrapMode = TextureWrapMode.Clamp;
-          } else if (originalName == "kerbalGirl_06_BaseColor") {
-            DefaultSkin[1].SetTexture(originalName, texture);
-            texture.wrapMode = TextureWrapMode.Clamp;
-          } else if (originalName == "kerbalGirl_06_BaseColorNRM") {
-            DefaultSkin[1].SetTexture(originalName, texture);
-            texture.wrapMode = TextureWrapMode.Clamp;
-          } else if (DefaultSuit.SetTexture(originalName, texture)) {
-            texture.wrapMode = TextureWrapMode.Clamp;
+          switch (originalName) {
+            case "eyeballLeft":
+            case "eyeballRight":
+            case "pupilLeft":
+            case "pupilRight":
+              DefaultSkin[0].SetTexture(originalName, texture);
+              DefaultSkin[1].SetTexture(originalName, texture);
+              texture.wrapMode = TextureWrapMode.Clamp;
+              break;
+
+            case "kerbalHead":
+            case "kerbalHeadNRM":
+              DefaultSkin[0].SetTexture(originalName, texture);
+              texture.wrapMode = TextureWrapMode.Clamp;
+              break;
+
+            case "kerbalGirl_06_BaseColor":
+            case "kerbalGirl_06_BaseColorNRM":
+              DefaultSkin[1].SetTexture(originalName, texture);
+              texture.wrapMode = TextureWrapMode.Clamp;
+              break;
+
+            default:
+              if (DefaultSuit.SetTexture(originalName, texture)) {
+                texture.wrapMode = TextureWrapMode.Clamp;
+              }
+              break;
           }
         }
       }

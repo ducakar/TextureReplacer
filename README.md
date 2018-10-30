@@ -44,14 +44,14 @@ Special thanks to:
 
 General replacement textures are of the form
 
-    GameData/TextureReplacer/Default/<internalName>
+    GameData/**/TextureReplacer/Default/<internalName>
 
 where `<internalName>` is the texture's internal name in KSP or path of a
 texture inside `GameData/` (plus .dds/.png/.jpg/.tga extension, of course).
 
 Examples:
 
-    GameData/TextureReplacer/
+    GameData/**/TextureReplacer/
       Default/kerbalHead                  // teeth and male head
       Default/kerbalHeadNRM               // teeth and male head normal map
       Default/kerbalGirl_06_BaseColor     // female head
@@ -111,7 +111,7 @@ Examples:
 It's also possible to replace textures from `GameData/` if one specifies
 the full directory hierarchy:
 
-    GameData/TextureReplacer/
+    GameData/**/TextureReplacer/
       Default/Squad/Parts/Command/Mk1-2Pod/model000  // Mk1-2 pod texture
       Default/Squad/Parts/Command/Mk1-2Pod/model001  // Mk1-2 pod normal map
 
@@ -166,12 +166,20 @@ Head textures reside inside `Skins/` directory, each in its own subdirectory:
     GameData/**/TextureReplacer/
       Skins/[<subDir>/]<skin>/kerbalHead     // Head texture
       Skins/[<subDir>/]<skin>/kerbalHeadNRM  // Normal map (optional)
+      Skins/[<subDir>/]<skin>/eyeballLeft    // Left eyeball
+      Skins/[<subDir>/]<skin>/eyeballRight   // Right eyeball
+      Skins/[<subDir>/]<skin>/pupilLeft      // Left pupil
+      Skins/[<subDir>/]<skin>/pupilRight     // Right pupil
 
 for males and
 
     GameData/**/TextureReplacer/
       Skins/[<subDir>/]<skin>/kerbalGirl_06_BaseColor     // Head texture
       Skins/[<subDir>/]<skin>/kerbalGirl_06_BaseColorNRM  // Normal map (optional)
+      Skins/[<subDir>/]<skin>/eyeballLeft                 // Left eyeball
+      Skins/[<subDir>/]<skin>/eyeballRight                // Right eyeball
+      Skins/[<subDir>/]<skin>/pupilLeft                   // Left pupil
+      Skins/[<subDir>/]<skin>/pupilRight                  // Right pupil
 
 for females.
 
@@ -258,6 +266,7 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 * 3.5
   - textures are now searched in `GameData/**/TextureReplacer/...`, not just in
     `GameData/TextureReplacer/...`.
+  - add eye texture replacements
 * 3.4
   - removed texture compression, mipmap generation and unloading
   - unified navball textures as `Default/NavBall`

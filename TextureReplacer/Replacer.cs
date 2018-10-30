@@ -30,11 +30,11 @@ namespace TextureReplacer
 {
   class Replacer
   {
+    public const string DefaultPrefix = "TextureReplacer/Default/";
     public const string NavBall = "NavBall";
     public static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
-    public static readonly Shader BumpedHeadShader = Shader.Find("Bumped Diffuse");
-
-    const string TexturePrefix = "/TextureReplacer/Default/";
+    public static readonly Shader StandardShader = Shader.Find("Standard");
+    public static readonly Shader BumpedDiffuseShader = Shader.Find("Bumped Diffuse");
 
     static readonly Log log = new Log(nameof(Replacer));
     static readonly Shader BasicVisorShader = Shader.Find("Transparent/Specular");
@@ -134,6 +134,10 @@ namespace TextureReplacer
     {
       mappedTextures.TryGetValue("kerbalHeadNRM", out Texture2D maleHeadNormalMap);
       mappedTextures.TryGetValue("kerbalGirl_06_BaseColorNRM", out Texture2D femaleHeadNormalMap);
+      mappedTextures.TryGetValue("eyeballLeft", out Texture2D eyeballLeft);
+      mappedTextures.TryGetValue("eyeballRight", out Texture2D eyeballRight);
+      mappedTextures.TryGetValue("pupilLeft", out Texture2D pupilLeft);
+      mappedTextures.TryGetValue("pupilRight", out Texture2D pupilRight);
       mappedTextures.TryGetValue("kerbalVisor", out Texture2D ivaVisorTexture);
       mappedTextures.TryGetValue("EVAvisor", out Texture2D evaVisorTexture);
 
@@ -184,11 +188,32 @@ namespace TextureReplacer
         foreach (SkinnedMeshRenderer smr in maleMeshes[i]) {
           // Many meshes share the same material, so it suffices to enumerate only one mesh for each material.
           switch (smr.name) {
+            case "eyeballLeft":
+              log.Print("{0}", eyeballLeft);
+              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.mainTexture = eyeballLeft;
+              break;
+
+            case "eyeballRight":
+              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.mainTexture = eyeballRight;
+              break;
+
+            case "pupilLeft":
+              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.mainTexture = pupilLeft;
+              break;
+
+            case "pupilRight":
+              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.mainTexture = pupilRight;
+              break;
+
             case "headMesh01":
             case "headMesh02":
               if (maleHeadNormalMap != null) {
                 // Replace with bump-mapped shader so normal maps for heads will work.
-                smr.sharedMaterial.shader = BumpedHeadShader;
+                smr.sharedMaterial.shader = BumpedDiffuseShader;
                 smr.sharedMaterial.SetTexture(Util.BumpMapProperty, maleHeadNormalMap);
               }
 
@@ -221,11 +246,27 @@ namespace TextureReplacer
         foreach (SkinnedMeshRenderer smr in femaleMeshes[i]) {
           // Here we must enumerate all meshes wherever we are replacing the material.
           switch (smr.name) {
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
+              smr.sharedMaterial.mainTexture = eyeballLeft;
+              break;
+
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
+              smr.sharedMaterial.mainTexture = eyeballRight;
+              break;
+
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
+              smr.sharedMaterial.mainTexture = pupilLeft;
+              break;
+
+            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
+              smr.sharedMaterial.mainTexture = pupilRight;
+              break;
+
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
               if (femaleHeadNormalMap != null) {
                 // Replace with bump-mapped shader so normal maps for heads will work.
-                smr.sharedMaterial.shader = BumpedHeadShader;
+                smr.sharedMaterial.shader = BumpedDiffuseShader;
                 smr.sharedMaterial.SetTexture(Util.BumpMapProperty, femaleHeadNormalMap);
               } else {
                 // Some female heads use specular shader. Fix it.
@@ -289,9 +330,10 @@ namespace TextureReplacer
           continue;
         }
 
-        int pathPrefixIndex = texture.name.IndexOf(TexturePrefix, StringComparison.Ordinal);
-        if (pathPrefixIndex != -1) {
-          string originalName = texture.name.Substring(pathPrefixIndex + TexturePrefix.Length);
+        int defaultPrefixIndex = texture.name.IndexOf(DefaultPrefix, StringComparison.Ordinal);
+        if (defaultPrefixIndex != -1) {
+          string originalName = texture.name.Substring(defaultPrefixIndex + DefaultPrefix.Length);
+          log.Print("{0} {1}", texture.name, originalName);
 
           // Since we are merging multiple directories, we must expect conflicts.
           if (!mappedTextures.ContainsKey(originalName)) {
@@ -300,7 +342,6 @@ namespace TextureReplacer
             }
             mappedTextures.Add(originalName, texture);
           }
-          break;
         }
       }
 
