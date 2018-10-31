@@ -53,7 +53,7 @@ namespace TextureReplacer
       Reflections reflections = Reflections.Instance;
 
       Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
-      Color reflectionColour = new Color(0.5f, 0.5f, 0.5f);
+      Color reflectionColour = new Color(0.75f, 0.75f, 0.75f);
       int updateInterval = 1;
 
       Util.Parse(ReflectionColor, ref reflectionColour);
