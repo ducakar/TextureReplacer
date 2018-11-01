@@ -212,7 +212,7 @@ namespace TextureReplacer
     // Interval in frames for updating environment map faces.
     static int reflectionInterval = 2;
     // Reflection colour.
-    static Color visorReflectionColour = new Color(0.75f, 0.75f, 0.75f);
+    static Color visorReflectionColour = new Color(0.7f, 0.7f, 0.7f);
     // Visor reflection feature.
     public bool IsVisorReflectionEnabled { get; private set; }
     // Print names of meshes and their shaders in parts with TRReflection module.

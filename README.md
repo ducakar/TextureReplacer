@@ -12,7 +12,7 @@ TextureReplacer is a plugin for Kerbal Space Program that allows you to replace
 stock textures and customise your Kerbals. More specifically, it can:
 
 * replace stock textures with custom ones,
-* assign personalised head and suit textures for each Kerbal,
+* assign personalised skin and suit textures for each Kerbal,
 * assign suits based on class and experience level,
 * toggle between EVA suit and IVA suit without helmet in breathable atmosphere,
 * add reflections to parts and helmet visors and
@@ -47,7 +47,8 @@ General replacement textures are of the form
     GameData/**/TextureReplacer/Default/<internalName>
 
 where `<internalName>` is the texture's internal name in KSP or path of a
-texture inside `GameData/` (plus .dds/.png/.jpg/.tga extension, of course).
+texture inside `GameData/` (plus `.dds`/`.png`/`.jpg`/`.tga` extension, of
+course).
 
 Examples:
 
@@ -127,7 +128,7 @@ reflections onto the windows of Mk1-2 pod:
     {
       name = TRReflection
       shader = Reflective/Bumped Diffuse
-      colour = 0.5 0.5 0.5
+      colour = 0.7 0.7 0.7
       interval = 1
       meshes = FrontWindow SideWindow
     }
@@ -138,8 +139,8 @@ There are several parameters, all optional:
   counterparts. In some cases, however, there are no reflective version of a
   shader, so you will have to manually specify appropriate shader.
 * `colour`: Reflection is pre-multiplied by this RGB value before added to the
-  material. "0.5 0.5 0.5" by default.
-* `interval`: Once in how many steps the reflection is updated. "1" by default.
+  material. `0.7 0.7 0.7` by default.
+* `interval`: Once in how many steps the reflection is updated. `1` by default.
 * `meshes`: Space- and/or comma-separated list of mesh names where to apply
   reflections. Reflection is applied to whole part if this parameter is empty or
   non-existent. You may find `logReflectiveMeshes` configuration option very
@@ -147,7 +148,7 @@ There are several parameters, all optional:
   module into your log.
 
 One face of one reflection cube texture is updated every `reflectionInterval`
-frames (2 by default, it can be changed in a configuration file), so each
+frames (`2` by default, it can be changed in a configuration file), so each
 reflective part has to be updated six times to update all six texture faces.
 More reflective parts there are on the scene less frequently they are updated.
 `interval` field on TRReflection module can lessen the update rate for a part;
@@ -155,13 +156,13 @@ e.g. `interval = 2` makes the part update half less frequently.
 
 ### Personalised Kerbal Textures ###
 
-Heads and suits are assigned either manually or automatically (configured in the
+Skins and suits are assigned either manually or automatically (configured in the
 GUI while configuration files can provide initial settings). "Random" assignment
-of heads and suits is based on Kerbals' names, which ensures the same head/suit
+of skins and suits is based on Kerbals' names, which ensures the same skin/suit
 is always assigned to a given Kerbal. Additionally, special per-class suit can
 be set for each class.
 
-Head textures reside inside `Skins/` directory, each in its own subdirectory:
+Skin textures reside inside `Skins/` directory, each in its own subdirectory:
 
     GameData/**/TextureReplacer/
       Skins/[<subDir>/]<skin>/kerbalHead     // Head texture
@@ -215,9 +216,9 @@ all levels on veterans.
 
 ### Configuration File ###
 
-NOTE: All options that can be configured in the GUI are saved per-game and not
-in the configuration files. Configuration files only provide initial settings
-for those options.
+***NOTE:*** All options that can be configured in the GUI are saved per-game and
+not in the configuration files. Configuration files only provide initial
+settings for those options.
 
 Main/default configuration file:
 
@@ -226,23 +227,23 @@ Main/default configuration file:
 One can also use additional configuration files; configuration is merged from
 all `*.cfg` files containing `TextureReplacer { ... }` as the root node. This
 should prove useful to developers of texture packs so they can distribute
-pack-specific head/suit assignment rules in a separate file. All `*.cfg` files
-(including `@Default.cfg`) are processed in alphabetical order (the leading "@"
+pack-specific skin/suit assignment rules in a separate file. All `*.cfg` files
+(including `@Default.cfg`) are processed in alphabetical order (the leading `@`
 in `@Default.cfg` ensures it is processed first and overridden by subsequent
 custom configuration files).
 
 ### Normal Maps ###
 
-Unity uses "grey" normal maps (RGBA = YYYX) to minimise artefacts when applying
-DXT5 texture compression on them. When a normal map has a "NRM" suffix Unity
-converts it from RGB = XYZ ("blue") to RGBA = YYYX ("grey") normal map unless
+Unity uses _grey_ normal maps (RGBA = YYYX) to minimise artefacts when applying
+DXT5 texture compression on them. When a normal map has a `NRM` suffix Unity
+converts it from RGB = XYZ (_blue_) to RGBA = YYYX (_grey_) normal map unless
 it is in DDS format.
 
-In short: you should supply "blue" normal maps when a texture has "NRM" suffix
+In short: you should supply _blue_ normal maps when a texture has `NRM` suffix
 and is in PNG format (JPEGs and TGAs are not recommended for normal maps) and
-"grey" normal maps for textures in DDS format or without "NRM" suffix.
+_grey_ normal maps for textures in DDS format or without `NRM` suffix.
 
-"Grey" normal maps can be created by saving the standard "blue" normal maps as
+_Grey_ normal maps can be created by saving the standard _blue_ normal maps as
 DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Notes ##
@@ -260,6 +261,10 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 * When using stock vintage suits, EVA suit is used for IVA.
 * Reflections disable part highlighting along reflective surfaces.
 * Only the top face of the atmospheric skybox is reflected.
+* Issues with other plugins:
+  - EVE clouds are not reflected at certain altitudes.
+  - Ship Manifest crew transfers reset Kerbals to default textures (restored on
+    vessel switch or scene reload).
 
 ## Change Log ##
 
@@ -271,6 +276,7 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
   - adjusted reflection colour
   - fixed visors in IVA
   - fixed level suits
+  - fixed some head texture artefacts
 * 3.4
   - removed texture compression, mipmap generation and unloading
   - unified navball textures as `Default/NavBall`
