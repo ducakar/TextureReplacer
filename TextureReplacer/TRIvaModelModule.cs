@@ -30,10 +30,9 @@ namespace TextureReplacer
   ///
   /// Directly personalising Kerbals doesn't work, they are reset to default suits after that in some situation
   /// (e.g. crew transfer). So we have to personalise Kerbals by using another component (TRIvaModule) bound directly
-  /// to IVA Kerbals. So why don't we add this component to proto models when Personaliser is initialised as we do for
-  /// EVAs? Once we did, but the vintage Kerbals that came with Making History Expansion don't have preexisting
-  /// proto-models that are cloned. Instead, they are created anew each time. So, this is the only nice way to get
-  /// TRIvaModule on all IVA Kerbals, both standard and vintage ones.
+  /// to IVA Kerbals. So why don't we add this component to proto-models in first place? Once we did, but the vintage
+  /// Kerbals don't have preexisting proto-models. Instead, they are created anew each time, so this is the only nice
+  /// way to get TRIvaModule on all IVA Kerbals, both standard and vintage ones.
   /// </summary>
   class TRIvaModelModule : MonoBehaviour
   {

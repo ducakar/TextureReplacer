@@ -675,6 +675,8 @@ namespace TextureReplacer
         kerbal.textureVeteran = DefaultSuit.IvaSuitVeteran;
       }
 
+      // `TRIvaModelModule` makes sure that internal spaces personalise all Kerbals inside them on instantiation.
+      // This will not suffice for Ship Manifest, we will also need to re-add these modules on any crew transfer.
       foreach (InternalModel model in Resources.FindObjectsOfTypeAll<InternalModel>()) {
         if (model.GetComponent<TRIvaModelModule>() == null) {
           model.gameObject.AddComponent<TRIvaModelModule>();

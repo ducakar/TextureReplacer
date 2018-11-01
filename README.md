@@ -268,6 +268,7 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
     `GameData/TextureReplacer/...`.
   - add eye texture replacements
   - apply specular shader to all Kerbals' eyes
+  - adjusted reflection colour
   - fixed visors in IVA
   - fixed level suits
 * 3.4

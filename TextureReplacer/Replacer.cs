@@ -340,7 +340,6 @@ namespace TextureReplacer
         int defaultPrefixIndex = texture.name.IndexOf(DefaultPrefix, StringComparison.Ordinal);
         if (defaultPrefixIndex != -1) {
           string originalName = texture.name.Substring(defaultPrefixIndex + DefaultPrefix.Length);
-          log.Print("{0} {1}", texture.name, originalName);
 
           // Since we are merging multiple directories, we must expect conflicts.
           if (!mappedTextures.ContainsKey(originalName)) {

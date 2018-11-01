@@ -276,6 +276,11 @@ namespace TextureReplacer
         if (isKerbalSelected) {
           isVintage = GUILayout.Toggle(isVintage, "Vintage");
           selectedKerbal.suit = isVintage ? KerbalSuit.Vintage : KerbalSuit.Default;
+
+          // Make sure the right kind of default suit is selected.
+          if (appearance.Suit == personaliser.DefaultSuit || appearance.Suit == personaliser.VintageSuit) {
+            appearance.Suit = defaultSuit;
+          }
         }
       }
 
