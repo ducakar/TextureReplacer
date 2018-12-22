@@ -41,13 +41,10 @@ namespace TextureReplacer
     readonly List<Suit>[] kerbalSuits = { new List<Suit>(), new List<Suit>() };
     // Personalised Kerbal textures.
     readonly Dictionary<string, Appearance> gameKerbals = new Dictionary<string, Appearance>();
+
     // Backed-up personalised textures from main configuration files. These are used to initialise kerbals if a saved
     // game doesn't contain `TRScenario`.
     readonly ConfigNode customKerbalsNode = new ConfigNode();
-    // Atmospheric IVA suit parameters.
-    bool isAtmSuitEnabled = true;
-    double atmSuitPressure = 50.0;
-    readonly HashSet<string> atmSuitBodies = new HashSet<string>();
 
     // Instance.
     public static Personaliser Instance { get; private set; }
@@ -67,21 +64,6 @@ namespace TextureReplacer
     // Class-specific suits.
     public readonly Dictionary<string, Suit> ClassSuits = new Dictionary<string, Suit>();
     public readonly Dictionary<string, Suit> DefaultClassSuits = new Dictionary<string, Suit>();
-
-    public bool IsAtmSuitEnabled {
-      get { return isAtmSuitEnabled; }
-      set { isAtmSuitEnabled = value; }
-    }
-
-    /// <summary>
-    /// Whether the atmosphere is breathable.
-    /// </summary>
-    public bool IsAtmBreathable()
-    {
-      return !HighLogic.LoadedSceneIsFlight ||
-             (FlightGlobals.getStaticPressure() >= atmSuitPressure &&
-             atmSuitBodies.Contains(FlightGlobals.currentMainBody.bodyName));
-    }
 
     Suit GetClassSuit(ProtoCrewMember kerbal)
     {
@@ -149,10 +131,11 @@ namespace TextureReplacer
     /// <summary>
     /// Replace textures on a Kerbal model.
     /// </summary>
-    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, bool isEva, bool useEvaSuit)
+    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, bool isEva)
     {
       Appearance appearance = GetAppearance(kerbal);
       bool isVintage = kerbal.suit == KerbalSuit.Vintage;
+      bool useEvaSuit = isEva && kerbal.hasHelmetOn;
 
       Skin skin = GetKerbalSkin(kerbal, appearance);
       Suit suit = GetKerbalSuit(kerbal, appearance);
@@ -281,22 +264,19 @@ namespace TextureReplacer
             }
             break;
 
+          case "neckRing":
+            newTexture = suitTexture;
+            newNormalMap = suitNormalMap;
+            break;
+
           case "helmet":
           case "mesh_female_kerbalAstronaut01_helmet":
-            if (isEva) {
-              smr.enabled = useEvaSuit;
-            }
-
             newTexture = suitTexture;
             newNormalMap = suitNormalMap;
             break;
 
           case "visor":
           case "mesh_female_kerbalAstronaut01_visor":
-            if (isEva) {
-              smr.enabled = useEvaSuit;
-            }
-
             // Visor texture has to be replaced every time.
             newTexture = suit.GetVisor(useEvaSuit);
             if (newTexture != null) {
@@ -330,25 +310,18 @@ namespace TextureReplacer
     /// </summary>
     public void PersonaliseIva(Kerbal kerbal)
     {
-      PersonaliseKerbal(kerbal, kerbal.protoCrewMember, false, false);
+      PersonaliseKerbal(kerbal, kerbal.protoCrewMember, false);
     }
 
     /// <summary>
-    /// Set external EVA/IVA suit. Fails and returns false iff trying to remove an EVA suit outside of breathable
-    /// atmosphere.This function is used by EvaModule.
+    /// Set external EVA/IVA suit.
     /// </summary>
-    public bool PersonaliseEva(Part evaPart, bool useEvaSuit)
+    public void PersonaliseEva(Part part)
     {
-      bool isDesiredSuitValid = true;
-
-      if (evaPart.protoModuleCrew.Count != 0) {
-        if (!useEvaSuit && !IsAtmBreathable()) {
-          useEvaSuit = true;
-          isDesiredSuitValid = false;
-        }
-        PersonaliseKerbal(evaPart, evaPart.protoModuleCrew[0], true, useEvaSuit);
+      ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
+      if (kerbal != null) {
+        PersonaliseKerbal(part, kerbal, true);
       }
-      return isDesiredSuitValid;
     }
 
     /// <summary>
@@ -519,16 +492,6 @@ namespace TextureReplacer
     public static void Recreate()
     {
       Instance = new Personaliser();
-    }
-
-    /// <summary>
-    /// Read configuration and perform pre-load initialisation.
-    /// </summary>
-    public void ReadConfig(ConfigNode rootNode)
-    {
-      Util.Parse(rootNode.GetValue("isAtmSuitEnabled"), ref isAtmSuitEnabled);
-      Util.Parse(rootNode.GetValue("atmSuitPressure"), ref atmSuitPressure);
-      Util.AddLists(rootNode.GetValues("atmSuitBodies"), atmSuitBodies);
     }
 
     /// <summary>
@@ -708,6 +671,25 @@ namespace TextureReplacer
       }
     }
 
+    void OnHelmetChange(KerbalEVA eva, bool hasHelmet, bool hasNeckRing)
+    {
+      var evaModule = eva.GetComponent<TREvaModule>();
+      if (evaModule != null) {
+        evaModule.OnHelmetChanged(hasHelmet);
+        PersonaliseEva(eva.part);
+      }
+    }
+
+    public void OnBeginFlight()
+    {
+      GameEvents.OnHelmetChanged.Add(OnHelmetChange);
+    }
+
+    public void OnEndFlight()
+    {
+      GameEvents.OnHelmetChanged.Remove(OnHelmetChange);
+    }
+
     public void OnLoadScenario(ConfigNode node)
     {
       gameKerbals.Clear();
@@ -715,16 +697,12 @@ namespace TextureReplacer
 
       LoadKerbalsMap(node.GetNode("Kerbals"));
       LoadSuitMap(node.GetNode("ClassSuits"), ClassSuits, DefaultClassSuits);
-
-      Util.Parse(node.GetValue("isAtmSuitEnabled"), ref isAtmSuitEnabled);
     }
 
     public void OnSaveScenario(ConfigNode node)
     {
       SaveKerbals(node.AddNode("Kerbals"));
       SaveSuitMap(ClassSuits, node.AddNode("ClassSuits"));
-
-      node.AddValue("isAtmSuitEnabled", isAtmSuitEnabled);
     }
 
     public void ResetKerbals()

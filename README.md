@@ -268,9 +268,14 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Change Log ##
 
+* 3.6
+  - leverage stock helmet removal system for managing atmospheric IVA suit
+  - remove `IsAtmSuitEnabled`, `atmSuitPressure` and `atmSuitBodies` config
+    options, these things are now managed by the stock helmet removal system
+  - remove atmospheric suit option from GUI
 * 3.5.1
   - adjusted default reflection colour to (1.0, 1.0, 1.0)
-  - fix trilinear texture filter not applying on some textures
+  - fixed trilinear texture filter not applying on some textures
   - fixed for KSP 1.6
 * 3.5
   - textures are now searched in `GameData/**/TextureReplacer/...`, not just in

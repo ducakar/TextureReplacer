@@ -51,7 +51,6 @@ namespace TextureReplacer
       foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer")) {
         Replacer.Instance.ReadConfig(file.config);
         Reflections.Instance.ReadConfig(file.config);
-        Personaliser.Instance.ReadConfig(file.config);
       }
     }
 

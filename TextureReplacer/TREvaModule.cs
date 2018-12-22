@@ -23,69 +23,27 @@
 namespace TextureReplacer
 {
   /// <summary>
-  /// This class takes cares of EVA Kerbal to assign appropriate suit on creation, watch for atmosphere charges (to put
-  /// on spacesuit of it leaves breathable atmosphere) and enables "Toggle EVA Suit" action.
-  ///
-  /// It is added to EVA kerbal by Personaliser so it doesn't need to be public.
+  /// This class takes cares of EVA Kerbal to assign appropriate suit on creation and manage reflection script.
   /// </summary>
   class TREvaModule : PartModule
   {
     Reflections.Script reflectionScript;
 
-    [KSPField(isPersistant = true)]
-    bool isInitialised;
-
-    [KSPField(isPersistant = true)]
-    bool hasEvaSuit;
-
-    [KSPEvent(guiActive = true, name = "ToggleEvaSuit", guiName = "Toggle EVA Suit")]
-    public void ToggleEvaSuit()
-    {
-      Personaliser personaliser = Personaliser.Instance;
-
-      if (personaliser.PersonaliseEva(part, !hasEvaSuit)) {
-        hasEvaSuit = !hasEvaSuit;
-        if (reflectionScript != null) {
-          reflectionScript.SetActive(hasEvaSuit);
-        }
-      } else {
-        ScreenMessages.PostScreenMessage("No breathable atmosphere", 5.0f, ScreenMessageStyle.UPPER_CENTER);
-      }
-    }
-
     public override void OnStart(StartState state)
     {
-      Personaliser personaliser = Personaliser.Instance;
-
-      if (!isInitialised) {
-        if (!personaliser.IsAtmSuitEnabled) {
-          Events["ToggleEvaSuit"].active = false;
-          hasEvaSuit = true;
-        }
-        isInitialised = true;
-      }
-
-      if (!personaliser.PersonaliseEva(part, hasEvaSuit)) {
-        hasEvaSuit = true;
-      }
       if (Reflections.Instance.IsVisorReflectionEnabled &&
           Reflections.Instance.ReflectionType == Reflections.Type.Real) {
         reflectionScript = new Reflections.Script(part, 1);
-        reflectionScript.SetActive(hasEvaSuit);
+        reflectionScript.SetActive(false);
       }
+
+      Personaliser.Instance.PersonaliseEva(part);
     }
 
-    public void Update()
+    public void OnHelmetChanged(bool enabled)
     {
-      Personaliser personaliser = Personaliser.Instance;
-
-      if (!hasEvaSuit && !personaliser.IsAtmBreathable()) {
-        personaliser.PersonaliseEva(part, true);
-        hasEvaSuit = true;
-
-        if (reflectionScript != null) {
-          reflectionScript.SetActive(true);
-        }
+      if (reflectionScript != null) {
+        reflectionScript.SetActive(enabled);
       }
     }
 

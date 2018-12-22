@@ -288,9 +288,6 @@ namespace TextureReplacer
       GUILayout.EndHorizontal();
       GUILayout.Space(5);
 
-      personaliser.IsAtmSuitEnabled = GUILayout.Toggle(personaliser.IsAtmSuitEnabled,
-        "Spawn Kerbals in IVA suits when in breathable atmosphere");
-
       bool enableReflections = reflections.ReflectionType == Reflections.Type.Real;
       enableReflections = GUILayout.Toggle(enableReflections, "Enable real-time reflections for visors and parts");
       reflections.ReflectionType = enableReflections ? Reflections.Type.Real : Reflections.Type.None;
@@ -333,8 +330,9 @@ namespace TextureReplacer
 
     public void Awake()
     {
-      foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("TextureReplacer"))
+      foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("TextureReplacer")) {
         Util.Parse(node.GetValue("isGUIEnabled"), ref isGuiEnabled);
+      }
 
       if (isGuiEnabled) {
         foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("EXPERIENCE_TRAIT")) {

@@ -182,11 +182,6 @@ namespace TextureReplacer
       Material headMaterial = null;
       Material[] visorMaterials = { null, null, null };
 
-      var shaders = Resources.FindObjectsOfTypeAll<Shader>();
-      foreach (var s in shaders) {
-        log.Print("{0}", s);
-      }
-
       for (int i = 0; i < 3; ++i) {
         foreach (SkinnedMeshRenderer smr in maleMeshes[i]) {
           // Many meshes share the same material, so it suffices to enumerate only one mesh for each material.
