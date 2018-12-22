@@ -184,142 +184,143 @@ namespace TextureReplacer
         // Parachute backpack, flag decals, headlight flares and thruster jets.
         if (smr == null) {
           renderer.enabled = useEvaSuit;
-        } else {
-          Texture2D newTexture = null;
-          Texture2D newNormalMap = null;
+          continue;
+        }
 
-          switch (smr.name) {
-            case "eyeballLeft":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
-              if (skin.IsEyeless) {
-                smr.sharedMesh = null;
-              } else {
-                newTexture = skin.EyeballLeft;
-                // Vintage IVA is missing a proto-model so it always has to be replaced.
-                if (!isEva && isVintage) {
-                  smr.material.shader = Replacer.StandardShader;
-                  newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballLeft;
-                }
+        Texture2D newTexture = null;
+        Texture2D newNormalMap = null;
+
+        switch (smr.name) {
+          case "eyeballLeft":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
+            if (skin.IsEyeless) {
+              smr.sharedMesh = null;
+            } else {
+              newTexture = skin.EyeballLeft;
+              // Vintage IVA is missing a proto-model so it always has to be replaced.
+              if (!isEva && isVintage) {
+                smr.material.shader = Replacer.StandardShader;
+                newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballLeft;
               }
-              break;
+            }
+            break;
 
-            case "eyeballRight":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
-              if (skin.IsEyeless) {
-                smr.sharedMesh = null;
-              } else {
-                newTexture = skin.EyeballRight;
-                // Vintage IVA is missing a proto-model so it always has to be replaced.
-                if (!isEva && isVintage) {
-                  smr.material.shader = Replacer.StandardShader;
-                  newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballRight;
-                }
+          case "eyeballRight":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
+            if (skin.IsEyeless) {
+              smr.sharedMesh = null;
+            } else {
+              newTexture = skin.EyeballRight;
+              // Vintage IVA is missing a proto-model so it always has to be replaced.
+              if (!isEva && isVintage) {
+                smr.material.shader = Replacer.StandardShader;
+                newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballRight;
               }
-              break;
+            }
+            break;
 
-            case "pupilLeft":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
-              if (skin.IsEyeless) {
-                smr.sharedMesh = null;
-              } else {
-                newTexture = skin.PupilLeft;
-                // Vintage IVA is missing a proto-model so it always has to be replaced.
-                if (!isEva && isVintage) {
-                  smr.material.shader = Replacer.StandardShader;
-                  newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilLeft;
-                }
+          case "pupilLeft":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
+            if (skin.IsEyeless) {
+              smr.sharedMesh = null;
+            } else {
+              newTexture = skin.PupilLeft;
+              // Vintage IVA is missing a proto-model so it always has to be replaced.
+              if (!isEva && isVintage) {
+                smr.material.shader = Replacer.StandardShader;
+                newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilLeft;
               }
-              break;
+            }
+            break;
 
-            case "pupilRight":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
-              if (skin.IsEyeless) {
-                smr.sharedMesh = null;
-              } else {
-                newTexture = skin.PupilRight;
-                // Vintage IVA is missing a proto-model so it has to be replaced always.
-                if (!isEva && isVintage) {
-                  smr.material.shader = Replacer.StandardShader;
-                  newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilRight;
-                }
+          case "pupilRight":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
+            if (skin.IsEyeless) {
+              smr.sharedMesh = null;
+            } else {
+              newTexture = skin.PupilRight;
+              // Vintage IVA is missing a proto-model so it has to be replaced always.
+              if (!isEva && isVintage) {
+                smr.material.shader = Replacer.StandardShader;
+                newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilRight;
               }
-              break;
+            }
+            break;
 
-            case "headMesh01":
-            case "headMesh02":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-              if (!skin.IsDefault) {
-                newTexture = skin.Head;
-                newNormalMap = skin.HeadNRM;
+          case "headMesh01":
+          case "headMesh02":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
+            if (!skin.IsDefault) {
+              newTexture = skin.Head;
+              newNormalMap = skin.HeadNRM;
 
-                if (newNormalMap != null) {
-                  smr.material.shader = Replacer.BumpedDiffuseShader;
-                }
+              if (newNormalMap != null) {
+                smr.material.shader = Replacer.BumpedDiffuseShader;
               }
-              break;
+            }
+            break;
 
-            case "tongue":
-            case "upTeeth01":
-            case "upTeeth02":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
-            case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
-              break;
+          case "tongue":
+          case "upTeeth01":
+          case "upTeeth02":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
+          case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
+            break;
 
-            case "body01":
-            case "mesh_female_kerbalAstronaut01_body01":
-              newTexture = suitTexture;
-              newNormalMap = suitNormalMap;
+          case "body01":
+          case "mesh_female_kerbalAstronaut01_body01":
+            newTexture = suitTexture;
+            newNormalMap = suitNormalMap;
 
-              // Update textures in Kerbal IVA object since KSP resets them to these values a few frames later.
-              var kerbalIva = component as Kerbal;
-              if (kerbalIva != null) {
-                kerbalIva.textureStandard = newTexture;
-                kerbalIva.textureVeteran = newTexture;
+            // Update textures in Kerbal IVA object since KSP resets them to these values a few frames later.
+            var kerbalIva = component as Kerbal;
+            if (kerbalIva != null) {
+              kerbalIva.textureStandard = newTexture;
+              kerbalIva.textureVeteran = newTexture;
+            }
+            break;
+
+          case "helmet":
+          case "mesh_female_kerbalAstronaut01_helmet":
+            if (isEva) {
+              smr.enabled = useEvaSuit;
+            }
+
+            newTexture = suitTexture;
+            newNormalMap = suitNormalMap;
+            break;
+
+          case "visor":
+          case "mesh_female_kerbalAstronaut01_visor":
+            if (isEva) {
+              smr.enabled = useEvaSuit;
+            }
+
+            // Visor texture has to be replaced every time.
+            newTexture = suit.GetVisor(useEvaSuit);
+            if (newTexture != null) {
+              smr.material.color = Color.white;
+            }
+            break;
+
+          default: // Jetpack.
+            if (isEva) {
+              smr.enabled = useEvaSuit;
+
+              if (useEvaSuit) {
+                newTexture = suit.EvaJetpack;
+                newNormalMap = suit.EvaJetpackNRM;
               }
-              break;
+            }
+            break;
+        }
 
-            case "helmet":
-            case "mesh_female_kerbalAstronaut01_helmet":
-              if (isEva) {
-                smr.enabled = useEvaSuit;
-              }
-
-              newTexture = suitTexture;
-              newNormalMap = suitNormalMap;
-              break;
-
-            case "visor":
-            case "mesh_female_kerbalAstronaut01_visor":
-              if (isEva) {
-                smr.enabled = useEvaSuit;
-              }
-
-              // Visor texture has to be replaced every time.
-              newTexture = suit.GetVisor(useEvaSuit);
-              if (newTexture != null) {
-                smr.material.color = Color.white;
-              }
-              break;
-
-            default: // Jetpack.
-              if (isEva) {
-                smr.enabled = useEvaSuit;
-
-                if (useEvaSuit) {
-                  newTexture = suit.EvaJetpack;
-                  newNormalMap = suit.EvaJetpackNRM;
-                }
-              }
-              break;
-          }
-
-          if (newTexture != null) {
-            smr.material.mainTexture = newTexture;
-          }
-          if (newNormalMap != null) {
-            smr.material.SetTexture(Util.BumpMapProperty, newNormalMap);
-          }
+        if (newTexture != null) {
+          smr.material.mainTexture = newTexture;
+        }
+        if (newNormalMap != null) {
+          smr.material.SetTexture(Util.BumpMapProperty, newNormalMap);
         }
       }
     }

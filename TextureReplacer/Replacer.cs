@@ -35,7 +35,7 @@ namespace TextureReplacer
     public static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
     public static readonly Shader StandardShader = Shader.Find("Standard");
     public static readonly Shader BumpedDiffuseShader = Shader.Find("Bumped Diffuse");
-    public static readonly Shader BasicVisorShader = Shader.Find("Transparent/Specular");
+    public static readonly Shader BasicVisorShader = Shader.Find("KSP/Alpha/Translucent");
 
     static readonly Log log = new Log(nameof(Replacer));
 
@@ -80,6 +80,8 @@ namespace TextureReplacer
 
           material.mainTexture = newTexture;
           UnityEngine.Object.Destroy(texture);
+        } else if (texture.filterMode == FilterMode.Bilinear) {
+          texture.filterMode = FilterMode.Trilinear;
         }
 
         if (!material.HasProperty(Util.BumpMapProperty)) {
@@ -179,6 +181,11 @@ namespace TextureReplacer
       // shaders, missing teeth texture ...)
       Material headMaterial = null;
       Material[] visorMaterials = { null, null, null };
+
+      var shaders = Resources.FindObjectsOfTypeAll<Shader>();
+      foreach (var s in shaders) {
+        log.Print("{0}", s);
+      }
 
       for (int i = 0; i < 3; ++i) {
         foreach (SkinnedMeshRenderer smr in maleMeshes[i]) {
@@ -325,16 +332,14 @@ namespace TextureReplacer
         }
       }
 
-      foreach (Texture texture in Resources.FindObjectsOfTypeAll<Texture>()) {
-        if (texture.filterMode == FilterMode.Bilinear) {
-          texture.filterMode = FilterMode.Trilinear;
-        }
-      }
-
       foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture) {
         Texture2D texture = texInfo.texture;
         if (texture == null || texture.name.Length == 0) {
           continue;
+        }
+
+        if (texture.filterMode == FilterMode.Bilinear) {
+          texture.filterMode = FilterMode.Trilinear;
         }
 
         int defaultPrefixIndex = texture.name.IndexOf(DefaultPrefix, StringComparison.Ordinal);

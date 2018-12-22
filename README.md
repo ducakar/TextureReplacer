@@ -128,7 +128,7 @@ reflections onto the windows of Mk1-2 pod:
     {
       name = TRReflection
       shader = Reflective/Bumped Diffuse
-      colour = 0.7 0.7 0.7
+      colour = 1.0 1.0 1.0
       interval = 1
       meshes = FrontWindow SideWindow
     }
@@ -139,7 +139,7 @@ There are several parameters, all optional:
   counterparts. In some cases, however, there are no reflective version of a
   shader, so you will have to manually specify appropriate shader.
 * `colour`: Reflection is pre-multiplied by this RGB value before added to the
-  material. `0.7 0.7 0.7` by default.
+  material. `1.0 1.0 1.0` by default.
 * `interval`: Once in how many steps the reflection is updated. `1` by default.
 * `meshes`: Space- and/or comma-separated list of mesh names where to apply
   reflections. Reflection is applied to whole part if this parameter is empty or
@@ -268,12 +268,16 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Change Log ##
 
+* 3.5.1
+  - adjusted default reflection colour to (1.0, 1.0, 1.0)
+  - fix trilinear texture filter not applying on some textures
+  - fixed for KSP 1.6
 * 3.5
   - textures are now searched in `GameData/**/TextureReplacer/...`, not just in
     `GameData/TextureReplacer/...`.
   - add eye texture replacements
   - apply specular shader to all Kerbals' eyes
-  - adjusted reflection colour
+  - adjusted reflection colour to (0.7, 0.7, 0.7)
   - fixed visors in IVA
   - fixed level suits
   - fixed some head texture artefacts
