@@ -131,11 +131,10 @@ namespace TextureReplacer
     /// <summary>
     /// Replace textures on a Kerbal model.
     /// </summary>
-    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, bool isEva)
+    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, bool isEva, bool useEvaSuit)
     {
       Appearance appearance = GetAppearance(kerbal);
       bool isVintage = kerbal.suit == KerbalSuit.Vintage;
-      bool useEvaSuit = isEva && kerbal.hasHelmetOn;
 
       Skin skin = GetKerbalSkin(kerbal, appearance);
       Suit suit = GetKerbalSuit(kerbal, appearance);
@@ -156,7 +155,7 @@ namespace TextureReplacer
 
       if (isEva) {
         flag.GetComponent<Renderer>().enabled = useEvaSuit;
-        parachute.GetComponent<Renderer>().enabled = useEvaSuit;
+        parachute.GetComponent<Renderer>().enabled = false;
       }
 
       // We must include hidden meshes, since flares are hidden when light is turned off.
@@ -164,7 +163,7 @@ namespace TextureReplacer
       foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>(true)) {
         var smr = renderer as SkinnedMeshRenderer;
 
-        // Parachute backpack, flag decals, headlight flares and thruster jets.
+        // Headlight flares and thruster jets.
         if (smr == null) {
           renderer.enabled = useEvaSuit;
           continue;
@@ -310,18 +309,15 @@ namespace TextureReplacer
     /// </summary>
     public void PersonaliseIva(Kerbal kerbal)
     {
-      PersonaliseKerbal(kerbal, kerbal.protoCrewMember, false);
+      PersonaliseKerbal(kerbal, kerbal.protoCrewMember, false, false);
     }
 
     /// <summary>
     /// Set external EVA/IVA suit.
     /// </summary>
-    public void PersonaliseEva(Part part)
+    public void PersonaliseEva(Part part, ProtoCrewMember kerbal, bool useEvaSuit)
     {
-      ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
-      if (kerbal != null) {
-        PersonaliseKerbal(part, kerbal, true);
-      }
+      PersonaliseKerbal(part, kerbal, true, useEvaSuit);
     }
 
     /// <summary>
@@ -671,23 +667,22 @@ namespace TextureReplacer
       }
     }
 
-    void OnHelmetChange(KerbalEVA eva, bool hasHelmet, bool hasNeckRing)
+    void OnHelmetChanged(KerbalEVA eva, bool hasHelmet, bool hasNeckRing)
     {
       var evaModule = eva.GetComponent<TREvaModule>();
       if (evaModule != null) {
         evaModule.OnHelmetChanged(hasHelmet);
-        PersonaliseEva(eva.part);
       }
     }
 
     public void OnBeginFlight()
     {
-      GameEvents.OnHelmetChanged.Add(OnHelmetChange);
+      GameEvents.OnHelmetChanged.Add(OnHelmetChanged);
     }
 
     public void OnEndFlight()
     {
-      GameEvents.OnHelmetChanged.Remove(OnHelmetChange);
+      GameEvents.OnHelmetChanged.Remove(OnHelmetChanged);
     }
 
     public void OnLoadScenario(ConfigNode node)

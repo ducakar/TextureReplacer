@@ -44,8 +44,11 @@ namespace TextureReplacer
 
       readonly RenderTexture envMap;
       readonly Transform transform;
+      readonly Renderer[] meshes;
+      readonly bool[] meshStates;
       readonly bool isEva;
       readonly int interval;
+
       int counter;
       int currentFace;
       bool isActive = true;
@@ -61,8 +64,6 @@ namespace TextureReplacer
         isEva = part.GetComponent<KerbalEVA>() != null;
 
         if (isEva) {
-          transform = transform.Find("model01");
-
           SkinnedMeshRenderer visor = transform.GetComponentsInChildren<SkinnedMeshRenderer>(true)
             .FirstOrDefault(m => m.name == "visor" || m.name == "mesh_female_kerbalAstronaut01_visor");
 
@@ -75,7 +76,10 @@ namespace TextureReplacer
           }
         }
 
+        meshes = transform.GetComponentsInChildren<Renderer>();
+        meshStates = new bool[meshes.Length];
         interval = updateInterval;
+
         counter = Util.Random.Next(updateInterval);
         currentFace = Util.Random.Next(6);
 
@@ -109,9 +113,6 @@ namespace TextureReplacer
         int faceMask = force ? 0x3f : 1 << currentFace;
 
         // Hide all meshes of the current part.
-        Renderer[] meshes = transform.GetComponentsInChildren<Renderer>();
-        bool[] meshStates = new bool[meshes.Length];
-
         for (int i = 0; i < meshes.Length; ++i) {
           meshStates[i] = meshes[i].enabled;
           meshes[i].enabled = false;

@@ -34,7 +34,7 @@ namespace TextureReplacer
     public const string NavBall = "NavBall";
     public static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
     public static readonly Shader StandardShader = Shader.Find("Standard");
-    public static readonly Shader BumpedDiffuseShader = Shader.Find("Bumped Diffuse");
+    public static readonly Shader BumpedDiffuseShader = Shader.Find("KSP/Bumped");
     public static readonly Shader BasicVisorShader = Shader.Find("KSP/Alpha/Translucent");
 
     static readonly Log log = new Log(nameof(Replacer));

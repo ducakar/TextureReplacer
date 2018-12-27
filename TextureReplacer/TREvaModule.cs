@@ -20,6 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System.Linq;
+
 namespace TextureReplacer
 {
   /// <summary>
@@ -31,17 +33,30 @@ namespace TextureReplacer
 
     public override void OnStart(StartState state)
     {
+      bool useEvaSuit = false;
+
+      ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
+      if (kerbal != null) {
+        KerbalEVA kerbalEva = GetComponent<KerbalEVA>();
+
+        useEvaSuit = kerbal.hasHelmetOn || !kerbalEva.CanEVAWithoutHelmet();
+        Personaliser.Instance.PersonaliseEva(part, kerbal, useEvaSuit);
+      }
+
       if (Reflections.Instance.IsVisorReflectionEnabled &&
           Reflections.Instance.ReflectionType == Reflections.Type.Real) {
         reflectionScript = new Reflections.Script(part, 1);
-        reflectionScript.SetActive(false);
+        reflectionScript.SetActive(useEvaSuit);
       }
-
-      Personaliser.Instance.PersonaliseEva(part);
     }
 
     public void OnHelmetChanged(bool enabled)
     {
+      ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
+      if (kerbal != null) {
+        Personaliser.Instance.PersonaliseEva(part, kerbal, enabled);
+      }
+
       if (reflectionScript != null) {
         reflectionScript.SetActive(enabled);
       }
