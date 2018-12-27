@@ -46,6 +46,8 @@ namespace TextureReplacer
     // game doesn't contain `TRScenario`.
     readonly ConfigNode customKerbalsNode = new ConfigNode();
 
+    bool hideParachuteBackpack;
+
     // Instance.
     public static Personaliser Instance { get; private set; }
 
@@ -155,7 +157,7 @@ namespace TextureReplacer
 
       if (isEva) {
         flag.GetComponent<Renderer>().enabled = useEvaSuit;
-        parachute.GetComponent<Renderer>().enabled = false;
+        parachute.GetComponent<Renderer>().enabled = useEvaSuit && !hideParachuteBackpack;
       }
 
       // We must include hidden meshes, since flares are hidden when light is turned off.
@@ -494,6 +496,14 @@ namespace TextureReplacer
     public static void Recreate()
     {
       Instance = new Personaliser();
+    }
+
+    /// <summary>
+    /// Read configuration and perform pre-load initialisation.
+    /// </summary>
+    public void ReadConfig(ConfigNode rootNode)
+    {
+      Util.Parse(rootNode.GetValue("hideParachuteBackpack"), ref hideParachuteBackpack);
     }
 
     /// <summary>
