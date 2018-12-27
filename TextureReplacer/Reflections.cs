@@ -197,10 +197,10 @@ namespace TextureReplacer
     // 18 - skybox
     // 23 - sun
     static readonly float[] CullDistances = {
-      1000.0f, 100.0f, 0.0f, 0.0f, 0.0f, 100.0f, 0.0f, 0.0f,
+      500.0f, 5.0f, 0.0f, 0.0f, 0.0f, 50.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
     };
 
     readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
@@ -209,9 +209,9 @@ namespace TextureReplacer
     // Reflection type.
     public Type ReflectionType { get; set; }
     // Real reflection resolution.
-    static int reflectionResolution = 256;
+    static int reflectionResolution = 128;
     // Interval in frames for updating environment map faces.
-    static int reflectionInterval = 2;
+    static int reflectionInterval = 4;
     // Reflection colour.
     static Color visorReflectionColour = Color.white;
     // Visor reflection feature.

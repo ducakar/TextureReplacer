@@ -269,7 +269,8 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 ## Change Log ##
 
 * 3.6.1
-  - fixed jetpack, visor and visor reflection when spawning in EVA suit
+  - tune reflection settings to mitigate ragdoll jitter and performance issues
+  - fix jetpack, visor and visor reflection when spawning in EVA suit
 * 3.6
   - leverage stock helmet removal system for managing atmospheric IVA suit
   - remove `IsAtmSuitEnabled`, `atmSuitPressure` and `atmSuitBodies` config
