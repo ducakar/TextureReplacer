@@ -20,6 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System.Reflection;
 using UnityEngine;
 
 namespace TextureReplacer
@@ -39,26 +40,57 @@ namespace TextureReplacer
       }
     }
 
+    static readonly Log log = new Log(nameof(TRActivator));
+
+    static bool isLoaded;
+
     bool isFlightScene;
     TRReflectionUpdater reflectionUpdater;
 
+    void Load()
+    {
+      log.Print("Started, Version {0}", Assembly.GetExecutingAssembly().GetName().Version);
+
+      if (Reflections.Instance != null) {
+        Reflections.Instance.Destroy();
+      }
+
+      Replacer.Recreate();
+      Reflections.Recreate();
+      Personaliser.Recreate();
+
+      foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer")) {
+        Replacer.Instance.ReadConfig(file.config);
+        Reflections.Instance.ReadConfig(file.config);
+        Personaliser.Instance.ReadConfig(file.config);
+      }
+
+      Replacer.Instance.Load();
+      Reflections.Instance.Load();
+      Personaliser.Instance.Load();
+
+      isLoaded = true;
+    }
+
     public void Start()
     {
-      if (!TextureReplacer.IsLoaded) {
-        return;
-      }
+      if (!isLoaded) {
+        if (PartLoader.Instance.IsReady()) {
+          Load();
+        }
+      } else {
+        Replacer.Instance.OnBeginScene();
 
-      Replacer.Instance.OnBeginScene();
+        if (HighLogic.LoadedSceneIsFlight) {
+          Replacer.Instance.OnBeginFlight();
+          Personaliser.Instance.OnBeginFlight();
+          isFlightScene = true;
+        }
 
-      if (HighLogic.LoadedSceneIsFlight) {
-        Replacer.Instance.OnBeginFlight();
-        Personaliser.Instance.OnBeginFlight();
-        isFlightScene = true;
-      }
-
-      if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) &&
-          Reflections.Instance.ReflectionType == Reflections.Type.Real) {
-        reflectionUpdater = gameObject.AddComponent<TRReflectionUpdater>();
+        if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) &&
+            Reflections.Instance.ReflectionType == Reflections.Type.Real) {
+          reflectionUpdater = gameObject.AddComponent<TRReflectionUpdater>();
+        }
       }
     }
 

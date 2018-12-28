@@ -20,10 +20,14 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+//  #define TR_ENABLE_TEXTURE_EXPORTING
+
 using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
+#if TR_ENABLE_TEXTURE_EXPORTING
+using System.IO;
+#endif
 
 namespace TextureReplacer
 {
@@ -143,8 +147,8 @@ namespace TextureReplacer
       }
     }
 
+#if TR_ENABLE_TEXTURE_EXPORTING
     // Development utilities.
-#if false
     /// <summary>
     /// Print hierarchy from a transform up to the root.
     /// </summary>

@@ -35,7 +35,6 @@
     <Compile Include="TRGui.cs" />
     <Compile Include="TRReflection.cs" />
     <Compile Include="TRScenario.cs" />
-    <Compile Include="TextureReplacer.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="Skin.cs" />
     <Compile Include="Suit.cs" />
