@@ -165,22 +165,20 @@ be set for each class.
 Skin textures reside inside `Skins/` directory, each in its own subdirectory:
 
     GameData/**/TextureReplacer/
-      Skins/[<subDir>/]<skin>/kerbalHead     // Head texture
-      Skins/[<subDir>/]<skin>/kerbalHeadNRM  // Normal map (optional)
-      Skins/[<subDir>/]<skin>/eyeballLeft    // Left eyeball
-      Skins/[<subDir>/]<skin>/eyeballRight   // Right eyeball
-      Skins/[<subDir>/]<skin>/pupilLeft      // Left pupil
-      Skins/[<subDir>/]<skin>/pupilRight     // Right pupil
+      Skins/[<subDir>/]<skin>/kerbalHead    // Head texture
+      Skins/[<subDir>/]<skin>/eyeballLeft   // Left eyeball
+      Skins/[<subDir>/]<skin>/eyeballRight  // Right eyeball
+      Skins/[<subDir>/]<skin>/pupilLeft     // Left pupil
+      Skins/[<subDir>/]<skin>/pupilRight    // Right pupil
 
 for males and
 
     GameData/**/TextureReplacer/
-      Skins/[<subDir>/]<skin>/kerbalGirl_06_BaseColor     // Head texture
-      Skins/[<subDir>/]<skin>/kerbalGirl_06_BaseColorNRM  // Normal map (optional)
-      Skins/[<subDir>/]<skin>/eyeballLeft                 // Left eyeball
-      Skins/[<subDir>/]<skin>/eyeballRight                // Right eyeball
-      Skins/[<subDir>/]<skin>/pupilLeft                   // Left pupil
-      Skins/[<subDir>/]<skin>/pupilRight                  // Right pupil
+      Skins/[<subDir>/]<skin>/kerbalGirl_06_BaseColor  // Head texture
+      Skins/[<subDir>/]<skin>/eyeballLeft              // Left eyeball
+      Skins/[<subDir>/]<skin>/eyeballRight             // Right eyeball
+      Skins/[<subDir>/]<skin>/pupilLeft                // Left pupil
+      Skins/[<subDir>/]<skin>/pupilRight               // Right pupil
 
 for females.
 
@@ -270,6 +268,7 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 * 3.7
   - add option to hide parachute backpacks
+  - remove head normal maps because of defective normals on head meshes
 * 3.6.2
   - fix pupil textures
 * 3.6.1

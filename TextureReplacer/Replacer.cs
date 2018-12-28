@@ -33,9 +33,9 @@ namespace TextureReplacer
     public const string DefaultPrefix = "TextureReplacer/Default/";
     public const string NavBall = "NavBall";
     public static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
-    public static readonly Shader StandardShader = Shader.Find("Standard");
-    public static readonly Shader BumpedDiffuseShader = Shader.Find("KSP/Bumped");
-    public static readonly Shader BasicVisorShader = Shader.Find("KSP/Alpha/Translucent");
+    public static readonly Shader EyeShader = Shader.Find("Standard");
+    public static readonly Shader HeadShader = Shader.Find("Mobile/Diffuse");
+    public static readonly Shader TexturedVisorShader = Shader.Find("KSP/Alpha/Translucent");
 
     static readonly Log log = new Log(nameof(Replacer));
 
@@ -130,8 +130,6 @@ namespace TextureReplacer
 
     void FixKerbalModels()
     {
-      mappedTextures.TryGetValue("kerbalHeadNRM", out Texture2D maleHeadNormalMap);
-      mappedTextures.TryGetValue("kerbalGirl_06_BaseColorNRM", out Texture2D femaleHeadNormalMap);
       mappedTextures.TryGetValue("eyeballLeft", out Texture2D eyeballLeft);
       mappedTextures.TryGetValue("eyeballRight", out Texture2D eyeballRight);
       mappedTextures.TryGetValue("pupilLeft", out Texture2D pupilLeft);
@@ -187,17 +185,17 @@ namespace TextureReplacer
           // Many meshes share the same material, so it suffices to enumerate only one mesh for each material.
           switch (smr.name) {
             case "eyeballLeft":
-              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.shader = EyeShader;
               smr.sharedMaterial.mainTexture = eyeballLeft;
               break;
 
             case "eyeballRight":
-              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.shader = EyeShader;
               smr.sharedMaterial.mainTexture = eyeballRight;
               break;
 
             case "pupilLeft":
-              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.shader = EyeShader;
               smr.sharedMaterial.mainTexture = pupilLeft;
               if (pupilLeft != null) {
                 smr.sharedMaterial.color = Color.white;
@@ -205,7 +203,7 @@ namespace TextureReplacer
               break;
 
             case "pupilRight":
-              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.shader = EyeShader;
               smr.sharedMaterial.mainTexture = pupilRight;
               if (pupilRight != null) {
                 smr.sharedMaterial.color = Color.white;
@@ -214,12 +212,8 @@ namespace TextureReplacer
 
             case "headMesh01":
             case "headMesh02":
-              if (maleHeadNormalMap != null) {
-                // Replace with bump-mapped shader so normal maps for heads will work.
-                smr.sharedMaterial.shader = BumpedDiffuseShader;
-                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, maleHeadNormalMap);
-              }
-
+              // Replace with bump-mapped shader so normal maps for heads will work.
+              smr.sharedMaterial.shader = HeadShader;
               headMaterial = smr.sharedMaterial;
               break;
 
@@ -228,7 +222,7 @@ namespace TextureReplacer
               switch (i) {
                 case 0: // maleIva
                   if (ivaVisorTexture != null) {
-                    smr.sharedMaterial.shader = BasicVisorShader;
+                    smr.sharedMaterial.shader = TexturedVisorShader;
                     smr.sharedMaterial.mainTexture = ivaVisorTexture;
                     smr.sharedMaterial.color = Color.white;
                   }
@@ -236,7 +230,7 @@ namespace TextureReplacer
 
                 case 1: // maleEva
                   if (evaVisorTexture != null) {
-                    smr.sharedMaterial.shader = BasicVisorShader;
+                    smr.sharedMaterial.shader = TexturedVisorShader;
                     smr.sharedMaterial.mainTexture = evaVisorTexture;
                     smr.sharedMaterial.color = Color.white;
                   }
@@ -258,17 +252,17 @@ namespace TextureReplacer
           // Here we must enumerate all meshes wherever we are replacing the material.
           switch (smr.name) {
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
-              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.shader = EyeShader;
               smr.sharedMaterial.mainTexture = eyeballLeft;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
-              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.shader = EyeShader;
               smr.sharedMaterial.mainTexture = eyeballRight;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
-              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.shader = EyeShader;
               smr.sharedMaterial.mainTexture = pupilLeft;
               if (pupilLeft != null) {
                 smr.sharedMaterial.color = Color.white;
@@ -276,7 +270,7 @@ namespace TextureReplacer
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
-              smr.sharedMaterial.shader = StandardShader;
+              smr.sharedMaterial.shader = EyeShader;
               smr.sharedMaterial.mainTexture = pupilRight;
               if (pupilRight != null) {
                 smr.sharedMaterial.color = Color.white;
@@ -285,14 +279,8 @@ namespace TextureReplacer
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-              if (femaleHeadNormalMap != null) {
-                // Replace with bump-mapped shader so normal maps for heads will work.
-                smr.sharedMaterial.shader = BumpedDiffuseShader;
-                smr.sharedMaterial.SetTexture(Util.BumpMapProperty, femaleHeadNormalMap);
-              } else {
-                // Some female heads use specular shader. Fix it.
-                smr.sharedMaterial.shader = headMaterial.shader;
-              }
+              // Replace with bump-mapped shader so normal maps for heads will work.
+              smr.sharedMaterial.shader = HeadShader;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":

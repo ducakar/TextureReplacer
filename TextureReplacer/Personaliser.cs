@@ -181,9 +181,9 @@ namespace TextureReplacer
               smr.sharedMesh = null;
             } else {
               newTexture = skin.EyeballLeft;
-              // Vintage IVA is missing a proto-model so it always has to be replaced.
+              // Vintage IVA is missing a proto-model so it has to be replaced always.
               if (!isEva && isVintage) {
-                smr.material.shader = Replacer.StandardShader;
+                smr.material.shader = Replacer.EyeShader;
                 newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballLeft;
               }
             }
@@ -195,9 +195,9 @@ namespace TextureReplacer
               smr.sharedMesh = null;
             } else {
               newTexture = skin.EyeballRight;
-              // Vintage IVA is missing a proto-model so it always has to be replaced.
+              // Vintage IVA is missing a proto-model so it has to be replaced always.
               if (!isEva && isVintage) {
-                smr.material.shader = Replacer.StandardShader;
+                smr.material.shader = Replacer.EyeShader;
                 newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballRight;
               }
             }
@@ -209,9 +209,9 @@ namespace TextureReplacer
               smr.sharedMesh = null;
             } else {
               newTexture = skin.PupilLeft;
-              // Vintage IVA is missing a proto-model so it always has to be replaced.
+              // Vintage IVA is missing a proto-model so it has to be replaced always.
               if (!isEva && isVintage) {
-                smr.material.shader = Replacer.StandardShader;
+                smr.material.shader = Replacer.EyeShader;
                 newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilLeft;
               }
               if (newTexture != null) {
@@ -228,7 +228,7 @@ namespace TextureReplacer
               newTexture = skin.PupilRight;
               // Vintage IVA is missing a proto-model so it has to be replaced always.
               if (!isEva && isVintage) {
-                smr.material.shader = Replacer.StandardShader;
+                smr.material.shader = Replacer.EyeShader;
                 newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilRight;
               }
               if (newTexture != null) {
@@ -243,11 +243,6 @@ namespace TextureReplacer
           case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
             if (!skin.IsDefault) {
               newTexture = skin.Head;
-              newNormalMap = skin.HeadNRM;
-
-              if (newNormalMap != null) {
-                smr.material.shader = Replacer.BumpedDiffuseShader;
-              }
             }
             break;
 

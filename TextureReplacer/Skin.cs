@@ -33,9 +33,7 @@ namespace TextureReplacer
     public bool IsDefault;
 
     public Texture2D Head;
-    public Texture2D HeadNRM;
     public Texture2D Arms;
-    public Texture2D ArmsNRM;
     internal Texture2D EyeballLeft;
     internal Texture2D EyeballRight;
     internal Texture2D PupilLeft;
@@ -49,25 +47,13 @@ namespace TextureReplacer
           Head = Head ?? texture;
           return true;
 
-        case "kerbalHeadNRM":
-          HeadNRM = HeadNRM ?? texture;
-          return true;
-
         case "kerbalGirl_06_BaseColor":
           Gender = Gender.Female;
           Head = Head ?? texture;
           return true;
 
-        case "kerbalGirl_06_BaseColorNRM":
-          HeadNRM = HeadNRM ?? texture;
-          return true;
-
         case "kerbal_armHands":
           Arms = Arms ?? texture;
-          return true;
-
-        case "kerbal_armHandsNRM":
-          ArmsNRM = ArmsNRM ?? texture;
           return true;
 
         case "eyeballLeft":
