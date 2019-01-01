@@ -268,6 +268,8 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Change Log ##
 
+* 3.6.2
+  - fix pupil textures
 * 3.6.1
   - tune reflection settings to mitigate ragdoll jitter and performance issues
   - fix jetpack, visor and visor reflection when spawning in EVA suit
@@ -733,7 +735,7 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ### Plugin: MIT ###
 
-    Copyright © 2013-2018 Davorin Učakar
+    Copyright © 2013-2019 Davorin Učakar
     Copyright © 2016 RangeMachine
     Copyright © 2013 rbray89
 

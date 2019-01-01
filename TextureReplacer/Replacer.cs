@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Davorin Učakar
+ * Copyright © 2013-2019 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -199,11 +199,17 @@ namespace TextureReplacer
             case "pupilLeft":
               smr.sharedMaterial.shader = StandardShader;
               smr.sharedMaterial.mainTexture = pupilLeft;
+              if (pupilLeft != null) {
+                smr.sharedMaterial.color = Color.white;
+              }
               break;
 
             case "pupilRight":
               smr.sharedMaterial.shader = StandardShader;
               smr.sharedMaterial.mainTexture = pupilRight;
+              if (pupilRight != null) {
+                smr.sharedMaterial.color = Color.white;
+              }
               break;
 
             case "headMesh01":
@@ -264,11 +270,17 @@ namespace TextureReplacer
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
               smr.sharedMaterial.shader = StandardShader;
               smr.sharedMaterial.mainTexture = pupilLeft;
+              if (pupilLeft != null) {
+                smr.sharedMaterial.color = Color.white;
+              }
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
               smr.sharedMaterial.shader = StandardShader;
               smr.sharedMaterial.mainTexture = pupilRight;
+              if (pupilRight != null) {
+                smr.sharedMaterial.color = Color.white;
+              }
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":

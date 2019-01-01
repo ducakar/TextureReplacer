@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2018 Davorin Učakar
+ * Copyright © 2013-2019 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -212,6 +212,9 @@ namespace TextureReplacer
                 smr.material.shader = Replacer.StandardShader;
                 newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilLeft;
               }
+              if (newTexture != null) {
+                smr.material.color = Color.white;
+              }
             }
             break;
 
@@ -225,6 +228,9 @@ namespace TextureReplacer
               if (!isEva && isVintage) {
                 smr.material.shader = Replacer.StandardShader;
                 newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilRight;
+              }
+              if (newTexture != null) {
+                smr.material.color = Color.white;
               }
             }
             break;
