@@ -46,7 +46,7 @@ namespace TextureReplacer
     // game doesn't contain `TRScenario`.
     readonly ConfigNode customKerbalsNode = new ConfigNode();
 
-    bool hideParachuteBackpack;
+    public bool HideParachuteBackpack { get; set; }
 
     // Instance.
     public static Personaliser Instance { get; private set; }
@@ -157,7 +157,7 @@ namespace TextureReplacer
 
       if (isEva) {
         flag.GetComponent<Renderer>().enabled = useEvaSuit;
-        parachute.GetComponent<Renderer>().enabled = useEvaSuit && !hideParachuteBackpack;
+        parachute.GetComponent<Renderer>().enabled = useEvaSuit && !HideParachuteBackpack;
       }
 
       // We must include hidden meshes, since flares are hidden when light is turned off.
@@ -498,7 +498,9 @@ namespace TextureReplacer
     /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
+      bool hideParachuteBackpack = false;
       Util.Parse(rootNode.GetValue("hideParachuteBackpack"), ref hideParachuteBackpack);
+      HideParachuteBackpack = hideParachuteBackpack;
     }
 
     /// <summary>
@@ -701,12 +703,17 @@ namespace TextureReplacer
       gameKerbals.Clear();
       ClassSuits.Clear();
 
+      bool hideParachuteBackpack = HideParachuteBackpack;
+      Util.Parse(node.GetValue("hideParachuteBackpack"), ref hideParachuteBackpack);
+      HideParachuteBackpack = hideParachuteBackpack;
+
       LoadKerbalsMap(node.GetNode("Kerbals"));
       LoadSuitMap(node.GetNode("ClassSuits"), ClassSuits, DefaultClassSuits);
     }
 
     public void OnSaveScenario(ConfigNode node)
     {
+      node.AddValue("hideParachuteBackpack", HideParachuteBackpack);
       SaveKerbals(node.AddNode("Kerbals"));
       SaveSuitMap(ClassSuits, node.AddNode("ClassSuits"));
     }

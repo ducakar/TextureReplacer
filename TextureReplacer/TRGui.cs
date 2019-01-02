@@ -292,6 +292,10 @@ namespace TextureReplacer
       enableReflections = GUILayout.Toggle(enableReflections, "Enable real-time reflections for visors and parts");
       reflections.ReflectionType = enableReflections ? Reflections.Type.Real : Reflections.Type.None;
 
+      bool hideParachuteBackpack = personaliser.HideParachuteBackpack;
+      hideParachuteBackpack = GUILayout.Toggle(hideParachuteBackpack, "Hide parachute backpack");
+      personaliser.HideParachuteBackpack = hideParachuteBackpack;
+
       GUILayout.EndVertical();
       GUI.DragWindow(new Rect(0, 0, Screen.width, 30));
     }
