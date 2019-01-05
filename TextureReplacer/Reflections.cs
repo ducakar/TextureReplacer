@@ -212,6 +212,7 @@ namespace TextureReplacer
     static int reflectionResolution = 128;
     // Interval in frames for updating environment map faces.
     static int reflectionInterval = 4;
+    static Type globalReflectionType = Type.Real;
     // Reflection colour.
     static Color visorReflectionColour = Color.white;
     // Visor reflection feature.
@@ -254,18 +255,16 @@ namespace TextureReplacer
     /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
-      Type reflectionType = Type.Real;
       bool isVisorReflectionEnabled = true;
       bool logReflectiveMeshes = false;
 
-      Util.Parse(rootNode.GetValue("reflectionType"), ref reflectionType);
+      Util.Parse(rootNode.GetValue("reflectionType"), ref globalReflectionType);
       Util.Parse(rootNode.GetValue("reflectionResolution"), ref reflectionResolution);
       Util.Parse(rootNode.GetValue("reflectionInterval"), ref reflectionInterval);
       Util.Parse(rootNode.GetValue("isVisorReflectionEnabled"), ref isVisorReflectionEnabled);
       Util.Parse(rootNode.GetValue("visorReflectionColour"), ref visorReflectionColour);
       Util.Parse(rootNode.GetValue("logReflectiveMeshes"), ref logReflectiveMeshes);
 
-      ReflectionType = reflectionType;
       IsVisorReflectionEnabled = isVisorReflectionEnabled;
       LogReflectiveMeshes = logReflectiveMeshes;
     }
@@ -335,7 +334,7 @@ namespace TextureReplacer
 
     public void OnLoadScenario(ConfigNode node)
     {
-      Type type = ReflectionType;
+      Type type = globalReflectionType;
       Util.Parse(node.GetValue("reflectionType"), ref type);
       ReflectionType = type;
     }

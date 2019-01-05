@@ -43,8 +43,8 @@ namespace TextureReplacer
         Personaliser.Instance.PersonaliseEva(part, kerbal, useEvaSuit);
       }
 
-      if (Reflections.Instance.IsVisorReflectionEnabled &&
-          Reflections.Instance.ReflectionType == Reflections.Type.Real) {
+      if (Reflections.Instance.ReflectionType == Reflections.Type.Real &&
+          Reflections.Instance.IsVisorReflectionEnabled) {
         reflectionScript = new Reflections.Script(part, 1);
         reflectionScript.SetActive(useEvaSuit);
       }

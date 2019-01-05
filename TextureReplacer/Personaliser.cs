@@ -46,6 +46,7 @@ namespace TextureReplacer
     // game doesn't contain `TRScenario`.
     readonly ConfigNode customKerbalsNode = new ConfigNode();
 
+    bool globalHideParachuteBackpack;
     public bool HideParachuteBackpack { get; set; }
 
     // Instance.
@@ -498,9 +499,7 @@ namespace TextureReplacer
     /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
-      bool hideParachuteBackpack = false;
-      Util.Parse(rootNode.GetValue("hideParachuteBackpack"), ref hideParachuteBackpack);
-      HideParachuteBackpack = hideParachuteBackpack;
+      Util.Parse(rootNode.GetValue("hideParachuteBackpack"), ref globalHideParachuteBackpack);
     }
 
     /// <summary>
@@ -703,7 +702,7 @@ namespace TextureReplacer
       gameKerbals.Clear();
       ClassSuits.Clear();
 
-      bool hideParachuteBackpack = HideParachuteBackpack;
+      bool hideParachuteBackpack = globalHideParachuteBackpack;
       Util.Parse(node.GetValue("hideParachuteBackpack"), ref hideParachuteBackpack);
       HideParachuteBackpack = hideParachuteBackpack;
 

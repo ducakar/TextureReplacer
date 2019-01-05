@@ -66,11 +66,11 @@ namespace TextureReplacer
       if (MeshesToChange != "all") {
         meshNames.AddUniqueRange(Util.SplitConfigValue(MeshesToChange));
       }
-      if (reflections.ReflectionType == Reflections.Type.None) {
-        return;
-      }
       if (reflections.LogReflectiveMeshes) {
         log.Print("Part \"{0}\"", part.name);
+      }
+      if (reflections.ReflectionType == Reflections.Type.None) {
+        return;
       }
 
       script = new Reflections.Script(part, updateInterval);
