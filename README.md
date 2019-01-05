@@ -268,6 +268,7 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 * 3.7
   - add option to hide parachute backpacks
+  - add vintage IVA kerbals to logKerbalHierarchy
   - remove head normal maps because of defective normals on head meshes
 * 3.6.2
   - fix pupil textures

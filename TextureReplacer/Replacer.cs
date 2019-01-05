@@ -128,6 +128,47 @@ namespace TextureReplacer
       }
     }
 
+    void LogHierarchies(Kerbal maleIva, Part maleEva, Part maleEvaVintage,
+                        Kerbal femaleIva, Part femaleEva, Part femaleEvaVintage)
+    {
+      log.Print("Male IVA Hierarchy");
+      Util.LogDownHierarchy(maleIva.transform);
+      log.Print("Female IVA Hierarchy");
+      Util.LogDownHierarchy(femaleIva.transform);
+      log.Print("Male EVA Hierarchy");
+      Util.LogDownHierarchy(maleEva.transform);
+      log.Print("Female EVA Hierarchy");
+      Util.LogDownHierarchy(femaleEva.transform);
+
+      // Vintage Kerbals don't have prefab models loaded. We need to load them from assets.
+      AssetBundle makingHistoryBundle = AssetBundle.GetAllLoadedAssetBundles()
+        .FirstOrDefault(b => b.name == "makinghistory_assets");
+      if (makingHistoryBundle != null) {
+        var maleIvaVintage = makingHistoryBundle
+          .LoadAsset("assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab") as GameObject;
+        var femaleIvaVintage = makingHistoryBundle
+          .LoadAsset("assets/expansions/missions/kerbals/iva/kerbalfemalevintage.prefab") as GameObject;
+        if (maleIvaVintage != null) {
+          log.Print("Male IVA Vintage Hierarchy");
+          Util.LogDownHierarchy(maleIvaVintage.transform);
+          UnityEngine.Object.Destroy(maleIvaVintage);
+        }
+        if (maleEvaVintage != null) {
+          log.Print("Male EVA Vintage Hierarchy");
+          Util.LogDownHierarchy(maleEvaVintage.transform);
+        }
+        if (femaleIvaVintage != null) {
+          log.Print("Female IVA Vintage Hierarchy");
+          Util.LogDownHierarchy(femaleIvaVintage.transform);
+          UnityEngine.Object.Destroy(femaleIvaVintage);
+        }
+        if (femaleEvaVintage != null) {
+          log.Print("Female EVA Vintage Hierarchy");
+          Util.LogDownHierarchy(femaleEvaVintage.transform);
+        }
+      }
+    }
+
     void FixKerbalModels()
     {
       mappedTextures.TryGetValue("eyeballLeft", out Texture2D eyeballLeft);
@@ -149,30 +190,19 @@ namespace TextureReplacer
       Part femaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAfemaleVintage").partPrefab;
 
       if (logKerbalHierarchy) {
-        log.Print("Male IVA Hierarchy");
-        Util.LogDownHierarchy(maleIva.transform);
-        log.Print("Male EVA Hierarchy");
-        Util.LogDownHierarchy(maleEva.transform);
-        log.Print("Male EVA Vintage Hierarchy");
-        Util.LogDownHierarchy(maleEvaVintage.transform);
-        log.Print("Female IVA Hierarchy");
-        Util.LogDownHierarchy(femaleIva.transform);
-        log.Print("Female EVA Hierarchy");
-        Util.LogDownHierarchy(femaleEva.transform);
-        log.Print("Female EVA Vintage Hierarchy");
-        Util.LogDownHierarchy(femaleEvaVintage.transform);
+        LogHierarchies(maleIva, maleEva, maleEvaVintage, femaleIva, femaleEva, femaleEvaVintage);
       }
 
       SkinnedMeshRenderer[][] maleMeshes = {
         maleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
         maleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        maleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+        maleEvaVintage?.GetComponentsInChildren<SkinnedMeshRenderer>(true)
       };
 
       SkinnedMeshRenderer[][] femaleMeshes = {
         femaleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
         femaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        femaleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+        femaleEvaVintage?.GetComponentsInChildren<SkinnedMeshRenderer>(true)
       };
 
       // Male materials to be copied to females to fix tons of female issues (missing normal maps, non-bumpmapped
@@ -181,6 +211,10 @@ namespace TextureReplacer
       Material[] visorMaterials = { null, null, null };
 
       for (int i = 0; i < 3; ++i) {
+        if (maleMeshes[i] == null) {
+          continue;
+        }
+
         foreach (SkinnedMeshRenderer smr in maleMeshes[i]) {
           // Many meshes share the same material, so it suffices to enumerate only one mesh for each material.
           switch (smr.name) {
@@ -248,6 +282,10 @@ namespace TextureReplacer
       }
 
       for (int i = 0; i < 3; ++i) {
+        if (femaleMeshes[i] == null) {
+          continue;
+        }
+
         foreach (SkinnedMeshRenderer smr in femaleMeshes[i]) {
           // Here we must enumerate all meshes wherever we are replacing the material.
           switch (smr.name) {
