@@ -27,7 +27,7 @@ namespace TextureReplacer
   /// <summary>
   /// Component for personalisation of IVA Kerbals, similar as TREvaModule, but much simpler.
   /// </summary>
-  class TRIvaModule : MonoBehaviour
+  internal class TRIvaModule : MonoBehaviour
   {
     public void Start()
     {

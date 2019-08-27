@@ -28,7 +28,7 @@ using UnityEngine.Rendering;
 
 namespace TextureReplacer
 {
-  class Reflections
+  internal class Reflections
   {
     public enum Type
     {
@@ -39,26 +39,24 @@ namespace TextureReplacer
     public class Script
     {
       // List of all created reflection scripts.
-      static readonly List<Script> Scripts = new List<Script>();
-      static int currentScript;
+      private static readonly List<Script> Scripts = new List<Script>();
+      private static int currentScript;
 
-      readonly RenderTexture envMap;
-      readonly Transform transform;
-      readonly Renderer[] meshes;
-      readonly bool[] meshStates;
-      readonly bool isEva;
-      readonly int interval;
+      private readonly RenderTexture envMap;
+      private readonly Transform transform;
+      private readonly Renderer[] meshes;
+      private readonly bool[] meshStates;
+      private readonly bool isEva;
+      private readonly int interval;
 
-      int counter;
-      int currentFace;
-      bool isActive = true;
+      private int counter;
+      private int currentFace;
+      private bool isActive = true;
 
-      public Script(Part part, int updateInterval)
+      public Script(Component part, int updateInterval)
       {
         envMap = new RenderTexture(reflectionResolution, reflectionResolution, 24) {
-          hideFlags = HideFlags.HideAndDontSave,
-          wrapMode = TextureWrapMode.Clamp,
-          dimension = TextureDimension.Cube
+          hideFlags = HideFlags.HideAndDontSave, wrapMode = TextureWrapMode.Clamp, dimension = TextureDimension.Cube
         };
         transform = part.transform;
         isEva = part.GetComponent<KerbalEVA>() != null;
@@ -91,7 +89,7 @@ namespace TextureReplacer
 
       public bool Apply(Material material, Shader shader, Color reflectionColour)
       {
-        Shader reflectiveShader = shader ?? Instance.ToReflective(material.shader);
+        Shader reflectiveShader = shader ? shader : Instance.ToReflective(material.shader);
 
         if (reflectiveShader != null) {
           material.shader = reflectiveShader;
@@ -108,7 +106,7 @@ namespace TextureReplacer
         Object.DestroyImmediate(envMap);
       }
 
-      void Update(bool force)
+      private void Update(bool force)
       {
         int faceMask = force ? 0x3f : 1 << currentFace;
 
@@ -131,7 +129,8 @@ namespace TextureReplacer
         camera.RenderToCubemap(envMap, faceMask);
 
         // Scene.
-        camera.transform.position = isEva ? transform.position + 0.4f * transform.up : transform.position;
+        var pos = transform.position;
+        camera.transform.position = isEva ? pos + 0.4f * transform.up : pos;
         camera.farClipPlane = 60000.0f;
         camera.cullingMask = (1 << 0) | (1 << 1) | (1 << 5) | (1 << 15) | (1 << 17);
         camera.RenderToCubemap(envMap, faceMask);
@@ -154,36 +153,36 @@ namespace TextureReplacer
 
       public static void UpdateScripts()
       {
-        if (Scripts.Count != 0 && Time.frameCount % reflectionInterval == 0) {
-          currentScript %= Scripts.Count;
-
-          int startScript = currentScript;
-          do {
-            Script script = Scripts[currentScript];
-            currentScript = (currentScript + 1) % Scripts.Count;
-
-            if (script.isActive) {
-              script.counter = (script.counter + 1) % script.interval;
-
-              if (script.counter == 0) {
-                script.Update(false);
-                break;
-              }
-            }
-          } while (currentScript != startScript);
+        if (Scripts.Count == 0 || Time.frameCount % reflectionInterval != 0) {
+          return;
         }
+
+        currentScript %= Scripts.Count;
+
+        int startScript = currentScript;
+        do {
+          Script script = Scripts[currentScript];
+          currentScript = (currentScript + 1) % Scripts.Count;
+
+          if (script.isActive) {
+            script.counter = (script.counter + 1) % script.interval;
+
+            if (script.counter == 0) {
+              script.Update(false);
+              break;
+            }
+          }
+        } while (currentScript != startScript);
       }
     }
 
-    static readonly Log log = new Log(nameof(Reflections));
+    private static readonly Log log = new Log(nameof(Reflections));
     // Reflective shader map.
-    static readonly string[,] ShaderNameMap = {
-      { "KSP/Diffuse", "Reflective/Bumped Diffuse" },
-      { "KSP/Specular", "Reflective/Bumped Diffuse" },
-      { "KSP/Bumped", "Reflective/Bumped Diffuse" },
-      { "KSP/Bumped Specular", "Reflective/Bumped Diffuse" },
-      { "KSP/Alpha/Translucent", "Reflective/Bumped Diffuse" },
-      { "KSP/Alpha/Translucent Specular", "Reflective/Bumped Diffuse" }
+    private static readonly string[,] ShaderNameMap = {
+      {"KSP/Diffuse", "Reflective/Bumped Diffuse"}, {"KSP/Specular", "Reflective/Bumped Diffuse"},
+      {"KSP/Bumped", "Reflective/Bumped Diffuse"}, {"KSP/Bumped Specular", "Reflective/Bumped Diffuse"},
+      {"KSP/Alpha/Translucent", "Reflective/Bumped Diffuse"},
+      {"KSP/Alpha/Translucent Specular", "Reflective/Bumped Diffuse"}
     };
 
     // Render layers:
@@ -196,50 +195,52 @@ namespace TextureReplacer
     // 17 - kerbals
     // 18 - skybox
     // 23 - sun
-    static readonly float[] CullDistances = {
-      500.0f, 5.0f, 0.0f, 0.0f, 0.0f, 50.0f, 0.0f, 0.0f,
-      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-      0.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
+    private static readonly float[] CullDistances = {
+      500.0f, 5.0f, 0.0f, 0.0f, 0.0f, 50.0f, 0.0f, 0.0f, //
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,    //
+      0.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,   //
+      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f     //
     };
 
-    readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
+    private readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflection camera.
-    static Camera camera;
+    private static Camera camera;
     // Reflection type.
     public Type ReflectionType { get; set; }
     // Real reflection resolution.
-    static int reflectionResolution = 128;
+    private static int reflectionResolution = 128;
     // Interval in frames for updating environment map faces.
-    static int reflectionInterval = 4;
-    static Type globalReflectionType = Type.Real;
+    private static int reflectionInterval = 4;
+    private static Type globalReflectionType = Type.Real;
     // Reflection colour.
-    static Color visorReflectionColour = Color.white;
+    private static Color visorReflectionColour = Color.white;
     // Visor reflection feature.
     public bool IsVisorReflectionEnabled { get; private set; }
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool LogReflectiveMeshes { get; private set; }
     // Reflective visor shader.
-    Shader visorShader;
+    private Shader visorShader;
     // Instance.
     public static Reflections Instance { get; private set; }
 
-    static void EnsureCamera()
+    private static void EnsureCamera()
     {
-      if (camera == null) {
-        camera = new GameObject("TRReflectionCamera", new[] { typeof(Camera) }).GetComponent<Camera>();
-        camera.enabled = false;
-        camera.clearFlags = CameraClearFlags.Depth;
-        // Any smaller number and visors will reflect internals of helmets.
-        camera.nearClipPlane = 0.125f;
-        camera.layerCullDistances = CullDistances;
+      if (camera != null) {
+        return;
       }
+
+      camera = new GameObject("TRReflectionCamera", typeof(Camera)).GetComponent<Camera>();
+      camera.enabled = false;
+      camera.clearFlags = CameraClearFlags.Depth;
+      // Any smaller number and visors will reflect internals of helmets.
+      camera.nearClipPlane = 0.125f;
+      camera.layerCullDistances = CullDistances;
     }
 
     /**
      * Get reflective version of a shader.
      */
-    public Shader ToReflective(Shader shader)
+    private Shader ToReflective(Shader shader)
     {
       shaderMap.TryGetValue(shader, out Shader newShader);
       return newShader;

@@ -27,9 +27,9 @@ namespace TextureReplacer
   /// <summary>
   /// This class takes cares of EVA Kerbal to assign appropriate suit on creation and manage reflection script.
   /// </summary>
-  class TREvaModule : PartModule
+  internal class TREvaModule : PartModule
   {
-    Reflections.Script reflectionScript;
+    private Reflections.Script reflectionScript;
 
     public override void OnStart(StartState state)
     {
@@ -37,7 +37,7 @@ namespace TextureReplacer
 
       ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
       if (kerbal != null) {
-        KerbalEVA kerbalEva = GetComponent<KerbalEVA>();
+        var kerbalEva = GetComponent<KerbalEVA>();
 
         useEvaSuit = kerbal.hasHelmetOn || !kerbalEva.CanEVAWithoutHelmet();
         Personaliser.Instance.PersonaliseEva(part, kerbal, useEvaSuit);
@@ -50,23 +50,19 @@ namespace TextureReplacer
       }
     }
 
-    public void OnHelmetChanged(bool enabled)
+    public void OnHelmetChanged(bool hasHelmet)
     {
       ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
       if (kerbal != null) {
-        Personaliser.Instance.PersonaliseEva(part, kerbal, enabled);
+        Personaliser.Instance.PersonaliseEva(part, kerbal, hasHelmet);
       }
 
-      if (reflectionScript != null) {
-        reflectionScript.SetActive(enabled);
-      }
+      reflectionScript?.SetActive(hasHelmet);
     }
 
     public void OnDestroy()
     {
-      if (reflectionScript != null) {
-        reflectionScript.Destroy();
-      }
+      reflectionScript?.Destroy();
     }
   }
 }

@@ -29,24 +29,22 @@ using KerbalSuit = ProtoCrewMember.KerbalSuit;
 
 namespace TextureReplacer
 {
-  class Personaliser
+  internal class Personaliser
   {
-    const string SkinsPrefix = "TextureReplacer/Skins/";
-    const string SuitsPrefix = "TextureReplacer/Suits/";
+    private const string SkinsPrefix = "TextureReplacer/Skins/";
+    private const string SuitsPrefix = "TextureReplacer/Suits/";
 
-    static readonly Log log = new Log(nameof(Personaliser));
-
+    private static readonly Log log = new Log(nameof(Personaliser));
     // Male/female textures (minus excluded).
-    readonly List<Skin>[] kerbalSkins = { new List<Skin>(), new List<Skin>() };
-    readonly List<Suit>[] kerbalSuits = { new List<Suit>(), new List<Suit>() };
+    private readonly List<Skin>[] kerbalSkins = {new List<Skin>(), new List<Skin>()};
+    private readonly List<Suit>[] kerbalSuits = {new List<Suit>(), new List<Suit>()};
     // Personalised Kerbal textures.
-    readonly Dictionary<string, Appearance> gameKerbals = new Dictionary<string, Appearance>();
-
+    private readonly Dictionary<string, Appearance> gameKerbals = new Dictionary<string, Appearance>();
     // Backed-up personalised textures from main configuration files. These are used to initialise kerbals if a saved
     // game doesn't contain `TRScenario`.
-    readonly ConfigNode customKerbalsNode = new ConfigNode();
+    private readonly ConfigNode customKerbalsNode = new ConfigNode();
 
-    bool globalHideParachuteBackpack;
+    private bool globalHideParachuteBackpack;
     public bool HideParachuteBackpack { get; set; }
 
     // Instance.
@@ -54,11 +52,10 @@ namespace TextureReplacer
 
     // Default textures (from `Default/`).
     public readonly Skin[] DefaultSkin = {
-      new Skin { Name = "DEFAULT", IsDefault = true },
-      new Skin { Name = "DEFAULT", IsDefault = true }
+      new Skin {Name = "DEFAULT", IsDefault = true}, new Skin {Name = "DEFAULT", IsDefault = true}
     };
-    public readonly Suit DefaultSuit = new Suit { Name = "DEFAULT", IsDefault = true };
-    public readonly Suit VintageSuit = new Suit { Name = "VINTAGE", IsDefault = true };
+    public readonly Suit DefaultSuit = new Suit {Name = "DEFAULT"};
+    public readonly Suit VintageSuit = new Suit {Name = "VINTAGE"};
 
     // All Kerbal textures, including excluded by configuration.
     public readonly List<Skin> Skins = new List<Skin>();
@@ -68,7 +65,7 @@ namespace TextureReplacer
     public readonly Dictionary<string, Suit> ClassSuits = new Dictionary<string, Suit>();
     public readonly Dictionary<string, Suit> DefaultClassSuits = new Dictionary<string, Suit>();
 
-    Suit GetClassSuit(ProtoCrewMember kerbal)
+    private Suit GetClassSuit(ProtoCrewMember kerbal)
     {
       ClassSuits.TryGetValue(kerbal.experienceTrait.Config.Name, out Suit suit);
       return suit;
@@ -81,9 +78,7 @@ namespace TextureReplacer
     public Appearance GetAppearance(ProtoCrewMember kerbal)
     {
       if (!gameKerbals.TryGetValue(kerbal.name, out Appearance appearance)) {
-        appearance = new Appearance {
-          Hash = kerbal.name.GetHashCode()
-        };
+        appearance = new Appearance {Hash = kerbal.name.GetHashCode()};
         gameKerbals.Add(kerbal.name, appearance);
       }
       return appearance;
@@ -98,9 +93,9 @@ namespace TextureReplacer
         return appearance.Skin;
       }
 
-      List<Skin> genderSkins = kerbalSkins[(int)kerbal.gender];
+      List<Skin> genderSkins = kerbalSkins[(int) kerbal.gender];
       if (genderSkins.Count == 0) {
-        return DefaultSkin[(int)kerbal.gender];
+        return DefaultSkin[(int) kerbal.gender];
       }
 
       // Hash is multiplied with a large prime to increase randomisation, since hashes returned by `GetHashCode()` are
@@ -120,7 +115,7 @@ namespace TextureReplacer
         return suit;
       }
 
-      List<Suit> genderSuits = kerbalSuits[(int)kerbal.gender];
+      List<Suit> genderSuits = kerbalSuits[(int) kerbal.gender];
       if (genderSuits.Count == 0) {
         return kerbal.suit == KerbalSuit.Vintage ? VintageSuit : DefaultSuit;
       }
@@ -134,7 +129,7 @@ namespace TextureReplacer
     /// <summary>
     /// Replace textures on a Kerbal model.
     /// </summary>
-    void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, bool isEva, bool useEvaSuit)
+    private void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, bool isEva, bool useEvaSuit)
     {
       Appearance appearance = GetAppearance(kerbal);
       bool isVintage = kerbal.suit == KerbalSuit.Vintage;
@@ -143,7 +138,8 @@ namespace TextureReplacer
       Suit suit = GetKerbalSuit(kerbal, appearance);
       Suit defaultSuit = isVintage ? VintageSuit : DefaultSuit;
 
-      Transform model = isEva || !isVintage ? component.transform.Find("model01")
+      Transform model = isEva || !isVintage
+        ? component.transform.Find("model01")
         : component.transform.Find("kbIVA@idle/model01");
       Transform flag = isEva ? component.transform.Find("model/kbEVA_flagDecals") : null;
       Transform parachute = isEva ? component.transform.Find("model/EVAparachute/base") : null;
@@ -185,7 +181,7 @@ namespace TextureReplacer
               // Vintage IVA is missing a proto-model so it has to be replaced always.
               if (!isEva && isVintage) {
                 smr.material.shader = Replacer.EyeShader;
-                newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballLeft;
+                newTexture = newTexture ? newTexture : DefaultSkin[(int) kerbal.gender].EyeballLeft;
               }
             }
             break;
@@ -199,7 +195,7 @@ namespace TextureReplacer
               // Vintage IVA is missing a proto-model so it has to be replaced always.
               if (!isEva && isVintage) {
                 smr.material.shader = Replacer.EyeShader;
-                newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].EyeballRight;
+                newTexture = newTexture ? newTexture : DefaultSkin[(int) kerbal.gender].EyeballRight;
               }
             }
             break;
@@ -213,7 +209,7 @@ namespace TextureReplacer
               // Vintage IVA is missing a proto-model so it has to be replaced always.
               if (!isEva && isVintage) {
                 smr.material.shader = Replacer.EyeShader;
-                newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilLeft;
+                newTexture = newTexture ? newTexture : DefaultSkin[(int) kerbal.gender].PupilLeft;
               }
               if (newTexture != null) {
                 smr.material.color = Color.white;
@@ -230,7 +226,7 @@ namespace TextureReplacer
               // Vintage IVA is missing a proto-model so it has to be replaced always.
               if (!isEva && isVintage) {
                 smr.material.shader = Replacer.EyeShader;
-                newTexture = newTexture ?? DefaultSkin[(int)kerbal.gender].PupilRight;
+                newTexture = newTexture ? newTexture : DefaultSkin[(int) kerbal.gender].PupilRight;
               }
               if (newTexture != null) {
                 smr.material.color = Color.white;
@@ -327,9 +323,9 @@ namespace TextureReplacer
     /// <summary>
     /// Load per-game custom kerbals mapping.
     /// </summary>
-    void LoadKerbalsMap(ConfigNode node)
+    private void LoadKerbalsMap(ConfigNode node)
     {
-      node = node ?? customKerbalsNode;
+      node ??= customKerbalsNode;
 
       KerbalRoster roster = HighLogic.CurrentGame.CrewRoster;
 
@@ -342,22 +338,27 @@ namespace TextureReplacer
         Appearance appearance = GetAppearance(kerbal);
 
         string value = node.GetValue(kerbal.name);
-        if (value != null) {
-          string[] tokens = Util.SplitConfigValue(value);
-          string skinName = tokens.Length >= 1 ? tokens[0] : null;
-          string suitName = tokens.Length >= 2 ? tokens[1] : null;
+        if (value == null) {
+          continue;
+        }
 
-          if (skinName != null && skinName != "GENERIC") {
-            appearance.Skin = skinName == "DEFAULT"
-              ? DefaultSkin[(int)kerbal.gender]
-              : Skins.Find(h => h.Name == skinName);
-          }
+        string[] tokens = Util.SplitConfigValue(value);
+        string skinName = tokens.Length >= 1 ? tokens[0] : null;
+        string suitName = tokens.Length >= 2 ? tokens[1] : null;
 
-          if (suitName != null && suitName != "GENERIC") {
-            appearance.Suit = suitName == "DEFAULT" ? DefaultSuit
-              : suitName == "VINTAGE" ? VintageSuit
-              : Suits.Find(s => s.Name == suitName);
-          }
+        if (skinName != null && skinName != "GENERIC") {
+          appearance.Skin = skinName switch {
+            "DEFAULT" => DefaultSkin[(int) kerbal.gender],
+            _         => Skins.Find(h => h.Name == skinName)
+          };
+        }
+
+        if (suitName != null && suitName != "GENERIC") {
+          appearance.Suit = suitName switch {
+            "DEFAULT" => DefaultSuit,
+            "VINTAGE" => VintageSuit,
+            _         => Suits.Find(s => s.Name == suitName)
+          };
         }
       }
     }
@@ -365,7 +366,7 @@ namespace TextureReplacer
     /// <summary>
     /// Save per-game custom Kerbals mapping.
     /// </summary>
-    void SaveKerbals(ConfigNode node)
+    private void SaveKerbals(ConfigNode node)
     {
       KerbalRoster roster = HighLogic.CurrentGame.CrewRoster;
 
@@ -387,30 +388,37 @@ namespace TextureReplacer
     /// <summary>
     /// Load suit mapping.
     /// </summary>
-    void LoadSuitMap(ConfigNode node, IDictionary<string, Suit> map, IDictionary<string, Suit> defaultMap)
+    private void LoadSuitMap(ConfigNode node, IDictionary<string, Suit> map, IDictionary<string, Suit> defaultMap)
     {
       if (node == null) {
-        if (defaultMap != null) {
-          foreach (var entry in defaultMap) {
+        if (defaultMap != null)
+          foreach (KeyValuePair<string, Suit> entry in defaultMap) {
             map[entry.Key] = entry.Value;
           }
-        }
       } else {
         foreach (ConfigNode.Value entry in node.values) {
           map.Remove(entry.name);
 
           string suitName = entry.value;
-          if (suitName != null && suitName != "GENERIC") {
-            if (suitName == "DEFAULT") {
+          switch (suitName) {
+            case null:
+            case "GENERIC":
+              continue;
+
+            case "DEFAULT":
               map[entry.name] = DefaultSuit;
-            } else if (suitName == "VINTAGE") {
+              break;
+
+            case "VINTAGE":
               map[entry.name] = VintageSuit;
-            } else {
+              break;
+
+            default:
               Suit suit = Suits.Find(s => s.Name == suitName);
               if (suit != null) {
                 map[entry.name] = suit;
               }
-            }
+              break;
           }
         }
       }
@@ -419,9 +427,9 @@ namespace TextureReplacer
     /// <summary>
     /// Save suit mapping.
     /// </summary>
-    static void SaveSuitMap(Dictionary<string, Suit> map, ConfigNode node)
+    private static void SaveSuitMap(Dictionary<string, Suit> map, ConfigNode node)
     {
-      foreach (var entry in map) {
+      foreach (KeyValuePair<string, Suit> entry in map) {
         string suitName = entry.Value == null ? "GENERIC" : entry.Value.Name;
 
         node.AddValue(entry.Key, suitName);
@@ -431,7 +439,7 @@ namespace TextureReplacer
     /// <summary>
     /// Fill config for custom Kerbal skins and suits.
     /// </summary>
-    void ReadKerbalsConfigs()
+    private void ReadKerbalsConfigs()
     {
       var excludedSkins = new List<string>();
       var excludedSuits = new List<string>();
@@ -532,7 +540,7 @@ namespace TextureReplacer
 
             if (!skinDirs.TryGetValue(skinName, out int index)) {
               index = Skins.Count;
-              Skins.Add(new Skin { Name = skinName });
+              Skins.Add(new Skin {Name = skinName});
               skinDirs.Add(skinName, index);
             }
 
@@ -555,7 +563,7 @@ namespace TextureReplacer
 
             if (!suitDirs.TryGetValue(suitName, out int index)) {
               index = Suits.Count;
-              Suits.Add(new Suit { Name = suitName });
+              Suits.Add(new Suit {Name = suitName});
               suitDirs.Add(suitName, index);
             }
 
@@ -603,26 +611,34 @@ namespace TextureReplacer
 
       // Visor needs to be replaced every time, not only on the proto-Kerbal model, so the visor from the default suit
       // must be set on all suits without a custom visor.
-      VintageSuit.IvaVisor = VintageSuit.IvaVisor ?? DefaultSuit.IvaVisor;
-      VintageSuit.EvaVisor = VintageSuit.EvaVisor ?? DefaultSuit.EvaVisor;
+      VintageSuit.IvaVisor = VintageSuit.IvaVisor ? VintageSuit.IvaVisor : DefaultSuit.IvaVisor;
+      VintageSuit.EvaVisor = VintageSuit.EvaVisor ? VintageSuit.EvaVisor : DefaultSuit.EvaVisor;
 
-      foreach (var suit in Suits) {
-        suit.IvaVisor = suit.IvaVisor ?? DefaultSuit.IvaVisor;
-        suit.EvaVisor = suit.EvaVisor ?? DefaultSuit.EvaVisor;
+      foreach (Suit suit in Suits) {
+        suit.IvaVisor = suit.IvaVisor ? suit.IvaVisor : DefaultSuit.IvaVisor;
+        suit.EvaVisor = suit.EvaVisor ? suit.EvaVisor : DefaultSuit.EvaVisor;
       }
 
       ReadKerbalsConfigs();
 
       // Initialise default Kerbal, which is only loaded when the main menu shows.
       foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>()) {
-        if (texture.name != null) {
-          if (texture.name == "kerbalHead") {
-            DefaultSkin[0].Head = DefaultSkin[0].Head ?? texture;
-          } else if (texture.name == "kerbalGirl_06_BaseColor") {
-            DefaultSkin[1].Head = DefaultSkin[1].Head ?? texture;
-          } else {
+        if (texture.name == null) {
+          continue;
+        }
+
+        switch (texture.name) {
+          case "kerbalHead":
+            DefaultSkin[0].Head = DefaultSkin[0].Head ? DefaultSkin[0].Head : texture;
+            break;
+
+          case "kerbalGirl_06_BaseColor":
+            DefaultSkin[1].Head = DefaultSkin[1].Head ? DefaultSkin[1].Head : texture;
+            break;
+
+          default:
             DefaultSuit.SetTexture(texture.name, texture);
-          }
+            break;
         }
       }
 
@@ -632,13 +648,14 @@ namespace TextureReplacer
       Part vintageEva = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
 
       foreach (SkinnedMeshRenderer smr in vintageEva.GetComponentsInChildren<SkinnedMeshRenderer>()) {
-        if (smr.name == "body01") {
-          var suitTexture = smr.material.mainTexture as Texture2D;
+        if (smr.name != "body01")
+          continue;
 
-          VintageSuit.IvaSuitVeteran = suitTexture;
-          VintageSuit.SetIvaSuit(suitTexture, 0, true);
-          VintageSuit.SetEvaSuit(suitTexture, 0, true);
-        }
+        var suitTexture = smr.material.mainTexture as Texture2D;
+
+        VintageSuit.IvaSuitVeteran = suitTexture;
+        VintageSuit.SetIvaSuit(suitTexture, 0, true);
+        VintageSuit.SetEvaSuit(suitTexture, 0, true);
       }
 
       foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>()) {
@@ -679,7 +696,7 @@ namespace TextureReplacer
       }
     }
 
-    void OnHelmetChanged(KerbalEVA eva, bool hasHelmet, bool hasNeckRing)
+    private void OnHelmetChanged(KerbalEVA eva, bool hasHelmet, bool hasNeckRing)
     {
       var evaModule = eva.GetComponent<TREvaModule>();
       if (evaModule != null) {

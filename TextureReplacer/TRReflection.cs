@@ -29,24 +29,18 @@ namespace TextureReplacer
 {
   public class TRReflection : PartModule
   {
-    [KSPField(isPersistant = false)]
-    public string shader = "";
-    [KSPField(isPersistant = false)]
-    public string colour = "";
-    [KSPField(isPersistant = false)]
-    public string interval = "";
-    [KSPField(isPersistant = false)]
-    public string meshes = "";
+    [KSPField(isPersistant = false)] public string shader = "";
+    [KSPField(isPersistant = false)] public string colour = "";
+    [KSPField(isPersistant = false)] public string interval = "";
+    [KSPField(isPersistant = false)] public string meshes = "";
 
     // ReflectionPlugin parameters.
-    [KSPField(isPersistant = false)]
-    public string ReflectionColor = "";
-    [KSPField(isPersistant = false)]
-    public string MeshesToChange = "all";
+    [KSPField(isPersistant = false)] public string ReflectionColor = "";
+    [KSPField(isPersistant = false)] public string MeshesToChange = "all";
 
-    static readonly Log log = new Log(nameof(TRReflection));
+    private static readonly Log log = new Log(nameof(TRReflection));
 
-    Reflections.Script script;
+    private Reflections.Script script;
 
     public override void OnStart(StartState state)
     {
@@ -93,19 +87,16 @@ namespace TextureReplacer
       }
 
       if (!success) {
-        if (script != null) {
-          script.Destroy();
-          script = null;
-        }
+        script?.Destroy();
+        script = null;
+
         log.Print("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
       }
     }
 
     public void OnDestroy()
     {
-      if (script != null) {
-        script.Destroy();
-      }
+      script?.Destroy();
     }
   }
 }

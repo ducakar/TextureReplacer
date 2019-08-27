@@ -20,18 +20,16 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-using System;
 using System.Linq;
 using UnityEngine;
 using Gender = ProtoCrewMember.Gender;
 
 namespace TextureReplacer
 {
-  class Suit
+  internal class Suit
   {
     public string Name;
     public Gender Gender;
-    public bool IsDefault;
 
     public Texture2D IvaSuitVeteran;
     public readonly Texture2D[] IvaSuit = new Texture2D[6];
@@ -46,9 +44,7 @@ namespace TextureReplacer
     public Texture2D GetSuit(bool useEvaSuit, ProtoCrewMember kerbal)
     {
       int level = kerbal.experienceLevel;
-      return useEvaSuit ? EvaSuit[level]
-        : kerbal.veteran && IvaSuitVeteran != null ? IvaSuitVeteran
-        : IvaSuit[level];
+      return useEvaSuit ? EvaSuit[level] : kerbal.veteran && IvaSuitVeteran != null ? IvaSuitVeteran : IvaSuit[level];
     }
 
     public Texture2D GetSuitNRM(bool useEvaSuit)
@@ -98,7 +94,7 @@ namespace TextureReplacer
           return true;
 
         case "kerbalMain":
-          IvaSuitVeteran = IvaSuitVeteran ?? texture;
+          IvaSuitVeteran = IvaSuitVeteran ? IvaSuitVeteran : texture;
           return true;
 
         case "kerbalMainGrey":
@@ -106,11 +102,11 @@ namespace TextureReplacer
           return true;
 
         case "kerbalMainNRM":
-          IvaSuitNRM = IvaSuitNRM ?? texture;
+          IvaSuitNRM = IvaSuitNRM ? IvaSuitNRM : texture;
           return true;
 
         case "kerbalVisor":
-          IvaVisor = IvaVisor ?? texture;
+          IvaVisor = IvaVisor ? IvaVisor : texture;
           return true;
 
         case "EVAtexture":
@@ -118,19 +114,19 @@ namespace TextureReplacer
           return true;
 
         case "EVAtextureNRM":
-          EvaSuitNRM = EvaSuitNRM ?? texture;
+          EvaSuitNRM = EvaSuitNRM ? EvaSuitNRM : texture;
           return true;
 
         case "EVAvisor":
-          EvaVisor = EvaVisor ?? texture;
+          EvaVisor = EvaVisor ? EvaVisor : texture;
           return true;
 
         case "EVAjetpack":
-          EvaJetpack = EvaJetpack ?? texture;
+          EvaJetpack = EvaJetpack ? EvaJetpack : texture;
           return true;
 
         case "EVAjetpackNRM":
-          EvaJetpackNRM = EvaJetpackNRM ?? texture;
+          EvaJetpackNRM = EvaJetpackNRM ? EvaJetpackNRM : texture;
           return true;
 
         case "kerbalMainGrey1":

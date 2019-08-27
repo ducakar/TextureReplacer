@@ -34,7 +34,7 @@ namespace TextureReplacer
   /// Kerbals don't have preexisting proto-models. Instead, they are created anew each time, so this is the only nice
   /// way to get TRIvaModule on all IVA Kerbals, both standard and vintage ones.
   /// </summary>
-  class TRIvaModelModule : MonoBehaviour
+  internal class TRIvaModelModule : MonoBehaviour
   {
     public void Start()
     {

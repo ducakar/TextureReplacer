@@ -24,9 +24,9 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  class Log
+  internal class Log
   {
-    readonly string header;
+    private readonly string header;
 
     public Log(string className)
     {

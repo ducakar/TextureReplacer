@@ -40,20 +40,18 @@ namespace TextureReplacer
       }
     }
 
-    static readonly Log log = new Log(nameof(TRActivator));
+    private static readonly Log log = new Log(nameof(TRActivator));
 
-    static bool isLoaded;
+    private static bool isLoaded;
 
-    bool isFlightScene;
-    TRReflectionUpdater reflectionUpdater;
+    private bool isFlightScene;
+    private TRReflectionUpdater reflectionUpdater;
 
-    void Load()
+    private static void Load()
     {
       log.Print("Started, Version {0}", Assembly.GetExecutingAssembly().GetName().Version);
 
-      if (Reflections.Instance != null) {
-        Reflections.Instance.Destroy();
-      }
+      Reflections.Instance?.Destroy();
 
       Replacer.Recreate();
       Reflections.Recreate();

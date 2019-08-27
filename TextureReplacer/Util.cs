@@ -20,20 +20,21 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-//  #define TR_ENABLE_TEXTURE_EXPORTING
+//#define TR_ENABLE_TEXTURE_EXPORTING
 
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+
 #if TR_ENABLE_TEXTURE_EXPORTING
 using System.IO;
 #endif
 
 namespace TextureReplacer
 {
-  static class Util
+  internal static class Util
   {
-    static readonly char[] ConfigDelimiters = { ' ', '\t', ',' };
+    private static readonly char[] ConfigDelimiters = {' ', '\t', ','};
 
     public const string Directory = "TextureReplacer/";
     public static readonly int MainTexProperty = Shader.PropertyToID("_MainTex");
@@ -65,34 +66,27 @@ namespace TextureReplacer
       }
     }
 
-    public static void Parse(string name, ref double variable)
-    {
-      if (double.TryParse(name, out double value)) {
-        variable = value;
-      }
-    }
-
     public static void Parse<T>(string name, ref T variable)
     {
       try {
-        variable = (T)Enum.Parse(typeof(T), name, true);
-      } catch (ArgumentException) {
-      } catch (OverflowException) {
-      }
+        variable = (T) Enum.Parse(typeof(T), name, true);
+      } catch (ArgumentException) { } catch (OverflowException) { }
     }
 
     public static void Parse(string name, ref Color variable)
     {
-      if (name != null) {
-        string[] components = SplitConfigValue(name);
-        if (components.Length >= 3) {
-          float.TryParse(components[0], out variable.r);
-          float.TryParse(components[1], out variable.g);
-          float.TryParse(components[2], out variable.b);
-        }
-        if (components.Length >= 4) {
-          float.TryParse(components[3], out variable.a);
-        }
+      if (name == null) {
+        return;
+      }
+
+      string[] components = SplitConfigValue(name);
+      if (components.Length >= 3) {
+        float.TryParse(components[0], out variable.r);
+        float.TryParse(components[1], out variable.g);
+        float.TryParse(components[2], out variable.b);
+      }
+      if (components.Length >= 4) {
+        float.TryParse(components[3], out variable.a);
       }
     }
 
@@ -164,8 +158,8 @@ namespace TextureReplacer
     /// </summary>
     public static void DumpToPNG(Texture texture, string path)
     {
-      Texture2D targetTex = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
-      RenderTexture renderTex = new RenderTexture(texture.width, texture.height, 32);
+      var targetTex = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
+      var renderTex = new RenderTexture(texture.width, texture.height, 32);
       RenderTexture originalRenderTex = RenderTexture.active;
 
       Graphics.Blit(texture, renderTex);
@@ -174,29 +168,28 @@ namespace TextureReplacer
       RenderTexture.active = originalRenderTex;
 
       byte[] data = targetTex.EncodeToPNG();
-      using (FileStream fs = new FileStream(path, FileMode.Create)) {
-        fs.Write(data, 0, data.Length);
-      }
+      using var fs = new FileStream(path, FileMode.Create);
+      fs.Write(data, 0, data.Length);
     }
 
-    static bool isDefaultVeteranIvaExported;
-    static bool isDefaultIvaExported;
-    static bool isDefaultEvaExported;
-    static bool isVintageVeteranIvaExported;
-    static bool isVintageIvaExported;
-    static bool isVintageEvaExported;
+    private static bool isDefaultVeteranIvaExported;
+    private static bool isDefaultIvaExported;
+    private static bool isDefaultEvaExported;
+    private static bool isVintageVeteranIvaExported;
+    private static bool isVintageIvaExported;
+    private static bool isVintageEvaExported;
 
     public static void DumpSuitOnce(ProtoCrewMember kerbal, Texture texture, bool isEva, string dir)
     {
       if (isEva) {
         if (kerbal.suit == ProtoCrewMember.KerbalSuit.Vintage) {
           if (!isVintageEvaExported) {
-            Util.DumpToPNG(texture, dir + "EVAtexture.vintage.png");
+            DumpToPNG(texture, dir + "EVAtexture.vintage.png");
             isVintageEvaExported = true;
           }
         } else {
           if (!isDefaultEvaExported) {
-            Util.DumpToPNG(texture, dir + "EVAtexture.png");
+            DumpToPNG(texture, dir + "EVAtexture.png");
             isDefaultEvaExported = true;
           }
         }
@@ -204,24 +197,24 @@ namespace TextureReplacer
         if (kerbal.suit == ProtoCrewMember.KerbalSuit.Vintage) {
           if (kerbal.veteran) {
             if (!isVintageVeteranIvaExported) {
-              Util.DumpToPNG(texture, dir + "kerbalMain.vintage.png");
+              DumpToPNG(texture, dir + "kerbalMain.vintage.png");
               isVintageVeteranIvaExported = true;
             }
           } else {
             if (!isVintageIvaExported) {
-              Util.DumpToPNG(texture, dir + "kerbalMainGrey.vintage.png");
+              DumpToPNG(texture, dir + "kerbalMainGrey.vintage.png");
               isVintageIvaExported = true;
             }
           }
         } else {
           if (kerbal.veteran) {
             if (!isDefaultVeteranIvaExported) {
-              Util.DumpToPNG(texture, dir + "kerbalMain.png");
+              DumpToPNG(texture, dir + "kerbalMain.png");
               isDefaultVeteranIvaExported = true;
             }
           } else {
             if (!isDefaultIvaExported) {
-              Util.DumpToPNG(texture, dir + "kerbalMainGrey.png");
+              DumpToPNG(texture, dir + "kerbalMainGrey.png");
               isDefaultIvaExported = true;
             }
           }

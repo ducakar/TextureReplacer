@@ -31,27 +31,28 @@ namespace TextureReplacer
   [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
   public class TRGui : MonoBehaviour
   {
-    const int WindowId = 107056;
-    const string AppIconPath = Util.Directory + "Plugins/appIcon";
-    static readonly Log log = new Log(nameof(TRGui));
-    static readonly Color SelectedColour = new Color(0.7f, 0.9f, 1.0f);
-    static readonly Color ClassColour = new Color(1.0f, 0.8f, 1.0f);
+    private const int WindowId = 107056;
+    private const string AppIconPath = Util.Directory + "Plugins/appIcon";
+    private static readonly Color SelectedColour = new Color(0.7f, 0.9f, 1.0f);
+    private static readonly Color ClassColour = new Color(1.0f, 0.8f, 1.0f);
+
+    private static readonly Log log = new Log(nameof(TRGui));
 
     // Application launcher icon.
-    Texture2D appIcon;
-    ApplicationLauncherButton appButton;
-    bool isGuiEnabled = true;
+    private Texture2D appIcon;
+    private ApplicationLauncherButton appButton;
+    private bool isGuiEnabled = true;
     // UI state.
-    Rect windowRect = new Rect(Screen.width - 600, 60, 580, 580);
-    Vector2 rosterScroll = Vector2.zero;
-    bool isEnabled;
+    private Rect windowRect = new Rect(Screen.width - 600, 60, 580, 580);
+    private Vector2 rosterScroll = Vector2.zero;
+    private bool isEnabled;
     // Classes from config files.
-    readonly List<string> classes = new List<string>();
+    private readonly List<string> classes = new List<string>();
     // Selection.
-    ProtoCrewMember selectedKerbal;
-    string selectedClass;
+    private ProtoCrewMember selectedKerbal;
+    private string selectedClass;
 
-    void WindowHandler(int id)
+    private void WindowHandler(int id)
     {
       Reflections reflections = Reflections.Instance;
       Personaliser personaliser = Personaliser.Instance;
@@ -87,14 +88,11 @@ namespace TextureReplacer
       }
 
       foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Unowned) {
-        switch (kerbal.rosterStatus) {
-          case ProtoCrewMember.RosterStatus.Dead:
-            GUI.contentColor = Color.cyan;
-            break;
-          default:
-            continue;
+        if (kerbal.rosterStatus != ProtoCrewMember.RosterStatus.Dead) {
+          continue;
         }
 
+        GUI.contentColor = Color.cyan;
         if (GUILayout.Button(kerbal.name)) {
           selectedKerbal = kerbal;
           selectedClass = null;
@@ -138,7 +136,7 @@ namespace TextureReplacer
         }
 
         appearance = personaliser.GetAppearance(selectedKerbal);
-        defaultSkin = personaliser.DefaultSkin[(int)selectedKerbal.gender];
+        defaultSkin = personaliser.DefaultSkin[(int) selectedKerbal.gender];
 
         skin = personaliser.GetKerbalSkin(selectedKerbal, appearance);
         suit = personaliser.GetKerbalSuit(selectedKerbal, appearance);
@@ -300,14 +298,14 @@ namespace TextureReplacer
       GUI.DragWindow(new Rect(0, 0, Screen.width, 30));
     }
 
-    void Enable()
+    private void Enable()
     {
       isEnabled = true;
       selectedKerbal = null;
       selectedClass = null;
     }
 
-    void Disable()
+    private void Disable()
     {
       isEnabled = false;
       selectedKerbal = null;
@@ -316,15 +314,15 @@ namespace TextureReplacer
       rosterScroll = Vector2.zero;
     }
 
-    void AddAppButton()
+    private void AddAppButton()
     {
       if (appButton == null) {
-        appButton = ApplicationLauncher.Instance.AddModApplication(
-          Enable, Disable, null, null, null, null, ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
+        appButton = ApplicationLauncher.Instance.AddModApplication(Enable, Disable, null, null, null, null,
+          ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
       }
     }
 
-    void RemoveAppButton(GameScenes scenes)
+    private void RemoveAppButton(GameScenes scenes)
     {
       if (appButton != null) {
         ApplicationLauncher.Instance.RemoveModApplication(appButton);
@@ -338,22 +336,24 @@ namespace TextureReplacer
         Util.Parse(node.GetValue("isGUIEnabled"), ref isGuiEnabled);
       }
 
-      if (isGuiEnabled) {
-        foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("EXPERIENCE_TRAIT")) {
-          string className = node.GetValue("name");
-          if (className != null) {
-            classes.AddUnique(className);
-          }
-        }
-
-        appIcon = GameDatabase.Instance.GetTexture(AppIconPath, false);
-        if (appIcon == null) {
-          log.Print("Application icon missing: {0}", AppIconPath);
-        }
-
-        GameEvents.onGUIApplicationLauncherReady.Add(AddAppButton);
-        GameEvents.onGameSceneLoadRequested.Add(RemoveAppButton);
+      if (!isGuiEnabled) {
+        return;
       }
+
+      foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("EXPERIENCE_TRAIT")) {
+        string className = node.GetValue("name");
+        if (className != null) {
+          classes.AddUnique(className);
+        }
+      }
+
+      appIcon = GameDatabase.Instance.GetTexture(AppIconPath, false);
+      if (appIcon == null) {
+        log.Print("Application icon missing: {0}", AppIconPath);
+      }
+
+      GameEvents.onGUIApplicationLauncherReady.Add(AddAppButton);
+      GameEvents.onGameSceneLoadRequested.Add(RemoveAppButton);
     }
 
     public void Start()
@@ -365,12 +365,14 @@ namespace TextureReplacer
 
     public void OnGUI()
     {
-      if (isEnabled) {
-        GUI.skin = HighLogic.Skin;
-        windowRect = GUILayout.Window(WindowId, windowRect, WindowHandler, "TextureReplacer");
-        windowRect.x = Math.Max(0, Math.Min(Screen.width - 30, windowRect.x));
-        windowRect.y = Math.Max(0, Math.Min(Screen.height - 30, windowRect.y));
+      if (!isEnabled) {
+        return;
       }
+
+      GUI.skin = HighLogic.Skin;
+      windowRect = GUILayout.Window(WindowId, windowRect, WindowHandler, "TextureReplacer");
+      windowRect.x = Math.Max(0, Math.Min(Screen.width - 30, windowRect.x));
+      windowRect.y = Math.Max(0, Math.Min(Screen.height - 30, windowRect.y));
     }
 
     public void OnDestroy()

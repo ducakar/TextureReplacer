@@ -22,7 +22,7 @@
 
 namespace TextureReplacer
 {
-  class Appearance
+  internal class Appearance
   {
     public int Hash;
     public Skin Skin;

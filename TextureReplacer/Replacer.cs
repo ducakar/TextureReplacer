@@ -28,27 +28,27 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  class Replacer
+  internal class Replacer
   {
-    public const string DefaultPrefix = "TextureReplacer/Default/";
-    public const string NavBall = "NavBall";
-    public static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
-    public static readonly Shader EyeShader = Shader.Find("Standard");
-    public static readonly Shader HeadShader = Shader.Find("Mobile/Diffuse");
-    public static readonly Shader TexturedVisorShader = Shader.Find("KSP/Alpha/Translucent");
+    private const string NavBall = "NavBall";
+    private static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
+    private static readonly Shader HeadShader = Shader.Find("Mobile/Diffuse");
+    private static readonly Shader TexturedVisorShader = Shader.Find("KSP/Alpha/Translucent");
 
-    static readonly Log log = new Log(nameof(Replacer));
+    public const string DefaultPrefix = "TextureReplacer/Default/";
+    public static readonly Shader EyeShader = Shader.Find("Standard");
+
+    private static readonly Log log = new Log(nameof(Replacer));
 
     // General texture replacements.
-    readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
-
+    private readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
     // NavBall texture.
-    Texture2D navBallTexture;
+    private Texture2D navBallTexture;
     // Change shinning quality.
-    SkinQuality skinningQuality = SkinQuality.Auto;
+    private SkinQuality skinningQuality = SkinQuality.Auto;
     // Print material/texture names when performing texture replacement pass.
-    bool logTextures;
-    bool logKerbalHierarchy;
+    private bool logTextures;
+    private bool logKerbalHierarchy;
 
     // Instance.
     public static Replacer Instance { get; private set; }
@@ -56,8 +56,7 @@ namespace TextureReplacer
     /// <summary>
     /// General texture replacement step.
     /// </summary>
-    void ReplaceTextures()
-    {
+    private void ReplaceTextures() {
       foreach (Material material in Resources.FindObjectsOfTypeAll<Material>()) {
         if (!material.HasProperty(Util.MainTexProperty)) {
           continue;
@@ -108,29 +107,28 @@ namespace TextureReplacer
     /// <summary>
     /// Replace NavBalls' textures.
     /// </summary>
-    void UpdateNavBall()
-    {
-      if (navBallTexture != null) {
-        NavBall hudNavBall = UnityEngine.Object.FindObjectOfType<NavBall>();
-        if (hudNavBall != null) {
-          Material material = hudNavBall.navBall.GetComponent<Renderer>().sharedMaterial;
+    private void UpdateNavBall() {
+      if (navBallTexture == null)
+        return;
 
-          material.SetTexture(Util.MainTextureProperty, navBallTexture);
-        }
+      var hudNavBall = UnityEngine.Object.FindObjectOfType<NavBall>();
+      if (hudNavBall != null) {
+        Material material = hudNavBall.navBall.GetComponent<Renderer>().sharedMaterial;
 
-        InternalNavBall ivaNavBall = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
-        if (ivaNavBall != null) {
-          Material material = ivaNavBall.navBall.GetComponent<Renderer>().sharedMaterial;
+        material.SetTexture(Util.MainTextureProperty, navBallTexture);
+      }
 
-          material.mainTexture = navBallTexture;
-          material.SetTextureScale(Util.MainTexProperty, NavBallScale);
-        }
+      var ivaNavBall = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
+      if (ivaNavBall != null) {
+        Material material = ivaNavBall.navBall.GetComponent<Renderer>().sharedMaterial;
+
+        material.mainTexture = navBallTexture;
+        material.SetTextureScale(Util.MainTexProperty, NavBallScale);
       }
     }
 
-    void LogHierarchies(Kerbal maleIva, Part maleEva, Part maleEvaVintage,
-                        Kerbal femaleIva, Part femaleEva, Part femaleEvaVintage)
-    {
+    private static void LogHierarchies(Component maleIva, Component maleEva, Component maleEvaVintage,
+      Component femaleIva, Component femaleEva, Component femaleEvaVintage) {
       log.Print("Male IVA Hierarchy");
       Util.LogDownHierarchy(maleIva.transform);
       log.Print("Female IVA Hierarchy");
@@ -143,34 +141,35 @@ namespace TextureReplacer
       // Vintage Kerbals don't have prefab models loaded. We need to load them from assets.
       AssetBundle makingHistoryBundle = AssetBundle.GetAllLoadedAssetBundles()
         .FirstOrDefault(b => b.name == "makinghistory_assets");
-      if (makingHistoryBundle != null) {
-        var maleIvaVintage = makingHistoryBundle
-          .LoadAsset("assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab") as GameObject;
-        var femaleIvaVintage = makingHistoryBundle
-          .LoadAsset("assets/expansions/missions/kerbals/iva/kerbalfemalevintage.prefab") as GameObject;
-        if (maleIvaVintage != null) {
-          log.Print("Male IVA Vintage Hierarchy");
-          Util.LogDownHierarchy(maleIvaVintage.transform);
-          UnityEngine.Object.Destroy(maleIvaVintage);
-        }
-        if (maleEvaVintage != null) {
-          log.Print("Male EVA Vintage Hierarchy");
-          Util.LogDownHierarchy(maleEvaVintage.transform);
-        }
-        if (femaleIvaVintage != null) {
-          log.Print("Female IVA Vintage Hierarchy");
-          Util.LogDownHierarchy(femaleIvaVintage.transform);
-          UnityEngine.Object.Destroy(femaleIvaVintage);
-        }
-        if (femaleEvaVintage != null) {
-          log.Print("Female EVA Vintage Hierarchy");
-          Util.LogDownHierarchy(femaleEvaVintage.transform);
-        }
+      if (makingHistoryBundle == null)
+        return;
+
+      var maleIvaVintage =
+        makingHistoryBundle.LoadAsset("assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab") as GameObject;
+      var femaleIvaVintage =
+        makingHistoryBundle.LoadAsset("assets/expansions/missions/kerbals/iva/kerbalfemalevintage.prefab") as
+          GameObject;
+      if (maleIvaVintage != null) {
+        log.Print("Male IVA Vintage Hierarchy");
+        Util.LogDownHierarchy(maleIvaVintage.transform);
+        UnityEngine.Object.Destroy(maleIvaVintage);
+      }
+      if (maleEvaVintage != null) {
+        log.Print("Male EVA Vintage Hierarchy");
+        Util.LogDownHierarchy(maleEvaVintage.transform);
+      }
+      if (femaleIvaVintage != null) {
+        log.Print("Female IVA Vintage Hierarchy");
+        Util.LogDownHierarchy(femaleIvaVintage.transform);
+        UnityEngine.Object.Destroy(femaleIvaVintage);
+      }
+      if (femaleEvaVintage != null) {
+        log.Print("Female EVA Vintage Hierarchy");
+        Util.LogDownHierarchy(femaleEvaVintage.transform);
       }
     }
 
-    void FixKerbalModels()
-    {
+    private void FixKerbalModels() {
       mappedTextures.TryGetValue("eyeballLeft", out Texture2D eyeballLeft);
       mappedTextures.TryGetValue("eyeballRight", out Texture2D eyeballRight);
       mappedTextures.TryGetValue("pupilLeft", out Texture2D pupilLeft);
@@ -196,19 +195,19 @@ namespace TextureReplacer
       SkinnedMeshRenderer[][] maleMeshes = {
         maleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
         maleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        maleEvaVintage?.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+        maleEvaVintage ? maleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null,
       };
 
       SkinnedMeshRenderer[][] femaleMeshes = {
         femaleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
         femaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        femaleEvaVintage?.GetComponentsInChildren<SkinnedMeshRenderer>(true)
+        femaleEvaVintage ? femaleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null,
       };
 
       // Male materials to be copied to females to fix tons of female issues (missing normal maps, non-bumpmapped
       // shaders, missing teeth texture ...)
       Material headMaterial = null;
-      Material[] visorMaterials = { null, null, null };
+      Material[] visorMaterials = {null, null, null};
 
       for (int i = 0; i < 3; ++i) {
         if (maleMeshes[i] == null) {
@@ -217,56 +216,58 @@ namespace TextureReplacer
 
         foreach (SkinnedMeshRenderer smr in maleMeshes[i]) {
           // Many meshes share the same material, so it suffices to enumerate only one mesh for each material.
+          Material sharedMaterial = smr.sharedMaterial;
+
           switch (smr.name) {
             case "eyeballLeft":
-              smr.sharedMaterial.shader = EyeShader;
-              smr.sharedMaterial.mainTexture = eyeballLeft;
+              sharedMaterial.shader = EyeShader;
+              sharedMaterial.mainTexture = eyeballLeft;
               break;
 
             case "eyeballRight":
-              smr.sharedMaterial.shader = EyeShader;
-              smr.sharedMaterial.mainTexture = eyeballRight;
+              sharedMaterial.shader = EyeShader;
+              sharedMaterial.mainTexture = eyeballRight;
               break;
 
             case "pupilLeft":
-              smr.sharedMaterial.shader = EyeShader;
-              smr.sharedMaterial.mainTexture = pupilLeft;
+              sharedMaterial.shader = EyeShader;
+              sharedMaterial.mainTexture = pupilLeft;
               if (pupilLeft != null) {
-                smr.sharedMaterial.color = Color.white;
+                sharedMaterial.color = Color.white;
               }
               break;
 
             case "pupilRight":
-              smr.sharedMaterial.shader = EyeShader;
-              smr.sharedMaterial.mainTexture = pupilRight;
+              sharedMaterial.shader = EyeShader;
+              sharedMaterial.mainTexture = pupilRight;
               if (pupilRight != null) {
-                smr.sharedMaterial.color = Color.white;
+                sharedMaterial.color = Color.white;
               }
               break;
 
             case "headMesh01":
             case "headMesh02":
               // Replace with bump-mapped shader so normal maps for heads will work.
-              smr.sharedMaterial.shader = HeadShader;
-              headMaterial = smr.sharedMaterial;
+              sharedMaterial.shader = HeadShader;
+              headMaterial = sharedMaterial;
               break;
 
             case "visor":
-              // It will be raplaced with reflective shader later, if reflections are enabled.
+              // It will be replaced with reflective shader later, if reflections are enabled.
               switch (i) {
                 case 0: // maleIva
                   if (ivaVisorTexture != null) {
-                    smr.sharedMaterial.shader = TexturedVisorShader;
-                    smr.sharedMaterial.mainTexture = ivaVisorTexture;
-                    smr.sharedMaterial.color = Color.white;
+                    sharedMaterial.shader = TexturedVisorShader;
+                    sharedMaterial.mainTexture = ivaVisorTexture;
+                    sharedMaterial.color = Color.white;
                   }
                   break;
 
                 case 1: // maleEva
                   if (evaVisorTexture != null) {
-                    smr.sharedMaterial.shader = TexturedVisorShader;
-                    smr.sharedMaterial.mainTexture = evaVisorTexture;
-                    smr.sharedMaterial.color = Color.white;
+                    sharedMaterial.shader = TexturedVisorShader;
+                    sharedMaterial.mainTexture = evaVisorTexture;
+                    sharedMaterial.color = Color.white;
                   }
                   break;
 
@@ -275,7 +276,7 @@ namespace TextureReplacer
                   break;
               }
 
-              visorMaterials[i] = smr.sharedMaterial;
+              visorMaterials[i] = sharedMaterial;
               break;
           }
         }
@@ -288,37 +289,39 @@ namespace TextureReplacer
 
         foreach (SkinnedMeshRenderer smr in femaleMeshes[i]) {
           // Here we must enumerate all meshes wherever we are replacing the material.
+          Material sharedMaterial = smr.sharedMaterial;
+
           switch (smr.name) {
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
-              smr.sharedMaterial.shader = EyeShader;
-              smr.sharedMaterial.mainTexture = eyeballLeft;
+              sharedMaterial.shader = EyeShader;
+              sharedMaterial.mainTexture = eyeballLeft;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
-              smr.sharedMaterial.shader = EyeShader;
-              smr.sharedMaterial.mainTexture = eyeballRight;
+              sharedMaterial.shader = EyeShader;
+              sharedMaterial.mainTexture = eyeballRight;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
-              smr.sharedMaterial.shader = EyeShader;
-              smr.sharedMaterial.mainTexture = pupilLeft;
+              sharedMaterial.shader = EyeShader;
+              sharedMaterial.mainTexture = pupilLeft;
               if (pupilLeft != null) {
-                smr.sharedMaterial.color = Color.white;
+                sharedMaterial.color = Color.white;
               }
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
-              smr.sharedMaterial.shader = EyeShader;
-              smr.sharedMaterial.mainTexture = pupilRight;
+              sharedMaterial.shader = EyeShader;
+              sharedMaterial.mainTexture = pupilRight;
               if (pupilRight != null) {
-                smr.sharedMaterial.color = Color.white;
+                sharedMaterial.color = Color.white;
               }
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
               // Replace with bump-mapped shader so normal maps for heads will work.
-              smr.sharedMaterial.shader = HeadShader;
+              sharedMaterial.shader = HeadShader;
               break;
 
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
@@ -339,16 +342,14 @@ namespace TextureReplacer
       }
     }
 
-    public static void Recreate()
-    {
+    public static void Recreate() {
       Instance = new Replacer();
     }
 
     /// <summary>
     /// Read configuration and perform pre-load initialisation.
     /// </summary>
-    public void ReadConfig(ConfigNode rootNode)
-    {
+    public void ReadConfig(ConfigNode rootNode) {
       Util.Parse(rootNode.GetValue("skinningQuality"), ref skinningQuality);
       Util.Parse(rootNode.GetValue("logTextures"), ref logTextures);
       Util.Parse(rootNode.GetValue("logKerbalHierarchy"), ref logKerbalHierarchy);
@@ -357,8 +358,7 @@ namespace TextureReplacer
     /// <summary>
     /// Post-load initialisation.
     /// </summary>
-    public void Load()
-    {
+    public void Load() {
       if (skinningQuality != SkinQuality.Auto) {
         foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>()) {
           smr.quality = skinningQuality;
@@ -376,17 +376,18 @@ namespace TextureReplacer
         }
 
         int defaultPrefixIndex = texture.name.IndexOf(DefaultPrefix, StringComparison.Ordinal);
-        if (defaultPrefixIndex != -1) {
-          string originalName = texture.name.Substring(defaultPrefixIndex + DefaultPrefix.Length);
+        if (defaultPrefixIndex == -1)
+          continue;
 
-          // Since we are merging multiple directories, we must expect conflicts.
-          if (!mappedTextures.ContainsKey(originalName)) {
-            if (originalName.StartsWith("GalaxyTex_", StringComparison.Ordinal)) {
-              texture.wrapMode = TextureWrapMode.Clamp;
-            }
-            mappedTextures.Add(originalName, texture);
-          }
+        string originalName = texture.name.Substring(defaultPrefixIndex + DefaultPrefix.Length);
+        // Since we are merging multiple directories, we must expect conflicts.
+        if (mappedTextures.ContainsKey(originalName))
+          continue;
+
+        if (originalName.StartsWith("GalaxyTex_", StringComparison.Ordinal)) {
+          texture.wrapMode = TextureWrapMode.Clamp;
         }
+        mappedTextures[originalName] = texture;
       }
 
       FixKerbalModels();
@@ -401,15 +402,13 @@ namespace TextureReplacer
       }
     }
 
-    public void OnBeginFlight()
-    {
+    public void OnBeginFlight() {
       if (navBallTexture != null) {
         UpdateNavBall();
       }
     }
 
-    public void OnBeginScene()
-    {
+    public void OnBeginScene() {
       ReplaceTextures();
     }
   }

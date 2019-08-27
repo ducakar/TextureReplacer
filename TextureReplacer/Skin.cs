@@ -25,7 +25,7 @@ using Gender = ProtoCrewMember.Gender;
 
 namespace TextureReplacer
 {
-  class Skin
+  internal class Skin
   {
     public string Name;
     public Gender Gender;
@@ -33,43 +33,43 @@ namespace TextureReplacer
     public bool IsDefault;
 
     public Texture2D Head;
-    public Texture2D Arms;
-    internal Texture2D EyeballLeft;
-    internal Texture2D EyeballRight;
-    internal Texture2D PupilLeft;
-    internal Texture2D PupilRight;
+//    public Texture2D Arms;
+    public Texture2D EyeballLeft;
+    public Texture2D EyeballRight;
+    public Texture2D PupilLeft;
+    public Texture2D PupilRight;
 
     public bool SetTexture(string originalName, Texture2D texture)
     {
       switch (originalName) {
         case "kerbalHead":
           Gender = Gender.Male;
-          Head = Head ?? texture;
+          Head = Head ? Head : texture;
           return true;
 
         case "kerbalGirl_06_BaseColor":
           Gender = Gender.Female;
-          Head = Head ?? texture;
+          Head = Head ? Head : texture;
           return true;
 
-        case "kerbal_armHands":
-          Arms = Arms ?? texture;
-          return true;
+//        case "kerbal_armHands":
+//          Arms = Arms ? Arms : texture;
+//          return true;
 
         case "eyeballLeft":
-          EyeballLeft = EyeballLeft ?? texture;
+          EyeballLeft = EyeballLeft ? EyeballLeft : texture;
           return true;
 
         case "eyeballRight":
-          EyeballRight = EyeballRight ?? texture;
+          EyeballRight = EyeballRight ? EyeballRight : texture;
           return true;
 
         case "pupilLeft":
-          PupilLeft = PupilLeft ?? texture;
+          PupilLeft = PupilLeft ? PupilLeft : texture;
           return true;
 
         case "pupilRight":
-          PupilRight = PupilRight ?? texture;
+          PupilRight = PupilRight ? PupilRight : texture;
           return true;
 
         default:
