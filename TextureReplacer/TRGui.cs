@@ -138,8 +138,8 @@ namespace TextureReplacer
         appearance = personaliser.GetAppearance(selectedKerbal);
         defaultSkin = personaliser.DefaultSkin[(int) selectedKerbal.gender];
 
-        skin = personaliser.GetKerbalSkin(selectedKerbal, appearance);
-        suit = personaliser.GetKerbalSuit(selectedKerbal, appearance);
+        skin = appearance.Skin;
+        suit = appearance.Suit;
 
         skinIndex = personaliser.Skins.IndexOf(skin);
         suitIndex = personaliser.Suits.IndexOf(suit);
@@ -161,13 +161,11 @@ namespace TextureReplacer
       }
 
       if (suit != null) {
-        Texture2D suitTex = suit == defaultSuit && selectedKerbal != null && selectedKerbal.veteran
-          ? suit.IvaSuitVeteran
-          : suit.IvaSuit[0];
-        Texture2D evaSuitTex = suit.EvaSuit[0] ?? defaultSuit.EvaSuit[0];
+        Texture2D ivaSuitTex = suit.GetSuit(false, selectedKerbal) ?? defaultSuit.GetSuit(false, selectedKerbal);
+        Texture2D evaSuitTex = suit.GetSuit(true, selectedKerbal) ?? defaultSuit.GetSuit(true, selectedKerbal);
 
         GUILayout.BeginHorizontal();
-        GUILayout.Box(suitTex, GUILayout.Width(100), GUILayout.Height(100));
+        GUILayout.Box(ivaSuitTex, GUILayout.Width(100), GUILayout.Height(100));
         GUILayout.Space(10);
         GUILayout.Box(evaSuitTex, GUILayout.Width(100), GUILayout.Height(100));
         GUILayout.EndHorizontal();
@@ -178,10 +176,7 @@ namespace TextureReplacer
       GUILayout.EndVertical();
       GUILayout.BeginVertical(GUILayout.Width(120));
 
-      bool isKerbalSelected = appearance != null;
-      bool isClassSelected = selectedClass != null;
-
-      if (isKerbalSelected) {
+      if (appearance != null) {
         GUILayout.BeginHorizontal();
         GUI.enabled = personaliser.Skins.Count != 0;
 
@@ -215,10 +210,10 @@ namespace TextureReplacer
         selectedKerbal.veteran = GUILayout.Toggle(selectedKerbal.veteran, "Veteran");
       }
 
-      if (isKerbalSelected || isClassSelected) {
+      if (appearance != null || selectedClass != null) {
         bool isVintage = false;
 
-        if (isKerbalSelected) {
+        if (appearance != null) {
           isVintage = selectedKerbal.suit == KerbalSuit.Vintage;
           GUILayout.Space(100);
         }
@@ -230,7 +225,7 @@ namespace TextureReplacer
           suitIndex = suitIndex == -1 ? 0 : suitIndex;
           suitIndex = (personaliser.Suits.Count + suitIndex - 1) % personaliser.Suits.Count;
 
-          if (isClassSelected) {
+          if (selectedClass != null) {
             personaliser.ClassSuits[selectedClass] = personaliser.Suits[suitIndex];
           } else {
             appearance.Suit = personaliser.Suits[suitIndex];
@@ -239,7 +234,7 @@ namespace TextureReplacer
         if (GUILayout.Button(">")) {
           suitIndex = (suitIndex + 1) % personaliser.Suits.Count;
 
-          if (isClassSelected) {
+          if (selectedClass != null) {
             personaliser.ClassSuits[selectedClass] = personaliser.Suits[suitIndex];
           } else {
             appearance.Suit = personaliser.Suits[suitIndex];
@@ -249,11 +244,11 @@ namespace TextureReplacer
         GUI.enabled = true;
         GUILayout.EndHorizontal();
 
-        bool hasKerbalGenericSuit = isKerbalSelected && appearance.Suit == null;
+        bool hasKerbalGenericSuit = appearance != null && appearance.Suit == null;
 
         GUI.color = suit == defaultSuit && !hasKerbalGenericSuit ? SelectedColour : Color.white;
         if (GUILayout.Button("Default")) {
-          if (isClassSelected) {
+          if (selectedClass != null) {
             personaliser.ClassSuits[selectedClass] = defaultSuit;
           } else {
             appearance.Suit = defaultSuit;
@@ -262,7 +257,7 @@ namespace TextureReplacer
 
         GUI.color = suit == null || hasKerbalGenericSuit ? SelectedColour : Color.white;
         if (GUILayout.Button("Unset/Generic")) {
-          if (isClassSelected) {
+          if (selectedClass != null) {
             personaliser.ClassSuits[selectedClass] = null;
           } else {
             appearance.Suit = null;
@@ -271,7 +266,7 @@ namespace TextureReplacer
 
         GUI.color = Color.white;
 
-        if (isKerbalSelected) {
+        if (appearance != null) {
           isVintage = GUILayout.Toggle(isVintage, "Vintage");
           selectedKerbal.suit = isVintage ? KerbalSuit.Vintage : KerbalSuit.Default;
 

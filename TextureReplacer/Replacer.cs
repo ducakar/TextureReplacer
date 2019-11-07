@@ -56,7 +56,8 @@ namespace TextureReplacer
     /// <summary>
     /// General texture replacement step.
     /// </summary>
-    private void ReplaceTextures() {
+    private void ReplaceTextures()
+    {
       foreach (Material material in Resources.FindObjectsOfTypeAll<Material>()) {
         if (!material.HasProperty(Util.MainTexProperty)) {
           continue;
@@ -107,7 +108,8 @@ namespace TextureReplacer
     /// <summary>
     /// Replace NavBalls' textures.
     /// </summary>
-    private void UpdateNavBall() {
+    private void UpdateNavBall()
+    {
       if (navBallTexture == null)
         return;
 
@@ -127,8 +129,10 @@ namespace TextureReplacer
       }
     }
 
-    private static void LogHierarchies(Component maleIva, Component maleEva, Component maleEvaVintage,
-      Component femaleIva, Component femaleEva, Component femaleEvaVintage) {
+    private static void LogHierarchies(Component maleIva, Component femaleIva, Component maleEva, Component femaleEva,
+                                       GameObject maleIvaVintage, GameObject femaleIvaVintage, Component maleEvaVintage,
+                                       Component femaleEvaVintage)
+    {
       log.Print("Male IVA Hierarchy");
       Util.LogDownHierarchy(maleIva.transform);
       log.Print("Female IVA Hierarchy");
@@ -138,30 +142,19 @@ namespace TextureReplacer
       log.Print("Female EVA Hierarchy");
       Util.LogDownHierarchy(femaleEva.transform);
 
-      // Vintage Kerbals don't have prefab models loaded. We need to load them from assets.
-      AssetBundle makingHistoryBundle = AssetBundle.GetAllLoadedAssetBundles()
-        .FirstOrDefault(b => b.name == "makinghistory_assets");
-      if (makingHistoryBundle == null)
-        return;
-
-      var maleIvaVintage =
-        makingHistoryBundle.LoadAsset("assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab") as GameObject;
-      var femaleIvaVintage =
-        makingHistoryBundle.LoadAsset("assets/expansions/missions/kerbals/iva/kerbalfemalevintage.prefab") as
-          GameObject;
       if (maleIvaVintage != null) {
         log.Print("Male IVA Vintage Hierarchy");
         Util.LogDownHierarchy(maleIvaVintage.transform);
         UnityEngine.Object.Destroy(maleIvaVintage);
       }
-      if (maleEvaVintage != null) {
-        log.Print("Male EVA Vintage Hierarchy");
-        Util.LogDownHierarchy(maleEvaVintage.transform);
-      }
       if (femaleIvaVintage != null) {
         log.Print("Female IVA Vintage Hierarchy");
         Util.LogDownHierarchy(femaleIvaVintage.transform);
         UnityEngine.Object.Destroy(femaleIvaVintage);
+      }
+      if (maleEvaVintage != null) {
+        log.Print("Male EVA Vintage Hierarchy");
+        Util.LogDownHierarchy(maleEvaVintage.transform);
       }
       if (femaleEvaVintage != null) {
         log.Print("Female EVA Vintage Hierarchy");
@@ -169,7 +162,8 @@ namespace TextureReplacer
       }
     }
 
-    private void FixKerbalModels() {
+    private void FixKerbalModels()
+    {
       mappedTextures.TryGetValue("eyeballLeft", out Texture2D eyeballLeft);
       mappedTextures.TryGetValue("eyeballRight", out Texture2D eyeballRight);
       mappedTextures.TryGetValue("pupilLeft", out Texture2D pupilLeft);
@@ -181,27 +175,41 @@ namespace TextureReplacer
       // lighting. So, we copy shaders from male materials to respective female materials.
       Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
 
+      // Vintage Kerbals don't have prefab models loaded. We need to load them from assets.
+      AssetBundle makingHistoryBundle = AssetBundle.GetAllLoadedAssetBundles()
+        .FirstOrDefault(b => b.name == "makinghistory_assets");
+      if (makingHistoryBundle == null)
+        return;
+
+      const string maleIvaVintagePrefab = "assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab";
+      const string femaleIvaVintagePrefab = "assets/expansions/missions/kerbals/iva/kerbalfemalevintage.prefab";
+
       Kerbal maleIva = kerbals.First(k => k.transform.name == "kerbalMale");
       Kerbal femaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
       Part maleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
       Part femaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
+      var maleIvaVintage = makingHistoryBundle.LoadAsset(maleIvaVintagePrefab) as GameObject;
+      var femaleIvaVintage = makingHistoryBundle.LoadAsset(femaleIvaVintagePrefab) as GameObject;
       Part maleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
       Part femaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAfemaleVintage").partPrefab;
 
       if (logKerbalHierarchy) {
-        LogHierarchies(maleIva, maleEva, maleEvaVintage, femaleIva, femaleEva, femaleEvaVintage);
+        LogHierarchies(maleIva, femaleIva, maleEva, femaleEva, maleIvaVintage, femaleIvaVintage, maleEvaVintage,
+          femaleEvaVintage);
       }
 
       SkinnedMeshRenderer[][] maleMeshes = {
         maleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
         maleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        maleEvaVintage ? maleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null,
+        maleIvaVintage != null ? maleIvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null,
+        maleEvaVintage ? maleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null
       };
 
       SkinnedMeshRenderer[][] femaleMeshes = {
         femaleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
         femaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        femaleEvaVintage ? femaleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null,
+        femaleIvaVintage != null ? femaleIvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null,
+        femaleEvaVintage ? femaleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null
       };
 
       // Male materials to be copied to females to fix tons of female issues (missing normal maps, non-bumpmapped
@@ -288,9 +296,12 @@ namespace TextureReplacer
         }
 
         foreach (SkinnedMeshRenderer smr in femaleMeshes[i]) {
+          if (smr.sharedMaterial == null) {
+            continue;
+          }
+
           // Here we must enumerate all meshes wherever we are replacing the material.
           Material sharedMaterial = smr.sharedMaterial;
-
           switch (smr.name) {
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
               sharedMaterial.shader = EyeShader;
@@ -342,14 +353,16 @@ namespace TextureReplacer
       }
     }
 
-    public static void Recreate() {
+    public static void Recreate()
+    {
       Instance = new Replacer();
     }
 
     /// <summary>
     /// Read configuration and perform pre-load initialisation.
     /// </summary>
-    public void ReadConfig(ConfigNode rootNode) {
+    public void ReadConfig(ConfigNode rootNode)
+    {
       Util.Parse(rootNode.GetValue("skinningQuality"), ref skinningQuality);
       Util.Parse(rootNode.GetValue("logTextures"), ref logTextures);
       Util.Parse(rootNode.GetValue("logKerbalHierarchy"), ref logKerbalHierarchy);
@@ -358,7 +371,8 @@ namespace TextureReplacer
     /// <summary>
     /// Post-load initialisation.
     /// </summary>
-    public void Load() {
+    public void Load()
+    {
       if (skinningQuality != SkinQuality.Auto) {
         foreach (SkinnedMeshRenderer smr in Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>()) {
           smr.quality = skinningQuality;
@@ -402,13 +416,15 @@ namespace TextureReplacer
       }
     }
 
-    public void OnBeginFlight() {
+    public void OnBeginFlight()
+    {
       if (navBallTexture != null) {
         UpdateNavBall();
       }
     }
 
-    public void OnBeginScene() {
+    public void OnBeginScene()
+    {
       ReplaceTextures();
     }
   }

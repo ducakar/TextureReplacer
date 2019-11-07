@@ -129,7 +129,7 @@ namespace TextureReplacer
         camera.RenderToCubemap(envMap, faceMask);
 
         // Scene.
-        var pos = transform.position;
+        Vector3 pos = transform.position;
         camera.transform.position = isEva ? pos + 0.4f * transform.up : pos;
         camera.farClipPlane = 60000.0f;
         camera.cullingMask = (1 << 0) | (1 << 1) | (1 << 5) | (1 << 15) | (1 << 17);
@@ -248,6 +248,7 @@ namespace TextureReplacer
 
     public static void Recreate()
     {
+      Instance?.Destroy();
       Instance = new Reflections();
     }
 
@@ -256,8 +257,8 @@ namespace TextureReplacer
     /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
-      bool isVisorReflectionEnabled = true;
-      bool logReflectiveMeshes = false;
+      bool isVisorReflectionEnabled = IsVisorReflectionEnabled;
+      bool logReflectiveMeshes = LogReflectiveMeshes;
 
       Util.Parse(rootNode.GetValue("reflectionType"), ref globalReflectionType);
       Util.Parse(rootNode.GetValue("reflectionResolution"), ref reflectionResolution);

@@ -1,8 +1,9 @@
-/.vs
-/.vscode
-/*/bin
-/*/obj
-/GameData/TextureReplacer/Plugins
+/.idea/
+/.vs/
+/.vscode/
+/*/bin/
+/*/obj/
+/GameData/TextureReplacer/Plugins/
 /KSP.log
 *.dll
 *.dds

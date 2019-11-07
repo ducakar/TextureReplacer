@@ -8,7 +8,7 @@
     <RootNamespace>TextureReplacer</RootNamespace>
     <AssemblyName>TextureReplacer</AssemblyName>
     <UseMSBuildEngine>False</UseMSBuildEngine>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <LangVersion>preview</LangVersion>
     <Nullable>warnings</Nullable>
   </PropertyGroup>
@@ -52,16 +52,20 @@
       <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\mscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System">
-      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\System.dll</HintPath>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">

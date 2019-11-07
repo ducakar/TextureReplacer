@@ -266,6 +266,9 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Change Log ##
 
+* 3.7.1
+  - some code cleanups
+  - rebuilt for KSP 1.8
 * 3.7
   - add option to hide parachute backpacks
   - add vintage IVA kerbals to logKerbalHierarchy

@@ -91,12 +91,12 @@ namespace TextureReplacer
     }
 
     /// <summary>
-    /// Add all space-or-comma-separated values from listInstances strings to jointList.
+    /// Add all space-or-comma-separated values from listStrings to jointList.
     /// </summary>
-    public static void AddLists(string[] listInstances, ICollection<string> jointList)
+    public static void JoinLists(IEnumerable<string> listStrings, ICollection<string> jointList)
     {
-      foreach (string listInstance in listInstances) {
-        foreach (string item in SplitConfigValue(listInstance)) {
+      foreach (string listString in listStrings) {
+        foreach (string item in SplitConfigValue(listString)) {
           if (!jointList.Contains(item)) {
             jointList.Add(item);
           }
@@ -107,7 +107,7 @@ namespace TextureReplacer
     /// <summary>
     /// Print transform node with its attached objects.
     /// </summary>
-    public static void LogTransform(Transform tf, string indent = "")
+    private static void LogTransform(Transform tf, string indent = "")
     {
       if (tf.gameObject != null) {
         Debug.Log(indent + "* " + tf.gameObject.name + ": " + tf.gameObject.GetType());
@@ -120,10 +120,10 @@ namespace TextureReplacer
           Debug.Log(indent + "   shader:   " + r.material.shader);
 
           if (r.material.HasProperty(MainTexProperty)) {
-            Debug.Log(indent + "   maintex:  " + r.material.GetTexture(MainTexProperty));
+            Debug.Log(indent + "   mainTex:  " + r.material.GetTexture(MainTexProperty));
           }
           if (r.material.HasProperty(BumpMapProperty)) {
-            Debug.Log(indent + "   bumpmap:  " + r.material.GetTexture(BumpMapProperty));
+            Debug.Log(indent + "   bumpMap:  " + r.material.GetTexture(BumpMapProperty));
           }
         }
       }

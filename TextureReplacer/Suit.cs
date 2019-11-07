@@ -20,6 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+using System;
 using System.Linq;
 using UnityEngine;
 using Gender = ProtoCrewMember.Gender;
@@ -43,8 +44,8 @@ namespace TextureReplacer
 
     public Texture2D GetSuit(bool useEvaSuit, ProtoCrewMember kerbal)
     {
-      int level = kerbal.experienceLevel;
-      return useEvaSuit ? EvaSuit[level] : kerbal.veteran && IvaSuitVeteran != null ? IvaSuitVeteran : IvaSuit[level];
+      (int level, bool veteran) = kerbal == null ? (0, false) : (kerbal.experienceLevel, kerbal.veteran);
+      return useEvaSuit ? EvaSuit[level] : veteran && IvaSuitVeteran != null ? IvaSuitVeteran : IvaSuit[level];
     }
 
     public Texture2D GetSuitNRM(bool useEvaSuit)
@@ -57,98 +58,87 @@ namespace TextureReplacer
       return useEvaSuit ? EvaVisor : IvaVisor;
     }
 
-    public void SetIvaSuit(Texture2D texture, int fromLevel, bool force)
-    {
-      for (int i = fromLevel; i < IvaSuit.Length; ++i) {
-        IvaSuit[i] = force ? texture : (IvaSuit[i] ?? texture);
-      }
-    }
-
-    public void SetEvaSuit(Texture2D texture, int fromLevel, bool force)
-    {
-      for (int i = fromLevel; i < EvaSuit.Length; ++i) {
-        EvaSuit[i] = force ? texture : (EvaSuit[i] ?? texture);
-      }
-    }
-
     public bool SetTexture(string originalName, Texture2D texture)
     {
-      int level;
-
       switch (originalName) {
-        case "orangeSuite_diffuse":
+        case "orangeSuite_diffuse": {
           IvaSuitVeteran = texture;
           return true;
-
-        case "paleBlueSuite_diffuse":
-          SetIvaSuit(texture, 0, true);
+        }
+        case "paleBlueSuite_diffuse": {
+          Array.Fill(IvaSuit, texture);
           return true;
-
-        case "whiteSuite_diffuse":
-          SetEvaSuit(texture, 0, true);
+        }
+        case "whiteSuite_diffuse": {
+          Array.Fill(EvaSuit, texture);
           return true;
-
-        case "orangeSuite_normal":
+        }
+        case "orangeSuite_normal": {
           IvaSuitNRM = texture;
           EvaSuitNRM = texture;
           return true;
-
-        case "kerbalMain":
-          IvaSuitVeteran = IvaSuitVeteran ? IvaSuitVeteran : texture;
+        }
+        case "kerbalMain": {
+          IvaSuitVeteran ??= texture;
           return true;
-
-        case "kerbalMainGrey":
-          SetIvaSuit(texture, 0, false);
+        }
+        case "kerbalMainGrey": {
+          for (int i = 0; i < IvaSuit.Length && IvaSuit[i] == null; ++i) {
+            IvaSuit[i] = texture;
+          }
           return true;
-
-        case "kerbalMainNRM":
+        }
+        case "kerbalMainNRM": {
           IvaSuitNRM = IvaSuitNRM ? IvaSuitNRM : texture;
           return true;
-
-        case "kerbalVisor":
-          IvaVisor = IvaVisor ? IvaVisor : texture;
+        }
+        case "kerbalVisor": {
+          IvaVisor ??= texture;
           return true;
-
-        case "EVAtexture":
-          SetEvaSuit(texture, 0, false);
+        }
+        case "EVAtexture": {
+          for (int i = 0; i < EvaSuit.Length && EvaSuit[i] == null; ++i) {
+            EvaSuit[i] = texture;
+          }
           return true;
-
-        case "EVAtextureNRM":
-          EvaSuitNRM = EvaSuitNRM ? EvaSuitNRM : texture;
+        }
+        case "EVAtextureNRM": {
+          EvaSuitNRM ??= texture;
           return true;
-
-        case "EVAvisor":
-          EvaVisor = EvaVisor ? EvaVisor : texture;
+        }
+        case "EVAvisor": {
+          EvaVisor ??= texture;
           return true;
-
-        case "EVAjetpack":
-          EvaJetpack = EvaJetpack ? EvaJetpack : texture;
+        }
+        case "EVAjetpack": {
+          EvaJetpack ??= texture;
           return true;
-
-        case "EVAjetpackNRM":
-          EvaJetpackNRM = EvaJetpackNRM ? EvaJetpackNRM : texture;
+        }
+        case "EVAjetpackNRM": {
+          EvaJetpackNRM ??= texture;
           return true;
-
+        }
         case "kerbalMainGrey1":
         case "kerbalMainGrey2":
         case "kerbalMainGrey3":
         case "kerbalMainGrey4":
-        case "kerbalMainGrey5":
-          level = originalName.Last() - '0';
-          SetIvaSuit(texture, level, true);
+        case "kerbalMainGrey5": {
+          int level = originalName.Last() - '0';
+          Array.Fill(IvaSuit, texture, level, IvaSuit.Length - level);
           return true;
-
+        }
         case "EVAtexture1":
         case "EVAtexture2":
         case "EVAtexture3":
         case "EVAtexture4":
-        case "EVAtexture5":
-          level = originalName.Last() - '0';
-          SetEvaSuit(texture, level, true);
+        case "EVAtexture5": {
+          int level = originalName.Last() - '0';
+          Array.Fill(EvaSuit, texture, level, EvaSuit.Length - level);
           return true;
-
-        default:
+        }
+        default: {
           return false;
+        }
       }
     }
   }

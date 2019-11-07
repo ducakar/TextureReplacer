@@ -51,8 +51,6 @@ namespace TextureReplacer
     {
       log.Print("Started, Version {0}", Assembly.GetExecutingAssembly().GetName().Version);
 
-      Reflections.Instance?.Destroy();
-
       Replacer.Recreate();
       Reflections.Recreate();
       Personaliser.Recreate();
