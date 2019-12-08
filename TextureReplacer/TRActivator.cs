@@ -51,19 +51,27 @@ namespace TextureReplacer
     {
       log.Print("Started, Version {0}", Assembly.GetExecutingAssembly().GetName().Version);
 
+      Prefab.Recreate();
+      Mapper.Recreate();
       Replacer.Recreate();
       Reflections.Recreate();
       Personaliser.Recreate();
 
       foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer")) {
+        Prefab.Instance.ReadConfig(file.config);
+        Mapper.Instance.ReadConfig(file.config);
         Replacer.Instance.ReadConfig(file.config);
         Reflections.Instance.ReadConfig(file.config);
-        Personaliser.Instance.ReadConfig(file.config);
       }
 
+      Prefab.Instance.Load();
+      Mapper.Instance.Load();
       Replacer.Instance.Load();
       Reflections.Instance.Load();
       Personaliser.Instance.Load();
+
+      // We can unload prefabs here as they are only used in `Mapper.Load()` and `Replacer.Load()`.
+      Prefab.Instance.Unload();
 
       isLoaded = true;
     }

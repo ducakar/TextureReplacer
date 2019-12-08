@@ -52,279 +52,6 @@ namespace TextureReplacer
     private ProtoCrewMember selectedKerbal;
     private string selectedClass;
 
-    private void WindowHandler(int id)
-    {
-      Reflections reflections = Reflections.Instance;
-      Personaliser personaliser = Personaliser.Instance;
-
-      GUILayout.BeginVertical();
-      GUILayout.BeginHorizontal();
-
-      GUILayout.BeginVertical(GUILayout.Width(200));
-
-      // Roster area.
-      rosterScroll = GUILayout.BeginScrollView(rosterScroll);
-      GUILayout.BeginVertical();
-
-      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew) {
-        switch (kerbal.rosterStatus) {
-          case ProtoCrewMember.RosterStatus.Assigned:
-            GUI.contentColor = Color.cyan;
-            break;
-          case ProtoCrewMember.RosterStatus.Dead:
-            continue;
-          case ProtoCrewMember.RosterStatus.Missing:
-            GUI.contentColor = Color.yellow;
-            break;
-          default:
-            GUI.contentColor = Color.white;
-            break;
-        }
-
-        if (GUILayout.Button(kerbal.name)) {
-          selectedKerbal = kerbal;
-          selectedClass = null;
-        }
-      }
-
-      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Unowned) {
-        if (kerbal.rosterStatus != ProtoCrewMember.RosterStatus.Dead) {
-          continue;
-        }
-
-        GUI.contentColor = Color.cyan;
-        if (GUILayout.Button(kerbal.name)) {
-          selectedKerbal = kerbal;
-          selectedClass = null;
-        }
-      }
-
-      GUI.contentColor = Color.white;
-      GUI.color = ClassColour;
-
-      // Class suits.
-      foreach (string clazz in classes) {
-        if (GUILayout.Button(clazz)) {
-          selectedKerbal = null;
-          selectedClass = clazz;
-        }
-      }
-
-      GUI.color = Color.white;
-
-      GUILayout.EndVertical();
-      GUILayout.EndScrollView();
-
-      if (GUILayout.Button("Reset to Defaults")) {
-        personaliser.ResetKerbals();
-      }
-
-      GUILayout.EndVertical();
-
-      // Textures.
-      Skin defaultSkin = personaliser.DefaultSkin[0];
-      Suit defaultSuit = personaliser.DefaultSuit;
-      Appearance appearance = null;
-      Skin skin = null;
-      Suit suit = null;
-      int skinIndex = -1;
-      int suitIndex = -1;
-
-      if (selectedKerbal != null) {
-        if (selectedKerbal.suit == KerbalSuit.Vintage) {
-          defaultSuit = personaliser.VintageSuit;
-        }
-
-        appearance = personaliser.GetAppearance(selectedKerbal);
-        defaultSkin = personaliser.DefaultSkin[(int) selectedKerbal.gender];
-
-        skin = appearance.Skin;
-        suit = appearance.Suit;
-
-        skinIndex = personaliser.Skins.IndexOf(skin);
-        suitIndex = personaliser.Suits.IndexOf(suit);
-      } else if (selectedClass != null) {
-        personaliser.ClassSuits.TryGetValue(selectedClass, out suit);
-
-        if (suit != null) {
-          suitIndex = personaliser.Suits.IndexOf(suit);
-        }
-      }
-
-      GUILayout.Space(10);
-      GUILayout.BeginVertical();
-
-      if (skin != null) {
-        GUILayout.Box(skin.Head, GUILayout.Width(200), GUILayout.Height(200));
-
-        GUILayout.Label(skin.Name);
-      }
-
-      if (suit != null) {
-        Texture2D ivaSuitTex = suit.GetSuit(false, selectedKerbal) ?? defaultSuit.GetSuit(false, selectedKerbal);
-        Texture2D evaSuitTex = suit.GetSuit(true, selectedKerbal) ?? defaultSuit.GetSuit(true, selectedKerbal);
-
-        GUILayout.BeginHorizontal();
-        GUILayout.Box(ivaSuitTex, GUILayout.Width(100), GUILayout.Height(100));
-        GUILayout.Space(10);
-        GUILayout.Box(evaSuitTex, GUILayout.Width(100), GUILayout.Height(100));
-        GUILayout.EndHorizontal();
-
-        GUILayout.Label(suit.Name);
-      }
-
-      GUILayout.EndVertical();
-      GUILayout.BeginVertical(GUILayout.Width(120));
-
-      if (appearance != null) {
-        GUILayout.BeginHorizontal();
-        GUI.enabled = personaliser.Skins.Count != 0;
-
-        if (GUILayout.Button("<")) {
-          skinIndex = skinIndex == -1 ? 0 : skinIndex;
-          skinIndex = (personaliser.Skins.Count + skinIndex - 1) % personaliser.Skins.Count;
-
-          appearance.Skin = personaliser.Skins[skinIndex];
-        }
-        if (GUILayout.Button(">")) {
-          skinIndex = (skinIndex + 1) % personaliser.Skins.Count;
-
-          appearance.Skin = personaliser.Skins[skinIndex];
-        }
-
-        GUI.enabled = true;
-        GUILayout.EndHorizontal();
-
-        GUI.color = appearance.Skin == defaultSkin ? SelectedColour : Color.white;
-        if (GUILayout.Button("Default")) {
-          appearance.Skin = defaultSkin;
-        }
-
-        GUI.color = appearance.Skin == null ? SelectedColour : Color.white;
-        if (GUILayout.Button("Unset/Generic")) {
-          appearance.Skin = null;
-        }
-
-        GUI.color = Color.white;
-
-        selectedKerbal.veteran = GUILayout.Toggle(selectedKerbal.veteran, "Veteran");
-      }
-
-      if (appearance != null || selectedClass != null) {
-        bool isVintage = false;
-
-        if (appearance != null) {
-          isVintage = selectedKerbal.suit == KerbalSuit.Vintage;
-          GUILayout.Space(100);
-        }
-
-        GUILayout.BeginHorizontal();
-        GUI.enabled = personaliser.Suits.Count != 0;
-
-        if (GUILayout.Button("<")) {
-          suitIndex = suitIndex == -1 ? 0 : suitIndex;
-          suitIndex = (personaliser.Suits.Count + suitIndex - 1) % personaliser.Suits.Count;
-
-          if (selectedClass != null) {
-            personaliser.ClassSuits[selectedClass] = personaliser.Suits[suitIndex];
-          } else {
-            appearance.Suit = personaliser.Suits[suitIndex];
-          }
-        }
-        if (GUILayout.Button(">")) {
-          suitIndex = (suitIndex + 1) % personaliser.Suits.Count;
-
-          if (selectedClass != null) {
-            personaliser.ClassSuits[selectedClass] = personaliser.Suits[suitIndex];
-          } else {
-            appearance.Suit = personaliser.Suits[suitIndex];
-          }
-        }
-
-        GUI.enabled = true;
-        GUILayout.EndHorizontal();
-
-        bool hasKerbalGenericSuit = appearance != null && appearance.Suit == null;
-
-        GUI.color = suit == defaultSuit && !hasKerbalGenericSuit ? SelectedColour : Color.white;
-        if (GUILayout.Button("Default")) {
-          if (selectedClass != null) {
-            personaliser.ClassSuits[selectedClass] = defaultSuit;
-          } else {
-            appearance.Suit = defaultSuit;
-          }
-        }
-
-        GUI.color = suit == null || hasKerbalGenericSuit ? SelectedColour : Color.white;
-        if (GUILayout.Button("Unset/Generic")) {
-          if (selectedClass != null) {
-            personaliser.ClassSuits[selectedClass] = null;
-          } else {
-            appearance.Suit = null;
-          }
-        }
-
-        GUI.color = Color.white;
-
-        if (appearance != null) {
-          isVintage = GUILayout.Toggle(isVintage, "Vintage");
-          selectedKerbal.suit = isVintage ? KerbalSuit.Vintage : KerbalSuit.Default;
-
-          // Make sure the right kind of default suit is selected.
-          if (appearance.Suit == personaliser.DefaultSuit || appearance.Suit == personaliser.VintageSuit) {
-            appearance.Suit = defaultSuit;
-          }
-        }
-      }
-
-      GUILayout.EndVertical();
-      GUILayout.EndHorizontal();
-      GUILayout.Space(5);
-
-      bool enableReflections = reflections.ReflectionType == Reflections.Type.Real;
-      enableReflections = GUILayout.Toggle(enableReflections, "Enable real-time reflections for visors and parts");
-      reflections.ReflectionType = enableReflections ? Reflections.Type.Real : Reflections.Type.None;
-
-      bool hideParachuteBackpack = personaliser.HideParachuteBackpack;
-      hideParachuteBackpack = GUILayout.Toggle(hideParachuteBackpack, "Hide parachute backpack");
-      personaliser.HideParachuteBackpack = hideParachuteBackpack;
-
-      GUILayout.EndVertical();
-      GUI.DragWindow(new Rect(0, 0, Screen.width, 30));
-    }
-
-    private void Enable()
-    {
-      isEnabled = true;
-      selectedKerbal = null;
-      selectedClass = null;
-    }
-
-    private void Disable()
-    {
-      isEnabled = false;
-      selectedKerbal = null;
-      selectedClass = null;
-
-      rosterScroll = Vector2.zero;
-    }
-
-    private void AddAppButton()
-    {
-      if (appButton == null) {
-        appButton = ApplicationLauncher.Instance.AddModApplication(Enable, Disable, null, null, null, null,
-          ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
-      }
-    }
-
-    private void RemoveAppButton(GameScenes scenes)
-    {
-      if (appButton != null) {
-        ApplicationLauncher.Instance.RemoveModApplication(appButton);
-        appButton = null;
-      }
-    }
-
     public void Awake()
     {
       foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("TextureReplacer")) {
@@ -374,6 +101,302 @@ namespace TextureReplacer
     {
       GameEvents.onGUIApplicationLauncherReady.Remove(AddAppButton);
       GameEvents.onGameSceneLoadRequested.Remove(RemoveAppButton);
+    }
+
+    private void WindowHandler(int id)
+    {
+      var mapper = Mapper.Instance;
+      var reflections = Reflections.Instance;
+
+      GUILayout.BeginVertical();
+      GUILayout.BeginHorizontal();
+
+      GUILayout.BeginVertical(GUILayout.Width(200));
+
+      // Roster area.
+      rosterScroll = GUILayout.BeginScrollView(rosterScroll);
+      GUILayout.BeginVertical();
+
+      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew) {
+        switch (kerbal.rosterStatus) {
+          case ProtoCrewMember.RosterStatus.Assigned: {
+            GUI.contentColor = Color.cyan;
+            break;
+          }
+          case ProtoCrewMember.RosterStatus.Dead: {
+            continue;
+          }
+          case ProtoCrewMember.RosterStatus.Missing: {
+            GUI.contentColor = Color.yellow;
+            break;
+          }
+          default: {
+            GUI.contentColor = Color.white;
+            break;
+          }
+        }
+
+        if (GUILayout.Button(kerbal.name)) {
+          selectedKerbal = kerbal;
+          selectedClass = null;
+        }
+      }
+
+      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Unowned) {
+        if (kerbal.rosterStatus != ProtoCrewMember.RosterStatus.Dead) {
+          continue;
+        }
+
+        GUI.contentColor = Color.cyan;
+        if (GUILayout.Button(kerbal.name)) {
+          selectedKerbal = kerbal;
+          selectedClass = null;
+        }
+      }
+
+      GUI.contentColor = Color.white;
+      GUI.color = ClassColour;
+
+      // Class suits.
+      foreach (string clazz in classes) {
+        if (GUILayout.Button(clazz)) {
+          selectedKerbal = null;
+          selectedClass = clazz;
+        }
+      }
+
+      GUI.color = Color.white;
+
+      GUILayout.EndVertical();
+      GUILayout.EndScrollView();
+
+      if (GUILayout.Button("Reset to Defaults")) {
+        mapper.ResetKerbals();
+      }
+
+      GUILayout.EndVertical();
+
+      // Textures.
+      Appearance appearance = null;
+      Skin skin = null;
+      Suit suit = null;
+      int skinIndex = -1;
+      int suitIndex = -1;
+      Skin defaultSkin = mapper.DefaultSkin[0];
+      Suit defaultSuit = mapper.DefaultSuit;
+
+      if (selectedKerbal != null) {
+        appearance = mapper.GetAppearance(selectedKerbal);
+
+        skin = mapper.GetKerbalSkin(selectedKerbal, appearance);
+        suit = mapper.GetKerbalSuit(selectedKerbal, appearance);
+
+        skinIndex = mapper.Skins.IndexOf(skin);
+        suitIndex = mapper.Suits.IndexOf(suit);
+
+        defaultSkin = mapper.DefaultSkin[(int) selectedKerbal.gender];
+        defaultSuit = selectedKerbal.suit switch {
+          KerbalSuit.Vintage => mapper.VintageSuit,
+          KerbalSuit.Future  => mapper.FutureSuit,
+          _                  => mapper.DefaultSuit
+        };
+      } else if (selectedClass != null) {
+        mapper.ClassSuits.TryGetValue(selectedClass, out suit);
+
+        if (suit != null) {
+          suitIndex = mapper.Suits.IndexOf(suit);
+        }
+      }
+
+      GUILayout.Space(10);
+      GUILayout.BeginVertical();
+
+      if (skin != null) {
+        GUILayout.Box(skin.Head, GUILayout.Width(200), GUILayout.Height(200));
+
+        GUILayout.Label(skin.Name);
+      }
+
+      if (suit != null) {
+        Texture2D ivaSuitTex = suit.GetSuit(false, selectedKerbal) ?? defaultSuit.GetSuit(false, selectedKerbal);
+        Texture2D evaSuitTex = suit.GetSuit(true, selectedKerbal) ?? defaultSuit.GetSuit(true, selectedKerbal);
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Box(ivaSuitTex, GUILayout.Width(100), GUILayout.Height(100));
+        GUILayout.Space(10);
+        GUILayout.Box(evaSuitTex, GUILayout.Width(100), GUILayout.Height(100));
+        GUILayout.EndHorizontal();
+
+        GUILayout.Label(suit.Name);
+      }
+
+      GUILayout.EndVertical();
+      GUILayout.BeginVertical(GUILayout.Width(120));
+
+      if (appearance != null) {
+        GUILayout.BeginHorizontal();
+        GUI.enabled = mapper.Skins.Count != 0;
+
+        if (GUILayout.Button("<")) {
+          skinIndex = skinIndex == -1 ? 0 : skinIndex;
+          skinIndex = (mapper.Skins.Count + skinIndex - 1) % mapper.Skins.Count;
+
+          appearance.Skin = mapper.Skins[skinIndex];
+        }
+
+        if (GUILayout.Button(">")) {
+          skinIndex = (skinIndex + 1) % mapper.Skins.Count;
+
+          appearance.Skin = mapper.Skins[skinIndex];
+        }
+
+        GUI.enabled = true;
+        GUILayout.EndHorizontal();
+
+        GUI.color = appearance.Skin == defaultSkin ? SelectedColour : Color.white;
+        if (GUILayout.Button("Default")) {
+          appearance.Skin = defaultSkin;
+        }
+
+        GUI.color = appearance.Skin == null ? SelectedColour : Color.white;
+        if (GUILayout.Button("Unset/Generic")) {
+          appearance.Skin = null;
+        }
+
+        GUI.color = Color.white;
+
+        selectedKerbal.veteran = GUILayout.Toggle(selectedKerbal.veteran, "Veteran");
+      }
+
+      if (appearance != null || selectedClass != null) {
+        bool isVintage = false;
+        bool isFuture = false;
+
+        if (appearance != null) {
+          isVintage = selectedKerbal.suit == KerbalSuit.Vintage;
+          isFuture = selectedKerbal.suit == KerbalSuit.Future;
+
+          GUILayout.Space(100);
+        }
+
+        GUILayout.BeginHorizontal();
+        GUI.enabled = mapper.Suits.Count != 0;
+
+        if (GUILayout.Button("<")) {
+          suitIndex = suitIndex == -1 ? 0 : suitIndex;
+          suitIndex = (mapper.Suits.Count + suitIndex - 1) % mapper.Suits.Count;
+
+          if (appearance != null) {
+            appearance.Suit = mapper.Suits[suitIndex];
+          } else if (selectedClass != null) {
+            mapper.ClassSuits[selectedClass] = mapper.Suits[suitIndex];
+          }
+        }
+
+        if (GUILayout.Button(">")) {
+          suitIndex = (suitIndex + 1) % mapper.Suits.Count;
+
+          if (appearance != null) {
+            appearance.Suit = mapper.Suits[suitIndex];
+          } else if (selectedClass != null) {
+            mapper.ClassSuits[selectedClass] = mapper.Suits[suitIndex];
+          }
+        }
+
+        GUI.enabled = true;
+        GUILayout.EndHorizontal();
+
+        bool hasKerbalGenericSuit = appearance != null && appearance.Suit == null;
+
+        GUI.color = suit == defaultSuit && !hasKerbalGenericSuit ? SelectedColour : Color.white;
+        if (GUILayout.Button("Default")) {
+          if (selectedClass != null) {
+            mapper.ClassSuits[selectedClass] = defaultSuit;
+          } else {
+            appearance.Suit = defaultSuit;
+          }
+        }
+
+        GUI.color = suit == null || hasKerbalGenericSuit ? SelectedColour : Color.white;
+        if (GUILayout.Button("Unset/Generic")) {
+          if (selectedClass != null) {
+            mapper.ClassSuits[selectedClass] = null;
+          } else {
+            appearance.Suit = null;
+          }
+        }
+
+        GUI.color = Color.white;
+
+        if (appearance != null) {
+          isVintage = GUILayout.Toggle(isVintage, "Vintage");
+          isFuture = GUILayout.Toggle(isFuture, "Future");
+
+          selectedKerbal.suit = isVintage && isFuture
+            ? selectedKerbal.suit == KerbalSuit.Vintage
+              ? KerbalSuit.Future
+              : KerbalSuit.Vintage
+            : isVintage
+              ? KerbalSuit.Vintage
+              : isFuture
+                ? KerbalSuit.Future
+                : KerbalSuit.Default;
+
+          // Ensure default suits are switched, otherwise we'd get stuck on a specific default suit, unable to switch
+          // suit kind as `Mapper.GetKerbalSuit()` would keep resetting it.
+          if (appearance.Suit == mapper.DefaultSuit || appearance.Suit == mapper.VintageSuit ||
+              appearance.Suit == mapper.FutureSuit) {
+            appearance.Suit = mapper.GetDefaultSuit(selectedKerbal);
+          }
+        }
+      }
+
+      GUILayout.EndVertical();
+      GUILayout.EndHorizontal();
+      GUILayout.Space(5);
+
+      bool enableReflections = reflections.ReflectionType == Reflections.Type.Real;
+      enableReflections = GUILayout.Toggle(enableReflections, "Enable real-time reflections for visors and parts");
+      reflections.ReflectionType = enableReflections ? Reflections.Type.Real : Reflections.Type.None;
+
+      bool hideParachuteBackpack = mapper.HideParachuteBackpack;
+      hideParachuteBackpack = GUILayout.Toggle(hideParachuteBackpack, "Hide parachute backpack");
+      mapper.HideParachuteBackpack = hideParachuteBackpack;
+
+      GUILayout.EndVertical();
+      GUI.DragWindow(new Rect(0, 0, Screen.width, 30));
+    }
+
+    private void Enable()
+    {
+      isEnabled = true;
+      selectedKerbal = null;
+      selectedClass = null;
+    }
+
+    private void Disable()
+    {
+      isEnabled = false;
+      selectedKerbal = null;
+      selectedClass = null;
+
+      rosterScroll = Vector2.zero;
+    }
+
+    private void AddAppButton()
+    {
+      if (appButton == null) {
+        appButton = ApplicationLauncher.Instance.AddModApplication(Enable, Disable, null, null, null, null,
+          ApplicationLauncher.AppScenes.SPACECENTER, appIcon);
+      }
+    }
+
+    private void RemoveAppButton(GameScenes scenes)
+    {
+      if (appButton != null) {
+        ApplicationLauncher.Instance.RemoveModApplication(appButton);
+        appButton = null;
+      }
     }
   }
 }

@@ -278,15 +278,11 @@ namespace TextureReplacer
     {
       IsVisorReflectionEnabled = false;
 
-      string shadersFileName = "shaders.linux";
-      switch (Application.platform) {
-        case RuntimePlatform.WindowsPlayer:
-          shadersFileName = "shaders.windows";
-          break;
-        case RuntimePlatform.OSXPlayer:
-          shadersFileName = "shaders.osx";
-          break;
-      }
+      string shadersFileName = Application.platform switch {
+        RuntimePlatform.WindowsPlayer => "shaders.windows",
+        RuntimePlatform.OSXPlayer     => "shaders.osx",
+        _                             => "shaders.linux"
+      };
       string shadersPath = IOUtils.GetFilePathFor(GetType(), shadersFileName);
 
       AssetBundle shadersBundle = null;

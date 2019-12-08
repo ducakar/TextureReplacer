@@ -24,12 +24,15 @@ using System;
 using System.Linq;
 using UnityEngine;
 using Gender = ProtoCrewMember.Gender;
+using KerbalSuit = ProtoCrewMember.KerbalSuit;
 
 namespace TextureReplacer
 {
   internal class Suit
   {
-    public string Name;
+    public readonly string Name;
+    public readonly ProtoCrewMember.KerbalSuit Kind;
+
     public Gender Gender;
 
     public Texture2D IvaSuitVeteran;
@@ -42,10 +45,27 @@ namespace TextureReplacer
     public Texture2D EvaJetpack;
     public Texture2D EvaJetpackNRM;
 
+    public Suit(string name)
+    {
+      Name = name;
+
+      if (name == "VINTAGE" || name.EndsWith(".vintage")) {
+        Kind = KerbalSuit.Vintage;
+      } else if (name == "FUTURE" || name.EndsWith(".future")) {
+        Kind = KerbalSuit.Future;
+      } else {
+        Kind = KerbalSuit.Default;
+      }
+    }
+
     public Texture2D GetSuit(bool useEvaSuit, ProtoCrewMember kerbal)
     {
       (int level, bool veteran) = kerbal == null ? (0, false) : (kerbal.experienceLevel, kerbal.veteran);
-      return useEvaSuit ? EvaSuit[level] : veteran && IvaSuitVeteran != null ? IvaSuitVeteran : IvaSuit[level];
+      return useEvaSuit
+        ? EvaSuit[level]
+        : veteran && IvaSuitVeteran != null
+          ? IvaSuitVeteran
+          : IvaSuit[level];
     }
 
     public Texture2D GetSuitNRM(bool useEvaSuit)
@@ -61,45 +81,44 @@ namespace TextureReplacer
     public bool SetTexture(string originalName, Texture2D texture)
     {
       switch (originalName) {
-        case "orangeSuite_diffuse": {
-          IvaSuitVeteran = texture;
+        case "orangeSuite_normal":
+        case "futureSuitMainNRM": {
+          IvaSuitNRM ??= texture;
+          EvaSuitNRM ??= texture;
           return true;
         }
-        case "paleBlueSuite_diffuse": {
-          Array.Fill(IvaSuit, texture);
-          return true;
-        }
-        case "whiteSuite_diffuse": {
-          Array.Fill(EvaSuit, texture);
-          return true;
-        }
-        case "orangeSuite_normal": {
-          IvaSuitNRM = texture;
-          EvaSuitNRM = texture;
-          return true;
-        }
+        case "orangeSuite_diffuse":
+        case "me_suit_difuse_orange":
+        case "futureSuit_diffuse_whiteOrange":
         case "kerbalMain": {
           IvaSuitVeteran ??= texture;
           return true;
         }
+        case "paleBlueSuite_diffuse":
+        case "me_suit_difuse_low_polyBrown":
         case "kerbalMainGrey": {
           for (int i = 0; i < IvaSuit.Length && IvaSuit[i] == null; ++i) {
             IvaSuit[i] = texture;
           }
+
           return true;
         }
         case "kerbalMainNRM": {
-          IvaSuitNRM = IvaSuitNRM ? IvaSuitNRM : texture;
+          IvaSuitNRM ??= texture;
           return true;
         }
         case "kerbalVisor": {
           IvaVisor ??= texture;
           return true;
         }
+        case "whiteSuite_diffuse":
+        case "me_suit_difuse_blue":
+        case "futureSuit_diffuse_orange":
         case "EVAtexture": {
           for (int i = 0; i < EvaSuit.Length && EvaSuit[i] == null; ++i) {
             EvaSuit[i] = texture;
           }
+
           return true;
         }
         case "EVAtextureNRM": {

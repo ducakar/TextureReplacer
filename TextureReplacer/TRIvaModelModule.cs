@@ -43,6 +43,7 @@ namespace TextureReplacer
           kerbal.gameObject.AddComponent<TRIvaModule>();
         }
       }
+
       Destroy(this);
     }
   }

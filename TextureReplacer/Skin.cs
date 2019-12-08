@@ -27,53 +27,75 @@ namespace TextureReplacer
 {
   internal class Skin
   {
-    public string Name;
+    public readonly string Name;
+
     public Gender Gender;
     public bool IsEyeless;
-    public bool IsDefault;
 
     public Texture2D Head;
-//    public Texture2D Arms;
+    public Texture2D HeadNRM;
+    // public Texture2D Arms;
+    // public Texture2D ArmsNRM;
     public Texture2D EyeballLeft;
     public Texture2D EyeballRight;
     public Texture2D PupilLeft;
     public Texture2D PupilRight;
 
+    public Skin(string name)
+    {
+      Name = name;
+    }
+
     public bool SetTexture(string originalName, Texture2D texture)
     {
       switch (originalName) {
-        case "kerbalHead":
+        case "kerbalHead": {
           Gender = Gender.Male;
           Head = Head ? Head : texture;
           return true;
-
-        case "kerbalGirl_06_BaseColor":
+        }
+        case "kerbalHeadNRM": {
+          Gender = Gender.Male;
+          HeadNRM = HeadNRM ? HeadNRM : texture;
+          return true;
+        }
+        case "kerbalGirl_06_BaseColor": {
           Gender = Gender.Female;
           Head = Head ? Head : texture;
           return true;
-
-//        case "kerbal_armHands":
-//          Arms = Arms ? Arms : texture;
-//          return true;
-
-        case "eyeballLeft":
+        }
+        case "kerbalGirl_06_BaseColorNRM": {
+          Gender = Gender.Female;
+          HeadNRM = HeadNRM ? HeadNRM : texture;
+          return true;
+        }
+        // case "kerbal_armHands": {
+        //   Arms = Arms ? Arms : texture;
+        //   return true;
+        // }
+        // case "kerbal_armHandsNRM": {
+        //   ArmsNRM = ArmsNRM ? ArmsNRM : texture;
+        //   return true;
+        // }
+        case "eyeballLeft": {
           EyeballLeft = EyeballLeft ? EyeballLeft : texture;
           return true;
-
-        case "eyeballRight":
+        }
+        case "eyeballRight": {
           EyeballRight = EyeballRight ? EyeballRight : texture;
           return true;
-
-        case "pupilLeft":
+        }
+        case "pupilLeft": {
           PupilLeft = PupilLeft ? PupilLeft : texture;
           return true;
-
-        case "pupilRight":
+        }
+        case "pupilRight": {
           PupilRight = PupilRight ? PupilRight : texture;
           return true;
-
-        default:
+        }
+        default: {
           return false;
+        }
       }
     }
   }

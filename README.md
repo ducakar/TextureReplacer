@@ -256,7 +256,7 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Known Issues ##
 
-* When using stock vintage suits, EVA suit is used for IVA.
+* Reflections have some strange effect on physics and mouth stuttering.
 * Reflections disable part highlighting along reflective surfaces.
 * Only the top face of the atmospheric skybox is reflected.
 * Issues with other plugins:
@@ -266,9 +266,13 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Change Log ##
 
-* 3.7.1
-  - some code cleanups
-  - rebuilt for KSP 1.8
+* 3.8
+  - update for KSP 1.8.x
+  - add support for "future" (Breaking Ground) suits
+  - re-add normal map support for heads
+  - fix default vintage IVA suits
+  - fix default texture fallbacks on models with vintage suits
+  - code cleanup and reorganisation
 * 3.7
   - add option to hide parachute backpacks
   - add vintage IVA kerbals to logKerbalHierarchy

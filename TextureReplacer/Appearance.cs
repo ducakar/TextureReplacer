@@ -24,6 +24,7 @@ namespace TextureReplacer
 {
   internal class Appearance
   {
+    public int Hash;
     public Skin Skin;
     public Suit Suit;
   }

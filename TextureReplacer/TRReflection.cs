@@ -44,7 +44,7 @@ namespace TextureReplacer
 
     public override void OnStart(StartState state)
     {
-      Reflections reflections = Reflections.Instance;
+      var reflections = Reflections.Instance;
 
       Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
       Color reflectionColour = Color.white;
@@ -60,9 +60,11 @@ namespace TextureReplacer
       if (MeshesToChange != "all") {
         meshNames.AddUniqueRange(Util.SplitConfigValue(MeshesToChange));
       }
+
       if (reflections.LogReflectiveMeshes) {
         log.Print("Part \"{0}\"", part.name);
       }
+
       if (reflections.ReflectionType == Reflections.Type.None) {
         return;
       }
@@ -72,7 +74,7 @@ namespace TextureReplacer
       bool success = false;
 
       foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>()) {
-        Renderer renderer = meshFilter.GetComponent<Renderer>();
+        var renderer = meshFilter.GetComponent<Renderer>();
         if (renderer == null) {
           continue;
         }
@@ -81,6 +83,7 @@ namespace TextureReplacer
         if (reflections.LogReflectiveMeshes) {
           log.Print("+ {0} [{1}]", meshFilter.name, material.shader.name);
         }
+
         if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name)) {
           success |= script.Apply(material, reflectiveShader, reflectionColour);
         }

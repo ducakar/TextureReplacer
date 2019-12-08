@@ -85,6 +85,7 @@ namespace TextureReplacer
         float.TryParse(components[1], out variable.g);
         float.TryParse(components[2], out variable.b);
       }
+
       if (components.Length >= 4) {
         float.TryParse(components[3], out variable.a);
       }
@@ -112,6 +113,7 @@ namespace TextureReplacer
       if (tf.gameObject != null) {
         Debug.Log(indent + "* " + tf.gameObject.name + ": " + tf.gameObject.GetType());
       }
+
       foreach (Component c in tf.GetComponents<Component>()) {
         Debug.Log(indent + " - " + c);
 
@@ -122,6 +124,7 @@ namespace TextureReplacer
           if (r.material.HasProperty(MainTexProperty)) {
             Debug.Log(indent + "   mainTex:  " + r.material.GetTexture(MainTexProperty));
           }
+
           if (r.material.HasProperty(BumpMapProperty)) {
             Debug.Log(indent + "   bumpMap:  " + r.material.GetTexture(BumpMapProperty));
           }
