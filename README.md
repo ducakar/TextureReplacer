@@ -185,7 +185,8 @@ for females.
 Suit textures' names are identical as for the default texture replacement except
 that class level variants of suit texture are possible. If `kerbalMain` is not
 present `kerbalMainGrey` is used for veterans. Each suit must reside inside its
-own directory:
+own directory. If a directory contains a vintage or future suit, it must have
+".vintage" or ".future" suffix, respectively.
 
     GameData/**/TextureReplacer/
       Suits/[<subDir>/]<suit>/kerbalMain       // IVA suit (veteran)
@@ -256,9 +257,12 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Known Issues ##
 
-* Reflections have some strange effect on physics and mouth stuttering.
-* Reflections disable part highlighting along reflective surfaces.
-* Only the top face of the atmospheric skybox is reflected.
+* Reflections:
+  - Reflections have some strange effect on physics and mouth stuttering.
+  - Reflections disable part highlighting along reflective surfaces.
+  - Only the top face of the atmospheric skybox is reflected.
+* Switching suit type (default, vintage, future) during flight needs two flight
+  scene reloads before it is fully applied on EVA Kerbal models.
 * Issues with other plugins:
   - EVE clouds are not reflected at certain altitudes.
   - Ship Manifest crew transfers reset Kerbals to default textures (restored on
@@ -269,6 +273,8 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 * 3.8
   - update for KSP 1.8.x
   - add support for "future" (Breaking Ground) suits
+  - add suit directory suffixes: directories containing vintage or future suits
+    must have ".vintage" or ".future" suffix, respectively
   - re-add normal map support for heads
   - fix default vintage IVA suits
   - fix default texture fallbacks on models with vintage suits
