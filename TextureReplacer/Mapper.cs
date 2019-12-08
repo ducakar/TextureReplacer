@@ -336,11 +336,15 @@ namespace TextureReplacer
       Prefab.ExtractSuit(prefab.MaleIva.transform, DefaultSuit);
       Prefab.ExtractSuit(prefab.MaleEva.transform, DefaultSuit);
 
-      Prefab.ExtractSuit(prefab.MaleIvaVintage.transform, VintageSuit);
-      Prefab.ExtractSuit(prefab.MaleEvaVintage.transform, VintageSuit);
+      if (prefab.MaleIvaVintage && prefab.MaleEvaVintage) {
+        Prefab.ExtractSuit(prefab.MaleIvaVintage.transform, VintageSuit);
+        Prefab.ExtractSuit(prefab.MaleEvaVintage.transform, VintageSuit);
+      }
 
-      Prefab.ExtractSuit(prefab.MaleIvaFuture.transform, FutureSuit);
-      Prefab.ExtractSuit(prefab.MaleEvaFuture.transform, FutureSuit);
+      if (prefab.MaleIvaFuture && prefab.MaleEvaFuture) {
+        Prefab.ExtractSuit(prefab.MaleIvaFuture.transform, FutureSuit);
+        Prefab.ExtractSuit(prefab.MaleEvaFuture.transform, FutureSuit);
+      }
 
       // These textures cannot be found on "prefab" models, we have to add them manually.
       foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>()) {
