@@ -75,15 +75,6 @@ namespace TextureReplacer
       }
     }
 
-    // Must be non-static or the event won't work.
-    private void OnHelmetChanged(KerbalEVA eva, bool hasHelmet, bool hasNeckRing)
-    {
-      var evaModule = eva.GetComponent<TREvaModule>();
-      if (evaModule) {
-        evaModule.OnHelmetChanged(hasHelmet);
-      }
-    }
-
     public void OnBeginFlight()
     {
       GameEvents.OnHelmetChanged.Add(OnHelmetChanged);
@@ -94,17 +85,25 @@ namespace TextureReplacer
       GameEvents.OnHelmetChanged.Remove(OnHelmetChanged);
     }
 
+    // Must be non-static or the event won't work.
+    private void OnHelmetChanged(KerbalEVA eva, bool hasHelmet, bool hasNeckRing)
+    {
+      var evaModule = eva.GetComponent<TREvaModule>();
+      if (evaModule) {
+        evaModule.OnHelmetChanged(hasHelmet);
+      }
+    }
+
     /// <summary>
     /// Replace textures on a Kerbal model.
     /// </summary>
     private void PersonaliseKerbal(Component component, ProtoCrewMember kerbal, bool isEva, bool useEvaSuit)
     {
       Transform transform = component.transform;
-      bool isStandardSuit = kerbal.suit == KerbalSuit.Default;
 
       // Prefabricated Vintage & Future IVA models are missing so they are instantiated anew every time. Hence, we have
       // to apply fixes to them and set fallback default textures.
-      bool isPrefabMissing = !isEva && !isStandardSuit;
+      bool isPrefabMissing = !isEva && kerbal.suit != KerbalSuit.Default;
 
       Appearance appearance = mapper.GetAppearance(kerbal);
 

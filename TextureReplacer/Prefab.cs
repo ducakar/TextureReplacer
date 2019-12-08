@@ -22,7 +22,6 @@
 
 using System.Linq;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace TextureReplacer
 {
@@ -45,7 +44,7 @@ namespace TextureReplacer
     public Part MaleEvaFuture;
     public Part FemaleEvaFuture;
 
-    private static readonly Log log = new Log(nameof(Replacer));
+    private static readonly Log log = new Log(nameof(Prefab));
 
     private bool logKerbalHierarchy;
 
@@ -109,29 +108,6 @@ namespace TextureReplacer
       }
     }
 
-    public void Unload()
-    {
-      if (MaleIvaVintage != null) {
-        Object.Destroy(MaleIvaVintage);
-        MaleIvaVintage = null;
-      }
-
-      if (FemaleIvaVintage != null) {
-        Object.Destroy(FemaleIvaVintage);
-        FemaleIvaVintage = null;
-      }
-
-      if (MaleIvaFuture != null) {
-        Object.Destroy(MaleIvaFuture);
-        MaleIvaFuture = null;
-      }
-
-      if (FemaleIvaFuture != null) {
-        Object.Destroy(FemaleIvaFuture);
-        FemaleIvaFuture = null;
-      }
-    }
-
     public static void ExtractSkin(Transform kerbal, Skin skin)
     {
       foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>()) {
@@ -148,6 +124,13 @@ namespace TextureReplacer
         var texture = smr.material.mainTexture as Texture2D;
         if (texture != null) {
           suit.SetTexture(texture.name, texture);
+        }
+
+        if (smr.material.HasProperty(Util.BumpMapProperty)) {
+          var normalMap = smr.material.GetTexture(Util.BumpMapProperty) as Texture2D;
+          if (normalMap != null) {
+            suit.SetTexture(normalMap.name, normalMap);
+          }
         }
       }
     }

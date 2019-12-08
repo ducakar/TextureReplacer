@@ -70,9 +70,6 @@ namespace TextureReplacer
       Reflections.Instance.Load();
       Personaliser.Instance.Load();
 
-      // We can unload prefabs here as they are only used in `Mapper.Load()` and `Replacer.Load()`.
-      Prefab.Instance.Unload();
-
       isLoaded = true;
     }
 

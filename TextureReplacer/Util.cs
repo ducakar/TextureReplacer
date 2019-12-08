@@ -174,56 +174,6 @@ namespace TextureReplacer
       using var fs = new FileStream(path, FileMode.Create);
       fs.Write(data, 0, data.Length);
     }
-
-    private static bool isDefaultVeteranIvaExported;
-    private static bool isDefaultIvaExported;
-    private static bool isDefaultEvaExported;
-    private static bool isVintageVeteranIvaExported;
-    private static bool isVintageIvaExported;
-    private static bool isVintageEvaExported;
-
-    public static void DumpSuitOnce(ProtoCrewMember kerbal, Texture texture, bool isEva, string dir)
-    {
-      if (isEva) {
-        if (kerbal.suit == ProtoCrewMember.KerbalSuit.Vintage) {
-          if (!isVintageEvaExported) {
-            DumpToPNG(texture, dir + "EVAtexture.vintage.png");
-            isVintageEvaExported = true;
-          }
-        } else {
-          if (!isDefaultEvaExported) {
-            DumpToPNG(texture, dir + "EVAtexture.png");
-            isDefaultEvaExported = true;
-          }
-        }
-      } else {
-        if (kerbal.suit == ProtoCrewMember.KerbalSuit.Vintage) {
-          if (kerbal.veteran) {
-            if (!isVintageVeteranIvaExported) {
-              DumpToPNG(texture, dir + "kerbalMain.vintage.png");
-              isVintageVeteranIvaExported = true;
-            }
-          } else {
-            if (!isVintageIvaExported) {
-              DumpToPNG(texture, dir + "kerbalMainGrey.vintage.png");
-              isVintageIvaExported = true;
-            }
-          }
-        } else {
-          if (kerbal.veteran) {
-            if (!isDefaultVeteranIvaExported) {
-              DumpToPNG(texture, dir + "kerbalMain.png");
-              isDefaultVeteranIvaExported = true;
-            }
-          } else {
-            if (!isDefaultIvaExported) {
-              DumpToPNG(texture, dir + "kerbalMainGrey.png");
-              isDefaultIvaExported = true;
-            }
-          }
-        }
-      }
-    }
 #endif
   }
 }

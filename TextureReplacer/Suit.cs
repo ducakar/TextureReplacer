@@ -96,6 +96,7 @@ namespace TextureReplacer
         }
         case "paleBlueSuite_diffuse":
         case "me_suit_difuse_low_polyBrown":
+        case "futureSuit_diffuse_whiteBlue":
         case "kerbalMainGrey": {
           for (int i = 0; i < IvaSuit.Length && IvaSuit[i] == null; ++i) {
             IvaSuit[i] = texture;
