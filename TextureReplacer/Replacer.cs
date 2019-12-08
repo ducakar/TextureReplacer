@@ -31,7 +31,8 @@ namespace TextureReplacer
   {
     public const string DefaultPrefix = "TextureReplacer/Default/";
     public static readonly Shader EyeShader = Shader.Find("Standard");
-    public static readonly Shader HeadShader = Shader.Find("Bumped Diffuse");
+    public static readonly Shader HeadShader = Shader.Find("Mobile/Diffuse");
+    public static readonly Shader BumpedHeadShader = Shader.Find("Bumped Diffuse");
 
     private const string NavBall = "NavBall";
     private static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
@@ -208,6 +209,7 @@ namespace TextureReplacer
       mappedTextures.TryGetValue("eyeballRight", out Texture2D eyeballRight);
       mappedTextures.TryGetValue("pupilLeft", out Texture2D pupilLeft);
       mappedTextures.TryGetValue("pupilRight", out Texture2D pupilRight);
+      mappedTextures.TryGetValue("kerbalHeadNRM", out Texture2D kerbalHeadNRM);
       mappedTextures.TryGetValue("kerbalVisor", out Texture2D ivaVisorTexture);
       mappedTextures.TryGetValue("EVAvisor", out Texture2D evaVisorTexture);
 
@@ -278,8 +280,8 @@ namespace TextureReplacer
             }
             case "headMesh01":
             case "headMesh02": {
-              // Replace with bump-mapped shader so normal maps for heads will work.
-              sharedMaterial.shader = HeadShader;
+              // Replace with bump-mapped shader, so normal maps for heads will work.
+              sharedMaterial.shader = kerbalHeadNRM == null ? HeadShader : BumpedHeadShader;
               headMaterial = sharedMaterial;
               break;
             }
@@ -363,8 +365,8 @@ namespace TextureReplacer
             }
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51": {
-              // Replace with bump-mapped shader so normal maps for heads will work.
-              sharedMaterial.shader = HeadShader;
+              // Replace with bump-mapped shader, so normal maps for heads will work.
+              sharedMaterial.shader = kerbalHeadNRM == null ? HeadShader : BumpedHeadShader;
               break;
             }
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":

@@ -218,8 +218,8 @@ namespace TextureReplacer
             newTexture = skin.PupilRight;
 
             if (isPrefabMissing) {
-              smr.material.shader = Replacer.EyeShader;
               newTexture ??= defaultSkin.PupilRight;
+              smr.material.shader = Replacer.EyeShader;
             }
 
             if (newTexture != null) {
@@ -236,9 +236,11 @@ namespace TextureReplacer
             newNormalMap = skin.HeadNRM;
 
             if (isPrefabMissing) {
-              smr.material.shader = Replacer.HeadShader;
               newTexture ??= defaultSkin.Head;
               newNormalMap ??= defaultSkin.HeadNRM;
+              smr.material.shader = newNormalMap == null ? Replacer.HeadShader : Replacer.BumpedHeadShader;
+            } else if (newNormalMap != null) {
+              smr.material.shader = Replacer.BumpedHeadShader;
             }
 
             break;
@@ -249,10 +251,10 @@ namespace TextureReplacer
           case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
           case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01": {
             if (isPrefabMissing) {
-              smr.material.shader = Replacer.HeadShader;
               // We use male head texture for teeth, since female texture mapping would map their hair to teeth.
               newTexture = mapper.DefaultSkin[0].Head;
               newNormalMap = mapper.DefaultSkin[0].Head;
+              smr.material.shader = newNormalMap == null ? Replacer.HeadShader : Replacer.BumpedHeadShader;
             }
 
             break;
@@ -286,7 +288,6 @@ namespace TextureReplacer
           case "mesh_female_kerbalAstronaut01_visor": {
             // Visor texture has to be replaced every time.
             newTexture = suit.GetVisor(useEvaSuit);
-
             if (newTexture != null) {
               smr.material.color = Color.white;
             }
@@ -296,7 +297,6 @@ namespace TextureReplacer
           default: { // Jetpack.
             if (isEva) {
               smr.enabled = useEvaSuit;
-
               if (useEvaSuit) {
                 newTexture = suit.EvaJetpack;
                 newNormalMap = suit.EvaJetpackNRM;
