@@ -58,6 +58,7 @@ namespace TextureReplacer
         envMap = new RenderTexture(reflectionResolution, reflectionResolution, 24) {
           hideFlags = HideFlags.HideAndDontSave, wrapMode = TextureWrapMode.Clamp, dimension = TextureDimension.Cube
         };
+
         transform = part.transform;
         isEva = part.GetComponent<KerbalEVA>() != null;
 
@@ -87,6 +88,12 @@ namespace TextureReplacer
         Scripts.Add(this);
       }
 
+      public void Destroy()
+      {
+        Scripts.Remove(this);
+        Object.DestroyImmediate(envMap);
+      }
+
       public bool Apply(Material material, Shader shader, Color reflectionColour)
       {
         Shader reflectiveShader = shader ? shader : Instance.ToReflective(material.shader);
@@ -97,50 +104,8 @@ namespace TextureReplacer
           material.SetColor(Util.ReflectColorProperty, reflectionColour);
           return true;
         }
+
         return false;
-      }
-
-      public void Destroy()
-      {
-        Scripts.Remove(this);
-        Object.DestroyImmediate(envMap);
-      }
-
-      private void Update(bool force)
-      {
-        int faceMask = force ? 0x3f : 1 << currentFace;
-
-        // Hide all meshes of the current part.
-        for (int i = 0; i < meshes.Length; ++i) {
-          meshStates[i] = meshes[i].enabled;
-          meshes[i].enabled = false;
-        }
-
-        // Skybox.
-        camera.transform.position = GalaxyCubeControl.Instance.transform.position;
-        camera.farClipPlane = 100.0f;
-        camera.cullingMask = 1 << 18;
-        camera.RenderToCubemap(envMap, faceMask);
-
-        // Scaled space.
-        camera.transform.position = ScaledSpace.Instance.transform.position;
-        camera.farClipPlane = 3.0e7f;
-        camera.cullingMask = (1 << 10) | (1 << 23);
-        camera.RenderToCubemap(envMap, faceMask);
-
-        // Scene.
-        Vector3 pos = transform.position;
-        camera.transform.position = isEva ? pos + 0.4f * transform.up : pos;
-        camera.farClipPlane = 60000.0f;
-        camera.cullingMask = (1 << 0) | (1 << 1) | (1 << 5) | (1 << 15) | (1 << 17);
-        camera.RenderToCubemap(envMap, faceMask);
-
-        // Restore mesh visibility.
-        for (int i = 0; i < meshes.Length; ++i) {
-          meshes[i].enabled = meshStates[i];
-        }
-
-        currentFace = (currentFace + 1) % 6;
       }
 
       public void SetActive(bool value)
@@ -148,6 +113,7 @@ namespace TextureReplacer
         if (!isActive && value) {
           Update(true);
         }
+
         isActive = value;
       }
 
@@ -174,7 +140,54 @@ namespace TextureReplacer
           }
         } while (currentScript != startScript);
       }
+
+      private void Update(bool force)
+      {
+        int faceMask = force ? 0x3f : 1 << currentFace;
+
+        // Hide all meshes of the current part.
+        for (int i = 0; i < meshes.Length; ++i) {
+          meshStates[i] = meshes[i].enabled;
+          meshes[i].enabled = false;
+        }
+
+        Transform cameraTransform = camera.transform;
+
+        // Skybox.
+        cameraTransform.position = GalaxyCubeControl.Instance.transform.position;
+        camera.farClipPlane = 100.0f;
+        camera.cullingMask = 1 << 18;
+        camera.RenderToCubemap(envMap, faceMask);
+
+        // Scaled space.
+        cameraTransform.position = ScaledSpace.Instance.transform.position;
+        camera.farClipPlane = 3.0e7f;
+        camera.cullingMask = (1 << 10) | (1 << 23);
+        camera.RenderToCubemap(envMap, faceMask);
+
+        // Scene.
+        Vector3 pos = transform.position;
+        cameraTransform.position = isEva ? pos + 0.4f * transform.up : pos;
+        camera.farClipPlane = 60000.0f;
+        camera.cullingMask = (1 << 0) | (1 << 1) | (1 << 5) | (1 << 15) | (1 << 17);
+        camera.RenderToCubemap(envMap, faceMask);
+
+        // Restore mesh visibility.
+        for (int i = 0; i < meshes.Length; ++i) {
+          meshes[i].enabled = meshStates[i];
+        }
+
+        currentFace = (currentFace + 1) % 6;
+      }
     }
+
+    // Instance.
+    public static Reflections Instance { get; private set; }
+
+    // Visor reflection feature.
+    public bool IsVisorReflectionEnabled { get; private set; }
+    // Print names of meshes and their shaders in parts with TRReflection module.
+    public bool LogReflectiveMeshes { get; private set; }
 
     private static readonly Log log = new Log(nameof(Reflections));
     // Reflective shader map.
@@ -214,37 +227,9 @@ namespace TextureReplacer
     private static Type globalReflectionType = Type.Real;
     // Reflection colour.
     private static Color visorReflectionColour = Color.white;
-    // Visor reflection feature.
-    public bool IsVisorReflectionEnabled { get; private set; }
-    // Print names of meshes and their shaders in parts with TRReflection module.
-    public bool LogReflectiveMeshes { get; private set; }
+
     // Reflective visor shader.
     private Shader visorShader;
-    // Instance.
-    public static Reflections Instance { get; private set; }
-
-    private static void EnsureCamera()
-    {
-      if (camera != null) {
-        return;
-      }
-
-      camera = new GameObject("TRReflectionCamera", typeof(Camera)).GetComponent<Camera>();
-      camera.enabled = false;
-      camera.clearFlags = CameraClearFlags.Depth;
-      // Any smaller number and visors will reflect internals of helmets.
-      camera.nearClipPlane = 0.125f;
-      camera.layerCullDistances = CullDistances;
-    }
-
-    /**
-     * Get reflective version of a shader.
-     */
-    private Shader ToReflective(Shader shader)
-    {
-      shaderMap.TryGetValue(shader, out Shader newShader);
-      return newShader;
-    }
 
     public static void Recreate()
     {
@@ -283,6 +268,7 @@ namespace TextureReplacer
         RuntimePlatform.OSXPlayer     => "shaders.osx",
         _                             => "shaders.linux"
       };
+
       string shadersPath = IOUtils.GetFilePathFor(GetType(), shadersFileName);
 
       AssetBundle shadersBundle = null;
@@ -320,16 +306,6 @@ namespace TextureReplacer
       }
     }
 
-    public void Destroy()
-    {
-      if (camera != null) {
-        Object.DestroyImmediate(camera.gameObject);
-      }
-      if (visorShader != null) {
-        Object.DestroyImmediate(visorShader);
-      }
-    }
-
     public void OnLoadScenario(ConfigNode node)
     {
       Type type = globalReflectionType;
@@ -340,6 +316,40 @@ namespace TextureReplacer
     public void OnSaveScenario(ConfigNode node)
     {
       node.AddValue("reflectionType", ReflectionType);
+    }
+
+    private void Destroy()
+    {
+      if (camera != null) {
+        Object.DestroyImmediate(camera.gameObject);
+      }
+
+      if (visorShader != null) {
+        Object.DestroyImmediate(visorShader);
+      }
+    }
+
+    private static void EnsureCamera()
+    {
+      if (camera != null) {
+        return;
+      }
+
+      camera = new GameObject("TRReflectionCamera", typeof(Camera)).GetComponent<Camera>();
+      camera.enabled = false;
+      camera.clearFlags = CameraClearFlags.Depth;
+      // Any smaller number and visors will reflect internals of helmets.
+      camera.nearClipPlane = 0.125f;
+      camera.layerCullDistances = CullDistances;
+    }
+
+    /**
+     * Get reflective version of a shader.
+     */
+    private Shader ToReflective(Shader shader)
+    {
+      shaderMap.TryGetValue(shader, out Shader newShader);
+      return newShader;
     }
   }
 }
