@@ -120,6 +120,11 @@ namespace TextureReplacer
         _                                         => transform.Find("model01")
       };
 
+      // Sometimes when we switch between suits (e.g. with clothes hanger) suit kind and model get out of sync.
+      // Just try all possible nodes in such cases.
+      modelTransform ??= transform.Find("model01") ?? transform.Find("kbIVA@idle/model01") ??
+                         transform.Find("serenityMaleIVA/model01") ?? transform.Find("serenityFemaleIVA/model01");
+
       if (isEva) {
         Transform flag = transform.Find("model/kbEVA_flagDecals");
         Transform parachute = transform.Find("model/EVAparachute/base");
