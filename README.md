@@ -275,6 +275,8 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
   - add support for "future" (Breaking Ground) suits
   - add suit directory suffixes: directories containing vintage or future suits
     must have ".vintage" or ".future" suffix, respectively
+  - rename `hideParachuteBackpack` setting to `hideBackpack` as it hides both
+    parachute and cargo backpacks now
   - re-add normal map support for heads
   - fix default vintage IVA suits
   - fix default texture fallbacks on models with vintage suits

@@ -126,11 +126,18 @@ namespace TextureReplacer
                          transform.Find("serenityMaleIVA/model01") ?? transform.Find("serenityFemaleIVA/model01");
 
       if (isEva) {
+        bool showJetpack = useEvaSuit;
+        bool showBackpack = showJetpack && !mapper.HideBackpack;
+
         Transform flag = transform.Find("model/kbEVA_flagDecals");
+        Transform cargo = transform.Find(kerbal.suit == KerbalSuit.Future
+          ? "model/kerbalCargoContainerPack/base"
+          : "model/EVABackpack/kerbalCargoContainerPack/base");
         Transform parachute = transform.Find("model/EVAparachute/base");
 
-        flag.GetComponent<Renderer>().enabled = useEvaSuit;
-        parachute.GetComponent<Renderer>().enabled = useEvaSuit && !mapper.HideParachuteBackpack;
+        flag.GetComponent<Renderer>().enabled = showJetpack;
+        cargo.GetComponent<Renderer>().enabled = showBackpack;
+        parachute.GetComponent<Renderer>().enabled = showBackpack;
       }
 
       // We determine body and helmet texture here to avoid code duplication between suit and helmet cases in the

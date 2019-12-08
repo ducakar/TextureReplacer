@@ -63,8 +63,8 @@ namespace TextureReplacer
     // game doesn't contain `TRScenario`.
     private readonly ConfigNode customKerbalsNode = new ConfigNode();
 
-    private bool globalHideParachuteBackpack;
-    public bool HideParachuteBackpack { get; set; }
+    private bool globalHideBackpack;
+    public bool HideBackpack { get; set; }
 
     public static void Recreate()
     {
@@ -76,7 +76,7 @@ namespace TextureReplacer
     /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
-      Util.Parse(rootNode.GetValue("hideParachuteBackpack"), ref globalHideParachuteBackpack);
+      Util.Parse(rootNode.GetValue("hideBackpack"), ref globalHideBackpack);
     }
 
     /// <summary>
@@ -104,16 +104,18 @@ namespace TextureReplacer
     {
       gameKerbals.Clear();
       ClassSuits.Clear();
-      bool hideParachuteBackpack = globalHideParachuteBackpack;
-      Util.Parse(node.GetValue("hideParachuteBackpack"), ref hideParachuteBackpack);
-      HideParachuteBackpack = hideParachuteBackpack;
+      bool hideParachuteBackpack = globalHideBackpack;
+      Util.Parse(node.GetValue("hideBackpack"), ref hideParachuteBackpack);
+      HideBackpack = hideParachuteBackpack;
       LoadKerbalsMap(node.GetNode("Kerbals"));
       LoadClassSuitMap(node.GetNode("ClassSuits"), ClassSuits);
     }
 
     public void OnSaveScenario(ConfigNode node)
     {
-      node.AddValue("hideParachuteBackpack", HideParachuteBackpack);
+      node.ClearNodes();
+
+      node.AddValue("hideBackpack", HideBackpack);
       SaveKerbals(node.AddNode("Kerbals"));
       SaveClassSuitMap(node.AddNode("ClassSuits"));
     }

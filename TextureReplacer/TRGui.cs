@@ -356,12 +356,12 @@ namespace TextureReplacer
       GUILayout.Space(5);
 
       bool enableReflections = reflections.ReflectionType == Reflections.Type.Real;
-      enableReflections = GUILayout.Toggle(enableReflections, "Enable real-time reflections for visors and parts");
+      enableReflections = GUILayout.Toggle(enableReflections, "Enable real-time reflections");
       reflections.ReflectionType = enableReflections ? Reflections.Type.Real : Reflections.Type.None;
 
-      bool hideParachuteBackpack = mapper.HideParachuteBackpack;
-      hideParachuteBackpack = GUILayout.Toggle(hideParachuteBackpack, "Hide parachute backpack");
-      mapper.HideParachuteBackpack = hideParachuteBackpack;
+      bool hideBackpack = mapper.HideBackpack;
+      hideBackpack = GUILayout.Toggle(hideBackpack, "Hide parachute/cargo backpack");
+      mapper.HideBackpack = hideBackpack;
 
       GUILayout.EndVertical();
       GUI.DragWindow(new Rect(0, 0, Screen.width, 30));
