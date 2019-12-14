@@ -3,8 +3,8 @@
   "URL": "https://raw.githubusercontent.com/ducakar/TextureReplacer/master/GameData/TextureReplacer/TextureReplacer.version",
   "DOWNLOAD": "http://kerbal.curseforge.com/projects/texturereplacer",
   "VERSION": {
-    "MAJOR": 3,
-    "MINOR": 8,
+    "MAJOR": 4,
+    "MINOR": 0,
     "PATCH": 0,
     "BUILD": 0
   },

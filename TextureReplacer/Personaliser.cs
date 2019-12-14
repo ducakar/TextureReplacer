@@ -125,21 +125,6 @@ namespace TextureReplacer
       modelTransform ??= transform.Find("model01") ?? transform.Find("kbIVA@idle/model01") ??
                          transform.Find("serenityMaleIVA/model01") ?? transform.Find("serenityFemaleIVA/model01");
 
-      if (isEva) {
-        bool showJetpack = useEvaSuit;
-        bool showBackpack = showJetpack && !mapper.HideBackpack;
-
-        Transform flag = transform.Find("model/kbEVA_flagDecals");
-        Transform cargo = transform.Find(kerbal.suit == KerbalSuit.Future
-          ? "model/kerbalCargoContainerPack/base"
-          : "model/EVABackpack/kerbalCargoContainerPack/base");
-        Transform parachute = transform.Find("model/EVAparachute/base");
-
-        flag.GetComponent<Renderer>().enabled = showJetpack;
-        cargo.GetComponent<Renderer>().enabled = showBackpack;
-        parachute.GetComponent<Renderer>().enabled = showBackpack;
-      }
-
       // We determine body and helmet texture here to avoid code duplication between suit and helmet cases in the
       // following switch.
       // Setting the suit explicitly -- even when default -- is necessary for two reasons: to fix IVA suits after KSP
@@ -148,24 +133,24 @@ namespace TextureReplacer
       Texture2D suitTexture = suit.GetSuit(useEvaSuit, kerbal) ?? defaultSuit.GetSuit(useEvaSuit, kerbal);
       Texture2D suitNormalMap = suit.GetSuitNRM(useEvaSuit) ?? defaultSuit.GetSuitNRM(useEvaSuit);
 
-      // We must include hidden meshes, since flares are hidden when light is turned off.
-      // All other meshes are always visible, so no performance hit here.
-      foreach (Renderer renderer in modelTransform.GetComponentsInChildren<Renderer>(true)) {
+      foreach (Renderer renderer in modelTransform.GetComponentsInChildren<Renderer>()) {
         var smr = renderer as SkinnedMeshRenderer;
 
         // Headlight flares and thruster jets.
         if (smr == null) {
-          renderer.enabled = useEvaSuit;
           continue;
         }
 
+        Material material = smr.material;
+
         Texture2D newTexture = null;
         Texture2D newNormalMap = null;
+        Texture2D newEmissive = null;
 
         switch (smr.name) {
           case "eyeballLeft":
           case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft": {
-            if (skin.IsEyeless) {
+            if (skin.Eyeless) {
               smr.sharedMesh = null;
               break;
             }
@@ -173,15 +158,14 @@ namespace TextureReplacer
             newTexture = skin.EyeballLeft;
 
             if (isPrefabMissing) {
-              smr.material.shader = Replacer.EyeShader;
+              material.shader = Replacer.EyeShader;
               newTexture ??= defaultSkin.EyeballLeft;
             }
-
             break;
           }
           case "eyeballRight":
           case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight": {
-            if (skin.IsEyeless) {
+            if (skin.Eyeless) {
               smr.sharedMesh = null;
               break;
             }
@@ -189,15 +173,14 @@ namespace TextureReplacer
             newTexture = skin.EyeballRight;
 
             if (isPrefabMissing) {
-              smr.material.shader = Replacer.EyeShader;
+              material.shader = Replacer.EyeShader;
               newTexture ??= defaultSkin.EyeballRight;
             }
-
             break;
           }
           case "pupilLeft":
           case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft": {
-            if (skin.IsEyeless) {
+            if (skin.Eyeless) {
               smr.sharedMesh = null;
               break;
             }
@@ -205,19 +188,17 @@ namespace TextureReplacer
             newTexture = skin.PupilLeft;
 
             if (isPrefabMissing) {
-              smr.material.shader = Replacer.EyeShader;
+              material.shader = Replacer.EyeShader;
               newTexture ??= defaultSkin.PupilLeft;
             }
-
             if (newTexture != null) {
-              smr.material.color = Color.white;
+              material.color = Color.white;
             }
-
             break;
           }
           case "pupilRight":
           case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight": {
-            if (skin.IsEyeless) {
+            if (skin.Eyeless) {
               smr.sharedMesh = null;
               break;
             }
@@ -226,13 +207,11 @@ namespace TextureReplacer
 
             if (isPrefabMissing) {
               newTexture ??= defaultSkin.PupilRight;
-              smr.material.shader = Replacer.EyeShader;
+              material.shader = Replacer.EyeShader;
             }
-
             if (newTexture != null) {
-              smr.material.color = Color.white;
+              material.color = Color.white;
             }
-
             break;
           }
           case "headMesh01":
@@ -245,11 +224,10 @@ namespace TextureReplacer
             if (isPrefabMissing) {
               newTexture ??= defaultSkin.Head;
               newNormalMap ??= defaultSkin.HeadNRM;
-              smr.material.shader = newNormalMap == null ? Replacer.HeadShader : Replacer.BumpedHeadShader;
+              material.shader = newNormalMap == null ? Replacer.HeadShader : Replacer.BumpedHeadShader;
             } else if (newNormalMap != null) {
-              smr.material.shader = Replacer.BumpedHeadShader;
+              material.shader = Replacer.BumpedHeadShader;
             }
-
             break;
           }
           case "tongue":
@@ -261,9 +239,8 @@ namespace TextureReplacer
               // We use male head texture for teeth, since female texture mapping would map their hair to teeth.
               newTexture = mapper.DefaultSkin[0].Head;
               newNormalMap = mapper.DefaultSkin[0].Head;
-              smr.material.shader = newNormalMap == null ? Replacer.HeadShader : Replacer.BumpedHeadShader;
+              material.shader = newNormalMap == null ? Replacer.HeadShader : Replacer.BumpedHeadShader;
             }
-
             break;
           }
           case "body01":
@@ -277,12 +254,15 @@ namespace TextureReplacer
               kerbalIva.textureStandard = newTexture;
               kerbalIva.textureVeteran = newTexture;
             }
-
             break;
           }
           case "neckRing": {
-            newTexture = suitTexture;
-            newNormalMap = suitNormalMap;
+            if (isEva) {
+              newTexture = suitTexture;
+              newNormalMap = suitNormalMap;
+            } else {
+              smr.gameObject.DestroyGameObjectImmediate();
+            }
             break;
           }
           case "helmet":
@@ -296,30 +276,79 @@ namespace TextureReplacer
             // Visor texture has to be replaced every time.
             newTexture = suit.GetVisor(useEvaSuit);
             if (newTexture != null) {
-              smr.material.color = Color.white;
+              material.color = Color.white;
             }
-
             break;
           }
           default: { // Jetpack.
             if (isEva) {
               smr.enabled = useEvaSuit;
               if (useEvaSuit) {
-                newTexture = suit.EvaJetpack;
-                newNormalMap = suit.EvaJetpackNRM;
+                newTexture = suit.Jetpack;
+                newNormalMap = suit.JetpackNRM;
+                newEmissive = suit.JetpackEmissive;
               }
             }
-
             break;
           }
         }
 
         if (newTexture != null) {
-          smr.material.mainTexture = newTexture;
+          material.mainTexture = newTexture;
+        }
+        if (newNormalMap != null) {
+          material.SetTexture(Util.BumpMapProperty, newNormalMap);
+        }
+        if (newEmissive != null) {
+          material.SetTexture(Util.EmissiveProperty, newEmissive);
+        }
+      }
+
+      // Backpacks and parachute are positioned on another node in model hierarchy.
+      if (isEva) {
+        bool showJetpack = useEvaSuit;
+        bool showBackpack = showJetpack && !mapper.HideBackpack;
+
+        Transform flagTransform = transform.Find("model/kbEVA_flagDecals");
+        Transform cargoPackTransform = transform.Find(kerbal.suit == KerbalSuit.Future
+          ? "model/kerbalCargoContainerPack/base"
+          : "model/EVABackpack/kerbalCargoContainerPack/base");
+        Transform parachutePackTransform = transform.Find("model/EVAparachute/base");
+        Transform parachuteCanopyTransform = transform.Find("model/EVAparachute/canopyrot/canopy");
+
+        var flag = flagTransform.GetComponent<Renderer>();
+        var cargoPack = cargoPackTransform.GetComponent<Renderer>();
+        var parachutePack = parachutePackTransform.GetComponent<Renderer>();
+        var parachuteCanopy = parachuteCanopyTransform.GetComponent<Renderer>();
+
+        flag.enabled = showJetpack;
+        cargoPack.enabled = showBackpack;
+        parachutePack.enabled = showBackpack;
+
+        if (showBackpack) {
+          if (suit.CargoPack != null) {
+            cargoPack.material.mainTexture = suit.CargoPack;
+          }
+          if (suit.CargoPackNRM != null) {
+            cargoPack.material.SetTexture(Util.BumpMapProperty, suit.CargoPackNRM);
+          }
+          if (suit.CargoPackEmissive != null) {
+            cargoPack.material.SetTexture(Util.EmissiveProperty, suit.CargoPackEmissive);
+          }
+
+          if (suit.ParachutePack != null) {
+            parachutePack.material.mainTexture = suit.ParachutePack;
+          }
+          if (suit.ParachutePackNRM != null) {
+            parachutePack.material.SetTexture(Util.BumpMapProperty, suit.ParachutePackNRM);
+          }
         }
 
-        if (newNormalMap != null) {
-          smr.material.SetTexture(Util.BumpMapProperty, newNormalMap);
+        if (suit.ParachuteCanopy != null) {
+          parachuteCanopy.material.mainTexture = suit.ParachuteCanopy;
+        }
+        if (suit.ParachuteCanopyNRM != null) {
+          parachuteCanopy.material.SetTexture(Util.BumpMapProperty, suit.ParachuteCanopyNRM);
         }
       }
     }

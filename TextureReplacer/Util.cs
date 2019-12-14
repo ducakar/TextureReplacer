@@ -20,29 +20,25 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-//#define TR_ENABLE_TEXTURE_EXPORTING
-
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-
-#if TR_ENABLE_TEXTURE_EXPORTING
-using System.IO;
-#endif
+using File = KSP.IO.File;
+using FileStream = KSP.IO.FileStream;
 
 namespace TextureReplacer
 {
   internal static class Util
   {
-    private static readonly char[] ConfigDelimiters = {' ', '\t', ','};
-
     public const string Directory = "TextureReplacer/";
     public static readonly int MainTexProperty = Shader.PropertyToID("_MainTex");
     public static readonly int MainTextureProperty = Shader.PropertyToID("_MainTexture");
     public static readonly int BumpMapProperty = Shader.PropertyToID("_BumpMap");
+    public static readonly int EmissiveProperty = Shader.PropertyToID("_Emissive");
     public static readonly int CubeProperty = Shader.PropertyToID("_Cube");
     public static readonly int ReflectColorProperty = Shader.PropertyToID("_ReflectColor");
     public static readonly System.Random Random = new System.Random();
+
+    private static readonly char[] ConfigDelimiters = {' ', '\t', ','};
 
     /// <summary>
     /// Split a space- and/or comma-separated configuration file value into its tokens.
@@ -92,44 +88,19 @@ namespace TextureReplacer
     }
 
     /// <summary>
-    /// Add all space-or-comma-separated values from listStrings to jointList.
+    /// True, iff a given char is encountered after the last dot (the the extension). False if there is no extension.
     /// </summary>
-    public static void JoinLists(IEnumerable<string> listStrings, ICollection<string> jointList)
+    public static bool HasSuffix(string s, char c)
     {
-      foreach (string listString in listStrings) {
-        foreach (string item in SplitConfigValue(listString)) {
-          if (!jointList.Contains(item)) {
-            jointList.Add(item);
-          }
+      bool flag = false;
+      for (int i = s.Length - 1; i >= 0; --i) {
+        if (s[i] == c) {
+          flag = true;
+        } else if (s[i] == '.') {
+          return flag;
         }
       }
-    }
-
-    /// <summary>
-    /// Print transform node with its attached objects.
-    /// </summary>
-    private static void LogTransform(Transform tf, string indent = "")
-    {
-      if (tf.gameObject != null) {
-        Debug.Log(indent + "* " + tf.gameObject.name + ": " + tf.gameObject.GetType());
-      }
-
-      foreach (Component c in tf.GetComponents<Component>()) {
-        Debug.Log(indent + " - " + c);
-
-        if (c is Renderer r) {
-          Debug.Log(indent + "   material: " + r.material.name);
-          Debug.Log(indent + "   shader:   " + r.material.shader);
-
-          if (r.material.HasProperty(MainTexProperty)) {
-            Debug.Log(indent + "   mainTex:  " + r.material.GetTexture(MainTexProperty));
-          }
-
-          if (r.material.HasProperty(BumpMapProperty)) {
-            Debug.Log(indent + "   bumpMap:  " + r.material.GetTexture(BumpMapProperty));
-          }
-        }
-      }
+      return false;
     }
 
     /// <summary>
@@ -144,22 +115,33 @@ namespace TextureReplacer
       }
     }
 
-#if TR_ENABLE_TEXTURE_EXPORTING
-    // Development utilities.
     /// <summary>
-    /// Print hierarchy from a transform up to the root.
+    /// Print transform node with its attached objects.
     /// </summary>
-    public static void LogUpHierarchy(Transform tf, string indent = "")
+    private static void LogTransform(Component tf, string indent = "")
     {
-      for (; tf != null; tf = tf.parent) {
-        LogTransform(tf, indent);
+      if (tf.gameObject != null) {
+        Debug.Log($"{indent}* {tf.gameObject}");
+      }
+
+      foreach (Component c in tf.GetComponents<Component>()) {
+        Debug.Log($"{indent} - {c}");
+
+        if (c is Renderer r) {
+          Debug.Log($"{indent}   material: {r.material.name}");
+          Debug.Log($"{indent}   shader:   {r.material.shader}");
+
+          foreach (string name in r.material.GetTexturePropertyNames()) {
+            Debug.Log($"{indent}   {name}: {r.material.GetTexture(name)}");
+          }
+        }
       }
     }
 
     /// <summary>
     /// Export any texture (even if not loaded in RAM) as a PNG.
     /// </summary>
-    public static void DumpToPNG(Texture texture, string path)
+    public static void DumpToPng(Texture texture)
     {
       var targetTex = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
       var renderTex = new RenderTexture(texture.width, texture.height, 32);
@@ -171,9 +153,10 @@ namespace TextureReplacer
       RenderTexture.active = originalRenderTex;
 
       byte[] data = targetTex.EncodeToPNG();
-      using var fs = new FileStream(path, FileMode.Create);
+
+      string path = $"Export/{texture.name}.png";
+      using FileStream fs = File.Create<TRActivator>(path);
       fs.Write(data, 0, data.Length);
     }
-#endif
   }
 }

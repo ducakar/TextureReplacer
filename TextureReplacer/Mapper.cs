@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Gender = ProtoCrewMember.Gender;
 using KerbalSuit = ProtoCrewMember.KerbalSuit;
 
 namespace TextureReplacer
@@ -35,10 +34,10 @@ namespace TextureReplacer
     public static Mapper Instance { get; private set; }
 
     // Default textures (from `Default/`).
-    public readonly Skin[] DefaultSkin = {new Skin("DEFAULT"), new Skin("DEFAULT")};
+    public readonly Skin[] DefaultSkin = {new Skin("DEFAULT.m"), new Skin("DEFAULT.f")};
     public readonly Suit DefaultSuit = new Suit("DEFAULT");
-    public readonly Suit VintageSuit = new Suit("VINTAGE");
-    public readonly Suit FutureSuit = new Suit("FUTURE");
+    public readonly Suit VintageSuit = new Suit("DEFAULT.V");
+    public readonly Suit FutureSuit = new Suit("DEFAULT.F");
 
     // All Kerbal textures, including excluded by configuration.
     public readonly List<Skin> Skins = new List<Skin>();
@@ -52,9 +51,6 @@ namespace TextureReplacer
 
     private static readonly Log log = new Log(nameof(Mapper));
 
-    // Male/female textures (minus excluded).
-    private readonly List<Skin>[] kerbalSkins = {new List<Skin>(), new List<Skin>()};
-    private readonly List<Suit> kerbalSuits = new List<Suit>();
     // Personalised Kerbal textures.
     private readonly Dictionary<string, Appearance> gameKerbals = new Dictionary<string, Appearance>();
     // Global class suits.
@@ -89,8 +85,9 @@ namespace TextureReplacer
       ReadKerbalsConfigs();
 
       // Re-read scenario if database is reloaded during the space centre scene to avoid losing all per-game settings.
-      if (HighLogic.CurrentGame == null)
+      if (HighLogic.CurrentGame == null) {
         return;
+      }
 
       ConfigNode scenarioNode = HighLogic.CurrentGame.config.GetNodes("SCENARIO")
         .FirstOrDefault(n => n.GetValue("name") == "TRScenario");
@@ -134,11 +131,12 @@ namespace TextureReplacer
     /// </summary>
     public Appearance GetAppearance(ProtoCrewMember kerbal)
     {
-      if (!gameKerbals.TryGetValue(kerbal.name, out Appearance appearance)) {
-        appearance = new Appearance {Hash = kerbal.name.GetHashCode()};
-        gameKerbals.Add(kerbal.name, appearance);
+      if (gameKerbals.TryGetValue(kerbal.name, out Appearance appearance)) {
+        return appearance;
       }
 
+      appearance = new Appearance {Hash = kerbal.name.GetHashCode()};
+      gameKerbals.Add(kerbal.name, appearance);
       return appearance;
     }
 
@@ -165,15 +163,15 @@ namespace TextureReplacer
         return appearance.Skin;
       }
 
-      List<Skin> genderSkins = kerbalSkins[(int) kerbal.gender];
-      if (genderSkins.Count == 0) {
+      IList<Skin> availableSkins = GetAvailableSkins(kerbal, false);
+      if (availableSkins.Count == 0) {
         return DefaultSkin[(int) kerbal.gender];
       }
 
       // Hash is multiplied with a large prime to increase randomisation, since hashes returned by `GetHashCode()` are
       // close together if strings only differ in the last (few) char(s).
       int number = (appearance.Hash * 4099) & 0x7fffffff;
-      return genderSkins[number % genderSkins.Count];
+      return availableSkins[number % availableSkins.Count];
     }
 
     /// <summary>
@@ -188,21 +186,36 @@ namespace TextureReplacer
         return suit;
       }
 
-      List<Suit> genderSuits = kerbalSuits.Where(s => s.Kind == kerbal.suit && s.Gender == kerbal.gender).ToList();
-      if (genderSuits.Count == 0) {
+      IList<Suit> availableSuits = GetAvailableSuits(kerbal, false);
+      if (availableSuits.Count == 0) {
         return GetDefaultSuit(kerbal);
       }
 
       // We must use a different prime here to increase randomisation so that the same skin is not always combined with
       // the same suit.
       int number = (appearance.Hash * 2053) & 0x7fffffff;
-      return genderSuits[number % genderSuits.Count];
+      return availableSuits[number % availableSuits.Count];
     }
 
     private Suit GetClassSuit(ProtoCrewMember kerbal)
     {
       ClassSuits.TryGetValue(kerbal.experienceTrait.Config.Name, out Suit suit);
       return suit;
+    }
+
+    public IList<Skin> GetAvailableSkins(ProtoCrewMember kerbal, bool allowExcluded)
+    {
+      return (allowExcluded
+        ? Skins.Where(s => s.Gender == kerbal.gender)
+        : Skins.Where(s => !s.Excluded && s.Gender == kerbal.gender)).ToList();
+    }
+
+    public IList<Suit> GetAvailableSuits(ProtoCrewMember kerbal, bool allowExcluded)
+    {
+      return (allowExcluded
+          ? Suits.Where(s => s.Kind == kerbal.suit && (s.Gender == null || s.Gender == kerbal.gender))
+          : Suits.Where(s => !s.Excluded && s.Kind == kerbal.suit && (s.Gender == null || s.Gender == kerbal.gender)))
+        .ToList();
     }
 
     /// <summary>
@@ -237,12 +250,12 @@ namespace TextureReplacer
             _         => Skins.Find(h => h.Name == skinName)
           },
           Suit = suitName switch {
-            null      => null,
-            "GENERIC" => null,
-            "DEFAULT" => GetDefaultSuit(kerbal),
-            "VINTAGE" => GetDefaultSuit(kerbal),
-            "FUTURE"  => GetDefaultSuit(kerbal),
-            _         => Suits.Find(s => s.Name == suitName)
+            null        => null,
+            "GENERIC"   => null,
+            "DEFAULT"   => GetDefaultSuit(kerbal),
+            "DEFAULT.V" => GetDefaultSuit(kerbal),
+            "DEFAULT.F" => GetDefaultSuit(kerbal),
+            _           => Suits.Find(s => s.Name == suitName)
           }
         };
       }
@@ -293,11 +306,11 @@ namespace TextureReplacer
               map[entry.name] = DefaultSuit;
               break;
             }
-            case "VINTAGE": {
+            case "DEFAULT.V": {
               map[entry.name] = VintageSuit;
               break;
             }
-            case "FUTURE": {
+            case "DEFAULT.F": {
               map[entry.name] = FutureSuit;
               break;
             }
@@ -306,7 +319,6 @@ namespace TextureReplacer
               if (suit != null) {
                 map[entry.name] = suit;
               }
-
               break;
             }
           }
@@ -349,15 +361,18 @@ namespace TextureReplacer
       // These textures cannot be found on "prefab" models, we have to add them manually.
       foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>()) {
         switch (texture.name) {
-          case "paleBlueSuite_diffuse":
+          case "paleBlueSuite_diffuse": {
             DefaultSuit.SetTexture(texture.name, texture);
             break;
-          case "me_suit_difuse_low_polyBrown":
+          }
+          case "me_suit_difuse_low_polyBrown": {
             VintageSuit.SetTexture(texture.name, texture);
             break;
-          case "futureSuit_diffuse_whiteOrange":
+          }
+          case "futureSuit_diffuse_whiteOrange": {
             FutureSuit.SetTexture(texture.name, texture);
             break;
+          }
         }
       }
 
@@ -437,7 +452,6 @@ namespace TextureReplacer
               if (DefaultSuit.SetTexture(textureBaseName, texture)) {
                 texture.wrapMode = TextureWrapMode.Clamp;
               }
-
               break;
             }
           }
@@ -450,11 +464,6 @@ namespace TextureReplacer
     /// </summary>
     private void ReadKerbalsConfigs()
     {
-      var excludedSkins = new List<string>();
-      var excludedSuits = new List<string>();
-      var femaleSuits = new List<string>();
-      var eyelessSkins = new List<string>();
-
       foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer")) {
         ConfigNode customNode = file.config.GetNode("CustomKerbals");
         if (customNode != null) {
@@ -465,41 +474,15 @@ namespace TextureReplacer
           }
         }
 
-        ConfigNode genericNode = file.config.GetNode("GenericKerbals");
-        if (genericNode != null) {
-          Util.JoinLists(genericNode.GetValues("excludedSkins"), excludedSkins);
-          Util.JoinLists(genericNode.GetValues("excludedSuits"), excludedSuits);
-          Util.JoinLists(genericNode.GetValues("femaleSuits"), femaleSuits);
-          Util.JoinLists(genericNode.GetValues("eyelessSkins"), eyelessSkins);
-        }
-
         ConfigNode classNode = file.config.GetNode("ClassSuits");
         if (classNode != null) {
           LoadClassSuitMap(classNode, globalClassSuits);
         }
       }
 
-      // Tag eye-less skins.
-      foreach (Skin head in Skins) {
-        head.IsEyeless = eyelessSkins.Contains(head.Name);
-      }
-
-      // Tag female suits.
-      foreach (Suit suit in Suits) {
-        suit.Gender = femaleSuits.Contains(suit.Name) ? Gender.Female : Gender.Male;
-      }
-
-      // Create lists of available generic skins and suits.
-      kerbalSkins[0].AddRange(Skins.Where(h => h.Gender == Gender.Male && !excludedSkins.Contains(h.Name)));
-      kerbalSkins[1].AddRange(Skins.Where(h => h.Gender == Gender.Female && !excludedSkins.Contains(h.Name)));
-      kerbalSuits.AddRange(Suits.Where(s => !excludedSuits.Contains(s.Name)));
-
       // Trim lists.
       Skins.TrimExcess();
       Suits.TrimExcess();
-      kerbalSkins[0].TrimExcess();
-      kerbalSkins[1].TrimExcess();
-      kerbalSuits.TrimExcess();
     }
 
     // Extract part of path consisting of directories under a prefix. Return false if prefix is not found.

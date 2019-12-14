@@ -150,17 +150,14 @@ namespace TextureReplacer
         log.Print("Male IVA Vintage Hierarchy");
         Util.LogDownHierarchy(MaleIvaVintage.transform);
       }
-
       if (FemaleIvaVintage != null) {
         log.Print("Female IVA Vintage Hierarchy");
         Util.LogDownHierarchy(FemaleIvaVintage.transform);
       }
-
       if (MaleEvaVintage != null) {
         log.Print("Male EVA Vintage Hierarchy");
         Util.LogDownHierarchy(MaleEvaVintage.transform);
       }
-
       if (FemaleEvaVintage != null) {
         log.Print("Female EVA Vintage Hierarchy");
         Util.LogDownHierarchy(FemaleEvaVintage.transform);
@@ -170,17 +167,14 @@ namespace TextureReplacer
         log.Print("Male IVA Future Hierarchy");
         Util.LogDownHierarchy(MaleIvaFuture.transform);
       }
-
       if (FemaleIvaFuture != null) {
         log.Print("Female IVA Future Hierarchy");
         Util.LogDownHierarchy(FemaleIvaFuture.transform);
       }
-
       if (MaleEvaFuture != null) {
         log.Print("Male EVA Future Hierarchy");
         Util.LogDownHierarchy(MaleEvaFuture.transform);
       }
-
       if (FemaleEvaFuture != null) {
         log.Print("Female EVA Future Hierarchy");
         Util.LogDownHierarchy(FemaleEvaFuture.transform);

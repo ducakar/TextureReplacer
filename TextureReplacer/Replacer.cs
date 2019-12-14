@@ -34,7 +34,6 @@ namespace TextureReplacer
     public static readonly Shader HeadShader = Shader.Find("Mobile/Diffuse");
     public static readonly Shader BumpedHeadShader = Shader.Find("Bumped Diffuse");
 
-    private const string NavBall = "NavBall";
     private static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
     private static readonly Shader TexturedVisorShader = Shader.Find("KSP/Alpha/Translucent");
 
@@ -44,6 +43,7 @@ namespace TextureReplacer
     private readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
     // NavBall texture.
     private Texture2D navBallTexture;
+    private Texture2D navBallTextureEmissive;
     // Change shinning quality.
     private SkinQuality skinningQuality = SkinQuality.Auto;
     // Print material/texture names when performing texture replacement pass.
@@ -106,18 +106,26 @@ namespace TextureReplacer
       FixKerbalModels();
 
       // Find NavBall replacement textures if available.
-      if (mappedTextures.TryGetValue(NavBall, out navBallTexture)) {
-        mappedTextures.Remove(NavBall);
+      if (mappedTextures.TryGetValue("NavBall", out navBallTexture)) {
+        mappedTextures.Remove("NavBall");
 
         if (navBallTexture.mipmapCount != 1) {
           log.Print("NavBall texture should not have mipmaps!");
+        }
+      }
+
+      if (mappedTextures.TryGetValue("NavBallEmissive", out navBallTextureEmissive)) {
+        mappedTextures.Remove("NavBallEmissive");
+
+        if (navBallTextureEmissive.mipmapCount != 1) {
+          log.Print("NavBallEmissive texture should not have mipmaps!");
         }
       }
     }
 
     public void OnBeginFlight()
     {
-      if (navBallTexture != null) {
+      if (navBallTexture != null || navBallTextureEmissive != null) {
         UpdateNavBall();
       }
     }
@@ -151,30 +159,39 @@ namespace TextureReplacer
         if (newTexture != null && newTexture != texture) {
           newTexture.anisoLevel = texture.anisoLevel;
           newTexture.wrapMode = texture.wrapMode;
-
           material.mainTexture = newTexture;
           UnityEngine.Object.Destroy(texture);
         } else if (texture.filterMode == FilterMode.Bilinear) {
+          // Some textures are instantiated after `Load()` has run, so we have to change their filter here.
           texture.filterMode = FilterMode.Trilinear;
         }
 
-        if (!material.HasProperty(Util.BumpMapProperty)) {
-          continue;
+        if (material.HasProperty(Util.BumpMapProperty)) {
+          Texture normalMap = material.GetTexture(Util.BumpMapProperty);
+          if (normalMap != null) {
+            mappedTextures.TryGetValue(normalMap.name, out Texture2D newNormalMap);
+
+            if (newNormalMap != null && newNormalMap != normalMap) {
+              newNormalMap.anisoLevel = normalMap.anisoLevel;
+              newNormalMap.wrapMode = normalMap.wrapMode;
+              material.SetTexture(Util.BumpMapProperty, newNormalMap);
+              UnityEngine.Object.Destroy(normalMap);
+            }
+          }
         }
 
-        Texture normalMap = material.GetTexture(Util.BumpMapProperty);
-        if (normalMap == null) {
-          continue;
-        }
+        if (material.HasProperty(Util.EmissiveProperty)) {
+          Texture emissive = material.GetTexture(Util.EmissiveProperty);
+          if (emissive != null) {
+            mappedTextures.TryGetValue(emissive.name, out Texture2D newEmissive);
 
-        mappedTextures.TryGetValue(normalMap.name, out Texture2D newNormalMap);
-
-        if (newNormalMap != null && newNormalMap != normalMap) {
-          newNormalMap.anisoLevel = normalMap.anisoLevel;
-          newNormalMap.wrapMode = normalMap.wrapMode;
-
-          material.SetTexture(Util.BumpMapProperty, newNormalMap);
-          UnityEngine.Object.Destroy(normalMap);
+            if (newEmissive != null && newEmissive != emissive) {
+              newEmissive.anisoLevel = emissive.anisoLevel;
+              newEmissive.wrapMode = emissive.wrapMode;
+              material.SetTexture(Util.EmissiveProperty, newEmissive);
+              UnityEngine.Object.Destroy(emissive);
+            }
+          }
         }
       }
     }
@@ -184,22 +201,32 @@ namespace TextureReplacer
     /// </summary>
     private void UpdateNavBall()
     {
-      if (navBallTexture == null)
-        return;
-
       var hudNavBall = UnityEngine.Object.FindObjectOfType<NavBall>();
       if (hudNavBall != null) {
         Material material = hudNavBall.navBall.GetComponent<Renderer>().sharedMaterial;
 
-        material.SetTexture(Util.MainTextureProperty, navBallTexture);
+        if (navBallTexture != null) {
+          material.SetTexture(Util.MainTextureProperty, navBallTexture);
+        }
+
+        if (navBallTextureEmissive != null) {
+          material.SetTexture(Util.EmissiveProperty, navBallTextureEmissive);
+        }
       }
 
       var ivaNavBall = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
       if (ivaNavBall != null) {
         Material material = ivaNavBall.navBall.GetComponent<Renderer>().sharedMaterial;
 
-        material.mainTexture = navBallTexture;
-        material.SetTextureScale(Util.MainTexProperty, NavBallScale);
+        if (navBallTexture != null) {
+          material.SetTexture(Util.MainTextureProperty, navBallTexture);
+          material.SetTextureScale(Util.MainTexProperty, NavBallScale);
+        }
+
+        if (navBallTextureEmissive != null) {
+          material.SetTexture(Util.EmissiveProperty, navBallTextureEmissive);
+          material.SetTextureScale(Util.EmissiveProperty, NavBallScale);
+        }
       }
     }
 
@@ -266,7 +293,6 @@ namespace TextureReplacer
               if (pupilLeft != null) {
                 sharedMaterial.color = Color.white;
               }
-
               break;
             }
             case "pupilRight": {
@@ -275,7 +301,6 @@ namespace TextureReplacer
               if (pupilRight != null) {
                 sharedMaterial.color = Color.white;
               }
-
               break;
             }
             case "headMesh01":
@@ -303,7 +328,6 @@ namespace TextureReplacer
                     sharedMaterial.mainTexture = evaVisorTexture;
                     sharedMaterial.color = Color.white;
                   }
-
                   break;
                 }
                 case 2: { // maleEvaVintage
@@ -351,7 +375,6 @@ namespace TextureReplacer
               if (pupilLeft != null) {
                 sharedMaterial.color = Color.white;
               }
-
               break;
             }
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight": {
@@ -360,7 +383,6 @@ namespace TextureReplacer
               if (pupilRight != null) {
                 sharedMaterial.color = Color.white;
               }
-
               break;
             }
             case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":

@@ -31,31 +31,49 @@ namespace TextureReplacer
   internal class Suit
   {
     public readonly string Name;
-    public readonly ProtoCrewMember.KerbalSuit Kind;
+    public readonly Gender? Gender;
+    public readonly KerbalSuit Kind;
+    public readonly bool Excluded;
 
-    public Gender Gender;
-
-    public Texture2D IvaSuitVeteran;
     public readonly Texture2D[] IvaSuit = new Texture2D[6];
     public Texture2D IvaSuitNRM;
+    public Texture2D IvaSuitVeteran;
     public Texture2D IvaVisor;
+
     public readonly Texture2D[] EvaSuit = new Texture2D[6];
     public Texture2D EvaSuitNRM;
+    public Texture2D EvaSuitEmissive;
     public Texture2D EvaVisor;
-    public Texture2D EvaJetpack;
-    public Texture2D EvaJetpackNRM;
+
+    public Texture2D Jetpack;
+    public Texture2D JetpackNRM;
+    public Texture2D JetpackEmissive;
+
+    public Texture2D ParachutePack;
+    public Texture2D ParachutePackNRM;
+    public Texture2D ParachuteCanopy;
+    public Texture2D ParachuteCanopyNRM;
+
+    public Texture2D CargoPack;
+    public Texture2D CargoPackNRM;
+    public Texture2D CargoPackEmissive;
 
     public Suit(string name)
     {
       Name = name;
+      Gender = Util.HasSuffix(name, 'm')
+        ? ProtoCrewMember.Gender.Male
+        : Util.HasSuffix(name, 'f')
+          ? ProtoCrewMember.Gender.Female
+          : (Gender?) null;
 
-      if (name == "VINTAGE" || name.EndsWith(".vintage")) {
-        Kind = KerbalSuit.Vintage;
-      } else if (name == "FUTURE" || name.EndsWith(".future")) {
-        Kind = KerbalSuit.Future;
-      } else {
-        Kind = KerbalSuit.Default;
-      }
+      Kind = Util.HasSuffix(name, 'V')
+        ? KerbalSuit.Vintage
+        : Util.HasSuffix(name, 'F')
+          ? KerbalSuit.Future
+          : KerbalSuit.Default;
+
+      Excluded = Util.HasSuffix(name, 'x');
     }
 
     public Texture2D GetSuit(bool useEvaSuit, ProtoCrewMember kerbal)
@@ -87,13 +105,6 @@ namespace TextureReplacer
           EvaSuitNRM ??= texture;
           return true;
         }
-        case "orangeSuite_diffuse":
-        case "me_suit_difuse_orange":
-        case "futureSuit_diffuse_whiteOrange":
-        case "kerbalMain": {
-          IvaSuitVeteran ??= texture;
-          return true;
-        }
         case "paleBlueSuite_diffuse":
         case "me_suit_difuse_low_polyBrown":
         case "futureSuit_diffuse_whiteBlue":
@@ -101,11 +112,26 @@ namespace TextureReplacer
           for (int i = 0; i < IvaSuit.Length && IvaSuit[i] == null; ++i) {
             IvaSuit[i] = texture;
           }
-
+          return true;
+        }
+        case "kerbalMainGrey1":
+        case "kerbalMainGrey2":
+        case "kerbalMainGrey3":
+        case "kerbalMainGrey4":
+        case "kerbalMainGrey5": {
+          int level = originalName.Last() - '0';
+          Array.Fill(IvaSuit, texture, level, IvaSuit.Length - level);
           return true;
         }
         case "kerbalMainNRM": {
           IvaSuitNRM ??= texture;
+          return true;
+        }
+        case "orangeSuite_diffuse":
+        case "me_suit_difuse_orange":
+        case "futureSuit_diffuse_whiteOrange":
+        case "kerbalMain": {
+          IvaSuitVeteran ??= texture;
           return true;
         }
         case "kerbalVisor": {
@@ -119,32 +145,6 @@ namespace TextureReplacer
           for (int i = 0; i < EvaSuit.Length && EvaSuit[i] == null; ++i) {
             EvaSuit[i] = texture;
           }
-
-          return true;
-        }
-        case "EVAtextureNRM": {
-          EvaSuitNRM ??= texture;
-          return true;
-        }
-        case "EVAvisor": {
-          EvaVisor ??= texture;
-          return true;
-        }
-        case "EVAjetpack": {
-          EvaJetpack ??= texture;
-          return true;
-        }
-        case "EVAjetpackNRM": {
-          EvaJetpackNRM ??= texture;
-          return true;
-        }
-        case "kerbalMainGrey1":
-        case "kerbalMainGrey2":
-        case "kerbalMainGrey3":
-        case "kerbalMainGrey4":
-        case "kerbalMainGrey5": {
-          int level = originalName.Last() - '0';
-          Array.Fill(IvaSuit, texture, level, IvaSuit.Length - level);
           return true;
         }
         case "EVAtexture1":
@@ -154,6 +154,58 @@ namespace TextureReplacer
         case "EVAtexture5": {
           int level = originalName.Last() - '0';
           Array.Fill(EvaSuit, texture, level, EvaSuit.Length - level);
+          return true;
+        }
+        case "EVAtextureNRM": {
+          EvaSuitNRM ??= texture;
+          return true;
+        }
+        case "futureSuit_emissive": {
+          EvaSuitEmissive ??= texture;
+          return true;
+        }
+        case "EVAvisor": {
+          EvaVisor ??= texture;
+          return true;
+        }
+        case "EVAjetpack": {
+          Jetpack ??= texture;
+          return true;
+        }
+        case "EVAjetpackNRM": {
+          JetpackNRM ??= texture;
+          return true;
+        }
+        case "EVAjetpackEmmisive": {
+          JetpackEmissive ??= texture;
+          return true;
+        }
+        case "backpack_Diff": {
+          ParachutePack ??= texture;
+          return true;
+        }
+        case "backpack_NM": {
+          ParachutePackNRM ??= texture;
+          return true;
+        }
+        case "canopy_Diff": {
+          ParachuteCanopy ??= texture;
+          return true;
+        }
+        case "canopy_NR": {
+          ParachuteCanopyNRM ??= texture;
+          return true;
+        }
+        case "cargoContainerPack_diffuse": {
+          CargoPack ??= texture;
+          return true;
+        }
+        case "cargoContainerPack_NRM": {
+          CargoPackNRM ??= texture;
+          return true;
+        }
+        case "cargoContainerPack_emissive": {
+          CargoPackEmissive ??= texture;
           return true;
         }
         default: {
