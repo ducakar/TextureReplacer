@@ -182,9 +182,6 @@ namespace TextureReplacer
       if (suit != null) {
         ShowKerbalSuitTextures(suit);
       }
-      if (selectedKerbal != null) {
-        ShowSuitColourSliders();
-      }
 
       GUILayout.EndVertical();
       GUILayout.BeginVertical(GUILayout.Width(120));
@@ -432,28 +429,6 @@ namespace TextureReplacer
           appearance.Suit = mapper.GetDefault(selectedKerbal.suit);
         }
       }
-    }
-
-    private void ShowSuitColourSliders()
-    {
-      GUILayout.BeginHorizontal();
-
-      GUILayout.BeginVertical();
-      GUI.color = Color.red;
-      selectedKerbal.lightR = GUILayout.HorizontalSlider(selectedKerbal.lightR, 0.0f, 1.0f);
-      GUI.color = Color.green;
-      selectedKerbal.lightG = GUILayout.HorizontalSlider(selectedKerbal.lightG, 0.0f, 1.0f);
-      GUI.color = Color.blue;
-      selectedKerbal.lightB = GUILayout.HorizontalSlider(selectedKerbal.lightB, 0.0f, 1.0f);
-      GUILayout.EndVertical();
-
-      var colour = new Color(selectedKerbal.lightR, selectedKerbal.lightG, selectedKerbal.lightB);
-
-      GUI.color = colour;
-      GUILayout.Label(appIcon);
-      GUI.color = Color.white;
-
-      GUILayout.EndHorizontal();
     }
 
     private static void ShowOptions()

@@ -294,7 +294,6 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
   - add support for skin and suit directory suffixes
   - add ability to replace cargo and parachute backpack and parachute canopy
     textures for each suit
-  - add future suit colour adjustment sliders in GUI
   - add support for replacing emissive textures
   - rename `hideParachuteBackpack` setting to `hideBackpack` as it hides both
     parachute and cargo backpacks now
