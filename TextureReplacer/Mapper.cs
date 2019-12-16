@@ -102,9 +102,9 @@ namespace TextureReplacer
     {
       gameKerbals.Clear();
       ClassSuits.Clear();
-      bool hideParachuteBackpack = globalHideBackpack;
-      Util.Parse(node.GetValue("hideBackpack"), ref hideParachuteBackpack);
-      HideBackpack = hideParachuteBackpack;
+      bool hideBackpack = globalHideBackpack;
+      Util.Parse(node.GetValue("hideBackpack"), ref hideBackpack);
+      HideBackpack = hideBackpack;
       LoadKerbalsMap(node.GetNode("Kerbals"));
       LoadClassSuitMap(node.GetNode("ClassSuits"), ClassSuits);
     }

@@ -223,8 +223,8 @@ namespace TextureReplacer
     // Real reflection resolution.
     private static int reflectionResolution = 128;
     // Interval in frames for updating environment map faces.
-    private static int reflectionInterval = 4;
-    private static Type globalReflectionType = Type.Real;
+    private static int reflectionInterval = 1;
+    private static Type globalReflectionType = Type.None;
     // Reflection colour.
     private static Color visorReflectionColour = Color.white;
 
