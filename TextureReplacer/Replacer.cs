@@ -242,20 +242,20 @@ namespace TextureReplacer
 
       // Shaders between male and female models are inconsistent, female models are missing normal maps and specular
       // lighting. So, we copy shaders from male materials to respective female materials.
-      var loader = Prefab.Instance;
+      var prefab = Prefab.Instance;
 
       SkinnedMeshRenderer[][] maleMeshes = {
-        loader.MaleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        loader.MaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        loader.MaleEvaVintage ? loader.MaleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null,
-        loader.MaleEvaFuture ? loader.MaleEvaFuture.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null
+        prefab.MaleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
+        prefab.MaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
+        prefab.MaleEvaVintage ? prefab.MaleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null,
+        prefab.MaleEvaFuture ? prefab.MaleEvaFuture.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null
       };
 
       SkinnedMeshRenderer[][] femaleMeshes = {
-        loader.FemaleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        loader.FemaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
-        loader.FemaleEvaVintage ? loader.FemaleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null,
-        loader.FemaleEvaFuture ? loader.FemaleEvaFuture.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null
+        prefab.FemaleIva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
+        prefab.FemaleEva.GetComponentsInChildren<SkinnedMeshRenderer>(true),
+        prefab.FemaleEvaVintage ? prefab.FemaleEvaVintage.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null,
+        prefab.FemaleEvaFuture ? prefab.FemaleEvaFuture.GetComponentsInChildren<SkinnedMeshRenderer>(true) : null
       };
 
       // Male materials to be copied to females to fix tons of female issues (missing normal maps, non-bump-mapped

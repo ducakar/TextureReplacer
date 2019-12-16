@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Gender = ProtoCrewMember.Gender;
 using KerbalSuit = ProtoCrewMember.KerbalSuit;
 
 namespace TextureReplacer
@@ -140,14 +141,14 @@ namespace TextureReplacer
       return appearance;
     }
 
-    public Skin GetDefaultSkin(ProtoCrewMember kerbal)
+    public Skin GetDefault(Gender gender)
     {
-      return DefaultSkin[(int) kerbal.gender];
+      return DefaultSkin[(int) gender];
     }
 
-    public Suit GetDefaultSuit(ProtoCrewMember kerbal)
+    public Suit GetDefault(KerbalSuit kind)
     {
-      return kerbal.suit switch {
+      return kind switch {
         KerbalSuit.Vintage => VintageSuit,
         KerbalSuit.Future  => FutureSuit,
         _                  => DefaultSuit
@@ -188,7 +189,7 @@ namespace TextureReplacer
 
       IList<Suit> availableSuits = GetAvailableSuits(kerbal, false);
       if (availableSuits.Count == 0) {
-        return GetDefaultSuit(kerbal);
+        return GetDefault(kerbal.suit);
       }
 
       // We must use a different prime here to increase randomisation so that the same skin is not always combined with
@@ -246,15 +247,15 @@ namespace TextureReplacer
           Skin = skinName switch {
             null      => null,
             "GENERIC" => null,
-            "DEFAULT" => GetDefaultSkin(kerbal),
+            "DEFAULT" => GetDefault(kerbal.gender),
             _         => Skins.Find(h => h.Name == skinName)
           },
           Suit = suitName switch {
             null        => null,
             "GENERIC"   => null,
-            "DEFAULT"   => GetDefaultSuit(kerbal),
-            "DEFAULT.V" => GetDefaultSuit(kerbal),
-            "DEFAULT.F" => GetDefaultSuit(kerbal),
+            "DEFAULT"   => GetDefault(kerbal.suit),
+            "DEFAULT.V" => GetDefault(kerbal.suit),
+            "DEFAULT.F" => GetDefault(kerbal.suit),
             _           => Suits.Find(s => s.Name == suitName)
           }
         };

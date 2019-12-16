@@ -51,25 +51,32 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>../../../../Apps/KSP/game/KSP_Data/Managed/Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\mscorlib.dll</HintPath>
+      <HintPath>../../../../Apps/KSP/game/KSP_Data/Managed/mscorlib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>../../../../Apps/KSP/game/KSP_Data/Managed/UnityEngine.AnimationModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>../../../../Apps/KSP/game/KSP_Data/Managed/UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>../../../../Apps/KSP/game/KSP_Data/Managed/UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>../../../../Apps/KSP/game/KSP_Data/Managed/UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\Apps\KSP\game\KSP_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>../../../../Apps/KSP/game/KSP_Data/Managed/UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
 </Project>

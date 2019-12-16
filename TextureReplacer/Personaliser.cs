@@ -45,12 +45,6 @@ namespace TextureReplacer
     {
       mapper = Mapper.Instance;
 
-      foreach (Kerbal kerbal in Resources.FindObjectsOfTypeAll<Kerbal>()) {
-        // After na IVA space is initialised, suits are reset to these values. Replace stock textures with default ones.
-        kerbal.textureStandard = mapper.DefaultSuit.IvaSuit[0];
-        kerbal.textureVeteran = mapper.DefaultSuit.IvaSuitVeteran;
-      }
-
       // `TRIvaModelModule` makes sure that internal spaces personalise all Kerbals inside them on instantiation.
       // This will not suffice for Ship Manifest, we will also need to re-add these modules on any crew transfer.
       foreach (InternalModel model in Resources.FindObjectsOfTypeAll<InternalModel>()) {
@@ -59,20 +53,14 @@ namespace TextureReplacer
         }
       }
 
-      Part[] evas = {
-        PartLoader.getPartInfoByName("kerbalEVA").partPrefab,
-        PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab,
-        PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab,
-        PartLoader.getPartInfoByName("kerbalEVAfemaleVintage").partPrefab,
-        PartLoader.getPartInfoByName("kerbalEVAFuture").partPrefab,
-        PartLoader.getPartInfoByName("kerbalEVAfemaleFuture").partPrefab
-      };
+      var prefab = Prefab.Instance;
 
-      foreach (Part eva in evas) {
-        if (eva.GetComponent<TREvaModule>() == null) {
-          eva.gameObject.AddComponent<TREvaModule>();
-        }
-      }
+      EnsureEvaModule(prefab.MaleEva);
+      EnsureEvaModule(prefab.FemaleEva);
+      EnsureEvaModule(prefab.MaleEvaVintage);
+      EnsureEvaModule(prefab.FemaleEvaVintage);
+      EnsureEvaModule(prefab.MaleEvaFuture);
+      EnsureEvaModule(prefab.FemaleEvaFuture);
     }
 
     public void OnBeginFlight()
@@ -85,12 +73,35 @@ namespace TextureReplacer
       GameEvents.OnHelmetChanged.Remove(OnHelmetChanged);
     }
 
+    /// <summary>
+    /// Personalise Kerbals in an internal space of a vessel. Used by IvaModule.
+    /// </summary>
+    public void PersonaliseIva(Kerbal kerbal)
+    {
+      PersonaliseKerbal(kerbal, kerbal.protoCrewMember, false, false);
+    }
+
+    /// <summary>
+    /// Set external EVA/IVA suit.
+    /// </summary>
+    public void PersonaliseEva(Part part, ProtoCrewMember kerbal, bool useEvaSuit)
+    {
+      PersonaliseKerbal(part, kerbal, true, useEvaSuit);
+    }
+
     // Must be non-static or the event won't work.
     private void OnHelmetChanged(KerbalEVA eva, bool hasHelmet, bool hasNeckRing)
     {
       var evaModule = eva.GetComponent<TREvaModule>();
       if (evaModule) {
         evaModule.OnHelmetChanged(hasHelmet);
+      }
+    }
+
+    private static void EnsureEvaModule(Component eva)
+    {
+      if (eva.GetComponent<TREvaModule>() == null) {
+        eva.gameObject.AddComponent<TREvaModule>();
       }
     }
 
@@ -109,8 +120,8 @@ namespace TextureReplacer
 
       Skin skin = mapper.GetKerbalSkin(kerbal, appearance);
       Suit suit = mapper.GetKerbalSuit(kerbal, appearance);
-      Skin defaultSkin = mapper.GetDefaultSkin(kerbal);
-      Suit defaultSuit = mapper.GetDefaultSuit(kerbal);
+      Skin defaultSkin = mapper.GetDefault(kerbal.gender);
+      Suit defaultSuit = mapper.GetDefault(kerbal.suit);
 
       Transform modelTransform = (isEva, kerbal.suit, kerbal.gender) switch {
         (false, KerbalSuit.Default, _)            => transform.Find("model01"),
@@ -310,7 +321,7 @@ namespace TextureReplacer
         bool showBackpack = showJetpack && !mapper.HideBackpack;
 
         Transform flagTransform = transform.Find("model/kbEVA_flagDecals");
-        Transform cargoPackTransform = transform.Find(kerbal.suit == KerbalSuit.Future
+        Transform cargoPackTransform = transform.Find(kerbal.suit == KerbalSuit.Future && kerbal.gender == Gender.Male
           ? "model/kerbalCargoContainerPack/base"
           : "model/EVABackpack/kerbalCargoContainerPack/base");
         Transform parachutePackTransform = transform.Find("model/EVAparachute/base");
@@ -351,22 +362,6 @@ namespace TextureReplacer
           parachuteCanopy.material.SetTexture(Util.BumpMapProperty, suit.ParachuteCanopyNRM);
         }
       }
-    }
-
-    /// <summary>
-    /// Personalise Kerbals in an internal space of a vessel. Used by IvaModule.
-    /// </summary>
-    public void PersonaliseIva(Kerbal kerbal)
-    {
-      PersonaliseKerbal(kerbal, kerbal.protoCrewMember, false, false);
-    }
-
-    /// <summary>
-    /// Set external EVA/IVA suit.
-    /// </summary>
-    public void PersonaliseEva(Part part, ProtoCrewMember kerbal, bool useEvaSuit)
-    {
-      PersonaliseKerbal(part, kerbal, true, useEvaSuit);
     }
   }
 }

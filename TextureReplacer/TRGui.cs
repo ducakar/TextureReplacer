@@ -56,6 +56,7 @@ namespace TextureReplacer
     private string selectedClass;
     private IList<Skin> availableSkins;
     private IList<Suit> availableSuits;
+    private string dumpTextureName;
 
     public void Awake()
     {
@@ -166,12 +167,10 @@ namespace TextureReplacer
         skin = mapper.GetKerbalSkin(selectedKerbal, appearance);
         suit = mapper.GetKerbalSuit(selectedKerbal, appearance);
 
-        suitIndex = mapper.Suits.IndexOf(suit);
+        suitIndex = availableSuits.IndexOf(suit);
       } else if (selectedClass != null) {
-        mapper.ClassSuits.TryGetValue(selectedClass, out suit);
-
-        if (suit != null) {
-          suitIndex = mapper.Suits.IndexOf(suit);
+        if (mapper.ClassSuits.TryGetValue(selectedClass, out suit)) {
+          suitIndex = availableSuits.IndexOf(suit);
         }
       }
 
@@ -180,11 +179,9 @@ namespace TextureReplacer
       if (skin != null) {
         ShowKerbalSkinTextures(skin);
       }
-
       if (suit != null) {
         ShowKerbalSuitTextures(suit);
       }
-
       if (selectedKerbal != null) {
         ShowSuitColourSliders();
       }
@@ -195,8 +192,7 @@ namespace TextureReplacer
       if (selectedKerbal != null && appearance != null) {
         ShowKerbalSkinButtons(appearance);
       }
-
-      if (appearance != null || selectedClass != null) {
+      if (selectedKerbal != null || selectedClass != null) {
         ShowKerbalSuitButtons(appearance, suitIndex, suit);
       }
 
@@ -221,30 +217,24 @@ namespace TextureReplacer
       GUILayout.BeginVertical();
 
       foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew) {
-        switch (kerbal.rosterStatus) {
-          case ProtoCrewMember.RosterStatus.Assigned: {
-            GUI.contentColor = Color.cyan;
-            break;
-          }
-          case ProtoCrewMember.RosterStatus.Dead: {
-            continue;
-          }
-          case ProtoCrewMember.RosterStatus.Missing: {
-            GUI.contentColor = Color.yellow;
-            break;
-          }
-          default: {
-            GUI.contentColor = Color.white;
-            break;
-          }
+        if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead) {
+          continue;
         }
 
-        if (GUILayout.Button(kerbal.name)) {
-          selectedKerbal = kerbal;
-          selectedClass = null;
-          availableSkins = mapper.GetAvailableSkins(kerbal, true);
-          availableSuits = mapper.GetAvailableSuits(kerbal, true);
+        GUI.contentColor = kerbal.rosterStatus switch {
+          ProtoCrewMember.RosterStatus.Assigned => Color.cyan,
+          ProtoCrewMember.RosterStatus.Missing  => Color.yellow,
+          _                                     => Color.white
+        };
+
+        if (!GUILayout.Button(kerbal.name)) {
+          continue;
         }
+
+        selectedKerbal = kerbal;
+        selectedClass = null;
+        availableSkins = mapper.GetAvailableSkins(kerbal, true);
+        availableSuits = mapper.GetAvailableSuits(kerbal, true);
       }
 
       foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Unowned) {
@@ -253,12 +243,15 @@ namespace TextureReplacer
         }
 
         GUI.contentColor = Color.cyan;
-        if (GUILayout.Button(kerbal.name)) {
-          selectedKerbal = kerbal;
-          selectedClass = null;
-          availableSkins = mapper.GetAvailableSkins(kerbal, true);
-          availableSuits = mapper.GetAvailableSuits(kerbal, true);
+
+        if (!GUILayout.Button(kerbal.name)) {
+          continue;
         }
+
+        selectedKerbal = kerbal;
+        selectedClass = null;
+        availableSkins = mapper.GetAvailableSkins(kerbal, true);
+        availableSuits = mapper.GetAvailableSuits(kerbal, true);
       }
 
       GUI.contentColor = Color.white;
@@ -286,7 +279,7 @@ namespace TextureReplacer
       GUILayout.EndVertical();
     }
 
-    private void ShowKerbalSkinTextures(Skin skin)
+    private static void ShowKerbalSkinTextures(Skin skin)
     {
       GUILayout.Box(skin.Head, GUILayout.Width(200), GUILayout.Height(200));
       GUILayout.Label(skin.Name);
@@ -310,14 +303,14 @@ namespace TextureReplacer
       if (GUILayout.Button(">")) {
         int skinIndex = availableSkins.IndexOf(mapper.GetKerbalSkin(selectedKerbal, appearance));
 
-        skinIndex = (skinIndex + 1) % availableSkins.Count;
+        skinIndex = skinIndex == -1 ? 0 : (skinIndex + 1) % availableSkins.Count;
         appearance.Skin = availableSkins[skinIndex];
       }
 
       GUI.enabled = true;
       GUILayout.EndHorizontal();
 
-      Skin defaultSkin = mapper.GetDefaultSkin(selectedKerbal);
+      Skin defaultSkin = mapper.GetDefault(selectedKerbal.gender);
       GUI.color = appearance.Skin == defaultSkin ? SelectedColour : Color.white;
       if (GUILayout.Button("Default")) {
         appearance.Skin = defaultSkin;
@@ -339,9 +332,18 @@ namespace TextureReplacer
     {
       var mapper = Mapper.Instance;
 
-      Suit defaultSuit = mapper.GetDefaultSuit(selectedKerbal);
-      Texture2D ivaSuitTex = suit.GetSuit(false, selectedKerbal) ?? defaultSuit.GetSuit(false, selectedKerbal);
-      Texture2D evaSuitTex = suit.GetSuit(true, selectedKerbal) ?? defaultSuit.GetSuit(true, selectedKerbal);
+      Texture2D ivaSuitTex;
+      Texture2D evaSuitTex;
+
+      if (selectedKerbal != null) {
+        Suit defaultSuit = mapper.GetDefault(selectedKerbal.suit);
+        ivaSuitTex = suit.GetSuit(false, selectedKerbal) ?? defaultSuit.GetSuit(false, selectedKerbal);
+        evaSuitTex = suit.GetSuit(true, selectedKerbal) ?? defaultSuit.GetSuit(true, selectedKerbal);
+      } else {
+        Suit defaultSuit = mapper.GetDefault(suit.Kind);
+        ivaSuitTex = suit.IvaSuit[0] ?? defaultSuit.IvaSuit[0];
+        evaSuitTex = suit.EvaSuit[0] ?? defaultSuit.EvaSuit[0];
+      }
 
       GUILayout.BeginHorizontal();
       GUILayout.Box(ivaSuitTex, GUILayout.Width(100), GUILayout.Height(100));
@@ -357,22 +359,13 @@ namespace TextureReplacer
     {
       var mapper = Mapper.Instance;
 
-      bool isVintage = false;
-      bool isFuture = false;
-
-      if (appearance != null) {
-        isVintage = selectedKerbal.suit == KerbalSuit.Vintage;
-        isFuture = selectedKerbal.suit == KerbalSuit.Future;
-      }
-
       GUILayout.BeginHorizontal();
       GUI.enabled = availableSuits.Count != 0;
 
       if (GUILayout.Button("<")) {
-        suitIndex = suitIndex == -1 ? 0 : suitIndex;
-        suitIndex = (availableSuits.Count + suitIndex - 1) % availableSuits.Count;
+        suitIndex = suitIndex == -1 ? 0 : (suitIndex + availableSuits.Count - 1) % availableSuits.Count;
 
-        if (appearance != null) {
+        if (selectedKerbal != null) {
           appearance.Suit = availableSuits[suitIndex];
         } else if (selectedClass != null) {
           mapper.ClassSuits[selectedClass] = availableSuits[suitIndex];
@@ -380,9 +373,9 @@ namespace TextureReplacer
       }
 
       if (GUILayout.Button(">")) {
-        suitIndex = (suitIndex + 1) % availableSuits.Count;
+        suitIndex = suitIndex == -1 ? 0 : (suitIndex + 1) % availableSuits.Count;
 
-        if (appearance != null) {
+        if (selectedKerbal != null) {
           appearance.Suit = availableSuits[suitIndex];
         } else if (selectedClass != null) {
           mapper.ClassSuits[selectedClass] = availableSuits[suitIndex];
@@ -392,9 +385,9 @@ namespace TextureReplacer
       GUI.enabled = true;
       GUILayout.EndHorizontal();
 
-      bool hasKerbalGenericSuit = appearance != null && appearance.Suit == null;
+      bool hasKerbalGenericSuit = selectedKerbal != null && appearance.Suit == null;
 
-      Suit defaultSuit = selectedKerbal == null ? mapper.DefaultSuit : mapper.GetDefaultSuit(selectedKerbal);
+      Suit defaultSuit = selectedKerbal == null ? mapper.DefaultSuit : mapper.GetDefault(selectedKerbal.suit);
       GUI.color = suit == defaultSuit && !hasKerbalGenericSuit ? SelectedColour : Color.white;
       if (GUILayout.Button("Default")) {
         if (selectedClass != null) {
@@ -415,25 +408,28 @@ namespace TextureReplacer
 
       GUI.color = Color.white;
 
-      if (appearance != null) {
+      // Handle radio button clicks and change to default suit if suit kind changed.
+      if (selectedKerbal != null) {
+        bool isVintage = selectedKerbal.suit == KerbalSuit.Vintage;
+        bool isFuture = selectedKerbal.suit == KerbalSuit.Future;
+
         isVintage = GUILayout.Toggle(isVintage, "Vintage");
         isFuture = GUILayout.Toggle(isFuture, "Future");
 
-        selectedKerbal.suit = isVintage && isFuture
-          ? selectedKerbal.suit == KerbalSuit.Vintage
-            ? KerbalSuit.Future
-            : KerbalSuit.Vintage
-          : isVintage
-            ? KerbalSuit.Vintage
-            : isFuture
-              ? KerbalSuit.Future
-              : KerbalSuit.Default;
+        KerbalSuit? newSuit = (selectedKerbal.suit, isVintage, isFuture) switch {
+          (KerbalSuit.Default, true, _)      => KerbalSuit.Vintage,
+          (KerbalSuit.Default, _, true)      => KerbalSuit.Future,
+          (KerbalSuit.Vintage, false, false) => KerbalSuit.Default,
+          (KerbalSuit.Vintage, _, true)      => KerbalSuit.Future,
+          (KerbalSuit.Future, false, false)  => KerbalSuit.Default,
+          (KerbalSuit.Future, true, _)       => KerbalSuit.Vintage,
+          _                                  => (KerbalSuit?) null
+        };
 
-        // Ensure default suits are switched, otherwise we'd get stuck on a specific default suit, unable to switch
-        // suit kind as `Mapper.GetKerbalSuit()` would keep resetting it.
-        if (appearance.Suit == mapper.DefaultSuit || appearance.Suit == mapper.VintageSuit ||
-            appearance.Suit == mapper.FutureSuit) {
-          appearance.Suit = mapper.GetDefaultSuit(selectedKerbal);
+        if (newSuit.HasValue) {
+          selectedKerbal.suit = newSuit.Value;
+          availableSuits = mapper.GetAvailableSuits(selectedKerbal, true);
+          appearance.Suit = mapper.GetDefault(selectedKerbal.suit);
         }
       }
     }
@@ -465,23 +461,22 @@ namespace TextureReplacer
       var mapper = Mapper.Instance;
       var reflections = Reflections.Instance;
 
-      if (mapper == null) {
-        log.Print("mapper is null!");
-      }
       if (reflections == null) {
         log.Print("reflections is null!");
+      } else {
+        bool enableReflections = reflections.ReflectionType == Reflections.Type.Real;
+        enableReflections = GUILayout.Toggle(enableReflections, "Enable real-time reflections");
+        reflections.ReflectionType = enableReflections ? Reflections.Type.Real : Reflections.Type.None;
       }
 
-      bool enableReflections = reflections.ReflectionType == Reflections.Type.Real;
-      enableReflections = GUILayout.Toggle(enableReflections, "Enable real-time reflections");
-      reflections.ReflectionType = enableReflections ? Reflections.Type.Real : Reflections.Type.None;
-
-      bool hideBackpack = mapper.HideBackpack;
-      hideBackpack = GUILayout.Toggle(hideBackpack, "Hide parachute/cargo backpack");
-      mapper.HideBackpack = hideBackpack;
+      if (mapper == null) {
+        log.Print("mapper is null!");
+      } else {
+        bool hideBackpack = mapper.HideBackpack;
+        hideBackpack = GUILayout.Toggle(hideBackpack, "Hide parachute/cargo backpack");
+        mapper.HideBackpack = hideBackpack;
+      }
     }
-
-    private string dumpTextureName;
 
     private void ShowDumpTexture()
     {
