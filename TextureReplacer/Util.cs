@@ -154,8 +154,7 @@ namespace TextureReplacer
 
       byte[] data = targetTex.EncodeToPNG();
 
-      string path = $"Export/{texture.name}.png";
-      using FileStream fs = File.Create<TRActivator>(path);
+      using FileStream fs = File.Create<TRActivator>(texture.name + ".png");
       fs.Write(data, 0, data.Length);
     }
   }

@@ -169,8 +169,8 @@ namespace TextureReplacer
             newTexture = skin.EyeballLeft;
 
             if (isPrefabMissing) {
-              material.shader = Replacer.EyeShader;
               newTexture ??= defaultSkin.EyeballLeft;
+              material.shader = Replacer.EyeShader;
             }
             break;
           }
@@ -184,8 +184,8 @@ namespace TextureReplacer
             newTexture = skin.EyeballRight;
 
             if (isPrefabMissing) {
-              material.shader = Replacer.EyeShader;
               newTexture ??= defaultSkin.EyeballRight;
+              material.shader = Replacer.EyeShader;
             }
             break;
           }
@@ -199,9 +199,10 @@ namespace TextureReplacer
             newTexture = skin.PupilLeft;
 
             if (isPrefabMissing) {
-              material.shader = Replacer.EyeShader;
               newTexture ??= defaultSkin.PupilLeft;
+              material.shader = Replacer.EyeShader;
             }
+
             if (newTexture != null) {
               material.color = Color.white;
             }
@@ -220,6 +221,7 @@ namespace TextureReplacer
               newTexture ??= defaultSkin.PupilRight;
               material.shader = Replacer.EyeShader;
             }
+
             if (newTexture != null) {
               material.color = Color.white;
             }
@@ -247,10 +249,7 @@ namespace TextureReplacer
           case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
           case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01": {
             if (isPrefabMissing) {
-              // We use male head texture for teeth, since female texture mapping would map their hair to teeth.
-              newTexture = mapper.DefaultSkin[0].Head;
-              newNormalMap = mapper.DefaultSkin[0].Head;
-              material.shader = newNormalMap == null ? Replacer.HeadShader : Replacer.BumpedHeadShader;
+              smr.material = Replacer.Instance.TeethMaterial;
             }
             break;
           }
@@ -258,6 +257,9 @@ namespace TextureReplacer
           case "mesh_female_kerbalAstronaut01_body01": {
             newTexture = suitTexture;
             newNormalMap = suitNormalMap;
+            if (isEva) {
+              newEmissive = suit.EvaSuitEmissive;
+            }
 
             // Update textures in Kerbal IVA object since KSP resets them to these values a few frames later.
             var kerbalIva = component as Kerbal;
@@ -321,9 +323,8 @@ namespace TextureReplacer
         bool showBackpack = showJetpack && !mapper.HideBackpack;
 
         Transform flagTransform = transform.Find("model/kbEVA_flagDecals");
-        Transform cargoPackTransform = transform.Find(kerbal.suit == KerbalSuit.Future && kerbal.gender == Gender.Male
-          ? "model/kerbalCargoContainerPack/base"
-          : "model/EVABackpack/kerbalCargoContainerPack/base");
+        Transform cargoPackTransform = transform.Find("model/EVABackpack/kerbalCargoContainerPack/base") ??
+                                       transform.Find("model/kerbalCargoContainerPack/base");
         Transform parachutePackTransform = transform.Find("model/EVAparachute/base");
         Transform parachuteCanopyTransform = transform.Find("model/EVAparachute/canopyrot/canopy");
 

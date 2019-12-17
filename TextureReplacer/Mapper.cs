@@ -379,15 +379,15 @@ namespace TextureReplacer
 
       // Visor needs to be replaced every time, not only on the prefab models, so the visor from the default suit must
       // be set on all suits without a custom visor.
-      VintageSuit.IvaVisor = VintageSuit.IvaVisor ? VintageSuit.IvaVisor : DefaultSuit.IvaVisor;
-      VintageSuit.EvaVisor = VintageSuit.EvaVisor ? VintageSuit.EvaVisor : DefaultSuit.EvaVisor;
+      VintageSuit.IvaVisor ??= DefaultSuit.IvaVisor;
+      VintageSuit.EvaVisor ??= DefaultSuit.EvaVisor;
 
-      FutureSuit.IvaVisor = FutureSuit.IvaVisor ? FutureSuit.IvaVisor : DefaultSuit.IvaVisor;
-      FutureSuit.EvaVisor = FutureSuit.EvaVisor ? FutureSuit.EvaVisor : DefaultSuit.EvaVisor;
+      FutureSuit.IvaVisor ??= DefaultSuit.IvaVisor;
+      FutureSuit.EvaVisor ??= DefaultSuit.EvaVisor;
 
       foreach (Suit suit in Suits) {
-        suit.IvaVisor = suit.IvaVisor ? suit.IvaVisor : DefaultSuit.IvaVisor;
-        suit.EvaVisor = suit.EvaVisor ? suit.EvaVisor : DefaultSuit.EvaVisor;
+        suit.IvaVisor ??= DefaultSuit.IvaVisor;
+        suit.EvaVisor ??= DefaultSuit.EvaVisor;
       }
     }
 

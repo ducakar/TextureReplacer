@@ -88,6 +88,8 @@ namespace TextureReplacer
 
     public void Start()
     {
+      UpateKerbalSuitKinds();
+
       if (isGuiEnabled && ApplicationLauncher.Ready) {
         AddAppButton();
       }
@@ -448,7 +450,7 @@ namespace TextureReplacer
         log.Print("mapper is null!");
       } else {
         bool hideBackpack = mapper.HideBackpack;
-        hideBackpack = GUILayout.Toggle(hideBackpack, "Hide parachute/cargo backpack");
+        hideBackpack = GUILayout.Toggle(hideBackpack, "Hide cargo and parachute backpacks");
         mapper.HideBackpack = hideBackpack;
       }
     }
@@ -466,6 +468,42 @@ namespace TextureReplacer
       }
 
       GUILayout.EndHorizontal();
+    }
+
+    /// <summary>
+    /// Set ProcotCrewMembers to have the right suit kinds. On some occassions, e.g. when not changing suit kind through
+    /// TR GUI or on new game initialisation there can appear mismatches between suit texture assignments and Kerbal
+    /// models. We fix those here.
+    /// </summary>
+    private void UpateKerbalSuitKinds()
+    {
+      var mapper = Mapper.Instance;
+
+      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew) {
+        if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead) {
+          continue;
+        }
+
+        Appearance appearance = mapper.GetAppearance(kerbal);
+        Suit suit = mapper.GetKerbalSuit(kerbal, appearance);
+
+        if (suit != null && suit.Kind != kerbal.suit) {
+          kerbal.suit = suit.Kind;
+        }
+      }
+
+      foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Unowned) {
+        if (kerbal.rosterStatus != ProtoCrewMember.RosterStatus.Dead) {
+          continue;
+        }
+
+        Appearance appearance = mapper.GetAppearance(kerbal);
+        Suit suit = mapper.GetKerbalSuit(kerbal, appearance);
+
+        if (suit != null && suit.Kind != kerbal.suit) {
+          kerbal.suit = suit.Kind;
+        }
+      }
     }
   }
 }

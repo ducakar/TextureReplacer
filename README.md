@@ -53,70 +53,89 @@ course).
 Examples:
 
     GameData/**/TextureReplacer/Default/
-      kerbalHead                   // teeth and male head
-      kerbalHeadNRM                // teeth and male head normal map
-      kerbalGirl_06_BaseColor      // female head
-      kerbalGirl_06_BaseColorNRM   // female head normal map
-      kerbalMain                   // IVA suit (veteran/orange)
-      kerbalMainGrey               // IVA suit (standard/grey blue)
-      kerbalMainNRM                // IVA suit normal map
-      kerbalVisor                  // IVA helmet visor
-      EVAtexture                   // EVA suit
-      EVAtextureNRM                // EVA suit normal map
-      EVAvisor                     // EVA helmet visor
-      EVAjetpack                   // EVA jetpack
-      EVAjetpackNRM                // EVA jetpack normal map
-      EVAjetpackEmmisive           // EVA jetpack emissive
-      cargoContainerPack_diffuse   // EVA cargo backpack
-      cargoContainerPack_NRM       // EVA cargo backpack normal map
-      cargoContainerPack_emissive  // EVA cargo backpack emissive
-      backpack_Diff                // EVA parachute backpack
-      backpack_NM                  // EVA parachute backpack normal map
-      canopy_Diff                  // EVA parachute canopy
-      canopy_NR                    // EVA parachute canopy normal map
+      kerbalHead                      // teeth and male head
+      kerbalHeadNRM                   // teeth and male head normal map
+      kerbalGirl_06_BaseColor         // female head
+      kerbalGirl_06_BaseColorNRM      // female head normal map
 
-      NavBall                      // HUD & IVA NavBall
-      NavBallEmissive              // HUD & IVA NavBall emissive
+      orangeSuite_diffuse             // default IVA suit (veteran)
+      paleBlueSuite_diffuse           // default IVA suit (non-veteran)
+      orangeSuite_normal              // default IVA & EVA suit normal map
+      whiteSuite_diffuse              // default EVA suit
+      EVAjetpack                      // default EVA suit jetpack
+      EVAjetpackNRM                   // default EVA suit jetpack normal map
+      EVAjetpackEmmisive              // default EVA suit jetpack emissive
 
-      GalaxyTex_PositiveX          // skybox right face
-      GalaxyTex_NegativeX          // skybox left face
-      GalaxyTex_PositiveY          // skybox bottom face rotated by 180°
-      GalaxyTex_NegativeY          // skybox top face
-      GalaxyTex_PositiveZ          // skybox front face
-      GalaxyTex_NegativeZ          // skybox back face
+      me_suit_difuse_orange           // vintage IVA suit (veteran)
+      me_suit_difuse_low_polyBrown    // vintage IVA suit (non-veteran)
+      kerbalMainNRM                   // vintage IVA & EVA suit normal map
+      me_suit_difuse_blue             // vintage EVA suit
+      EVAjetpackscondary              // vintage suit jetpack
+      EVAjetpacksecondary_N           // vintage suit jetpack normal map
 
-      moho00                       // Moho
-      moho01                       // Moho normal map
-      Eve2_00                      // Eve
-      Eve2_01                      // Eve normal map
-      evemoon100                   // Gilly
-      evemoon101                   // Gilly normal map
-      KerbinScaledSpace300         // Kerbin
-      KerbinScaledSpace401         // Kerbin normal map
-      NewMunSurfaceMapDiffuse      // Mün
-      NewMunSurfaceMapNormals      // Mün normal map
-      NewMunSurfaceMap00           // Minmus
-      NewMunSurfaceMap01           // Minmus normal map
-      Duna5_00                     // Duna
-      Duna5_01                     // Duna normal map
-      desertplanetmoon00           // Ike
-      desertplanetmoon01           // Ike normal map
-      dwarfplanet100               // Dres
-      dwarfplanet101               // Dres normal map
-      gas1_clouds                  // Jool
-      cloud_normal                 // Jool normal map
-      newoceanmoon00               // Laythe
-      newoceanmoon01               // Laythe normal map
-      gp1icemoon00                 // Vall
-      gp1icemoon01                 // Vall normal map
-      rockyMoon00                  // Tylo
-      rockyMoon01                  // Tylo normal map
-      gp1minormoon100              // Bop
-      gp1minormoon101              // Bop normal map
-      gp1minormoon200              // Pol
-      gp1minormoon201              // Pol normal map
-      snowydwarfplanet00           // Eeloo
-      snowydwarfplanet01           // Eeloo normal map
+      futureSuit_diffuse_whiteOrange  // future IVA suit (veteran)
+      futureSuit_diffuse_whiteBlue    // future IVA suit (non-veteran)
+      futureSuitMainNRM               // future IVA suit normal map
+      futureSuit_diffuse_orange       // future EVA suit
+      futureSuitMainNRM               // future EVA suit normal map
+      futureSuit_emissive             // future EVA suit emissive
+      ksp_ig_jetpack_diffuse          // future EVA suit jetpack
+      EVAjetpackNRM                   // future EVA suit normal map
+
+      kerbalVisor                     // IVA helmet visor
+      EVAvisor                        // EVA helmet visor
+
+      cargoContainerPack_diffuse      // EVA cargo backpack
+      cargoContainerPack_NRM          // EVA cargo backpack normal map
+      cargoContainerPack_emissive     // EVA cargo backpack emissive
+
+      backpack_Diff                   // EVA parachute backpack
+      backpack_NM                     // EVA parachute backpack normal map
+      canopy_Diff                     // EVA parachute canopy
+      canopy_NR                       // EVA parachute canopy normal map
+
+      NavBall                         // HUD & IVA NavBall
+      NavBallEmissive                 // HUD & IVA NavBall emissive
+
+      GalaxyTex_PositiveX             // skybox right face
+      GalaxyTex_NegativeX             // skybox left face
+      GalaxyTex_PositiveY             // skybox bottom face rotated by 180°
+      GalaxyTex_NegativeY             // skybox top face
+      GalaxyTex_PositiveZ             // skybox front face
+      GalaxyTex_NegativeZ             // skybox back face
+
+      moho00                          // Moho
+      moho01                          // Moho normal map
+      Eve2_00                         // Eve
+      Eve2_01                         // Eve normal map
+      evemoon100                      // Gilly
+      evemoon101                      // Gilly normal map
+      KerbinScaledSpace300            // Kerbin
+      KerbinScaledSpace401            // Kerbin normal map
+      NewMunSurfaceMapDiffuse         // Mün
+      NewMunSurfaceMapNormals         // Mün normal map
+      NewMunSurfaceMap00              // Minmus
+      NewMunSurfaceMap01              // Minmus normal map
+      Duna5_00                        // Duna
+      Duna5_01                        // Duna normal map
+      desertplanetmoon00              // Ike
+      desertplanetmoon01              // Ike normal map
+      dwarfplanet100                  // Dres
+      dwarfplanet101                  // Dres normal map
+      gas1_clouds                     // Jool
+      cloud_normal                    // Jool normal map
+      newoceanmoon00                  // Laythe
+      newoceanmoon01                  // Laythe normal map
+      gp1icemoon00                    // Vall
+      gp1icemoon01                    // Vall normal map
+      rockyMoon00                     // Tylo
+      rockyMoon01                     // Tylo normal map
+      gp1minormoon100                 // Bop
+      gp1minormoon101                 // Bop normal map
+      gp1minormoon200                 // Pol
+      gp1minormoon201                 // Pol normal map
+      snowydwarfplanet00              // Eeloo
+      snowydwarfplanet01              // Eeloo normal map
 
 It's also possible to replace textures from `GameData/` if one specifies
 the full directory hierarchy:
@@ -193,34 +212,45 @@ only and only if explicitly selected (by `CustomKerbals` in a config file or
 later in the in-game GUI).
 
 Suit textures' names are identical as for the default texture replacement except
-that class level variants of suit texture are possible. If `kerbalMain` is not
-present `kerbalMainGrey` is used for veterans. Each suit must reside inside its
-own directory.
+that class level variants of suit texture are possible. Each suit must reside
+inside its own directory.
 
     GameData/**/TextureReplacer/Suits/[<subDir>/]<suit>/
-      kerbalMain       // IVA suit (veteran)
-      kerbalMainGrey   // IVA suit (level 0)
-      kerbalMainGrey1  // IVA suit (level 1)
-      kerbalMainGrey2  // IVA suit (level 2)
-      kerbalMainGrey3  // IVA suit (level 3)
-      kerbalMainGrey4  // IVA suit (level 4)
-      kerbalMainGrey5  // IVA suit (level 5)
-      kerbalMainNRM    // IVA suit normal map
-      kerbalVisor      // IVA helmet visor
-      EVAtexture       // EVA suit (level 0)
-      EVAtexture1      // EVA suit (level 1)
-      EVAtexture2      // EVA suit (level 2)
-      EVAtexture3      // EVA suit (level 3)
-      EVAtexture4      // EVA suit (level 4)
-      EVAtexture5      // EVA suit (level 5)
-      EVAtextureNRM    // EVA suit normal map
-      EVAvisor         // EVA helmet visor
-      EVAjetpack       // EVA jetpack
-      EVAjetpackNRM    // EVA jetpack normal map
+      kerbalMain                   // IVA suit (veteran)
+      kerbalMainGrey               // IVA suit (level 0)
+      kerbalMainGrey1              // IVA suit (level 1)
+      kerbalMainGrey2              // IVA suit (level 2)
+      kerbalMainGrey3              // IVA suit (level 3)
+      kerbalMainGrey4              // IVA suit (level 4)
+      kerbalMainGrey5              // IVA suit (level 5)
+      kerbalMainNRM                // IVA suit normal map
+      kerbalVisor                  // IVA helmet visor
 
-The level textures are optional. If a level texture is missing the one from the
-previous level is inherited. If the veteran texture is present it is used for
-all levels on veterans.
+      EVAtexture                   // EVA suit (level 0)
+      EVAtexture1                  // EVA suit (level 1)
+      EVAtexture2                  // EVA suit (level 2)
+      EVAtexture3                  // EVA suit (level 3)
+      EVAtexture4                  // EVA suit (level 4)
+      EVAtexture5                  // EVA suit (level 5)
+      EVAtextureNRM                // EVA suit normal map
+      futureSuit_emissive          // EVA suit emissive (future suit only)
+      EVAvisor                     // EVA helmet visor
+      EVAjetpack                   // EVA jetpack
+      EVAjetpackNRM                // EVA jetpack normal map
+      EVAjetpackEmmisive           // EVA jetpack emissive
+
+      cargoContainerPack_diffuse   // EVA cargo backpack
+      cargoContainerPack_NRM       // EVA cargo backpack normal map
+      cargoContainerPack_emissive  // EVA cargo backpack emissive
+
+      backpack_Diff                // EVA parachute backpack
+      backpack_NM                  // EVA parachute backpack normal map
+      canopy_Diff                  // EVA parachute canopy
+      canopy_NR                    // EVA parachute canopy normal map
+
+The veteran and level textures are optional. If a level texture is missing the
+one from the previous level is inherited. If the veteran texture is present it
+is used for all levels on veterans.
 
 Directories may optionally have a suffix containing any comination of the
 following letters (in an arbitrary order):
@@ -275,12 +305,15 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Known Issues ##
 
+* TextureReplacer does not detect suit type switch when done via clothes hanger.
+* Switching suit type via GUI needs at least two scene reloads before it is
+  correctly applied.
+* There are some lighting-related artefacts when using normal maps on heads
+  since head meshes do not have correct tangents and binormals.
 * Reflections:
   - Reflections have some strange effect on physics and mouth stuttering.
   - Reflections disable part highlighting along reflective surfaces.
   - Only the top face of the atmospheric skybox is reflected.
-* Switching suit type (default, vintage, future) during flight needs two flight
-  scene reloads before it is fully applied on EVA Kerbal models.
 * Issues with other plugins:
   - EVE clouds are not reflected at certain altitudes.
   - Ship Manifest crew transfers reset Kerbals to default textures (restored on
@@ -295,14 +328,17 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
   - add ability to replace cargo and parachute backpack and parachute canopy
     textures for each suit
   - add support for replacing emissive textures
+  - add option for exporting loaded textures as PNG in GUI
+  - re-add normal map support for heads
   - rename `hideParachuteBackpack` setting to `hideBackpack` as it hides both
     parachute and cargo backpacks now
-  - re-add normal map support for heads
+  - GUI only iterates through skins and suits of the selected type and gender
   - remove neck rings from future suits in IVA
   - remove `excludedSkins`, `excludedSuits`, `eyelessSkins` and `femaleSuits`
     config options; these should be configured via directory suffixes now
-  - fix default vintage IVA suits textures
-  - code cleanup and reorganisation
+  - remove `skinningQuality` setting
+  - disable reflections by default
+  - code cleanup, reorganisation and switch to C# 8.0
 * 3.7
   - add option to hide parachute backpacks
   - add vintage IVA kerbals to logKerbalHierarchy

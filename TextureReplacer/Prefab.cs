@@ -135,7 +135,7 @@ namespace TextureReplacer
       }
     }
 
-    private void LogHierarchies()
+    public void LogHierarchies()
     {
       log.Print("Male IVA Hierarchy");
       Util.LogDownHierarchy(MaleIva.transform);

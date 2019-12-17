@@ -168,10 +168,13 @@ namespace TextureReplacer
           EvaVisor ??= texture;
           return true;
         }
+        case "ksp_ig_jetpack_diffuse":
+        case "EVAjetpackscondary":
         case "EVAjetpack": {
           Jetpack ??= texture;
           return true;
         }
+        case "EVAjetpacksecondary_N":
         case "EVAjetpackNRM": {
           JetpackNRM ??= texture;
           return true;
