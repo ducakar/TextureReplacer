@@ -100,7 +100,7 @@ namespace TextureReplacer
 
     private static void EnsureEvaModule(Component eva)
     {
-      if (eva.GetComponent<TREvaModule>() == null) {
+      if (eva != null && eva.GetComponent<TREvaModule>() == null) {
         eva.gameObject.AddComponent<TREvaModule>();
       }
     }

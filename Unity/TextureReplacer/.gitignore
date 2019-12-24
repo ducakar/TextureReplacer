@@ -1,0 +1,8 @@
+*.meta
+/Assets/Scenes
+/Bundles
+/Library
+/Logs
+/Packages
+/ProjectSettings
+/Temp

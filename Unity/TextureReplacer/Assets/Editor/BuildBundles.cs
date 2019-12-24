@@ -9,12 +9,12 @@ public class BuildBundles
     Directory.CreateDirectory("Bundles");
 
     Directory.CreateDirectory("Bundles/Linux");
-    BuildPipeline.BuildAssetBundles("Bundles/Linux", BuildAssetBundleOptions.None, BuildTarget.StandaloneLinuxUniversal);
+    BuildPipeline.BuildAssetBundles("Bundles/Linux", BuildAssetBundleOptions.None, BuildTarget.StandaloneLinux64);
 
     Directory.CreateDirectory("Bundles/Windows");
     BuildPipeline.BuildAssetBundles("Bundles/Windows", BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows64);
 
     Directory.CreateDirectory("Bundles/OSX");
-    BuildPipeline.BuildAssetBundles("Bundles/OSX", BuildAssetBundleOptions.None, BuildTarget.StandaloneOSXIntel);
+    BuildPipeline.BuildAssetBundles("Bundles/OSX", BuildAssetBundleOptions.None, BuildTarget.StandaloneOSX);
   }
 }

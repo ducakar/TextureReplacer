@@ -321,6 +321,9 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Change Log ##
 
+* 4.0.1
+  - update Unity subproject and recompile shaders for Unity 2019.2
+  - fix a crash when missing a DLC
 * 4.0
   - update for KSP 1.8.x
   - add support for "future" (Breaking Ground) suits
