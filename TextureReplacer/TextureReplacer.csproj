@@ -30,8 +30,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Appearance.cs" />
-    <Compile Include="Mapper.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="Mapper.cs" />
     <Compile Include="Personaliser.cs" />
     <Compile Include="Prefab.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

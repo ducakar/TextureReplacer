@@ -4,9 +4,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextureReplacer", "TextureR
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{782FAF5C-879C-491B-8DB2-BD3E166B1A57}"
 	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
 		GameData\TextureReplacer\@Default.cfg = GameData\TextureReplacer\@Default.cfg
 		GameData\TextureReplacer\TextureReplacer.version = GameData\TextureReplacer\TextureReplacer.version
+		ChangeLog.md = ChangeLog.md
+		COPYING.md = COPYING.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
