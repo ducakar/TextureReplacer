@@ -159,10 +159,6 @@ namespace TextureReplacer
         if (navBallTexture != null) {
           material.SetTexture(Util.MainTextureProperty, navBallTexture);
         }
-
-        if (navBallTextureEmissive != null) {
-          material.SetTexture(Util.EmissiveProperty, navBallTextureEmissive);
-        }
       }
 
       var ivaNavBall = InternalSpace.Instance.GetComponentInChildren<InternalNavBall>();
@@ -170,7 +166,7 @@ namespace TextureReplacer
         Material material = ivaNavBall.navBall.GetComponent<Renderer>().sharedMaterial;
 
         if (navBallTexture != null) {
-          material.SetTexture(Util.MainTextureProperty, navBallTexture);
+          material.mainTexture = navBallTexture;
           material.SetTextureScale(Util.MainTexProperty, NavBallScale);
         }
 
