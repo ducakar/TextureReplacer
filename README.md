@@ -313,9 +313,5 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 * Head normal maps:
   - [KSP bug] Head meshes have mismatched tangents or binormals along lines
     where head texture is "stitched" together.
-* Reflections:
-  - Reflective shaders do not support part highlighting.
-  - Only the top face of the atmospheric skybox is reflected.
-  - Visor reflections cause jaw twitching.
 * Issues with other mods:
   - Clouds from EVE are not reflected at certain altitudes.

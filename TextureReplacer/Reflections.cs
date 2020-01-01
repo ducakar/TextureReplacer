@@ -44,8 +44,6 @@ namespace TextureReplacer
 
       private readonly RenderTexture envMap;
       private readonly Transform transform;
-      private readonly Renderer[] meshes;
-      private readonly bool[] meshStates;
       private readonly bool isEva;
       private readonly int interval;
 
@@ -56,7 +54,8 @@ namespace TextureReplacer
       public Script(Component part, int updateInterval)
       {
         envMap = new RenderTexture(reflectionResolution, reflectionResolution, 24) {
-          hideFlags = HideFlags.HideAndDontSave, wrapMode = TextureWrapMode.Clamp, dimension = TextureDimension.Cube
+          dimension = TextureDimension.Cube,
+          wrapMode = TextureWrapMode.Clamp
         };
 
         transform = part.transform;
@@ -75,10 +74,7 @@ namespace TextureReplacer
           }
         }
 
-        meshes = transform.GetComponentsInChildren<Renderer>();
-        meshStates = new bool[meshes.Length];
         interval = updateInterval;
-
         counter = Util.Random.Next(updateInterval);
         currentFace = Util.Random.Next(6);
 
@@ -145,37 +141,25 @@ namespace TextureReplacer
       {
         int faceMask = force ? 0x3f : 1 << currentFace;
 
-        // Hide all meshes of the current part.
-        for (int i = 0; i < meshes.Length; ++i) {
-          meshStates[i] = meshes[i].enabled;
-          meshes[i].enabled = false;
-        }
-
         Transform cameraTransform = camera.transform;
 
         // Skybox.
         cameraTransform.position = GalaxyCubeControl.Instance.transform.position;
         camera.farClipPlane = 100.0f;
-        camera.cullingMask = 1 << 18;
+        camera.cullingMask = (1 << 18);
         camera.RenderToCubemap(envMap, faceMask);
 
         // Scaled space.
         cameraTransform.position = ScaledSpace.Instance.transform.position;
         camera.farClipPlane = 3.0e7f;
-        camera.cullingMask = (1 << 10) | (1 << 23);
+        camera.cullingMask = (1 << 9) | (1 << 10) | (1 << 23);
         camera.RenderToCubemap(envMap, faceMask);
 
         // Scene.
-        Vector3 pos = transform.position;
-        cameraTransform.position = isEva ? pos + 0.4f * transform.up : pos;
+        cameraTransform.position = isEva ? transform.position + 0.4f * transform.up : transform.position;
         camera.farClipPlane = 60000.0f;
-        camera.cullingMask = (1 << 0) | (1 << 1) | (1 << 5) | (1 << 15) | (1 << 17);
+        camera.cullingMask = (1 << 0) | (1 << 15) | (1 << 17);
         camera.RenderToCubemap(envMap, faceMask);
-
-        // Restore mesh visibility.
-        for (int i = 0; i < meshes.Length; ++i) {
-          meshes[i].enabled = meshStates[i];
-        }
 
         currentFace = (currentFace + 1) % 6;
       }
@@ -184,49 +168,65 @@ namespace TextureReplacer
     // Instance.
     public static Reflections Instance { get; private set; }
 
-    // Visor reflection feature.
-    public bool IsVisorReflectionEnabled { get; private set; }
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool LogReflectiveMeshes { get; private set; }
 
     private static readonly Log log = new Log(nameof(Reflections));
+    private static readonly float[] CullDistances = {
+      100.0f, // 0 - parts (world space)
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      10.0f,  // 9 - atmosphere (scaled space)
+      0.0f,   // 10 - celestial bodies (scaled space)
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,   // 15 - buildings & terrain (world space)
+      0.0f,
+      100.0f, // 17 - kerbals (world space)
+      0.0f,   // 18 - skybox (galaxy cube space)
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,   // 23 - sun (scaled space)
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f,
+      0.0f
+    };
     // Reflective shader map.
     private static readonly string[,] ShaderNameMap = {
-      {"KSP/Diffuse", "Reflective/Bumped Diffuse"}, {"KSP/Specular", "Reflective/Bumped Diffuse"},
-      {"KSP/Bumped", "Reflective/Bumped Diffuse"}, {"KSP/Bumped Specular", "Reflective/Bumped Diffuse"},
+      {"KSP/Diffuse", "Reflective/Bumped Diffuse"},
+      {"KSP/Specular", "Reflective/Bumped Diffuse"},
+      {"KSP/Bumped", "Reflective/Bumped Diffuse"},
+      {"KSP/Bumped Specular", "Reflective/Bumped Diffuse"},
       {"KSP/Alpha/Translucent", "Reflective/Bumped Diffuse"},
       {"KSP/Alpha/Translucent Specular", "Reflective/Bumped Diffuse"}
     };
-
-    // Render layers:
-    //  0 - parts
-    //  1 - RCS jets
-    //  5 - engine exhaust
-    //  9 - sky/atmosphere
-    // 10 - scaled space bodies
-    // 15 - buildings, terrain
-    // 17 - kerbals
-    // 18 - skybox
-    // 23 - sun
-    private static readonly float[] CullDistances = {
-      500.0f, 5.0f, 0.0f, 0.0f, 0.0f, 50.0f, 0.0f, 0.0f, //
-      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,    //
-      0.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,   //
-      0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f     //
-    };
-
-    private readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
     // Reflection camera.
     private static Camera camera;
     // Reflection type.
     public Type ReflectionType { get; set; }
     // Real reflection resolution.
-    private static int reflectionResolution = 128;
-    // Interval in frames for updating environment map faces.
-    private static int reflectionInterval = 1;
+    private static int reflectionResolution = 256;
+    private static int reflectionInterval = 4;
     private static Type globalReflectionType = Type.None;
     // Reflection colour.
     private static Color visorReflectionColour = Color.white;
+
+    private readonly Dictionary<Shader, Shader> shaderMap = new Dictionary<Shader, Shader>();
 
     // Reflective visor shader.
     private Shader visorShader;
@@ -242,17 +242,14 @@ namespace TextureReplacer
     /// </summary>
     public void ReadConfig(ConfigNode rootNode)
     {
-      bool isVisorReflectionEnabled = IsVisorReflectionEnabled;
       bool logReflectiveMeshes = LogReflectiveMeshes;
 
       Util.Parse(rootNode.GetValue("reflectionType"), ref globalReflectionType);
       Util.Parse(rootNode.GetValue("reflectionResolution"), ref reflectionResolution);
       Util.Parse(rootNode.GetValue("reflectionInterval"), ref reflectionInterval);
-      Util.Parse(rootNode.GetValue("isVisorReflectionEnabled"), ref isVisorReflectionEnabled);
       Util.Parse(rootNode.GetValue("visorReflectionColour"), ref visorReflectionColour);
       Util.Parse(rootNode.GetValue("logReflectiveMeshes"), ref logReflectiveMeshes);
 
-      IsVisorReflectionEnabled = isVisorReflectionEnabled;
       LogReflectiveMeshes = logReflectiveMeshes;
     }
 
@@ -261,8 +258,6 @@ namespace TextureReplacer
     /// </summary>
     public void Load()
     {
-      IsVisorReflectionEnabled = false;
-
       string shadersFileName = Application.platform switch {
         RuntimePlatform.WindowsPlayer => "shaders.windows",
         RuntimePlatform.OSXPlayer     => "shaders.osx",
@@ -280,8 +275,6 @@ namespace TextureReplacer
           visorShader = shadersBundle.LoadAsset<Shader>("assets/visor.shader");
           if (visorShader == null) {
             log.Print("Visor shader missing in the asset file");
-          } else {
-            IsVisorReflectionEnabled = true;
           }
         }
       } catch (System.Exception ex) {
@@ -339,7 +332,7 @@ namespace TextureReplacer
       camera.enabled = false;
       camera.clearFlags = CameraClearFlags.Depth;
       // Any smaller number and visors will reflect internals of helmets.
-      camera.nearClipPlane = 0.125f;
+      camera.nearClipPlane = 0.4f;
       camera.layerCullDistances = CullDistances;
     }
 

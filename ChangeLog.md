@@ -1,5 +1,12 @@
 # Change Log #
 
+* 4.1
+  - do not hide the current part when rendering reflections to avoid subtle
+    physics glitches and jaw twitching
+  - change default `reflectionResolution` to 256 and `reflectionInterval` to 4
+  - remove `isVisorReflectionEnabled` setting
+  - fix atmosphere reflection
+  - fix visor shader to reflect terrain
 * 4.0.3
   - update reflection shader to match implementations published on Unity forum
   - clean up some code leftovers in GUI to fix a crash

@@ -40,13 +40,13 @@ Shader "KSP/TR/Visor"
     void surf(Input IN, inout SurfaceOutput o)
     {
       fixed4 tex  = tex2D(_MainTex, IN.uv_MainTex);
-      fixed4 refl = texCUBE(_Cube, IN.worldRefl) * tex.a;
+      fixed4 refl = texCUBE(_Cube, IN.worldRefl);
 
       o.Albedo   = tex.rgb * _Color.rgb;
       o.Gloss    = tex.a;
       o.Specular = _Shininess;
       o.Emission = refl.rgb * _ReflectColor.rgb;
-      o.Alpha    = refl.a * _Color.a;
+      o.Alpha    = tex.a * _Color.a;
     }
     ENDCG
   }
