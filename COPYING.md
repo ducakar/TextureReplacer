@@ -2,7 +2,7 @@
 
 ## Plugin: MIT ##
 
-    Copyright © 2013-2019 Davorin Učakar
+    Copyright © 2013-2020 Davorin Učakar
     Copyright © 2016 RangeMachine
     Copyright © 2013 rbray89
 
