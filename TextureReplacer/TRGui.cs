@@ -39,8 +39,6 @@ namespace TextureReplacer
 
     private static readonly Log log = new Log(nameof(TRGui));
 
-    private readonly Texture2D suitColour = new Texture2D(1, 1);
-
     // Application launcher icon.
     private Texture2D appIcon;
     private ApplicationLauncherButton appButton;
@@ -74,8 +72,6 @@ namespace TextureReplacer
           classes.AddUnique(className);
         }
       }
-
-      suitColour.wrapMode = TextureWrapMode.Repeat;
 
       appIcon = GameDatabase.Instance.GetTexture(AppIconPath, false);
       if (appIcon == null) {
@@ -111,8 +107,6 @@ namespace TextureReplacer
     {
       GameEvents.onGUIApplicationLauncherReady.Remove(AddAppButton);
       GameEvents.onGameSceneLoadRequested.Remove(RemoveAppButton);
-
-      Destroy(suitColour);
     }
 
     private void AddAppButton()
