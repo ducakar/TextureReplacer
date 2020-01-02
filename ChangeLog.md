@@ -1,8 +1,14 @@
 # Change Log #
 
+* 4.1
+  - rewrite reflection subsystem to use Unity reflection probes
+  - increase default reflection resolution to 256
+  - remove `reflectionInterval` and `isVisorReflectionEnabled` settings
 * 4.0.3
   - update reflection shader to match implementations published on Unity forum
   - clean up some code leftovers in GUI to fix a crash
+  - remove `interval` property on TRReflection module
+  - fix a crash in GUI
 * 4.0.2
   - fix IVA navball texture replacement
 * 4.0.1

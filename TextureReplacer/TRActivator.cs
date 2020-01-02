@@ -28,24 +28,11 @@ namespace TextureReplacer
   [KSPAddon(KSPAddon.Startup.EveryScene, false)]
   public class TRActivator : MonoBehaviour
   {
-    /// <summary>
-    /// Reflection updater. We don't want this to run every frame unless real reflections are enabled so it's wrapped
-    /// inside another component and enabled only when needed.
-    /// </summary>
-    public class TRReflectionUpdater : MonoBehaviour
-    {
-      public void Update()
-      {
-        Reflections.Script.UpdateScripts();
-      }
-    }
-
     private static readonly Log log = new Log(nameof(TRActivator));
 
     private static bool isLoaded;
 
     private bool isFlightScene;
-    private TRReflectionUpdater reflectionUpdater;
 
     private static void Load()
     {
@@ -87,20 +74,11 @@ namespace TextureReplacer
           Personaliser.Instance.OnBeginFlight();
           isFlightScene = true;
         }
-
-        if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) &&
-            Reflections.Instance.ReflectionType == Reflections.Type.Real) {
-          reflectionUpdater = gameObject.AddComponent<TRReflectionUpdater>();
-        }
       }
     }
 
     public void OnDestroy()
     {
-      if (reflectionUpdater != null) {
-        Destroy(reflectionUpdater);
-      }
-
       if (isFlightScene) {
         Personaliser.Instance.OnEndFlight();
       }
