@@ -1,5 +1,8 @@
 # Change Log #
 
+* 4.0.3
+  - update reflection shader to match implementations published on Unity forum
+  - clean up some code leftovers in GUI to fix a crash
 * 4.0.2
   - fix IVA navball texture replacement
 * 4.0.1

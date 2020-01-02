@@ -305,16 +305,17 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Known Issues ##
 
-* TextureReplacer does not detect suit type switch when done via clothes hanger.
-* Switching suit type via GUI needs at least two scene reloads before it is
-  correctly applied.
-* There are some lighting-related artefacts when using normal maps on heads
-  since head meshes do not have correct tangents and binormals.
+* Switching between default, vintage and future suit models:
+  - TextureReplacer will only detect the switch done via clothes hanger on
+    second flight scene load.
+  - EVA models on existing flights will only be updated on second flight scene
+    load when switched via TextureReplacer's GUI.
+* Head normal maps:
+  - [KSP bug] Head meshes have mismatched tangents or binormals along lines
+    where head texture is "stitched" together.
 * Reflections:
-  - Reflections have some strange effect on physics and mouth stuttering.
-  - Reflections disable part highlighting along reflective surfaces.
+  - Reflective shaders do not support part highlighting.
   - Only the top face of the atmospheric skybox is reflected.
-* Issues with other plugins:
-  - EVE clouds are not reflected at certain altitudes.
-  - Ship Manifest crew transfers reset Kerbals to default textures (restored on
-    vessel switch or scene reload).
+  - Visor reflections cause jaw twitching.
+* Issues with other mods:
+  - Clouds from EVE are not reflected at certain altitudes.
