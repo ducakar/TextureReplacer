@@ -138,9 +138,8 @@ namespace TextureReplacer
 
       // We determine body and helmet texture here to avoid code duplication between suit and helmet cases in the
       // following switch.
-      // Setting the suit explicitly -- even when default -- is necessary for two reasons: to fix IVA suits after KSP
-      // resetting them to the stock ones all the time and to fix the switch to default texture on start of EVA walk or
-      // EVA suit toggle.
+      // Setting the suit explicitly -- even when default -- is necessary to fix the switch to the default IVA texture
+      // when on EVA.
       Texture2D suitTexture = suit.GetSuit(useEvaSuit, kerbal) ?? defaultSuit.GetSuit(useEvaSuit, kerbal);
       Texture2D suitNormalMap = suit.GetSuitNRM(useEvaSuit) ?? defaultSuit.GetSuitNRM(useEvaSuit);
 
@@ -262,8 +261,7 @@ namespace TextureReplacer
             }
 
             // Update textures in Kerbal IVA object since KSP resets them to these values a few frames later.
-            var kerbalIva = component as Kerbal;
-            if (kerbalIva != null) {
+            if (component is Kerbal kerbalIva) {
               kerbalIva.textureStandard = newTexture;
               kerbalIva.textureVeteran = newTexture;
             }
@@ -273,6 +271,7 @@ namespace TextureReplacer
             if (isEva) {
               newTexture = suitTexture;
               newNormalMap = suitNormalMap;
+              newEmissive = suit.EvaSuitEmissive;
             } else {
               smr.gameObject.DestroyGameObjectImmediate();
             }
@@ -282,6 +281,9 @@ namespace TextureReplacer
           case "mesh_female_kerbalAstronaut01_helmet": {
             newTexture = suitTexture;
             newNormalMap = suitNormalMap;
+            if (isEva) {
+              newEmissive = suit.EvaSuitEmissive;
+            }
             break;
           }
           case "visor":

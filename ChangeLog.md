@@ -1,5 +1,7 @@
 # Change Log #
 
+* 4.1.1
+  - fix emissive texture for helmet and neck ring
 * 4.1
   - do not hide the current part when rendering reflections to avoid subtle
     physics glitches and jaw twitching
