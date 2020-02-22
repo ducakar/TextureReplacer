@@ -1,5 +1,8 @@
 # Change Log #
 
+* 4.2.2
+  - update for KSP 1.9
+  - fix some comments in `@Default.cfg`
 * 4.1.1
   - fix emissive texture for helmet and neck ring
 * 4.1
