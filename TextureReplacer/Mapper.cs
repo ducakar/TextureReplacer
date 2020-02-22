@@ -100,11 +100,12 @@ namespace TextureReplacer
 
     public void OnLoadScenario(ConfigNode node)
     {
-      gameKerbals.Clear();
-      ClassSuits.Clear();
       bool hideBackpack = globalHideBackpack;
       Util.Parse(node.GetValue("hideBackpack"), ref hideBackpack);
       HideBackpack = hideBackpack;
+
+      gameKerbals.Clear();
+      ClassSuits.Clear();
       LoadKerbalsMap(node.GetNode("Kerbals"));
       LoadClassSuitMap(node.GetNode("ClassSuits"), ClassSuits);
     }
@@ -112,8 +113,8 @@ namespace TextureReplacer
     public void OnSaveScenario(ConfigNode node)
     {
       node.ClearNodes();
-
       node.AddValue("hideBackpack", HideBackpack);
+
       SaveKerbals(node.AddNode("Kerbals"));
       SaveClassSuitMap(node.AddNode("ClassSuits"));
     }
@@ -136,7 +137,7 @@ namespace TextureReplacer
         return appearance;
       }
 
-      appearance = new Appearance {Hash = kerbal.name.GetHashCode()};
+      appearance = new Appearance(kerbal);
       gameKerbals.Add(kerbal.name, appearance);
       return appearance;
     }
@@ -207,15 +208,16 @@ namespace TextureReplacer
     public IList<Skin> GetAvailableSkins(ProtoCrewMember kerbal, bool allowExcluded)
     {
       return (allowExcluded
-        ? Skins.Where(s => s.Gender == kerbal.gender)
-        : Skins.Where(s => !s.Excluded && s.Gender == kerbal.gender)).ToList();
+                ? Skins.Where(s => s.Gender == kerbal.gender)
+                : Skins.Where(s => !s.Excluded && s.Gender == kerbal.gender)).ToList();
     }
 
     public IList<Suit> GetAvailableSuits(ProtoCrewMember kerbal, bool allowExcluded)
     {
       return (allowExcluded
-          ? Suits.Where(s => s.Kind == kerbal.suit && (s.Gender == null || s.Gender == kerbal.gender))
-          : Suits.Where(s => !s.Excluded && s.Kind == kerbal.suit && (s.Gender == null || s.Gender == kerbal.gender)))
+                ? Suits.Where(s => s.Kind == kerbal.suit && (s.Gender == null || s.Gender == kerbal.gender))
+                : Suits.Where(s =>
+                  !s.Excluded && s.Kind == kerbal.suit && (s.Gender == null || s.Gender == kerbal.gender)))
         .ToList();
     }
 
@@ -243,12 +245,13 @@ namespace TextureReplacer
         string skinName = tokens.Length >= 1 ? tokens[0] : null;
         string suitName = tokens.Length >= 2 ? tokens[1] : null;
 
-        gameKerbals[kerbal.name] = new Appearance {
+        gameKerbals[kerbal.name] = new Appearance(kerbal) {
           Skin = skinName switch {
-            null      => null,
-            "GENERIC" => null,
-            "DEFAULT" => GetDefault(kerbal.gender),
-            _         => Skins.Find(h => h.Name == skinName)
+            null        => null,
+            "GENERIC"   => null,
+            "DEFAULT.m" => GetDefault(kerbal.gender),
+            "DEFAULT.f" => GetDefault(kerbal.gender),
+            _           => Skins.Find(h => h.Name == skinName)
           },
           Suit = suitName switch {
             null        => null,

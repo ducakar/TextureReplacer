@@ -171,6 +171,9 @@ namespace TextureReplacer
     // Print names of meshes and their shaders in parts with TRReflection module.
     public bool LogReflectiveMeshes { get; private set; }
 
+    // Reflection type.
+    public Type ReflectionType { get; set; }
+
     private static readonly Log log = new Log(nameof(Reflections));
     private static readonly float[] CullDistances = {
       100.0f, // 0 - parts (world space)
@@ -182,13 +185,13 @@ namespace TextureReplacer
       0.0f,
       0.0f,
       0.0f,
-      10.0f,  // 9 - atmosphere (scaled space)
-      0.0f,   // 10 - celestial bodies (scaled space)
+      10.0f, // 9 - atmosphere (scaled space)
+      0.0f,  // 10 - celestial bodies (scaled space)
       0.0f,
       0.0f,
       0.0f,
       0.0f,
-      0.0f,   // 15 - buildings & terrain (world space)
+      0.0f, // 15 - buildings & terrain (world space)
       0.0f,
       100.0f, // 17 - kerbals (world space)
       0.0f,   // 18 - skybox (galaxy cube space)
@@ -196,7 +199,7 @@ namespace TextureReplacer
       0.0f,
       0.0f,
       0.0f,
-      0.0f,   // 23 - sun (scaled space)
+      0.0f, // 23 - sun (scaled space)
       0.0f,
       0.0f,
       0.0f,
@@ -206,6 +209,7 @@ namespace TextureReplacer
       0.0f,
       0.0f
     };
+
     // Reflective shader map.
     private static readonly string[,] ShaderNameMap = {
       {"KSP/Diffuse", "Reflective/Bumped Diffuse"},
@@ -215,10 +219,9 @@ namespace TextureReplacer
       {"KSP/Alpha/Translucent", "Reflective/Bumped Diffuse"},
       {"KSP/Alpha/Translucent Specular", "Reflective/Bumped Diffuse"}
     };
+
     // Reflection camera.
     private static Camera camera;
-    // Reflection type.
-    public Type ReflectionType { get; set; }
     // Real reflection resolution.
     private static int reflectionResolution = 256;
     private static int reflectionInterval = 4;

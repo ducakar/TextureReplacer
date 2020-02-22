@@ -1,6 +1,8 @@
 # Change Log #
 
-* 4.2.2
+* 4.1.3
+  - fix loading of kerbals from scenario that use generic skin or suit
+* 4.1.2
   - update for KSP 1.9
   - fix some comments in `@Default.cfg`
 * 4.1.1

@@ -24,8 +24,14 @@ namespace TextureReplacer
 {
   internal class Appearance
   {
-    public int Hash;
+    public readonly int Hash;
+
     public Skin Skin;
     public Suit Suit;
+
+    public Appearance(ProtoCrewMember kerbal)
+    {
+      Hash = kerbal.name.GetHashCode();
+    }
   }
 }
