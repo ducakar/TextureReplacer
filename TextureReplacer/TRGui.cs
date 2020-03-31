@@ -84,7 +84,7 @@ namespace TextureReplacer
 
     public void Start()
     {
-      UpateKerbalSuitKinds();
+      UpdateKerbalSuitKinds();
 
       if (isGuiEnabled && ApplicationLauncher.Ready) {
         AddAppButton();
@@ -465,11 +465,11 @@ namespace TextureReplacer
     }
 
     /// <summary>
-    /// Set ProcotCrewMembers to have the right suit kinds. On some occassions, e.g. when not changing suit kind through
+    /// Set ProtoCrewMembers to have the right suit kinds. On some occasions, e.g. when not changing suit kind through
     /// TR GUI or on new game initialisation there can appear mismatches between suit texture assignments and Kerbal
     /// models. We fix those here.
     /// </summary>
-    private void UpateKerbalSuitKinds()
+    private static void UpdateKerbalSuitKinds()
     {
       var mapper = Mapper.Instance;
 

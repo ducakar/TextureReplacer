@@ -34,10 +34,6 @@ namespace TextureReplacer
     [KSPField(isPersistant = false)] public string interval = "";
     [KSPField(isPersistant = false)] public string meshes = "";
 
-    // ReflectionPlugin parameters.
-    [KSPField(isPersistant = false)] public string ReflectionColor = "";
-    [KSPField(isPersistant = false)] public string MeshesToChange = "all";
-
     private static readonly Log log = new Log(nameof(TRReflection));
 
     private Reflections.Script script;
@@ -50,16 +46,12 @@ namespace TextureReplacer
       Color reflectionColour = Color.white;
       int updateInterval = 1;
 
-      Util.Parse(ReflectionColor, ref reflectionColour);
       Util.Parse(colour, ref reflectionColour);
       Util.Parse(interval, ref updateInterval);
 
       updateInterval = Math.Max(updateInterval, 1);
 
       List<string> meshNames = Util.SplitConfigValue(meshes).ToList();
-      if (MeshesToChange != "all") {
-        meshNames.AddUniqueRange(Util.SplitConfigValue(MeshesToChange));
-      }
 
       if (reflections.LogReflectiveMeshes) {
         log.Print("Part \"{0}\"", part.name);
