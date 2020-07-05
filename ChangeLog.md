@@ -1,5 +1,10 @@
 # Change Log #
 
+* 4.2
+  - rebuilt for KSP 1.10
+  - add GUI option to toggle suit personalisation
+  - remove global `reflectionType` and `hideBackpack` options as there was no
+    significant benefit and they only confused people
 * 4.1.3
   - fix loading of kerbals from scenario that use generic skin or suit
 * 4.1.2

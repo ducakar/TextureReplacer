@@ -44,7 +44,7 @@ namespace TextureReplacer
     private ApplicationLauncherButton appButton;
     private bool isGuiEnabled = true;
     // UI state.
-    private Rect windowRect = new Rect(Screen.width - 600, 60, 580, 580);
+    private Rect windowRect = new Rect(Screen.width - 600, 60, 580, 600);
     private Vector2 rosterScroll = Vector2.zero;
     private bool isEnabled;
     // Classes from config files.
@@ -416,7 +416,7 @@ namespace TextureReplacer
           (KerbalSuit.Vintage, _, true)      => KerbalSuit.Future,
           (KerbalSuit.Future, false, false)  => KerbalSuit.Default,
           (KerbalSuit.Future, true, _)       => KerbalSuit.Vintage,
-          _                                  => (KerbalSuit?) null
+          _                                  => null
         };
 
         if (newSuit.HasValue) {
@@ -443,6 +443,10 @@ namespace TextureReplacer
       if (mapper == null) {
         log.Print("mapper is null!");
       } else {
+        bool personaliseSuit = mapper.PersonaliseSuit;
+        personaliseSuit = GUILayout.Toggle(personaliseSuit, "Personalise suits");
+        mapper.PersonaliseSuit = personaliseSuit;
+
         bool hideBackpack = mapper.HideBackpack;
         hideBackpack = GUILayout.Toggle(hideBackpack, "Hide cargo and parachute backpacks");
         mapper.HideBackpack = hideBackpack;

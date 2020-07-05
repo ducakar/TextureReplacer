@@ -146,7 +146,7 @@ namespace TextureReplacer
         // Skybox.
         cameraTransform.position = GalaxyCubeControl.Instance.transform.position;
         camera.farClipPlane = 100.0f;
-        camera.cullingMask = (1 << 18);
+        camera.cullingMask = 1 << 18;
         camera.RenderToCubemap(envMap, faceMask);
 
         // Scaled space.
@@ -225,7 +225,6 @@ namespace TextureReplacer
     // Real reflection resolution.
     private static int reflectionResolution = 256;
     private static int reflectionInterval = 4;
-    private static Type globalReflectionType = Type.None;
     // Reflection colour.
     private static Color visorReflectionColour = Color.white;
 
@@ -247,7 +246,6 @@ namespace TextureReplacer
     {
       bool logReflectiveMeshes = LogReflectiveMeshes;
 
-      Util.Parse(rootNode.GetValue("reflectionType"), ref globalReflectionType);
       Util.Parse(rootNode.GetValue("reflectionResolution"), ref reflectionResolution);
       Util.Parse(rootNode.GetValue("reflectionInterval"), ref reflectionInterval);
       Util.Parse(rootNode.GetValue("visorReflectionColour"), ref visorReflectionColour);
@@ -304,7 +302,7 @@ namespace TextureReplacer
 
     public void OnLoadScenario(ConfigNode node)
     {
-      Type type = globalReflectionType;
+      var type = Type.Real;
       Util.Parse(node.GetValue("reflectionType"), ref type);
       ReflectionType = type;
     }

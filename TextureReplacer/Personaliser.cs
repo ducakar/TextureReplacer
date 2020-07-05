@@ -116,13 +116,6 @@ namespace TextureReplacer
       // to apply fixes to them and set fallback default textures.
       bool isPrefabMissing = !isEva && kerbal.suit != KerbalSuit.Default;
 
-      Appearance appearance = mapper.GetAppearance(kerbal);
-
-      Skin skin = mapper.GetKerbalSkin(kerbal, appearance);
-      Suit suit = mapper.GetKerbalSuit(kerbal, appearance);
-      Skin defaultSkin = mapper.GetDefault(kerbal.gender);
-      Suit defaultSuit = mapper.GetDefault(kerbal.suit);
-
       Transform modelTransform = (isEva, kerbal.suit, kerbal.gender) switch {
         (false, KerbalSuit.Default, _)            => transform.Find("model01"),
         (false, KerbalSuit.Vintage, _)            => transform.Find("kbIVA@idle/model01"),
@@ -136,12 +129,26 @@ namespace TextureReplacer
       modelTransform ??= transform.Find("model01") ?? transform.Find("kbIVA@idle/model01") ??
                          transform.Find("serenityMaleIVA/model01") ?? transform.Find("serenityFemaleIVA/model01");
 
+      Appearance appearance = mapper.GetAppearance(kerbal);
+
+      Skin skin = mapper.GetKerbalSkin(kerbal, appearance);
+      Skin defaultSkin = mapper.GetDefault(kerbal.gender);
+
       // We determine body and helmet texture here to avoid code duplication between suit and helmet cases in the
       // following switch.
       // Setting the suit explicitly -- even when default -- is necessary to fix the switch to the default IVA texture
       // when on EVA.
-      Texture2D suitTexture = suit.GetSuit(useEvaSuit, kerbal) ?? defaultSuit.GetSuit(useEvaSuit, kerbal);
-      Texture2D suitNormalMap = suit.GetSuitNRM(useEvaSuit) ?? defaultSuit.GetSuitNRM(useEvaSuit);
+      Suit suit = null;
+      Texture2D suitTexture = null;
+      Texture2D suitNormalMap = null;
+
+      if (mapper.PersonaliseSuit) {
+        Suit defaultSuit = mapper.GetDefault(kerbal.suit);
+
+        suit = mapper.GetKerbalSuit(kerbal, appearance);
+        suitTexture = suit.GetSuit(useEvaSuit, kerbal) ?? defaultSuit.GetSuit(useEvaSuit, kerbal);
+        suitNormalMap = suit.GetSuitNRM(useEvaSuit) ?? defaultSuit.GetSuitNRM(useEvaSuit);
+      }
 
       foreach (Renderer renderer in modelTransform.GetComponentsInChildren<Renderer>()) {
         var smr = renderer as SkinnedMeshRenderer;
@@ -254,6 +261,10 @@ namespace TextureReplacer
           }
           case "body01":
           case "mesh_female_kerbalAstronaut01_body01": {
+            if (suit == null) {
+              break;
+            }
+
             newTexture = suitTexture;
             newNormalMap = suitNormalMap;
             if (isEva) {
@@ -268,17 +279,23 @@ namespace TextureReplacer
             break;
           }
           case "neckRing": {
+            if (suit == null) {
+              break;
+            }
+
+            newTexture = suitTexture;
+            newNormalMap = suitNormalMap;
             if (isEva) {
-              newTexture = suitTexture;
-              newNormalMap = suitNormalMap;
               newEmissive = suit.EvaSuitEmissive;
-            } else {
-              smr.gameObject.DestroyGameObjectImmediate();
             }
             break;
           }
           case "helmet":
           case "mesh_female_kerbalAstronaut01_helmet": {
+            if (suit == null) {
+              break;
+            }
+
             newTexture = suitTexture;
             newNormalMap = suitNormalMap;
             if (isEva) {
@@ -288,6 +305,10 @@ namespace TextureReplacer
           }
           case "visor":
           case "mesh_female_kerbalAstronaut01_visor": {
+            if (suit == null) {
+              break;
+            }
+
             // Visor texture has to be replaced every time.
             newTexture = suit.GetVisor(useEvaSuit);
             if (newTexture != null) {
@@ -298,6 +319,11 @@ namespace TextureReplacer
           default: { // Jetpack.
             if (isEva) {
               smr.enabled = useEvaSuit;
+
+              if (suit == null) {
+                break;
+              }
+
               if (useEvaSuit) {
                 newTexture = suit.Jetpack;
                 newNormalMap = suit.JetpackNRM;
@@ -339,30 +365,39 @@ namespace TextureReplacer
         cargoPack.enabled = showBackpack;
         parachutePack.enabled = showBackpack;
 
+        if (suit == null) {
+          return;
+        }
+
         if (showBackpack) {
+          Material cargoPackMaterial = cargoPack.material;
+          Material parachutePackMaterial = parachutePack.material;
+
           if (suit.CargoPack != null) {
-            cargoPack.material.mainTexture = suit.CargoPack;
+            cargoPackMaterial.mainTexture = suit.CargoPack;
           }
           if (suit.CargoPackNRM != null) {
-            cargoPack.material.SetTexture(Util.BumpMapProperty, suit.CargoPackNRM);
+            cargoPackMaterial.SetTexture(Util.BumpMapProperty, suit.CargoPackNRM);
           }
           if (suit.CargoPackEmissive != null) {
-            cargoPack.material.SetTexture(Util.EmissiveProperty, suit.CargoPackEmissive);
+            cargoPackMaterial.SetTexture(Util.EmissiveProperty, suit.CargoPackEmissive);
           }
 
           if (suit.ParachutePack != null) {
-            parachutePack.material.mainTexture = suit.ParachutePack;
+            parachutePackMaterial.mainTexture = suit.ParachutePack;
           }
           if (suit.ParachutePackNRM != null) {
-            parachutePack.material.SetTexture(Util.BumpMapProperty, suit.ParachutePackNRM);
+            parachutePackMaterial.SetTexture(Util.BumpMapProperty, suit.ParachutePackNRM);
           }
         }
 
+        Material parachuteCanopyMaterial = parachuteCanopy.material;
+
         if (suit.ParachuteCanopy != null) {
-          parachuteCanopy.material.mainTexture = suit.ParachuteCanopy;
+          parachuteCanopyMaterial.mainTexture = suit.ParachuteCanopy;
         }
         if (suit.ParachuteCanopyNRM != null) {
-          parachuteCanopy.material.SetTexture(Util.BumpMapProperty, suit.ParachuteCanopyNRM);
+          parachuteCanopyMaterial.SetTexture(Util.BumpMapProperty, suit.ParachuteCanopyNRM);
         }
       }
     }

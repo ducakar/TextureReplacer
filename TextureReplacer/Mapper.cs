@@ -60,20 +60,12 @@ namespace TextureReplacer
     // game doesn't contain `TRScenario`.
     private readonly ConfigNode customKerbalsNode = new ConfigNode();
 
-    private bool globalHideBackpack;
+    public bool PersonaliseSuit { get; set; }
     public bool HideBackpack { get; set; }
 
     public static void Recreate()
     {
       Instance = new Mapper();
-    }
-
-    /// <summary>
-    /// Read configuration and perform pre-load initialisation.
-    /// </summary>
-    public void ReadConfig(ConfigNode rootNode)
-    {
-      Util.Parse(rootNode.GetValue("hideBackpack"), ref globalHideBackpack);
     }
 
     /// <summary>
@@ -100,7 +92,11 @@ namespace TextureReplacer
 
     public void OnLoadScenario(ConfigNode node)
     {
-      bool hideBackpack = globalHideBackpack;
+      bool personaliseSuit = true;
+      Util.Parse(node.GetValue("personaliseSuit"), ref personaliseSuit);
+      PersonaliseSuit = personaliseSuit;
+
+      bool hideBackpack = false;
       Util.Parse(node.GetValue("hideBackpack"), ref hideBackpack);
       HideBackpack = hideBackpack;
 
@@ -113,6 +109,7 @@ namespace TextureReplacer
     public void OnSaveScenario(ConfigNode node)
     {
       node.ClearNodes();
+      node.AddValue("personaliseSuit", PersonaliseSuit);
       node.AddValue("hideBackpack", HideBackpack);
 
       SaveKerbals(node.AddNode("Kerbals"));
