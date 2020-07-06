@@ -287,6 +287,8 @@ namespace TextureReplacer
             newNormalMap = suitNormalMap;
             if (isEva) {
               newEmissive = suit.EvaSuitEmissive;
+            } else if (!kerbal.hasNeckRingOn) {
+              smr.gameObject.DestroyGameObject();
             }
             break;
           }

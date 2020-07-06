@@ -1,5 +1,7 @@
 # Change Log #
 
+* 4.2.1
+  - hide suit collar of future suit in IVA if hidden in EVA
 * 4.2
   - rebuilt for KSP 1.10
   - add GUI option to toggle suit personalisation
