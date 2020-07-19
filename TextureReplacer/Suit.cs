@@ -61,27 +61,25 @@ namespace TextureReplacer
     public Suit(string name)
     {
       Name = name;
-      Gender = Util.HasSuffix(name, 'm')
-                 ? ProtoCrewMember.Gender.Male
-                 : Util.HasSuffix(name, 'f')
-                   ? ProtoCrewMember.Gender.Female
-                   : (Gender?) null;
-
-      Kind = Util.HasSuffix(name, 'V')
-               ? KerbalSuit.Vintage
-               : Util.HasSuffix(name, 'F')
-                 ? KerbalSuit.Future
-                 : KerbalSuit.Default;
-
+      Gender = true switch {
+        _ when Util.HasSuffix(name, 'm') => ProtoCrewMember.Gender.Male,
+        _ when Util.HasSuffix(name, 'f') => ProtoCrewMember.Gender.Female,
+        _                                => null
+      };
+      Kind = true switch {
+        _ when Util.HasSuffix(name, 'V') => KerbalSuit.Vintage,
+        _ when Util.HasSuffix(name, 'F') => KerbalSuit.Future,
+        _                                => KerbalSuit.Default
+      };
       Excluded = Util.HasSuffix(name, 'x');
     }
 
     public Texture2D GetSuit(bool useEvaSuit, ProtoCrewMember kerbal)
     {
-      (int level, bool veteran) = kerbal == null ? (0, false) : (kerbal.experienceLevel, kerbal.veteran);
+      int level = kerbal.experienceLevel;
       return useEvaSuit
                ? EvaSuit[level]
-               : veteran && IvaSuitVeteran != null
+               : kerbal.veteran && IvaSuitVeteran
                  ? IvaSuitVeteran
                  : IvaSuit[level];
     }

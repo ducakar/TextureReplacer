@@ -54,7 +54,7 @@ namespace TextureReplacer
     private string selectedClass;
     private IList<Skin> availableSkins;
     private IList<Suit> availableSuits;
-    private string dumpTextureName;
+    private string dumpTextureName = "";
 
     public void Awake()
     {

@@ -62,11 +62,12 @@ namespace TextureReplacer
       }
     }
 
-    public static void Parse<T>(string name, ref T variable)
+    public static void Parse<TEnum>(string name, ref TEnum variable)
+      where TEnum : struct
     {
-      try {
-        variable = (T) Enum.Parse(typeof(T), name, true);
-      } catch (ArgumentException) { } catch (OverflowException) { }
+      if (Enum.TryParse(name, out TEnum value)) {
+        variable = value;
+      }
     }
 
     public static void Parse(string name, ref Color variable)
