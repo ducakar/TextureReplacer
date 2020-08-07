@@ -1,7 +1,9 @@
 # Change Log #
 
+* 4.2.2
+  - fix suit switches via TR GUI not being applied on the first scene switch
 * 4.2.1
-  - hide suit collar of future suit in IVA if hidden in EVA
+  - hide collar of future suit in IVA when hidden on EVA
 * 4.2
   - rebuilt for KSP 1.10
   - add GUI option to toggle suit personalisation

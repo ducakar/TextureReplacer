@@ -305,13 +305,8 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
 ## Known Issues ##
 
-* Switching between default, vintage and future suit models:
-  - TextureReplacer will only detect the switch done via clothes hanger on
-    second flight scene load.
-  - EVA models on existing flights will only be updated on second flight scene
-    load when switched via TextureReplacer's GUI.
-* Head normal maps:
-  - [KSP bug] Head meshes have mismatched tangents or binormals along lines
-    where head texture is "stitched" together.
-* Issues with other mods:
-  - Clouds from EVE are not reflected at certain altitudes.
+* Switches between suit types (standard, vindage and future) done via stock GUI
+  will only be reflected in TextureReplacer's GUI after the next scene load.
+* (KSP bug) Head meshes have mismatched tangents and/or binormals along the back
+  of the head, where the texture is stitched together.
+* Clouds from EVE are not reflected at certain altitudes.
