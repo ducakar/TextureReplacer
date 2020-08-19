@@ -1,11 +1,14 @@
 # Change Log #
 
+* 4.2.3
+  - fix back buttons in GUI to start iterating from the last skin/suit
+  - fix `CustomKerbals` configuration being ignored in missions
 * 4.2.2
   - fix suit switches via TR GUI not being applied on the first scene switch
 * 4.2.1
   - hide collar of future suit in IVA when hidden on EVA
 * 4.2
-  - rebuilt for KSP 1.10
+  - rebuild for KSP 1.10
   - add GUI option to toggle suit personalisation
   - remove global `reflectionType` and `hideBackpack` options as there was no
     significant benefit and they only confused people

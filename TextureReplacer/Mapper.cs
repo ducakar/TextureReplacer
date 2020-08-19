@@ -112,7 +112,7 @@ namespace TextureReplacer
       node.AddValue("personaliseSuit", PersonaliseSuit);
       node.AddValue("hideBackpack", HideBackpack);
 
-      SaveKerbals(node.AddNode("Kerbals"));
+      SaveKerbalsMap(node.AddNode("Kerbals"));
       SaveClassSuitMap(node.AddNode("ClassSuits"));
     }
 
@@ -132,6 +132,11 @@ namespace TextureReplacer
     {
       if (gameKerbals.TryGetValue(kerbal.name, out Appearance appearance)) {
         return appearance;
+      }
+
+      string nodeValue = customKerbalsNode.GetValue(kerbal.name);
+      if (nodeValue != null) {
+        return GetAppearanceFromNode(kerbal, nodeValue);
       }
 
       appearance = new Appearance(kerbal);
@@ -238,34 +243,14 @@ namespace TextureReplacer
           continue;
         }
 
-        string[] tokens = Util.SplitConfigValue(value);
-        string skinName = tokens.Length >= 1 ? tokens[0] : null;
-        string suitName = tokens.Length >= 2 ? tokens[1] : null;
-
-        gameKerbals[kerbal.name] = new Appearance(kerbal) {
-          Skin = skinName switch {
-            null        => null,
-            "GENERIC"   => null,
-            "DEFAULT.m" => GetDefault(kerbal.gender),
-            "DEFAULT.f" => GetDefault(kerbal.gender),
-            _           => Skins.Find(h => h.Name == skinName)
-          },
-          Suit = suitName switch {
-            null        => null,
-            "GENERIC"   => null,
-            "DEFAULT"   => GetDefault(kerbal.suit),
-            "DEFAULT.V" => GetDefault(kerbal.suit),
-            "DEFAULT.F" => GetDefault(kerbal.suit),
-            _           => Suits.Find(s => s.Name == suitName)
-          }
-        };
+        gameKerbals[kerbal.name] = GetAppearanceFromNode(kerbal, value);
       }
     }
 
     /// <summary>
     /// Save per-game custom Kerbals mapping.
     /// </summary>
-    private void SaveKerbals(ConfigNode node)
+    private void SaveKerbalsMap(ConfigNode node)
     {
       KerbalRoster roster = HighLogic.CurrentGame.CrewRoster;
 
@@ -282,6 +267,31 @@ namespace TextureReplacer
 
         node.AddValue(kerbal.name, skinName + " " + suitName);
       }
+    }
+
+    private Appearance GetAppearanceFromNode(ProtoCrewMember kerbal, string value)
+    {
+      string[] tokens = Util.SplitConfigValue(value);
+      string skinName = tokens.Length >= 1 ? tokens[0] : null;
+      string suitName = tokens.Length >= 2 ? tokens[1] : null;
+
+      return new Appearance(kerbal) {
+        Skin = skinName switch {
+          null        => null,
+          "GENERIC"   => null,
+          "DEFAULT.m" => GetDefault(kerbal.gender),
+          "DEFAULT.f" => GetDefault(kerbal.gender),
+          _           => Skins.Find(h => h.Name == skinName)
+        },
+        Suit = suitName switch {
+          null        => null,
+          "GENERIC"   => null,
+          "DEFAULT"   => GetDefault(kerbal.suit),
+          "DEFAULT.V" => GetDefault(kerbal.suit),
+          "DEFAULT.F" => GetDefault(kerbal.suit),
+          _           => Suits.Find(s => s.Name == suitName)
+        }
+      };
     }
 
     /// <summary>

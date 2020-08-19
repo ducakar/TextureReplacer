@@ -289,7 +289,9 @@ namespace TextureReplacer
       if (GUILayout.Button("<")) {
         int skinIndex = availableSkins.IndexOf(mapper.GetKerbalSkin(selectedKerbal, appearance));
 
-        skinIndex = skinIndex == -1 ? 0 : (availableSkins.Count + skinIndex - 1) % availableSkins.Count;
+        skinIndex = skinIndex == -1
+                      ? availableSkins.Count - 1
+                      : (skinIndex + availableSkins.Count - 1) % availableSkins.Count;
         appearance.Skin = availableSkins[skinIndex];
       }
 
@@ -356,7 +358,9 @@ namespace TextureReplacer
       GUI.enabled = availableSuits.Count != 0;
 
       if (GUILayout.Button("<")) {
-        suitIndex = suitIndex == -1 ? 0 : (suitIndex + availableSuits.Count - 1) % availableSuits.Count;
+        suitIndex = suitIndex == -1
+                      ? availableSuits.Count - 1
+                      : (suitIndex + availableSuits.Count - 1) % availableSuits.Count;
 
         if (selectedKerbal != null) {
           appearance.Suit = availableSuits[suitIndex];
