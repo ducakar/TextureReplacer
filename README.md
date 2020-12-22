@@ -310,3 +310,6 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 * (KSP bug) Head meshes have mismatched tangents and/or binormals along the back
   of the head, where the texture is stitched together.
 * Clouds from EVE are not reflected at certain altitudes.
+* KSP 1.11 issues:
+  - Shaded visors only work with reflections disabled.
+  - Visor textures only work correctly with reflections enabled.

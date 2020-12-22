@@ -1,5 +1,10 @@
 # Change Log #
 
+* 4.3
+  - update for KSP 1.11, but keep backward compatibility with KSP 1.10
+  - remove jetpack and cargo/parachute backpack hiding option on KSP 1.11
+  - use stock visor shader when reflections are disabled; this fixes shaded
+    visor but breaks visor texture
 * 4.2.3
   - fix back buttons in GUI to start iterating from the last skin/suit
   - fix `CustomKerbals` configuration being ignored in missions

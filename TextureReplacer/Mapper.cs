@@ -60,12 +60,15 @@ namespace TextureReplacer
     // game doesn't contain `TRScenario`.
     private readonly ConfigNode customKerbalsNode = new ConfigNode();
 
+    public bool IsLegacyKSP { get; private set; }
     public bool PersonaliseSuit { get; set; }
     public bool HideBackpack { get; set; }
 
     public static void Recreate()
     {
-      Instance = new Mapper();
+      Instance = new Mapper {
+        IsLegacyKSP = Versioning.version_major == 1 && Versioning.version_minor <= 10
+      };
     }
 
     /// <summary>

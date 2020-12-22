@@ -146,18 +146,13 @@ namespace TextureReplacer
         Suit defaultSuit = mapper.GetDefault(kerbal.suit);
 
         suit = mapper.GetKerbalSuit(kerbal, appearance);
-        suitTexture = suit.GetSuit(useEvaSuit, kerbal) ?? defaultSuit.GetSuit(useEvaSuit, kerbal);
-        suitNormalMap = suit.GetSuitNRM(useEvaSuit) ?? defaultSuit.GetSuitNRM(useEvaSuit);
+        suitTexture = suit.GetSuit(useEvaSuit, kerbal);
+        suitTexture = suitTexture.HasValue() ? suitTexture : defaultSuit.GetSuit(useEvaSuit, kerbal);
+        suitNormalMap = suit.GetSuitNRM(useEvaSuit);
+        suitNormalMap = suitNormalMap.HasValue() ? suitNormalMap : defaultSuit.GetSuitNRM(useEvaSuit);
       }
 
-      foreach (Renderer renderer in modelTransform.GetComponentsInChildren<Renderer>()) {
-        var smr = renderer as SkinnedMeshRenderer;
-
-        // Headlight flares and thruster jets.
-        if (smr == null) {
-          continue;
-        }
-
+      foreach (SkinnedMeshRenderer smr in modelTransform.GetComponentsInChildren<SkinnedMeshRenderer>()) {
         Material material = smr.material;
 
         Texture2D newTexture = null;
@@ -175,7 +170,7 @@ namespace TextureReplacer
             newTexture = skin.EyeballLeft;
 
             if (isPrefabMissing) {
-              newTexture ??= defaultSkin.EyeballLeft;
+              newTexture = newTexture.HasValue() ? newTexture : defaultSkin.EyeballLeft;
               material.shader = Replacer.EyeShader;
             }
             break;
@@ -190,7 +185,7 @@ namespace TextureReplacer
             newTexture = skin.EyeballRight;
 
             if (isPrefabMissing) {
-              newTexture ??= defaultSkin.EyeballRight;
+              newTexture = newTexture.HasValue() ? newTexture : defaultSkin.EyeballRight;
               material.shader = Replacer.EyeShader;
             }
             break;
@@ -205,11 +200,11 @@ namespace TextureReplacer
             newTexture = skin.PupilLeft;
 
             if (isPrefabMissing) {
-              newTexture ??= defaultSkin.PupilLeft;
+              newTexture = newTexture.HasValue() ? newTexture : defaultSkin.PupilLeft;
               material.shader = Replacer.EyeShader;
             }
 
-            if (newTexture != null) {
+            if (newTexture.HasValue()) {
               material.color = Color.white;
             }
             break;
@@ -224,11 +219,11 @@ namespace TextureReplacer
             newTexture = skin.PupilRight;
 
             if (isPrefabMissing) {
-              newTexture ??= defaultSkin.PupilRight;
+              newTexture = newTexture.HasValue() ? newTexture : defaultSkin.PupilRight;
               material.shader = Replacer.EyeShader;
             }
 
-            if (newTexture != null) {
+            if (newTexture.HasValue()) {
               material.color = Color.white;
             }
             break;
@@ -241,10 +236,12 @@ namespace TextureReplacer
             newNormalMap = skin.HeadNRM;
 
             if (isPrefabMissing) {
-              newTexture ??= defaultSkin.Head;
-              newNormalMap ??= defaultSkin.HeadNRM;
-              material.shader = newNormalMap == null ? Replacer.HeadShader : Replacer.BumpedHeadShader;
-            } else if (newNormalMap != null) {
+              newTexture = newTexture.HasValue() ? newTexture : defaultSkin.Head;
+              newNormalMap = newNormalMap.HasValue() ? newNormalMap : defaultSkin.HeadNRM;
+              material.shader = Replacer.HeadShader;
+            }
+
+            if (newNormalMap.HasValue()) {
               material.shader = Replacer.BumpedHeadShader;
             }
             break;
@@ -313,92 +310,106 @@ namespace TextureReplacer
 
             // Visor texture has to be replaced every time.
             newTexture = suit.GetVisor(useEvaSuit);
-            if (newTexture != null) {
+            if (newTexture.HasValue()) {
               material.color = Color.white;
             }
             break;
           }
           default: { // Jetpack.
-            if (isEva) {
+            if (!isEva) {
+              break;
+            }
+
+            if (mapper.IsLegacyKSP) {
               smr.enabled = useEvaSuit;
+            }
 
-              if (suit == null) {
-                break;
-              }
+            if (suit == null) {
+              break;
+            }
 
-              if (useEvaSuit) {
-                newTexture = suit.Jetpack;
-                newNormalMap = suit.JetpackNRM;
-                newEmissive = suit.JetpackEmissive;
-              }
+            if (!mapper.IsLegacyKSP || useEvaSuit) {
+              newTexture = suit.Jetpack;
+              newNormalMap = suit.JetpackNRM;
+              newEmissive = suit.JetpackEmissive;
             }
             break;
           }
         }
 
-        if (newTexture != null) {
+        if (newTexture.HasValue()) {
           material.mainTexture = newTexture;
         }
-        if (newNormalMap != null) {
+        if (newNormalMap.HasValue()) {
           material.SetTexture(Util.BumpMapProperty, newNormalMap);
         }
-        if (newEmissive != null) {
+        if (newEmissive.HasValue()) {
           material.SetTexture(Util.EmissiveProperty, newEmissive);
         }
       }
 
+      if (!isEva) {
+        return;
+      }
+
       // Backpacks and parachute are positioned on another node in model hierarchy.
-      if (isEva) {
+      Transform cargoPackTransform = transform.Find("model/EVABackpack/kerbalCargoContainerPack/base") ??
+                                     transform.Find("model/kerbalCargoContainerPack/base");
+      Transform parachutePackTransform = transform.Find("model/EVAparachute/base");
+
+      var cargoPack = cargoPackTransform.GetComponent<Renderer>();
+      var parachutePack = parachutePackTransform.GetComponent<Renderer>();
+
+      if (mapper.IsLegacyKSP) {
+        Transform flagTransform = transform.Find("model/kbEVA_flagDecals");
+        var flag = flagTransform.GetComponent<Renderer>();
+
         bool showJetpack = useEvaSuit;
         bool showBackpack = showJetpack && !mapper.HideBackpack;
-
-        Transform flagTransform = transform.Find("model/kbEVA_flagDecals");
-        Transform cargoPackTransform = transform.Find("model/EVABackpack/kerbalCargoContainerPack/base") ??
-                                       transform.Find("model/kerbalCargoContainerPack/base");
-        Transform parachutePackTransform = transform.Find("model/EVAparachute/base");
-        Transform parachuteCanopyTransform = transform.Find("model/EVAparachute/canopyrot/canopy");
-
-        var flag = flagTransform.GetComponent<Renderer>();
-        var cargoPack = cargoPackTransform.GetComponent<Renderer>();
-        var parachutePack = parachutePackTransform.GetComponent<Renderer>();
-        var parachuteCanopy = parachuteCanopyTransform.GetComponent<Renderer>();
 
         flag.enabled = showJetpack;
         cargoPack.enabled = showBackpack;
         parachutePack.enabled = showBackpack;
+      }
 
-        if (suit == null) {
-          return;
+      if (suit == null) {
+        return;
+      }
+
+      if (suit.CargoPack.HasValue() || suit.CargoPackNRM.HasValue() || suit.CargoPackEmissive.HasValue()) {
+        Material cargoPackMaterial = cargoPack.material;
+
+        if (suit.CargoPack.HasValue()) {
+          cargoPackMaterial.mainTexture = suit.CargoPack;
         }
-
-        if (showBackpack) {
-          Material cargoPackMaterial = cargoPack.material;
-          Material parachutePackMaterial = parachutePack.material;
-
-          if (suit.CargoPack != null) {
-            cargoPackMaterial.mainTexture = suit.CargoPack;
-          }
-          if (suit.CargoPackNRM != null) {
-            cargoPackMaterial.SetTexture(Util.BumpMapProperty, suit.CargoPackNRM);
-          }
-          if (suit.CargoPackEmissive != null) {
-            cargoPackMaterial.SetTexture(Util.EmissiveProperty, suit.CargoPackEmissive);
-          }
-
-          if (suit.ParachutePack != null) {
-            parachutePackMaterial.mainTexture = suit.ParachutePack;
-          }
-          if (suit.ParachutePackNRM != null) {
-            parachutePackMaterial.SetTexture(Util.BumpMapProperty, suit.ParachutePackNRM);
-          }
+        if (suit.CargoPackNRM.HasValue()) {
+          cargoPackMaterial.SetTexture(Util.BumpMapProperty, suit.CargoPackNRM);
         }
+        if (suit.CargoPackEmissive.HasValue()) {
+          cargoPackMaterial.SetTexture(Util.EmissiveProperty, suit.CargoPackEmissive);
+        }
+      }
 
+      if (suit.ParachutePack.HasValue() || suit.ParachutePackNRM.HasValue()) {
+        Material parachutePackMaterial = parachutePack.material;
+
+        if (suit.ParachutePack.HasValue()) {
+          parachutePackMaterial.mainTexture = suit.ParachutePack;
+        }
+        if (suit.ParachutePackNRM.HasValue()) {
+          parachutePackMaterial.SetTexture(Util.BumpMapProperty, suit.ParachutePackNRM);
+        }
+      }
+
+      if (suit.ParachuteCanopy.HasValue() || suit.ParachuteCanopyNRM.HasValue()) {
+        Transform parachuteCanopyTransform = transform.Find("model/EVAparachute/canopyrot/canopy");
+        Renderer parachuteCanopy = parachuteCanopyTransform.GetComponent<Renderer>();
         Material parachuteCanopyMaterial = parachuteCanopy.material;
 
-        if (suit.ParachuteCanopy != null) {
+        if (suit.ParachuteCanopy.HasValue()) {
           parachuteCanopyMaterial.mainTexture = suit.ParachuteCanopy;
         }
-        if (suit.ParachuteCanopyNRM != null) {
+        if (suit.ParachuteCanopyNRM.HasValue()) {
           parachuteCanopyMaterial.SetTexture(Util.BumpMapProperty, suit.ParachuteCanopyNRM);
         }
       }

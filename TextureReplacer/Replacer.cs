@@ -39,7 +39,7 @@ namespace TextureReplacer
     public Material TeethMaterial;
 
     private static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
-    private static readonly Shader TexturedVisorShader = Shader.Find("KSP/Alpha/Translucent");
+    private static readonly Shader TexturedVisorShader = Shader.Find("Standard (Specular setup)");
 
     private static readonly Log log = new Log(nameof(Replacer));
 

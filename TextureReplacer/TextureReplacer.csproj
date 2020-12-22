@@ -8,7 +8,7 @@
     <RootNamespace>TextureReplacer</RootNamespace>
     <AssemblyName>TextureReplacer</AssemblyName>
     <UseMSBuildEngine>False</UseMSBuildEngine>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <LangVersion>default</LangVersion>
     <Nullable>warnings</Nullable>
   </PropertyGroup>
@@ -32,6 +32,7 @@
     <Compile Include="Appearance.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Mapper.cs" />
+    <Compile Include="ObjectExtension.cs" />
     <Compile Include="Personaliser.cs" />
     <Compile Include="Prefab.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

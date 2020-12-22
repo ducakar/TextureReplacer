@@ -451,9 +451,11 @@ namespace TextureReplacer
         personaliseSuit = GUILayout.Toggle(personaliseSuit, "Personalise suits");
         mapper.PersonaliseSuit = personaliseSuit;
 
-        bool hideBackpack = mapper.HideBackpack;
-        hideBackpack = GUILayout.Toggle(hideBackpack, "Hide cargo and parachute backpacks");
-        mapper.HideBackpack = hideBackpack;
+        if (mapper.IsLegacyKSP) {
+          bool hideBackpack = mapper.HideBackpack;
+          hideBackpack = GUILayout.Toggle(hideBackpack, "Hide cargo and parachute backpacks");
+          mapper.HideBackpack = hideBackpack;
+        }
       }
     }
 

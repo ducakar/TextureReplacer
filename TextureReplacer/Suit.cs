@@ -79,7 +79,7 @@ namespace TextureReplacer
       int level = kerbal.experienceLevel;
       return useEvaSuit
                ? EvaSuit[level]
-               : kerbal.veteran && IvaSuitVeteran
+               : kerbal.veteran && IvaSuitVeteran.HasValue()
                  ? IvaSuitVeteran
                  : IvaSuit[level];
     }

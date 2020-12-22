@@ -3,6 +3,7 @@
 /.vscode/
 /*/bin/
 /*/obj/
+/*.sln.DotSettings.user
 /GameData/TextureReplacer/Plugins/
 /KSP.log
 *.dll
