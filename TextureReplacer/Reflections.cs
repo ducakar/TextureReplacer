@@ -233,6 +233,37 @@ namespace TextureReplacer
     // Reflective visor shader.
     private Shader visorShader;
 
+    public static Shader LoadShaderFromAsset(string path)
+    {
+      string shadersFileName = Application.platform switch {
+        RuntimePlatform.WindowsPlayer => "shaders.windows",
+        RuntimePlatform.OSXPlayer     => "shaders.osx",
+        _                             => "shaders.linux"
+      };
+      string shadersPath = IOUtils.GetFilePathFor(typeof(Reflections), shadersFileName);
+
+      AssetBundle shadersBundle = null;
+      Shader visorShader = null;
+      try {
+        shadersBundle = AssetBundle.LoadFromFile(shadersPath);
+        if (shadersBundle == null) {
+          log.Print("Failed to load shader asset file: {0}", shadersPath);
+        } else {
+          visorShader = shadersBundle.LoadAsset<Shader>(path);
+          if (visorShader == null) {
+            log.Print("Visor shader missing in the asset file");
+          }
+        }
+      } catch (System.Exception ex) {
+        log.Print("Visor shader loading failed: {0}", ex);
+      } finally {
+        if (shadersBundle != null) {
+          shadersBundle.Unload(false);
+        }
+      }
+      return visorShader;
+    }
+
     public static void Recreate()
     {
       Instance?.Destroy();
@@ -259,32 +290,7 @@ namespace TextureReplacer
     /// </summary>
     public void Load()
     {
-      string shadersFileName = Application.platform switch {
-        RuntimePlatform.WindowsPlayer => "shaders.windows",
-        RuntimePlatform.OSXPlayer     => "shaders.osx",
-        _                             => "shaders.linux"
-      };
-
-      string shadersPath = IOUtils.GetFilePathFor(GetType(), shadersFileName);
-
-      AssetBundle shadersBundle = null;
-      try {
-        shadersBundle = AssetBundle.LoadFromFile(shadersPath);
-        if (shadersBundle == null) {
-          log.Print("Failed to load shader asset file: {0}", shadersPath);
-        } else {
-          visorShader = shadersBundle.LoadAsset<Shader>("assets/visor.shader");
-          if (visorShader == null) {
-            log.Print("Visor shader missing in the asset file");
-          }
-        }
-      } catch (System.Exception ex) {
-        log.Print("Visor shader loading failed: {0}", ex);
-      } finally {
-        if (shadersBundle != null) {
-          shadersBundle.Unload(false);
-        }
-      }
+      visorShader = LoadShaderFromAsset("assets/Visor.shader");
 
       for (int i = 0; i < ShaderNameMap.GetLength(0); ++i) {
         Shader original = Shader.Find(ShaderNameMap[i, 0]);

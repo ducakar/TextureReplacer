@@ -39,12 +39,13 @@ namespace TextureReplacer
     public Material TeethMaterial;
 
     private static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
-    private static readonly Shader TexturedVisorShader = Shader.Find("Standard (Specular setup)");
 
     private static readonly Log log = new Log(nameof(Replacer));
 
     // General texture replacements.
     private readonly Dictionary<string, Texture2D> mappedTextures = new Dictionary<string, Texture2D>();
+    // Non-reflective visor shader.
+    private Shader basicVisorShader;
     // NavBall texture.
     private Texture2D navBallTexture;
     private Texture2D navBallTextureEmissive;
@@ -69,6 +70,7 @@ namespace TextureReplacer
     /// </summary>
     public void Load()
     {
+      basicVisorShader = Reflections.LoadShaderFromAsset("assets/BasicVisor.shader");
       LoadDefaultTextures();
       LoadNavBallTextures();
       FixKerbalModels();
@@ -319,7 +321,7 @@ namespace TextureReplacer
               switch (i) {
                 case 0: { // maleIva
                   if (ivaVisorTexture != null) {
-                    material.shader = TexturedVisorShader;
+                    material.shader = basicVisorShader;
                     material.mainTexture = ivaVisorTexture;
                     material.color = Color.white;
                   }
@@ -327,7 +329,7 @@ namespace TextureReplacer
                 }
                 case 1: { // maleEva
                   if (evaVisorTexture != null) {
-                    material.shader = TexturedVisorShader;
+                    material.shader = basicVisorShader;
                     material.mainTexture = evaVisorTexture;
                     material.color = Color.white;
                   }
@@ -335,7 +337,7 @@ namespace TextureReplacer
                 }
                 case 2: { // maleEvaVintage
                   if (evaVisorTexture != null) {
-                    material.shader = TexturedVisorShader;
+                    material.shader = basicVisorShader;
                     material.mainTexture = evaVisorTexture;
                     material.color = Color.white;
                   }
@@ -343,7 +345,7 @@ namespace TextureReplacer
                 }
                 case 3: { // maleEvaFuture
                   if (evaVisorTexture != null) {
-                    material.shader = TexturedVisorShader;
+                    material.shader = basicVisorShader;
                     material.mainTexture = evaVisorTexture;
                     material.color = Color.white;
                   }

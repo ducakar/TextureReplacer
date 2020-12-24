@@ -137,8 +137,8 @@ Examples:
       snowydwarfplanet00              // Eeloo
       snowydwarfplanet01              // Eeloo normal map
 
-It's also possible to replace textures from `GameData/` if one specifies
-the full directory hierarchy:
+It's also possible to replace textures from `GameData/` if one specifies the
+full directory hierarchy:
 
     GameData/**/TextureReplacer/Default/
       Squad/Parts/Command/Mk1-2Pod/model000  // Mk1-2 pod texture
@@ -283,8 +283,8 @@ custom configuration files).
 
 Unity uses _grey_ normal maps (RGBA = YYYX) to minimise artefacts when applying
 DXT5 texture compression on them. When a normal map has a `NRM` suffix Unity
-converts it from RGB = XYZ (_blue_) to RGBA = YYYX (_grey_) normal map unless
-it is in DDS format.
+converts it from RGB = XYZ (_blue_) to RGBA = YYYX (_grey_) normal map unless it
+is in DDS format.
 
 In short: you should supply _blue_ normal maps when a texture has `NRM` suffix
 and is in PNG format (JPEGs and TGAs are not recommended for normal maps) and
@@ -310,6 +310,3 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 * (KSP bug) Head meshes have mismatched tangents and/or binormals along the back
   of the head, where the texture is stitched together.
 * Clouds from EVE are not reflected at certain altitudes.
-* KSP 1.11 issues:
-  - Shaded visors only work with reflections disabled.
-  - Visor textures only work correctly with reflections enabled.

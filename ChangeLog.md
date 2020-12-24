@@ -1,6 +1,8 @@
 # Change Log #
 
 * 4.3.1
+  - add custom BasicVisor shader to make both shaded visor and visor textures
+    work with KSP 1.11
   - fix stock normal map on vintage suit
 * 4.3
   - update for KSP 1.11, but keep backward compatibility with KSP 1.10
