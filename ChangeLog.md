@@ -1,5 +1,7 @@
 # Change Log #
 
+* 4.3.1
+  - fix stock normal map on vintage suit
 * 4.3
   - update for KSP 1.11, but keep backward compatibility with KSP 1.10
   - remove jetpack and cargo/parachute backpack hiding option on KSP 1.11

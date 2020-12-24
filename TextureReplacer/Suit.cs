@@ -123,6 +123,9 @@ namespace TextureReplacer
         }
         case "kerbalMainNRM": {
           IvaSuitNRM ??= texture;
+          if (Kind == KerbalSuit.Vintage) {
+            EvaSuitNRM ??= texture;
+          }
           return true;
         }
         case "orangeSuite_diffuse":
