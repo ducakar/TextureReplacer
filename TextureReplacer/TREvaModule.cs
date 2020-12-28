@@ -24,44 +24,44 @@ using System.Linq;
 
 namespace TextureReplacer
 {
-  /// <summary>
-  /// This class takes cares of EVA Kerbal to assign appropriate suit on creation and manage reflection script.
-  /// </summary>
-  internal class TREvaModule : PartModule
-  {
-    private Reflections.Script reflectionScript;
-
-    public override void OnStart(StartState state)
+    /// <summary>
+    /// This class takes cares of EVA Kerbal to assign appropriate suit on creation and manage reflection script.
+    /// </summary>
+    internal class TREvaModule : PartModule
     {
-      bool useEvaSuit = false;
+        private Reflections.Script reflectionScript;
 
-      ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
-      if (kerbal != null) {
-        var kerbalEva = GetComponent<KerbalEVA>();
+        public override void OnStart(StartState state)
+        {
+            bool useEvaSuit = false;
 
-        useEvaSuit = kerbal.hasHelmetOn || !kerbalEva.CanEVAWithoutHelmet();
-        Personaliser.Instance.PersonaliseEva(part, kerbal, useEvaSuit);
-      }
+            ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
+            if (kerbal != null) {
+                var kerbalEva = GetComponent<KerbalEVA>();
 
-      if (Reflections.Instance.ReflectionType == Reflections.Type.Real) {
-        reflectionScript = new Reflections.Script(part, 1);
-        reflectionScript.SetActive(useEvaSuit);
-      }
+                useEvaSuit = kerbal.hasHelmetOn || !kerbalEva.CanEVAWithoutHelmet();
+                Personaliser.Instance.PersonaliseEva(part, kerbal, useEvaSuit);
+            }
+
+            if (Reflections.Instance.ReflectionType == Reflections.Type.Real) {
+                reflectionScript = new Reflections.Script(part, 1);
+                reflectionScript.SetActive(useEvaSuit);
+            }
+        }
+
+        public void OnHelmetChanged(bool hasHelmet)
+        {
+            ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
+            if (kerbal != null) {
+                Personaliser.Instance.PersonaliseEva(part, kerbal, hasHelmet);
+            }
+
+            reflectionScript?.SetActive(hasHelmet);
+        }
+
+        public void OnDestroy()
+        {
+            reflectionScript?.Destroy();
+        }
     }
-
-    public void OnHelmetChanged(bool hasHelmet)
-    {
-      ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
-      if (kerbal != null) {
-        Personaliser.Instance.PersonaliseEva(part, kerbal, hasHelmet);
-      }
-
-      reflectionScript?.SetActive(hasHelmet);
-    }
-
-    public void OnDestroy()
-    {
-      reflectionScript?.Destroy();
-    }
-  }
 }

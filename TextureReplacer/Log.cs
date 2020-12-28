@@ -24,21 +24,21 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  internal class Log
-  {
-    private readonly string header;
-
-    public Log(string className)
+    internal class Log
     {
-      header = "[TR." + className + "] ";
-    }
+        private readonly string header;
 
-    /// <summary>
-    /// Print a log entry for TextureReplacer. `string.Format()`-style formatting is supported.
-    /// </summary>
-    public void Print(string s, params object[] args)
-    {
-      Debug.Log(header + string.Format(s, args));
+        public Log(string className)
+        {
+            header = "[TR." + className + "] ";
+        }
+
+        /// <summary>
+        /// Print a log entry for TextureReplacer. `string.Format()`-style formatting is supported.
+        /// </summary>
+        public void Print(string s, params object[] args)
+        {
+            Debug.Log(header + string.Format(s, args));
+        }
     }
-  }
 }

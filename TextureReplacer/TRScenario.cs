@@ -22,19 +22,19 @@
 
 namespace TextureReplacer
 {
-  [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER)]
-  public class TRScenario : ScenarioModule
-  {
-    public override void OnLoad(ConfigNode node)
+    [KSPScenario(ScenarioCreationOptions.AddToAllGames, GameScenes.SPACECENTER)]
+    public class TRScenario : ScenarioModule
     {
-      Mapper.Instance.OnLoadScenario(node);
-      Reflections.Instance.OnLoadScenario(node);
-    }
+        public override void OnLoad(ConfigNode node)
+        {
+            Mapper.Instance.OnLoadScenario(node);
+            Reflections.Instance.OnLoadScenario(node);
+        }
 
-    public override void OnSave(ConfigNode node)
-    {
-      Mapper.Instance.OnSaveScenario(node);
-      Reflections.Instance.OnSaveScenario(node);
+        public override void OnSave(ConfigNode node)
+        {
+            Mapper.Instance.OnSaveScenario(node);
+            Reflections.Instance.OnSaveScenario(node);
+        }
     }
-  }
 }

@@ -24,15 +24,15 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  /// <summary>
-  /// Component for personalisation of IVA Kerbals, similar as TREvaModule, but much simpler.
-  /// </summary>
-  internal class TRIvaModule : MonoBehaviour
-  {
-    public void Start()
+    /// <summary>
+    /// Component for personalisation of IVA Kerbals, similar as TREvaModule, but much simpler.
+    /// </summary>
+    internal class TRIvaModule : MonoBehaviour
     {
-      Personaliser.Instance.PersonaliseIva(GetComponent<Kerbal>());
-      Destroy(this);
+        public void Start()
+        {
+            Personaliser.Instance.PersonaliseIva(GetComponent<Kerbal>());
+            Destroy(this);
+        }
     }
-  }
 }

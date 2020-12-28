@@ -22,16 +22,16 @@
 
 namespace TextureReplacer
 {
-  internal class Appearance
-  {
-    public readonly int Hash;
-
-    public Skin Skin;
-    public Suit Suit;
-
-    public Appearance(ProtoCrewMember kerbal)
+    internal class Appearance
     {
-      Hash = kerbal.name.GetHashCode();
+        public readonly int Hash;
+
+        public Skin Skin;
+        public Suit Suit;
+
+        public Appearance(ProtoCrewMember kerbal)
+        {
+            Hash = kerbal.name.GetHashCode();
+        }
     }
-  }
 }

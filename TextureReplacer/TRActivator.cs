@@ -25,84 +25,85 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  [KSPAddon(KSPAddon.Startup.EveryScene, false)]
-  public class TRActivator : MonoBehaviour
-  {
-    /// <summary>
-    /// Reflection updater. We don't want this to run every frame unless real reflections are enabled so it's wrapped
-    /// inside another component and enabled only when needed.
-    /// </summary>
-    public class TRReflectionUpdater : MonoBehaviour
+    [KSPAddon(KSPAddon.Startup.EveryScene, false)]
+    public class TRActivator : MonoBehaviour
     {
-      public void Update()
-      {
-        Reflections.Script.UpdateScripts();
-      }
-    }
-
-    private static readonly Log log = new Log(nameof(TRActivator));
-
-    private static bool isLoaded;
-
-    private bool isFlightScene;
-    private TRReflectionUpdater reflectionUpdater;
-
-    private static void Load()
-    {
-      log.Print("Started, Version {0}", Assembly.GetExecutingAssembly().GetName().Version);
-
-      Prefab.Recreate();
-      Mapper.Recreate();
-      Replacer.Recreate();
-      Reflections.Recreate();
-      Personaliser.Recreate();
-
-      foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer")) {
-        Prefab.Instance.ReadConfig(file.config);
-        Replacer.Instance.ReadConfig(file.config);
-        Reflections.Instance.ReadConfig(file.config);
-      }
-
-      Prefab.Instance.Load();
-      Mapper.Instance.Load();
-      Replacer.Instance.Load();
-      Reflections.Instance.Load();
-      Personaliser.Instance.Load();
-
-      isLoaded = true;
-    }
-
-    public void Start()
-    {
-      if (!isLoaded) {
-        if (PartLoader.Instance.IsReady()) {
-          Load();
-        }
-      } else {
-        Replacer.Instance.OnBeginScene();
-
-        if (HighLogic.LoadedSceneIsFlight) {
-          Replacer.Instance.OnBeginFlight();
-          Personaliser.Instance.OnBeginFlight();
-          isFlightScene = true;
+        /// <summary>
+        /// Reflection updater. We don't want this to run every frame unless real reflections are enabled so it's wrapped
+        /// inside another component and enabled only when needed.
+        /// </summary>
+        public class TRReflectionUpdater : MonoBehaviour
+        {
+            public void Update()
+            {
+                Reflections.Script.UpdateScripts();
+            }
         }
 
-        if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) &&
-            Reflections.Instance.ReflectionType == Reflections.Type.Real) {
-          reflectionUpdater = gameObject.AddComponent<TRReflectionUpdater>();
+        private static readonly Log log = new Log(nameof(TRActivator));
+
+        private static bool isLoaded;
+
+        private bool isFlightScene;
+        private TRReflectionUpdater reflectionUpdater;
+
+        private static void Load()
+        {
+            log.Print("Started, Version {0}", Assembly.GetExecutingAssembly().GetName().Version);
+
+            Prefab.Recreate();
+            Mapper.Recreate();
+            Replacer.Recreate();
+            Reflections.Recreate();
+            Personaliser.Recreate();
+
+            foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer")) {
+                Prefab.Instance.ReadConfig(file.config);
+                Replacer.Instance.ReadConfig(file.config);
+                Reflections.Instance.ReadConfig(file.config);
+            }
+
+            Prefab.Instance.Load();
+            Mapper.Instance.Load();
+            Replacer.Instance.Load();
+            Reflections.Instance.Load();
+            Personaliser.Instance.Load();
+
+            isLoaded = true;
         }
-      }
-    }
 
-    public void OnDestroy()
-    {
-      if (reflectionUpdater != null) {
-        Destroy(reflectionUpdater);
-      }
+        public void Start()
+        {
+            if (!isLoaded) {
+                if (PartLoader.Instance.IsReady()) {
+                    Load();
+                }
+            } else {
+                Replacer.Instance.OnBeginScene();
 
-      if (isFlightScene) {
-        Personaliser.Instance.OnEndFlight();
-      }
+                if (HighLogic.LoadedSceneIsFlight) {
+                    Replacer.Instance.OnBeginFlight();
+                    Personaliser.Instance.OnBeginFlight();
+                    isFlightScene = true;
+                }
+
+                if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) &&
+                    Reflections.Instance.ReflectionType == Reflections.Type.Real)
+                {
+                    reflectionUpdater = gameObject.AddComponent<TRReflectionUpdater>();
+                }
+            }
+        }
+
+        public void OnDestroy()
+        {
+            if (reflectionUpdater != null) {
+                Destroy(reflectionUpdater);
+            }
+
+            if (isFlightScene) {
+                Personaliser.Instance.OnEndFlight();
+            }
+        }
     }
-  }
 }

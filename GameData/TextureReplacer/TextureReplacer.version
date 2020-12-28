@@ -1,7 +1,7 @@
 {
   "NAME": "TextureReplacer",
   "URL": "https://raw.githubusercontent.com/ducakar/TextureReplacer/master/GameData/TextureReplacer/TextureReplacer.version",
-  "DOWNLOAD": "http://kerbal.curseforge.com/projects/texturereplacer",
+  "DOWNLOAD": "https://github.com/ducakar/TextureReplacer",
   "VERSION": {
     "MAJOR": 4,
     "MINOR": 3,

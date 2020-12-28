@@ -25,61 +25,69 @@ using Gender = ProtoCrewMember.Gender;
 
 namespace TextureReplacer
 {
-  internal class Skin
-  {
-    public readonly string Name;
-    public readonly Gender Gender;
-    public readonly bool Eyeless;
-    public readonly bool Excluded;
-
-    public Texture2D Head;
-    public Texture2D HeadNRM;
-    public Texture2D EyeballLeft;
-    public Texture2D EyeballRight;
-    public Texture2D PupilLeft;
-    public Texture2D PupilRight;
-
-    public Skin(string name)
+    internal class Skin
     {
-      Name = name;
-      Gender = Util.HasSuffix(name, 'f') ? Gender.Female : Gender.Male;
-      Eyeless = Util.HasSuffix(name, 'e');
-      Excluded = Util.HasSuffix(name, 'x');
-    }
+        public readonly string Name;
+        public readonly Gender Gender;
+        public readonly bool Eyeless;
+        public readonly bool Excluded;
 
-    public bool SetTexture(string originalName, Texture2D texture)
-    {
-      switch (originalName) {
-        case "kerbalHead":
-        case "kerbalGirl_06_BaseColor": {
-          Head ??= texture;
-          return true;
+        public Texture2D Head;
+        public Texture2D HeadNRM;
+        public Texture2D EyeballLeft;
+        public Texture2D EyeballRight;
+        public Texture2D PupilLeft;
+        public Texture2D PupilRight;
+
+        public Skin(string name)
+        {
+            Name     = name;
+            Gender   = Util.HasSuffix(name, 'f') ? Gender.Female : Gender.Male;
+            Eyeless  = Util.HasSuffix(name, 'e');
+            Excluded = Util.HasSuffix(name, 'x');
         }
-        case "kerbalHeadNRM":
-        case "kerbalGirl_06_BaseColorNRM": {
-          HeadNRM ??= texture;
-          return true;
+
+        public bool SetTexture(string originalName, Texture2D texture)
+        {
+            switch (originalName)
+            {
+                case "kerbalHead":
+                case "kerbalGirl_06_BaseColor":
+                {
+                    Head ??= texture;
+                    return true;
+                }
+                case "kerbalHeadNRM":
+                case "kerbalGirl_06_BaseColorNRM":
+                {
+                    HeadNRM ??= texture;
+                    return true;
+                }
+                case "eyeballLeft":
+                {
+                    EyeballLeft ??= texture;
+                    return true;
+                }
+                case "eyeballRight":
+                {
+                    EyeballRight ??= texture;
+                    return true;
+                }
+                case "pupilLeft":
+                {
+                    PupilLeft ??= texture;
+                    return true;
+                }
+                case "pupilRight":
+                {
+                    PupilRight ??= texture;
+                    return true;
+                }
+                default:
+                {
+                    return false;
+                }
+            }
         }
-        case "eyeballLeft": {
-          EyeballLeft ??= texture;
-          return true;
-        }
-        case "eyeballRight": {
-          EyeballRight ??= texture;
-          return true;
-        }
-        case "pupilLeft": {
-          PupilLeft ??= texture;
-          return true;
-        }
-        case "pupilRight": {
-          PupilRight ??= texture;
-          return true;
-        }
-        default: {
-          return false;
-        }
-      }
     }
-  }
 }

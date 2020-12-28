@@ -25,160 +25,177 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  internal class Prefab
-  {
-    public static Prefab Instance { get; private set; }
-
-    public Kerbal MaleIva;
-    public Kerbal FemaleIva;
-    public Part MaleEva;
-    public Part FemaleEva;
-
-    public GameObject MaleIvaVintage;
-    public GameObject FemaleIvaVintage;
-    public Part MaleEvaVintage;
-    public Part FemaleEvaVintage;
-
-    public GameObject MaleIvaFuture;
-    public GameObject FemaleIvaFuture;
-    public Part MaleEvaFuture;
-    public Part FemaleEvaFuture;
-
-    private static readonly Log log = new Log(nameof(Prefab));
-
-    private bool logKerbalHierarchy;
-
-    public static void Recreate()
+    internal class Prefab
     {
-      Instance = new Prefab();
-    }
+        public static Prefab Instance { get; private set; }
 
-    /// <summary>
-    /// Read configuration and perform pre-load initialisation.
-    /// </summary>
-    public void ReadConfig(ConfigNode rootNode)
-    {
-      Util.Parse(rootNode.GetValue("logKerbalHierarchy"), ref logKerbalHierarchy);
-    }
+        public Kerbal MaleIva;
+        public Kerbal FemaleIva;
+        public Part MaleEva;
+        public Part FemaleEva;
 
-    /// <summary>
-    /// Load Kerbal prefabs.
-    /// </summary>
-    public void Load()
-    {
-      // Shaders between male and female models are inconsistent, female models are missing normal maps and specular
-      // lighting. So, we copy shaders from male materials to respective female materials.
-      Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
+        public GameObject MaleIvaVintage;
+        public GameObject FemaleIvaVintage;
+        public Part MaleEvaVintage;
+        public Part FemaleEvaVintage;
 
-      MaleIva = kerbals.First(k => k.transform.name == "kerbalMale");
-      FemaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
-      MaleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
-      FemaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
+        public GameObject MaleIvaFuture;
+        public GameObject FemaleIvaFuture;
+        public Part MaleEvaFuture;
+        public Part FemaleEvaFuture;
 
-      // Vintage Kerbals don't have prefab models loaded. We need to load them from assets.
-      AssetBundle missionsBundle = AssetBundle.GetAllLoadedAssetBundles()
-        .FirstOrDefault(b => b.name == "makinghistory_assets");
+        private static readonly Log log = new Log(nameof(Prefab));
 
-      if (missionsBundle != null) {
-        const string maleIvaVintagePrefab = "assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab";
-        const string femaleIvaVintagePrefab = "assets/expansions/missions/kerbals/iva/kerbalfemalevintage.prefab";
+        private bool logKerbalHierarchy;
 
-        MaleIvaVintage = missionsBundle.LoadAsset(maleIvaVintagePrefab) as GameObject;
-        FemaleIvaVintage = missionsBundle.LoadAsset(femaleIvaVintagePrefab) as GameObject;
-        MaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
-        FemaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAfemaleVintage").partPrefab;
-      }
-
-      // Future Kerbals don't have prefab models loaded. We need to load them from assets.
-      AssetBundle serenityBundle = AssetBundle.GetAllLoadedAssetBundles()
-        .FirstOrDefault(b => b.name == "serenity_assets");
-
-      if (serenityBundle != null) {
-        const string maleIvaFuturePrefab = "assets/expansions/serenity/kerbals/iva/kerbalmalefuture.prefab";
-        const string femaleIvaFuturePrefab = "assets/expansions/serenity/kerbals/iva/kerbalfemalefuture.prefab";
-
-        MaleIvaFuture = serenityBundle.LoadAsset(maleIvaFuturePrefab) as GameObject;
-        FemaleIvaFuture = serenityBundle.LoadAsset(femaleIvaFuturePrefab) as GameObject;
-        MaleEvaFuture = PartLoader.getPartInfoByName("kerbalEVAFuture").partPrefab;
-        FemaleEvaFuture = PartLoader.getPartInfoByName("kerbalEVAfemaleFuture").partPrefab;
-      }
-
-      if (logKerbalHierarchy) {
-        LogHierarchies();
-      }
-    }
-
-    public static void ExtractSkin(Transform kerbal, Skin skin)
-    {
-      foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>()) {
-        var texture = smr.material.mainTexture as Texture2D;
-        if (texture != null) {
-          skin.SetTexture(texture.name, texture);
-        }
-      }
-    }
-
-    public static void ExtractSuit(Transform kerbal, Suit suit)
-    {
-      foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>()) {
-        var texture = smr.material.mainTexture as Texture2D;
-        if (texture != null) {
-          suit.SetTexture(texture.name, texture);
+        public static void Recreate()
+        {
+            Instance = new Prefab();
         }
 
-        if (smr.material.HasProperty(Util.BumpMapProperty)) {
-          var normalMap = smr.material.GetTexture(Util.BumpMapProperty) as Texture2D;
-          if (normalMap != null) {
-            suit.SetTexture(normalMap.name, normalMap);
-          }
+        /// <summary>
+        /// Read configuration and perform pre-load initialisation.
+        /// </summary>
+        public void ReadConfig(ConfigNode rootNode)
+        {
+            Util.Parse(rootNode.GetValue("logKerbalHierarchy"), ref logKerbalHierarchy);
         }
-      }
+
+        /// <summary>
+        /// Load Kerbal prefabs.
+        /// </summary>
+        public void Load()
+        {
+            // Shaders between male and female models are inconsistent, female models are missing normal maps and
+            // specular lighting. So, we copy shaders from male materials to respective female materials.
+            Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
+
+            MaleIva   = kerbals.First(k => k.transform.name == "kerbalMale");
+            FemaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
+            MaleEva   = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
+            FemaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
+
+            // Vintage Kerbals don't have prefab models loaded. We need to load them from assets.
+            AssetBundle missionsBundle = AssetBundle.GetAllLoadedAssetBundles()
+                .FirstOrDefault(b => b.name == "makinghistory_assets");
+
+            if (missionsBundle != null)
+            {
+                const string maleIvaPrefab   = "assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab";
+                const string femaleIvaPrefab = "assets/expansions/missions/kerbals/iva/kerbalfemalevintage.prefab";
+
+                MaleIvaVintage   = missionsBundle.LoadAsset(maleIvaPrefab) as GameObject;
+                FemaleIvaVintage = missionsBundle.LoadAsset(femaleIvaPrefab) as GameObject;
+                MaleEvaVintage   = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
+                FemaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAfemaleVintage").partPrefab;
+            }
+
+            // Future Kerbals don't have prefab models loaded. We need to load them from assets.
+            AssetBundle serenityBundle = AssetBundle.GetAllLoadedAssetBundles()
+                .FirstOrDefault(b => b.name == "serenity_assets");
+
+            if (serenityBundle != null)
+            {
+                const string maleIvaPrefab   = "assets/expansions/serenity/kerbals/iva/kerbalmalefuture.prefab";
+                const string femaleIvaPrefab = "assets/expansions/serenity/kerbals/iva/kerbalfemalefuture.prefab";
+
+                MaleIvaFuture   = serenityBundle.LoadAsset(maleIvaPrefab) as GameObject;
+                FemaleIvaFuture = serenityBundle.LoadAsset(femaleIvaPrefab) as GameObject;
+                MaleEvaFuture   = PartLoader.getPartInfoByName("kerbalEVAFuture").partPrefab;
+                FemaleEvaFuture = PartLoader.getPartInfoByName("kerbalEVAfemaleFuture").partPrefab;
+            }
+
+            if (logKerbalHierarchy)
+            {
+                LogHierarchies();
+            }
+        }
+
+        public static void ExtractSkin(Transform kerbal, Skin skin)
+        {
+            foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                var texture = smr.material.mainTexture as Texture2D;
+                if (texture != null)
+                {
+                    skin.SetTexture(texture.name, texture);
+                }
+            }
+        }
+
+        public static void ExtractSuit(Transform kerbal, Suit suit)
+        {
+            foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                var texture = smr.material.mainTexture as Texture2D;
+                if (texture != null)
+                {
+                    suit.SetTexture(texture.name, texture);
+                }
+
+                if (smr.material.HasProperty(Util.BumpMapProperty))
+                {
+                    var normalMap = smr.material.GetTexture(Util.BumpMapProperty) as Texture2D;
+                    if (normalMap != null)
+                    {
+                        suit.SetTexture(normalMap.name, normalMap);
+                    }
+                }
+            }
+        }
+
+        private void LogHierarchies()
+        {
+            log.Print("Male IVA Hierarchy");
+            Util.LogDownHierarchy(MaleIva.transform);
+            log.Print("Female IVA Hierarchy");
+            Util.LogDownHierarchy(FemaleIva.transform);
+            log.Print("Male EVA Hierarchy");
+            Util.LogDownHierarchy(MaleEva.transform);
+            log.Print("Female EVA Hierarchy");
+            Util.LogDownHierarchy(FemaleEva.transform);
+
+            if (MaleIvaVintage != null)
+            {
+                log.Print("Male IVA Vintage Hierarchy");
+                Util.LogDownHierarchy(MaleIvaVintage.transform);
+            }
+            if (FemaleIvaVintage != null)
+            {
+                log.Print("Female IVA Vintage Hierarchy");
+                Util.LogDownHierarchy(FemaleIvaVintage.transform);
+            }
+            if (MaleEvaVintage != null)
+            {
+                log.Print("Male EVA Vintage Hierarchy");
+                Util.LogDownHierarchy(MaleEvaVintage.transform);
+            }
+            if (FemaleEvaVintage != null)
+            {
+                log.Print("Female EVA Vintage Hierarchy");
+                Util.LogDownHierarchy(FemaleEvaVintage.transform);
+            }
+
+            if (MaleIvaFuture != null)
+            {
+                log.Print("Male IVA Future Hierarchy");
+                Util.LogDownHierarchy(MaleIvaFuture.transform);
+            }
+            if (FemaleIvaFuture != null)
+            {
+                log.Print("Female IVA Future Hierarchy");
+                Util.LogDownHierarchy(FemaleIvaFuture.transform);
+            }
+            if (MaleEvaFuture != null)
+            {
+                log.Print("Male EVA Future Hierarchy");
+                Util.LogDownHierarchy(MaleEvaFuture.transform);
+            }
+            if (FemaleEvaFuture != null)
+            {
+                log.Print("Female EVA Future Hierarchy");
+                Util.LogDownHierarchy(FemaleEvaFuture.transform);
+            }
+        }
     }
-
-    private void LogHierarchies()
-    {
-      log.Print("Male IVA Hierarchy");
-      Util.LogDownHierarchy(MaleIva.transform);
-      log.Print("Female IVA Hierarchy");
-      Util.LogDownHierarchy(FemaleIva.transform);
-      log.Print("Male EVA Hierarchy");
-      Util.LogDownHierarchy(MaleEva.transform);
-      log.Print("Female EVA Hierarchy");
-      Util.LogDownHierarchy(FemaleEva.transform);
-
-      if (MaleIvaVintage != null) {
-        log.Print("Male IVA Vintage Hierarchy");
-        Util.LogDownHierarchy(MaleIvaVintage.transform);
-      }
-      if (FemaleIvaVintage != null) {
-        log.Print("Female IVA Vintage Hierarchy");
-        Util.LogDownHierarchy(FemaleIvaVintage.transform);
-      }
-      if (MaleEvaVintage != null) {
-        log.Print("Male EVA Vintage Hierarchy");
-        Util.LogDownHierarchy(MaleEvaVintage.transform);
-      }
-      if (FemaleEvaVintage != null) {
-        log.Print("Female EVA Vintage Hierarchy");
-        Util.LogDownHierarchy(FemaleEvaVintage.transform);
-      }
-
-      if (MaleIvaFuture != null) {
-        log.Print("Male IVA Future Hierarchy");
-        Util.LogDownHierarchy(MaleIvaFuture.transform);
-      }
-      if (FemaleIvaFuture != null) {
-        log.Print("Female IVA Future Hierarchy");
-        Util.LogDownHierarchy(FemaleIvaFuture.transform);
-      }
-      if (MaleEvaFuture != null) {
-        log.Print("Male EVA Future Hierarchy");
-        Util.LogDownHierarchy(MaleEvaFuture.transform);
-      }
-      if (FemaleEvaFuture != null) {
-        log.Print("Female EVA Future Hierarchy");
-        Util.LogDownHierarchy(FemaleEvaFuture.transform);
-      }
-    }
-  }
 }

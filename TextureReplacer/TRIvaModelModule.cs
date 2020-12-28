@@ -24,27 +24,29 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  /// <summary>
-  /// Component bound to internal models that triggers adds another component to IVA Kerbals that actually personalises
-  /// them.
-  ///
-  /// Directly personalising Kerbals doesn't work, they are reset to default suits after that in some situation
-  /// (e.g. crew transfer). So we have to personalise Kerbals by using another component (TRIvaModule) bound directly
-  /// to IVA Kerbals. So why don't we add this component to proto-models in first place? Once we did, but the vintage
-  /// Kerbals don't have preexisting proto-models. Instead, they are created anew each time, so this is the only nice
-  /// way to get TRIvaModule on all IVA Kerbals, both standard and vintage ones.
-  /// </summary>
-  internal class TRIvaModelModule : MonoBehaviour
-  {
-    public void Start()
+    /// <summary>
+    /// Component bound to internal models that triggers adds another component to IVA Kerbals that actually
+    /// personalises them.
+    ///
+    /// Directly personalising Kerbals doesn't work, they are reset to default suits after that in some situation (e.g.
+    /// crew transfer). So we have to personalise Kerbals by using another component (TRIvaModule) bound directly to IVA
+    /// Kerbals. So why don't we add this component to proto-models in first place? Once we did, but the vintage Kerbals
+    /// don't have preexisting proto-models. Instead, they are created anew each time, so this is the only nice way to
+    /// get TRIvaModule on all IVA Kerbals, both standard and vintage ones.
+    /// </summary>
+    internal class TRIvaModelModule : MonoBehaviour
     {
-      foreach (Kerbal kerbal in GetComponentsInChildren<Kerbal>()) {
-        if (kerbal.GetComponent<TRIvaModule>() == null) {
-          kerbal.gameObject.AddComponent<TRIvaModule>();
-        }
-      }
+        public void Start()
+        {
+            foreach (Kerbal kerbal in GetComponentsInChildren<Kerbal>())
+            {
+                if (kerbal.GetComponent<TRIvaModule>() == null)
+                {
+                    kerbal.gameObject.AddComponent<TRIvaModule>();
+                }
+            }
 
-      Destroy(this);
+            Destroy(this);
+        }
     }
-  }
 }

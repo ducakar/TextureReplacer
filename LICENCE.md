@@ -4,7 +4,7 @@
 
 Copyright © 2013-2020 Davorin Učakar  
 Copyright © 2016 RangeMachine  
-Copyright © 2013 rbray89  
+Copyright © 2013 rbray89
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),

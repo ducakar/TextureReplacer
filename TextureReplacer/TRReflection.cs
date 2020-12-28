@@ -27,71 +27,78 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-  public class TRReflection : PartModule
-  {
-    [KSPField(isPersistant = false)] public string shader = "";
-    [KSPField(isPersistant = false)] public string colour = "";
-    [KSPField(isPersistant = false)] public string interval = "";
-    [KSPField(isPersistant = false)] public string meshes = "";
-
-    private static readonly Log log = new Log(nameof(TRReflection));
-
-    private Reflections.Script script;
-
-    public override void OnStart(StartState state)
+    public class TRReflection : PartModule
     {
-      var reflections = Reflections.Instance;
+        [KSPField(isPersistant = false)] public string shader = "";
+        [KSPField(isPersistant = false)] public string colour = "";
+        [KSPField(isPersistant = false)] public string interval = "";
+        [KSPField(isPersistant = false)] public string meshes = "";
 
-      Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
-      Color reflectionColour = Color.white;
-      int updateInterval = 1;
+        private static readonly Log log = new Log(nameof(TRReflection));
 
-      Util.Parse(colour, ref reflectionColour);
-      Util.Parse(interval, ref updateInterval);
+        private Reflections.Script script;
 
-      updateInterval = Math.Max(updateInterval, 1);
+        public override void OnStart(StartState state)
+        {
+            var reflections = Reflections.Instance;
 
-      List<string> meshNames = Util.SplitConfigValue(meshes).ToList();
+            Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
+            Color  reflectionColour = Color.white;
+            int    updateInterval   = 1;
 
-      if (reflections.LogReflectiveMeshes) {
-        log.Print("Part \"{0}\"", part.name);
-      }
+            Util.Parse(colour, ref reflectionColour);
+            Util.Parse(interval, ref updateInterval);
 
-      if (reflections.ReflectionType == Reflections.Type.None) {
-        return;
-      }
+            updateInterval = Math.Max(updateInterval, 1);
 
-      script = new Reflections.Script(part, updateInterval);
+            List<string> meshNames = Util.SplitConfigValue(meshes).ToList();
 
-      bool success = false;
+            if (reflections.LogReflectiveMeshes)
+            {
+                log.Print("Part \"{0}\"", part.name);
+            }
 
-      foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>()) {
-        var renderer = meshFilter.GetComponent<Renderer>();
-        if (renderer == null) {
-          continue;
+            if (reflections.ReflectionType == Reflections.Type.None)
+            {
+                return;
+            }
+
+            script = new Reflections.Script(part, updateInterval);
+
+            bool success = false;
+
+            foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
+            {
+                var renderer = meshFilter.GetComponent<Renderer>();
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                Material material = renderer.material;
+                if (reflections.LogReflectiveMeshes)
+                {
+                    log.Print("+ {0} [{1}]", meshFilter.name, material.shader.name);
+                }
+
+                if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name))
+                {
+                    success |= script.Apply(material, reflectiveShader, reflectionColour);
+                }
+            }
+
+            if (!success)
+            {
+                script?.Destroy();
+                script = null;
+
+                log.Print("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
+            }
         }
 
-        Material material = renderer.material;
-        if (reflections.LogReflectiveMeshes) {
-          log.Print("+ {0} [{1}]", meshFilter.name, material.shader.name);
+        public void OnDestroy()
+        {
+            script?.Destroy();
         }
-
-        if (meshNames.Count == 0 || meshNames.Contains(meshFilter.name)) {
-          success |= script.Apply(material, reflectiveShader, reflectionColour);
-        }
-      }
-
-      if (!success) {
-        script?.Destroy();
-        script = null;
-
-        log.Print("Failed to replace any shader on \"{0}\" with its reflective counterpart", part.name);
-      }
     }
-
-    public void OnDestroy()
-    {
-      script?.Destroy();
-    }
-  }
 }
