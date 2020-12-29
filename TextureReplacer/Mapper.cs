@@ -34,16 +34,6 @@ namespace TextureReplacer
         // Instance.
         public static Mapper Instance { get; private set; }
 
-        // Default textures (from `Default/`).
-        public readonly Skin[] DefaultSkin = {new Skin("DEFAULT.m"), new Skin("DEFAULT.f")};
-        public readonly Suit DefaultSuit = new Suit("DEFAULT");
-        public readonly Suit VintageSuit = new Suit("DEFAULT.V");
-        public readonly Suit FutureSuit = new Suit("DEFAULT.F");
-
-        // All Kerbal textures, including excluded by configuration.
-        public readonly List<Skin> Skins = new List<Skin>();
-        public readonly List<Suit> Suits = new List<Suit>();
-
         // Class-specific suits.
         public readonly Dictionary<string, Suit> ClassSuits = new Dictionary<string, Suit>();
 
@@ -51,6 +41,16 @@ namespace TextureReplacer
         private const string SuitsPrefix = "TextureReplacer/Suits/";
 
         private static readonly Log log = new Log(nameof(Mapper));
+
+        // All Kerbal textures, including excluded by configuration.
+        private readonly List<Skin> skins = new List<Skin>();
+        private readonly List<Suit> suits = new List<Suit>();
+
+        // Default textures (from `Default/`).
+        private readonly Skin[] defaultSkin = {new Skin("DEFAULT.m"), new Skin("DEFAULT.f")};
+        private readonly Suit defaultSuit = new Suit("DEFAULT");
+        private readonly Suit vintageSuit = new Suit("DEFAULT.V");
+        private readonly Suit futureSuit = new Suit("DEFAULT.F");
 
         // Personalised Kerbal textures.
         private readonly Dictionary<string, Appearance> gameKerbals = new Dictionary<string, Appearance>();
@@ -155,18 +155,18 @@ namespace TextureReplacer
             return appearance;
         }
 
-        public Skin GetDefault(Gender gender)
+        public Skin GetDefaultSkin(Gender gender)
         {
-            return DefaultSkin[(int) gender];
+            return defaultSkin[(int) gender];
         }
 
-        public Suit GetDefault(KerbalSuit kind)
+        public Suit GetDefaultSuit(KerbalSuit? kind)
         {
             return kind switch
             {
-                KerbalSuit.Vintage => VintageSuit,
-                KerbalSuit.Future  => FutureSuit,
-                _                  => DefaultSuit
+                KerbalSuit.Vintage => vintageSuit,
+                KerbalSuit.Future  => futureSuit,
+                _                  => defaultSuit
             };
         }
 
@@ -184,7 +184,7 @@ namespace TextureReplacer
             IList<Skin> availableSkins = GetAvailableSkins(kerbal, false);
             if (availableSkins.Count == 0)
             {
-                return DefaultSkin[(int) kerbal.gender];
+                return defaultSkin[(int) kerbal.gender];
             }
 
             // Hash is multiplied with a large prime to increase randomisation, since hashes returned by `GetHashCode()`
@@ -209,7 +209,7 @@ namespace TextureReplacer
             IList<Suit> availableSuits = GetAvailableSuits(kerbal, false);
             if (availableSuits.Count == 0)
             {
-                return GetDefault(kerbal.suit);
+                return GetDefaultSuit(kerbal.suit);
             }
 
             // We must use a different prime here to increase randomisation so that the same skin is not always combined
@@ -227,18 +227,23 @@ namespace TextureReplacer
         public IList<Skin> GetAvailableSkins(ProtoCrewMember kerbal, bool allowExcluded)
         {
             return (allowExcluded
-                ? Skins.Where(s => s.Gender == kerbal.gender)
-                : Skins.Where(s => !s.Excluded && s.Gender == kerbal.gender)).ToList();
+                ? skins.Where(s => s.Gender == kerbal.gender)
+                : skins.Where(s => !s.Excluded && s.Gender == kerbal.gender)).ToList();
         }
 
         public IList<Suit> GetAvailableSuits(ProtoCrewMember kerbal, bool allowExcluded)
         {
             return (allowExcluded
-                    ? Suits.Where(s => s.Kind == kerbal.suit && (s.Gender == null || s.Gender == kerbal.gender))
-                    : Suits.Where(s =>
+                    ? suits.Where(s => s.Kind == kerbal.suit && (s.Gender == null || s.Gender == kerbal.gender))
+                    : suits.Where(s =>
                                       !s.Excluded && s.Kind == kerbal.suit &&
                                       (s.Gender == null || s.Gender == kerbal.gender)))
                 .ToList();
+        }
+
+        public List<Suit> GetGenderlessSuits()
+        {
+            return suits.Where(s => s.Gender == null).ToList();
         }
 
         /// <summary>
@@ -304,18 +309,18 @@ namespace TextureReplacer
                 {
                     null        => null,
                     "GENERIC"   => null,
-                    "DEFAULT.m" => GetDefault(kerbal.gender),
-                    "DEFAULT.f" => GetDefault(kerbal.gender),
-                    _           => Skins.Find(h => h.Name == skinName)
+                    "DEFAULT.m" => GetDefaultSkin(kerbal.gender),
+                    "DEFAULT.f" => GetDefaultSkin(kerbal.gender),
+                    _           => skins.Find(h => h.Name == skinName)
                 },
                 Suit = suitName switch
                 {
                     null        => null,
                     "GENERIC"   => null,
-                    "DEFAULT"   => GetDefault(kerbal.suit),
-                    "DEFAULT.V" => GetDefault(kerbal.suit),
-                    "DEFAULT.F" => GetDefault(kerbal.suit),
-                    _           => Suits.Find(s => s.Name == suitName)
+                    "DEFAULT"   => GetDefaultSuit(kerbal.suit),
+                    "DEFAULT.V" => GetDefaultSuit(kerbal.suit),
+                    "DEFAULT.F" => GetDefaultSuit(kerbal.suit),
+                    _           => suits.Find(s => s.Name == suitName)
                 }
             };
         }
@@ -348,22 +353,22 @@ namespace TextureReplacer
                         }
                         case "DEFAULT":
                         {
-                            map[entry.name] = DefaultSuit;
+                            map[entry.name] = defaultSuit;
                             break;
                         }
                         case "DEFAULT.V":
                         {
-                            map[entry.name] = VintageSuit;
+                            map[entry.name] = vintageSuit;
                             break;
                         }
                         case "DEFAULT.F":
                         {
-                            map[entry.name] = FutureSuit;
+                            map[entry.name] = futureSuit;
                             break;
                         }
                         default:
                         {
-                            Suit suit = Suits.Find(s => s.Name == suitName);
+                            Suit suit = suits.Find(s => s.Name == suitName);
                             if (suit != null)
                             {
                                 map[entry.name] = suit;
@@ -394,22 +399,22 @@ namespace TextureReplacer
         {
             var prefab = Prefab.Instance;
 
-            Prefab.ExtractSkin(prefab.MaleEva.transform, DefaultSkin[0]);
-            Prefab.ExtractSkin(prefab.FemaleEva.transform, DefaultSkin[1]);
+            Prefab.ExtractSkin(prefab.MaleEva.transform, defaultSkin[0]);
+            Prefab.ExtractSkin(prefab.FemaleEva.transform, defaultSkin[1]);
 
-            Prefab.ExtractSuit(prefab.MaleIva.transform, DefaultSuit);
-            Prefab.ExtractSuit(prefab.MaleEva.transform, DefaultSuit);
+            Prefab.ExtractSuit(prefab.MaleIva.transform, defaultSuit);
+            Prefab.ExtractSuit(prefab.MaleEva.transform, defaultSuit);
 
             if (prefab.MaleIvaVintage != null && prefab.MaleEvaVintage != null)
             {
-                Prefab.ExtractSuit(prefab.MaleIvaVintage.transform, VintageSuit);
-                Prefab.ExtractSuit(prefab.MaleEvaVintage.transform, VintageSuit);
+                Prefab.ExtractSuit(prefab.MaleIvaVintage.transform, vintageSuit);
+                Prefab.ExtractSuit(prefab.MaleEvaVintage.transform, vintageSuit);
             }
 
             if (prefab.MaleIvaFuture != null && prefab.MaleEvaFuture != null)
             {
-                Prefab.ExtractSuit(prefab.MaleIvaFuture.transform, FutureSuit);
-                Prefab.ExtractSuit(prefab.MaleEvaFuture.transform, FutureSuit);
+                Prefab.ExtractSuit(prefab.MaleIvaFuture.transform, futureSuit);
+                Prefab.ExtractSuit(prefab.MaleEvaFuture.transform, futureSuit);
             }
 
             // These textures cannot be found on "prefab" models, we have to add them manually.
@@ -419,17 +424,17 @@ namespace TextureReplacer
                 {
                     case "paleBlueSuite_diffuse":
                     {
-                        DefaultSuit.SetTexture(texture.name, texture);
+                        defaultSuit.SetTexture(texture.name, texture);
                         break;
                     }
                     case "me_suit_difuse_low_polyBrown":
                     {
-                        VintageSuit.SetTexture(texture.name, texture);
+                        vintageSuit.SetTexture(texture.name, texture);
                         break;
                     }
                     case "futureSuit_diffuse_whiteOrange":
                     {
-                        FutureSuit.SetTexture(texture.name, texture);
+                        futureSuit.SetTexture(texture.name, texture);
                         break;
                     }
                 }
@@ -437,16 +442,16 @@ namespace TextureReplacer
 
             // Visor needs to be replaced every time, not only on the prefab models, so the visor from the default suit must
             // be set on all suits without a custom visor.
-            VintageSuit.IvaVisor ??= DefaultSuit.IvaVisor;
-            VintageSuit.EvaVisor ??= DefaultSuit.EvaVisor;
+            vintageSuit.IvaVisor ??= defaultSuit.IvaVisor;
+            vintageSuit.EvaVisor ??= defaultSuit.EvaVisor;
 
-            FutureSuit.IvaVisor ??= DefaultSuit.IvaVisor;
-            FutureSuit.EvaVisor ??= DefaultSuit.EvaVisor;
+            futureSuit.IvaVisor ??= defaultSuit.IvaVisor;
+            futureSuit.EvaVisor ??= defaultSuit.EvaVisor;
 
-            foreach (Suit suit in Suits)
+            foreach (Suit suit in suits)
             {
-                suit.IvaVisor ??= DefaultSuit.IvaVisor;
-                suit.EvaVisor ??= DefaultSuit.EvaVisor;
+                suit.IvaVisor ??= defaultSuit.IvaVisor;
+                suit.EvaVisor ??= defaultSuit.EvaVisor;
             }
         }
 
@@ -467,12 +472,12 @@ namespace TextureReplacer
                 {
                     if (!skinDirs.TryGetValue(name, out int index))
                     {
-                        index = Skins.Count;
+                        index = skins.Count;
                         skinDirs.Add(name, index);
-                        Skins.Add(new Skin(name));
+                        skins.Add(new Skin(name));
                     }
 
-                    if (Skins[index].SetTexture(textureBaseName, texture))
+                    if (skins[index].SetTexture(textureBaseName, texture))
                     {
                         texture.wrapMode = TextureWrapMode.Clamp;
                     }
@@ -485,12 +490,12 @@ namespace TextureReplacer
                 {
                     if (!suitDirs.TryGetValue(name, out int index))
                     {
-                        index = Suits.Count;
+                        index = suits.Count;
                         suitDirs.Add(name, index);
-                        Suits.Add(new Suit(name));
+                        suits.Add(new Suit(name));
                     }
 
-                    if (Suits[index].SetTexture(textureBaseName, texture))
+                    if (suits[index].SetTexture(textureBaseName, texture))
                     {
                         texture.wrapMode = TextureWrapMode.Clamp;
                     }
@@ -508,28 +513,28 @@ namespace TextureReplacer
                         case "pupilLeft":
                         case "pupilRight":
                         {
-                            DefaultSkin[0].SetTexture(textureBaseName, texture);
-                            DefaultSkin[1].SetTexture(textureBaseName, texture);
+                            defaultSkin[0].SetTexture(textureBaseName, texture);
+                            defaultSkin[1].SetTexture(textureBaseName, texture);
                             texture.wrapMode = TextureWrapMode.Clamp;
                             break;
                         }
                         case "kerbalHead":
                         case "kerbalHeadNRM":
                         {
-                            DefaultSkin[0].SetTexture(textureBaseName, texture);
+                            defaultSkin[0].SetTexture(textureBaseName, texture);
                             texture.wrapMode = TextureWrapMode.Clamp;
                             break;
                         }
                         case "kerbalGirl_06_BaseColor":
                         case "kerbalGirl_06_BaseColorNRM":
                         {
-                            DefaultSkin[1].SetTexture(textureBaseName, texture);
+                            defaultSkin[1].SetTexture(textureBaseName, texture);
                             texture.wrapMode = TextureWrapMode.Clamp;
                             break;
                         }
                         default:
                         {
-                            if (DefaultSuit.SetTexture(textureBaseName, texture))
+                            if (defaultSuit.SetTexture(textureBaseName, texture))
                             {
                                 texture.wrapMode = TextureWrapMode.Clamp;
                             }
@@ -567,14 +572,16 @@ namespace TextureReplacer
             }
 
             // Trim lists.
-            Skins.TrimExcess();
-            Suits.TrimExcess();
+            skins.TrimExcess();
+            suits.TrimExcess();
         }
 
-        // Extract part of path consisting of directories under a prefix. Return false if prefix is not found.
-        // This function is used to determine whether a given path contains a skin or suit texture and extracts its
-        // name. E.g. for `SomeMod/TextureReplacer/Skins/MySkins/Skin01/KerbalHead` it extract skin name
-        // `MySkins/Skin01` and texture name `KerbalHead` for a given prefix `TextureReplacer/Skins`.
+        /// <summary>
+        /// Extract part of path consisting of directories under a prefix. Return false if prefix is not found. This
+        /// function is used to determine whether a given path contains a skin or suit texture and extracts its name.
+        /// E.g. for `SomeMod/TextureReplacer/Skins/MySkins/Skin01/KerbalHead` it extract skin name `MySkins/Skin01` and
+        /// texture name `KerbalHead` for a given prefix `TextureReplacer/Skins`.
+        /// </summary>
         private static bool TryGetNameUnderPrefix(string path, string prefix, out string name, out string textureName)
         {
             int prefixIndex = path.IndexOf(prefix, StringComparison.Ordinal);

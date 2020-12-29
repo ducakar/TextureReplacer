@@ -137,7 +137,7 @@ namespace TextureReplacer
             Appearance appearance = mapper.GetAppearance(kerbal);
 
             Skin skin        = mapper.GetKerbalSkin(kerbal, appearance);
-            Skin defaultSkin = mapper.GetDefault(kerbal.gender);
+            Skin defaultSkin = mapper.GetDefaultSkin(kerbal.gender);
 
             // We determine body and helmet texture here to avoid code duplication between suit and helmet cases in the
             // following switch. Setting the suit explicitly -- even when default -- is necessary to fix the switch to
@@ -149,7 +149,7 @@ namespace TextureReplacer
 
             if (mapper.PersonaliseSuit)
             {
-                Suit defaultSuit = mapper.GetDefault(kerbal.suit);
+                Suit defaultSuit = mapper.GetDefaultSuit(kerbal.suit);
 
                 suit          = mapper.GetKerbalSuit(kerbal, appearance);
                 suitTexture   = suit.GetSuit(useEvaSuit, kerbal);

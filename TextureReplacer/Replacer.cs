@@ -50,7 +50,6 @@ namespace TextureReplacer
 
         // NavBall texture.
         private Texture2D navBallTexture;
-
         private Texture2D navBallTextureEmissive;
 
         // Print material/texture names when performing texture replacement pass.

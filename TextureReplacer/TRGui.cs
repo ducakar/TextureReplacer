@@ -294,7 +294,7 @@ namespace TextureReplacer
                     selectedKerbal = null;
                     selectedClass  = clazz;
                     availableSkins = null;
-                    availableSuits = mapper.Suits.Where(s => s.Gender == null).ToList();
+                    availableSuits = mapper.GetGenderlessSuits();
                 }
             }
 
@@ -346,7 +346,7 @@ namespace TextureReplacer
             GUI.enabled = true;
             GUILayout.EndHorizontal();
 
-            Skin defaultSkin = mapper.GetDefault(selectedKerbal.gender);
+            Skin defaultSkin = mapper.GetDefaultSkin(selectedKerbal.gender);
             GUI.color = appearance.Skin == defaultSkin ? SelectedColour : Color.white;
             if (GUILayout.Button("Default"))
             {
@@ -375,13 +375,13 @@ namespace TextureReplacer
 
             if (selectedKerbal != null)
             {
-                Suit defaultSuit = mapper.GetDefault(selectedKerbal.suit);
+                Suit defaultSuit = mapper.GetDefaultSuit(selectedKerbal.suit);
                 ivaSuitTex = suit.GetSuit(false, selectedKerbal) ?? defaultSuit.GetSuit(false, selectedKerbal);
                 evaSuitTex = suit.GetSuit(true, selectedKerbal) ?? defaultSuit.GetSuit(true, selectedKerbal);
             }
             else
             {
-                Suit defaultSuit = mapper.GetDefault(suit.Kind);
+                Suit defaultSuit = mapper.GetDefaultSuit(suit.Kind);
                 ivaSuitTex = suit.IvaSuit[0] ?? defaultSuit.IvaSuit[0];
                 evaSuitTex = suit.EvaSuit[0] ?? defaultSuit.EvaSuit[0];
             }
@@ -438,7 +438,7 @@ namespace TextureReplacer
 
             bool hasKerbalGenericSuit = selectedKerbal != null && appearance.Suit == null;
 
-            Suit defaultSuit = selectedKerbal == null ? mapper.DefaultSuit : mapper.GetDefault(selectedKerbal.suit);
+            Suit defaultSuit = mapper.GetDefaultSuit(selectedKerbal?.suit);
             GUI.color = suit == defaultSuit && !hasKerbalGenericSuit ? SelectedColour : Color.white;
             if (GUILayout.Button("Default"))
             {
@@ -491,7 +491,7 @@ namespace TextureReplacer
                 {
                     selectedKerbal.suit = newSuit.Value;
                     availableSuits      = mapper.GetAvailableSuits(selectedKerbal, true);
-                    appearance.Suit     = mapper.GetDefault(selectedKerbal.suit);
+                    appearance.Suit     = mapper.GetDefaultSuit(selectedKerbal.suit);
                 }
             }
         }
