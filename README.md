@@ -1,4 +1,4 @@
-# TextureReplacer #
+# TextureReplacer
 
 ![logo](http://i.imgur.com/0esQrqA.jpg)
 
@@ -38,9 +38,9 @@ Special thanks to:
 * Sylith and Scart91 for giving others permissions to make derivatives of their
   texture packs.
 
-## Instructions ##
+## Instructions
 
-### General Textures ###
+### General Textures
 
 General replacement textures are of the form
 
@@ -146,7 +146,7 @@ full directory hierarchy:
 
 Note that all texture and directory names are case-sensitive!
 
-### Reflections ###
+### Reflections
 
 Reflections are shown on visors of Kerbals' helmets and on parts that include
 `TRReflection` module that can be used like in the following example adding
@@ -182,7 +182,7 @@ More reflective parts there are on the scene less frequently they are updated.
 `interval` field on TRReflection module can lessen the update rate for a part;
 e.g. `interval = 2` makes the part update half less frequently.
 
-### Personalised Kerbal Textures ###
+### Personalised Kerbal Textures
 
 Skins and suits are assigned either manually or automatically (configured in the
 GUI while configuration files can provide initial settings). "Random" assignment
@@ -252,7 +252,7 @@ The veteran and level textures are optional. If a level texture is missing the
 one from the previous level is inherited. If the veteran texture is present it
 is used for all levels on veterans.
 
-Directories may optionally have a suffix containing any comination of the
+Directories may optionally have a suffix containing any combination of the
 following letters (in an arbitrary order):
 
 * 'm' to make the suit male-only,
@@ -261,7 +261,7 @@ following letters (in an arbitrary order):
 * 'V' if containing textures for vintage suit model (Making History),
 * 'F' if containing textures for future suit model (Breaking Ground).
 
-### Configuration File ###
+### Configuration File
 
 ***NOTE:*** All options that can be configured in the GUI are saved per-game and
 not in the configuration files. Configuration files only provide initial
@@ -279,7 +279,7 @@ pack-specific skin/suit assignment rules in a separate file. All `*.cfg` files
 in `@Default.cfg` ensures it is processed first and overridden by subsequent
 custom configuration files).
 
-### Normal Maps ###
+### Normal Maps
 
 Unity uses _grey_ normal maps (RGBA = YYYX) to minimise artefacts when applying
 DXT5 texture compression on them. When a normal map has a `NRM` suffix Unity
@@ -293,7 +293,7 @@ _grey_ normal maps for textures in DDS format or without `NRM` suffix.
 _Grey_ normal maps can be created by saving the standard _blue_ normal maps as
 DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
 
-## Notes ##
+## Notes
 
 * Use DDS format for optimal RAM usage and loading times since DDS textures are
   not shadowed in RAM and can be pre-compressed and can have pre-built mipmaps.
@@ -303,9 +303,9 @@ DDS with DXT5nm compression or by manually shuffling channels: RGBA -> GGGR.
   the surface those textures are slowly interpolated into the high-resolution
   ones that cannot be replaced by this plugin.
 
-## Known Issues ##
+## Known Issues
 
-* Switches between suit types (standard, vindage and future) done via stock GUI
+* Switches between suit types (standard, vintage and future) done via stock GUI
   will only be reflected in TextureReplacer's GUI after the next scene load.
 * (KSP bug) Head meshes have mismatched tangents and/or binormals along the back
   of the head, where the texture is stitched together.

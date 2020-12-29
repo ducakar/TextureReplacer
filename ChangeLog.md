@@ -1,5 +1,7 @@
-# Change Log #
+# Change Log
 
+* 4.4
+  - add texture map for de-duplicating identical textures
 * 4.3.1
   - add custom BasicVisor shader to make both shaded visor and visor textures
     work with KSP 1.11

@@ -1,6 +1,6 @@
-# Licence #
+# Licence
 
-## Plugin: MIT ##
+## Plugin: MIT
 
 Copyright © 2013-2020 Davorin Učakar  
 Copyright © 2016 RangeMachine  
@@ -24,7 +24,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-## Skins: CC BY 4.0 ##
+## Skins: CC BY 4.0
 
 The skin texture pack contained in binary distributions of TextureReplacer under
 `GameData/TextureReplacer/Skins/TR` directory can be modified and distributed

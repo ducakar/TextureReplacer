@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using KSP.UI.Screens.Flight;
 using UnityEngine;
 
@@ -123,7 +124,6 @@ namespace TextureReplacer
                     newTexture.anisoLevel = texture.anisoLevel;
                     newTexture.wrapMode   = texture.wrapMode;
                     material.mainTexture  = newTexture;
-                    UnityEngine.Object.Destroy(texture);
                 }
                 else if (texture.filterMode == FilterMode.Bilinear)
                 {
@@ -143,7 +143,6 @@ namespace TextureReplacer
                             newNormalMap.anisoLevel = normalMap.anisoLevel;
                             newNormalMap.wrapMode   = normalMap.wrapMode;
                             material.SetTexture(Util.BumpMapProperty, newNormalMap);
-                            UnityEngine.Object.Destroy(normalMap);
                         }
                     }
                 }
@@ -160,7 +159,6 @@ namespace TextureReplacer
                             newEmissive.anisoLevel = emissive.anisoLevel;
                             newEmissive.wrapMode   = emissive.wrapMode;
                             material.SetTexture(Util.EmissiveProperty, newEmissive);
-                            UnityEngine.Object.Destroy(emissive);
                         }
                     }
                 }
@@ -204,7 +202,11 @@ namespace TextureReplacer
 
         private void LoadDefaultTextures()
         {
-            foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
+            var mapper = Mapper.Instance;
+
+            List<GameDatabase.TextureInfo> textureDatabase = GameDatabase.Instance.databaseTexture;
+
+            foreach (GameDatabase.TextureInfo texInfo in textureDatabase)
             {
                 Texture2D texture = texInfo.texture;
                 if (texture == null || texture.name.Length == 0)
@@ -219,12 +221,16 @@ namespace TextureReplacer
 
                 int defaultPrefixIndex = texture.name.IndexOf(DefaultPrefix, StringComparison.Ordinal);
                 if (defaultPrefixIndex == -1)
+                {
                     continue;
+                }
 
                 string originalName = texture.name.Substring(defaultPrefixIndex + DefaultPrefix.Length);
                 // Since we are merging multiple directories, we must expect conflicts.
                 if (mappedTextures.ContainsKey(originalName))
+                {
                     continue;
+                }
 
                 if (originalName.StartsWith("GalaxyTex_", StringComparison.Ordinal))
                 {
@@ -233,6 +239,18 @@ namespace TextureReplacer
 
                 mappedTextures[originalName] = texture;
                 log.Print("Mapping {0} -> {1}", originalName, texture.name);
+            }
+
+            foreach ((string key, string value) in mapper.TextureMap)
+            {
+                GameDatabase.TextureInfo textureInfo = textureDatabase.FirstOrDefault(t => t.name == value);
+                if (textureInfo == null)
+                {
+                    continue;
+                }
+
+                mappedTextures[key] = textureInfo.texture;
+                log.Print("Mapping {0} -> {1}", key, textureInfo.name);
             }
         }
 

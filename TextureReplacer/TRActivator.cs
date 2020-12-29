@@ -57,8 +57,10 @@ namespace TextureReplacer
             Reflections.Recreate();
             Personaliser.Recreate();
 
-            foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer")) {
+            foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
+            {
                 Prefab.Instance.ReadConfig(file.config);
+                Mapper.Instance.ReadConfig(file.config);
                 Replacer.Instance.ReadConfig(file.config);
                 Reflections.Instance.ReadConfig(file.config);
             }
@@ -74,14 +76,19 @@ namespace TextureReplacer
 
         public void Start()
         {
-            if (!isLoaded) {
-                if (PartLoader.Instance.IsReady()) {
+            if (!isLoaded)
+            {
+                if (PartLoader.Instance.IsReady())
+                {
                     Load();
                 }
-            } else {
+            }
+            else
+            {
                 Replacer.Instance.OnBeginScene();
 
-                if (HighLogic.LoadedSceneIsFlight) {
+                if (HighLogic.LoadedSceneIsFlight)
+                {
                     Replacer.Instance.OnBeginFlight();
                     Personaliser.Instance.OnBeginFlight();
                     isFlightScene = true;
@@ -97,11 +104,13 @@ namespace TextureReplacer
 
         public void OnDestroy()
         {
-            if (reflectionUpdater != null) {
+            if (reflectionUpdater != null)
+            {
                 Destroy(reflectionUpdater);
             }
 
-            if (isFlightScene) {
+            if (isFlightScene)
+            {
                 Personaliser.Instance.OnEndFlight();
             }
         }

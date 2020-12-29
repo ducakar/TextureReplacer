@@ -34,6 +34,9 @@ namespace TextureReplacer
         // Instance.
         public static Mapper Instance { get; private set; }
 
+        // Texture map for deduplication of identical textures.
+        public readonly Dictionary<string, string> TextureMap = new Dictionary<string, string>();
+
         // Class-specific suits.
         public readonly Dictionary<string, Suit> ClassSuits = new Dictionary<string, Suit>();
 
@@ -72,6 +75,20 @@ namespace TextureReplacer
             {
                 IsLegacyKSP = Versioning.version_major == 1 && Versioning.version_minor <= 10
             };
+        }
+
+        public void ReadConfig(ConfigNode rootNode)
+        {
+            ConfigNode textureMap = rootNode.GetNode("TextureMap");
+            if (textureMap == null)
+            {
+                return;
+            }
+
+            foreach (ConfigNode.Value pair in textureMap.values)
+            {
+                TextureMap[pair.name] = pair.value;
+            }
         }
 
         /// <summary>
@@ -395,6 +412,107 @@ namespace TextureReplacer
             }
         }
 
+        private void FillSkinsAndSuits()
+        {
+            foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
+            {
+                Texture2D texture = texInfo.texture;
+                if (texture != null)
+                {
+                    FillSkinAndSuitTexture(texture.name, texture);
+                }
+            }
+
+            foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>())
+            {
+                foreach ((string key, string value) in TextureMap)
+                {
+                    if (value == texture.name)
+                    {
+                        FillSkinAndSuitTexture(Replacer.DefaultPrefix + key, texture);
+                    }
+                }
+            }
+        }
+
+        private void FillSkinAndSuitTexture(string textureName, Texture2D texture)
+        {
+            if (TryGetNameUnderPrefix(textureName, SkinsPrefix, out string name, out string textureBaseName))
+            {
+                Skin skin = skins.FirstOrDefault(s => s.Name == name);
+                if (skin == null)
+                {
+                    skin = new Skin(name);
+                    skins.Add(skin);
+                }
+
+                if (skin.SetTexture(textureBaseName, texture))
+                {
+                    texture.wrapMode = TextureWrapMode.Clamp;
+                }
+                else
+                {
+                    log.Print("Unknown skin texture name \"{0}\": {1}", textureBaseName, textureName);
+                }
+            }
+            else if (TryGetNameUnderPrefix(textureName, SuitsPrefix, out name, out textureBaseName))
+            {
+                Suit suit = suits.FirstOrDefault(s => s.Name == name);
+                if (suit == null)
+                {
+                    suit = new Suit(name);
+                    suits.Add(suit);
+                }
+
+                if (suit.SetTexture(textureBaseName, texture))
+                {
+                    texture.wrapMode = TextureWrapMode.Clamp;
+                }
+                else
+                {
+                    log.Print("Unknown suit texture name \"{0}\": {1}", textureBaseName, textureName);
+                }
+            }
+            else if (TryGetNameUnderPrefix(textureName, Replacer.DefaultPrefix, out textureBaseName))
+            {
+                switch (textureBaseName)
+                {
+                    case "eyeballLeft":
+                    case "eyeballRight":
+                    case "pupilLeft":
+                    case "pupilRight":
+                    {
+                        defaultSkin[0].SetTexture(textureBaseName, texture);
+                        defaultSkin[1].SetTexture(textureBaseName, texture);
+                        texture.wrapMode = TextureWrapMode.Clamp;
+                        break;
+                    }
+                    case "kerbalHead":
+                    case "kerbalHeadNRM":
+                    {
+                        defaultSkin[0].SetTexture(textureBaseName, texture);
+                        texture.wrapMode = TextureWrapMode.Clamp;
+                        break;
+                    }
+                    case "kerbalGirl_06_BaseColor":
+                    case "kerbalGirl_06_BaseColorNRM":
+                    {
+                        defaultSkin[1].SetTexture(textureBaseName, texture);
+                        texture.wrapMode = TextureWrapMode.Clamp;
+                        break;
+                    }
+                    default:
+                    {
+                        if (defaultSuit.SetTexture(textureBaseName, texture))
+                        {
+                            texture.wrapMode = TextureWrapMode.Clamp;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
         private void FillDefaultKerbals()
         {
             var prefab = Prefab.Instance;
@@ -455,97 +573,6 @@ namespace TextureReplacer
             }
         }
 
-        private void FillSkinsAndSuits()
-        {
-            var skinDirs = new Dictionary<string, int>();
-            var suitDirs = new Dictionary<string, int>();
-
-            foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
-            {
-                Texture2D texture = texInfo.texture;
-                if (texture == null)
-                {
-                    continue;
-                }
-
-                if (TryGetNameUnderPrefix(texture.name, SkinsPrefix, out string name, out string textureBaseName))
-                {
-                    if (!skinDirs.TryGetValue(name, out int index))
-                    {
-                        index = skins.Count;
-                        skinDirs.Add(name, index);
-                        skins.Add(new Skin(name));
-                    }
-
-                    if (skins[index].SetTexture(textureBaseName, texture))
-                    {
-                        texture.wrapMode = TextureWrapMode.Clamp;
-                    }
-                    else
-                    {
-                        log.Print("Unknown skin texture name \"{0}\": {1}", textureBaseName, texture.name);
-                    }
-                }
-                else if (TryGetNameUnderPrefix(texture.name, SuitsPrefix, out name, out textureBaseName))
-                {
-                    if (!suitDirs.TryGetValue(name, out int index))
-                    {
-                        index = suits.Count;
-                        suitDirs.Add(name, index);
-                        suits.Add(new Suit(name));
-                    }
-
-                    if (suits[index].SetTexture(textureBaseName, texture))
-                    {
-                        texture.wrapMode = TextureWrapMode.Clamp;
-                    }
-                    else
-                    {
-                        log.Print("Unknown suit texture name \"{0}\": {1}", textureBaseName, texture.name);
-                    }
-                }
-                else if (TryGetNameUnderPrefix(texture.name, Replacer.DefaultPrefix, out name, out textureBaseName))
-                {
-                    switch (textureBaseName)
-                    {
-                        case "eyeballLeft":
-                        case "eyeballRight":
-                        case "pupilLeft":
-                        case "pupilRight":
-                        {
-                            defaultSkin[0].SetTexture(textureBaseName, texture);
-                            defaultSkin[1].SetTexture(textureBaseName, texture);
-                            texture.wrapMode = TextureWrapMode.Clamp;
-                            break;
-                        }
-                        case "kerbalHead":
-                        case "kerbalHeadNRM":
-                        {
-                            defaultSkin[0].SetTexture(textureBaseName, texture);
-                            texture.wrapMode = TextureWrapMode.Clamp;
-                            break;
-                        }
-                        case "kerbalGirl_06_BaseColor":
-                        case "kerbalGirl_06_BaseColorNRM":
-                        {
-                            defaultSkin[1].SetTexture(textureBaseName, texture);
-                            texture.wrapMode = TextureWrapMode.Clamp;
-                            break;
-                        }
-                        default:
-                        {
-                            if (defaultSuit.SetTexture(textureBaseName, texture))
-                            {
-                                texture.wrapMode = TextureWrapMode.Clamp;
-                            }
-
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Fill config for custom Kerbal skins and suits.
         /// </summary>
@@ -579,8 +606,8 @@ namespace TextureReplacer
         /// <summary>
         /// Extract part of path consisting of directories under a prefix. Return false if prefix is not found. This
         /// function is used to determine whether a given path contains a skin or suit texture and extracts its name.
-        /// E.g. for `SomeMod/TextureReplacer/Skins/MySkins/Skin01/KerbalHead` it extract skin name `MySkins/Skin01` and
-        /// texture name `KerbalHead` for a given prefix `TextureReplacer/Skins`.
+        /// E.g. for `SomeMod/TextureReplacer/Skins/MySkins/Skin01/KerbalHead` it extracts skin name `MySkins/Skin01`
+        /// and texture name `KerbalHead` for a given prefix `TextureReplacer/Skins`.
         /// </summary>
         private static bool TryGetNameUnderPrefix(string path, string prefix, out string name, out string textureName)
         {
@@ -592,8 +619,8 @@ namespace TextureReplacer
                 return false;
             }
 
-            int prefixLength = prefixIndex + prefix.Length;
-            int nameLength   = path.LastIndexOf('/') - prefixLength;
+            int prefixEnd  = prefixIndex + prefix.Length;
+            int nameLength = path.LastIndexOf('/') - prefixEnd;
             if (nameLength < 1)
             {
                 name        = "";
@@ -601,8 +628,22 @@ namespace TextureReplacer
                 return false;
             }
 
-            name        = path.Substring(prefixLength, nameLength);
-            textureName = path.Substring(prefixLength + nameLength + 1);
+            name        = path.Substring(prefixEnd, nameLength);
+            textureName = path.Substring(prefixEnd + nameLength + 1);
+            return true;
+        }
+
+        private static bool TryGetNameUnderPrefix(string path, string prefix, out string textureName)
+        {
+            int prefixIndex = path.IndexOf(prefix, StringComparison.Ordinal);
+            if (prefixIndex == -1)
+            {
+                textureName = "";
+                return false;
+            }
+
+            int prefixEnd = prefixIndex + prefix.Length;
+            textureName = path.Substring(prefixEnd);
             return true;
         }
     }

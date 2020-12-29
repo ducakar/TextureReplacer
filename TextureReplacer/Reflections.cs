@@ -273,7 +273,7 @@ namespace TextureReplacer
                     visorShader = shadersBundle.LoadAsset<Shader>(path);
                     if (visorShader == null)
                     {
-                        log.Print("Visor shader missing in the asset file");
+                        log.Print("{0} shader missing in the asset file", path);
                     }
                 }
             }
