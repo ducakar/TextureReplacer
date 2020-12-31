@@ -149,26 +149,33 @@ namespace TextureReplacer
 
             private void Update(bool force)
             {
-                int faceMask = force ? 0x3f : 1 << currentFace;
-
+                int       faceMask        = force ? 0x3f : 1 << currentFace;
                 Transform cameraTransform = camera.transform;
 
+                cameraTransform.position = Vector3.zero;
+
                 // Skybox.
-                cameraTransform.position = GalaxyCubeControl.Instance.transform.position;
-                camera.farClipPlane      = 100.0f;
-                camera.cullingMask       = 1 << 18;
+                camera.farClipPlane = 100.0f;
+                camera.cullingMask  = 1 << 18;
                 camera.RenderToCubemap(envMap, faceMask);
 
                 // Scaled space.
-                cameraTransform.position = ScaledSpace.Instance.transform.position;
-                camera.farClipPlane      = 3.0e7f;
-                camera.cullingMask       = (1 << 9) | (1 << 10) | (1 << 23);
+                camera.farClipPlane = 3.0e7f;
+                camera.cullingMask  = (1 << 9) | (1 << 10) | (1 << 23);
                 camera.RenderToCubemap(envMap, faceMask);
 
+                if (isEva)
+                {
+                    cameraTransform.position = transform.position + 0.4f * transform.up;
+                }
+                else
+                {
+                    cameraTransform.position = transform.position;
+                }
+
                 // Scene.
-                cameraTransform.position = isEva ? transform.position + 0.4f * transform.up : transform.position;
-                camera.farClipPlane      = 60000.0f;
-                camera.cullingMask       = (1 << 0) | (1 << 15) | (1 << 17);
+                camera.farClipPlane = 110000.0f;
+                camera.cullingMask  = (1 << 0) | (1 << 15) | (1 << 17);
                 camera.RenderToCubemap(envMap, faceMask);
 
                 currentFace = (currentFace + 1) % 6;
@@ -273,7 +280,7 @@ namespace TextureReplacer
                     visorShader = shadersBundle.LoadAsset<Shader>(path);
                     if (visorShader == null)
                     {
-                        log.Print("{0} shader missing in the asset file", path);
+                        log.Print("{0} not found in {1}", path, shadersPath);
                     }
                 }
             }
