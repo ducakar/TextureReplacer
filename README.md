@@ -2,7 +2,7 @@
 
 ![logo](http://i.imgur.com/0esQrqA.jpg)
 
-* [Forum thread](http://forum.kerbalspaceprogram.com/index.php?/topic/96851-/)
+* [Forum thread](http://forum.kerbalspaceprogram.com/index.php?/topic/96851--/)
 * [GitHub page](https://github.com/ducakar/TextureReplacer)
 * [Default texture pack](https://github.com/ducakar/TextureReplacer-pack)
 * [CurseForge page](https://kerbal.curseforge.com/projects/texturereplacer)
@@ -65,6 +65,9 @@ Examples:
       EVAjetpack                      // default EVA suit jetpack
       EVAjetpackNRM                   // default EVA suit jetpack normal map
       EVAjetpackEmmisive              // default EVA suit jetpack emissive
+
+      ESASuite_diffuse                // default ESA suit
+      ESASuite_normal                 // default ESA suit normal map
 
       me_suit_difuse_orange           // vintage IVA suit (veteran)
       me_suit_difuse_low_polyBrown    // vintage IVA suit (non-veteran)
