@@ -29,8 +29,8 @@ namespace TextureReplacer
     public class TRActivator : MonoBehaviour
     {
         /// <summary>
-        /// Reflection updater. We don't want this to run every frame unless real reflections are enabled so it's wrapped
-        /// inside another component and enabled only when needed.
+        /// Reflection updater. We don't want this to run every frame unless real reflections are enabled so it's
+        /// wrapped inside another component and enabled only when needed.
         /// </summary>
         public class TRReflectionUpdater : MonoBehaviour
         {

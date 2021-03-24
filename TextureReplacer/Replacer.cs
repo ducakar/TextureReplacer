@@ -288,8 +288,8 @@ namespace TextureReplacer
             mappedTextures.TryGetValue("kerbalVisor", out Texture2D ivaVisorTexture);
             mappedTextures.TryGetValue("EVAvisor", out Texture2D evaVisorTexture);
 
-            // Shaders between male and female models are inconsistent, female models are missing normal maps and specular
-            // lighting. So, we copy shaders from male materials to respective female materials.
+            // Shaders between male and female models are inconsistent, female models are missing normal maps and
+            // specular lighting. So, we copy shaders from male materials to respective female materials.
             var prefab = Prefab.Instance;
 
             SkinnedMeshRenderer[][] maleMeshes =
@@ -334,7 +334,8 @@ namespace TextureReplacer
 
                 foreach (SkinnedMeshRenderer smr in maleMeshes[i])
                 {
-                    // Many meshes share the same material, so it suffices to perform fixes only on one mesh for each material.
+                    // Many meshes share the same material, so it suffices to perform fixes only on one mesh for each
+                    // material.
                     Material material = smr.material;
 
                     switch (smr.name)

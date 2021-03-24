@@ -291,7 +291,8 @@ namespace TextureReplacer
                             newEmissive = suit.EvaSuitEmissive;
                         }
 
-                        // Update textures in Kerbal IVA object since KSP resets them to these values a few frames later.
+                        // Update textures in Kerbal IVA object since KSP resets them to these values a few frames
+                        // later.
                         if (component is Kerbal kerbalIva)
                         {
                             kerbalIva.textureStandard = newTexture;

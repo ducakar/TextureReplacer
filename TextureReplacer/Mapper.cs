@@ -542,8 +542,8 @@ namespace TextureReplacer
                 }
             }
 
-            // Visor needs to be replaced every time, not only on the prefab models, so the visor from the default suit must
-            // be set on all suits without a custom visor.
+            // Visor needs to be replaced every time, not only on the prefab models, so the visor from the default suit
+            // must be set on all suits without a custom visor.
             vintageSuit.IvaVisor ??= defaultSuit.IvaVisor;
             vintageSuit.EvaVisor ??= defaultSuit.EvaVisor;
 

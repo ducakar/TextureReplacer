@@ -96,7 +96,8 @@ namespace TextureReplacer
         }
 
         /// <summary>
-        /// True, iff a given char is encountered after the last dot (the the extension). False if there is no extension.
+        /// True, iff a given char is encountered after the last dot (the the extension). False if there is no
+        /// extension.
         /// </summary>
         public static bool HasSuffix(string s, char c)
         {

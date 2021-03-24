@@ -2,6 +2,7 @@
 
 * 4.4
   - add texture map for de-duplicating identical textures
+  - add TR suit pack (just a remap of internal suits)
 * 4.3.1
   - add custom BasicVisor shader to make both shaded visor and visor textures
     work with KSP 1.11
