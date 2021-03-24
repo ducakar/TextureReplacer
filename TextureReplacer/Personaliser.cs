@@ -122,11 +122,11 @@ namespace TextureReplacer
 
             Transform modelTransform = (isEva, kerbal.suit, kerbal.gender) switch
             {
-                (false, KerbalSuit.Default, _)            => transform.Find("model01"),
-                (false, KerbalSuit.Vintage, _)            => transform.Find("kbIVA@idle/model01"),
-                (false, KerbalSuit.Future, Gender.Male)   => transform.Find("serenityMaleIVA/model01"),
+                (false, KerbalSuit.Default, _) => transform.Find("model01"),
+                (false, KerbalSuit.Vintage, _) => transform.Find("kbIVA@idle/model01"),
+                (false, KerbalSuit.Future, Gender.Male) => transform.Find("serenityMaleIVA/model01"),
                 (false, KerbalSuit.Future, Gender.Female) => transform.Find("serenityFemaleIVA/model01"),
-                _                                         => transform.Find("model01")
+                _ => transform.Find("model01")
             };
 
             // Sometimes when we switch between suits (e.g. with clothes hanger) suit kind and model get out of sync.
@@ -136,24 +136,24 @@ namespace TextureReplacer
 
             Appearance appearance = mapper.GetAppearance(kerbal);
 
-            Skin skin        = mapper.GetKerbalSkin(kerbal, appearance);
+            Skin skin = mapper.GetKerbalSkin(kerbal, appearance);
             Skin defaultSkin = mapper.GetDefaultSkin(kerbal.gender);
 
             // We determine body and helmet texture here to avoid code duplication between suit and helmet cases in the
             // following switch. Setting the suit explicitly -- even when default -- is necessary to fix the switch to
             // the default IVA texture
             // when on EVA.
-            Suit      suit          = null;
-            Texture2D suitTexture   = null;
+            Suit suit = null;
+            Texture2D suitTexture = null;
             Texture2D suitNormalMap = null;
 
             if (mapper.PersonaliseSuit)
             {
                 Suit defaultSuit = mapper.GetDefaultSuit(kerbal.suit);
 
-                suit          = mapper.GetKerbalSuit(kerbal, appearance);
-                suitTexture   = suit.GetSuit(useEvaSuit, kerbal);
-                suitTexture   = suitTexture.HasValue() ? suitTexture : defaultSuit.GetSuit(useEvaSuit, kerbal);
+                suit = mapper.GetKerbalSuit(kerbal, appearance);
+                suitTexture = suit.GetSuit(useEvaSuit, kerbal);
+                suitTexture = suitTexture.HasValue() ? suitTexture : defaultSuit.GetSuit(useEvaSuit, kerbal);
                 suitNormalMap = suit.GetSuitNRM(useEvaSuit);
                 suitNormalMap = suitNormalMap.HasValue() ? suitNormalMap : defaultSuit.GetSuitNRM(useEvaSuit);
             }
@@ -162,15 +162,14 @@ namespace TextureReplacer
             {
                 Material material = smr.material;
 
-                Texture2D newTexture   = null;
+                Texture2D newTexture = null;
                 Texture2D newNormalMap = null;
-                Texture2D newEmissive  = null;
+                Texture2D newEmissive = null;
 
                 switch (smr.name)
                 {
                     case "eyeballLeft":
                     case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
-                    {
                         if (skin.Eyeless)
                         {
                             smr.sharedMesh = null;
@@ -181,14 +180,13 @@ namespace TextureReplacer
 
                         if (isPrefabMissing)
                         {
-                            newTexture      = newTexture.HasValue() ? newTexture : defaultSkin.EyeballLeft;
+                            newTexture = newTexture.HasValue() ? newTexture : defaultSkin.EyeballLeft;
                             material.shader = Replacer.EyeShader;
                         }
                         break;
-                    }
+
                     case "eyeballRight":
                     case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
-                    {
                         if (skin.Eyeless)
                         {
                             smr.sharedMesh = null;
@@ -199,14 +197,13 @@ namespace TextureReplacer
 
                         if (isPrefabMissing)
                         {
-                            newTexture      = newTexture.HasValue() ? newTexture : defaultSkin.EyeballRight;
+                            newTexture = newTexture.HasValue() ? newTexture : defaultSkin.EyeballRight;
                             material.shader = Replacer.EyeShader;
                         }
                         break;
-                    }
+
                     case "pupilLeft":
                     case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
-                    {
                         if (skin.Eyeless)
                         {
                             smr.sharedMesh = null;
@@ -217,7 +214,7 @@ namespace TextureReplacer
 
                         if (isPrefabMissing)
                         {
-                            newTexture      = newTexture.HasValue() ? newTexture : defaultSkin.PupilLeft;
+                            newTexture = newTexture.HasValue() ? newTexture : defaultSkin.PupilLeft;
                             material.shader = Replacer.EyeShader;
                         }
 
@@ -226,10 +223,9 @@ namespace TextureReplacer
                             material.color = Color.white;
                         }
                         break;
-                    }
+
                     case "pupilRight":
                     case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
-                    {
                         if (skin.Eyeless)
                         {
                             smr.sharedMesh = null;
@@ -240,7 +236,7 @@ namespace TextureReplacer
 
                         if (isPrefabMissing)
                         {
-                            newTexture      = newTexture.HasValue() ? newTexture : defaultSkin.PupilRight;
+                            newTexture = newTexture.HasValue() ? newTexture : defaultSkin.PupilRight;
                             material.shader = Replacer.EyeShader;
                         }
 
@@ -249,19 +245,18 @@ namespace TextureReplacer
                             material.color = Color.white;
                         }
                         break;
-                    }
+
                     case "headMesh01":
                     case "headMesh02":
                     case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
                     case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-                    {
-                        newTexture   = skin.Head;
+                        newTexture = skin.Head;
                         newNormalMap = skin.HeadNRM;
 
                         if (isPrefabMissing)
                         {
-                            newTexture      = newTexture.HasValue() ? newTexture : defaultSkin.Head;
-                            newNormalMap    = newNormalMap.HasValue() ? newNormalMap : defaultSkin.HeadNRM;
+                            newTexture = newTexture.HasValue() ? newTexture : defaultSkin.Head;
+                            newNormalMap = newNormalMap.HasValue() ? newNormalMap : defaultSkin.HeadNRM;
                             material.shader = Replacer.HeadShader;
                         }
 
@@ -270,28 +265,26 @@ namespace TextureReplacer
                             material.shader = Replacer.BumpedHeadShader;
                         }
                         break;
-                    }
+
                     case "tongue":
                     case "upTeeth01":
                     case "upTeeth02":
                     case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
                     case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
-                    {
                         if (isPrefabMissing)
                         {
                             smr.material = Replacer.Instance.TeethMaterial;
                         }
                         break;
-                    }
+
                     case "body01":
                     case "mesh_female_kerbalAstronaut01_body01":
-                    {
                         if (suit == null)
                         {
                             break;
                         }
 
-                        newTexture   = suitTexture;
+                        newTexture = suitTexture;
                         newNormalMap = suitNormalMap;
                         if (isEva)
                         {
@@ -302,18 +295,17 @@ namespace TextureReplacer
                         if (component is Kerbal kerbalIva)
                         {
                             kerbalIva.textureStandard = newTexture;
-                            kerbalIva.textureVeteran  = newTexture;
+                            kerbalIva.textureVeteran = newTexture;
                         }
                         break;
-                    }
+
                     case "neckRing":
-                    {
                         if (suit == null)
                         {
                             break;
                         }
 
-                        newTexture   = suitTexture;
+                        newTexture = suitTexture;
                         newNormalMap = suitNormalMap;
                         if (isEva)
                         {
@@ -324,26 +316,24 @@ namespace TextureReplacer
                             smr.gameObject.DestroyGameObject();
                         }
                         break;
-                    }
+
                     case "helmet":
                     case "mesh_female_kerbalAstronaut01_helmet":
-                    {
                         if (suit == null)
                         {
                             break;
                         }
 
-                        newTexture   = suitTexture;
+                        newTexture = suitTexture;
                         newNormalMap = suitNormalMap;
                         if (isEva)
                         {
                             newEmissive = suit.EvaSuitEmissive;
                         }
                         break;
-                    }
+
                     case "visor":
                     case "mesh_female_kerbalAstronaut01_visor":
-                    {
                         if (suit == null)
                         {
                             break;
@@ -356,9 +346,8 @@ namespace TextureReplacer
                             material.color = Color.white;
                         }
                         break;
-                    }
+
                     default:
-                    {
                         // Jetpack.
                         if (!isEva)
                         {
@@ -377,12 +366,11 @@ namespace TextureReplacer
 
                         if (!mapper.IsLegacyKSP || useEvaSuit)
                         {
-                            newTexture   = suit.Jetpack;
+                            newTexture = suit.Jetpack;
                             newNormalMap = suit.JetpackNRM;
-                            newEmissive  = suit.JetpackEmissive;
+                            newEmissive = suit.JetpackEmissive;
                         }
                         break;
-                    }
                 }
 
                 if (newTexture.HasValue())
@@ -409,19 +397,19 @@ namespace TextureReplacer
                                            transform.Find("model/kerbalCargoContainerPack/base");
             Transform parachutePackTransform = transform.Find("model/EVAparachute/base");
 
-            var cargoPack     = cargoPackTransform.GetComponent<Renderer>();
+            var cargoPack = cargoPackTransform.GetComponent<Renderer>();
             var parachutePack = parachutePackTransform.GetComponent<Renderer>();
 
             if (mapper.IsLegacyKSP)
             {
                 Transform flagTransform = transform.Find("model/kbEVA_flagDecals");
-                var       flag          = flagTransform.GetComponent<Renderer>();
+                var flag = flagTransform.GetComponent<Renderer>();
 
-                bool showJetpack  = useEvaSuit;
+                bool showJetpack = useEvaSuit;
                 bool showBackpack = showJetpack && !mapper.HideBackpack;
 
-                flag.enabled          = showJetpack;
-                cargoPack.enabled     = showBackpack;
+                flag.enabled = showJetpack;
+                cargoPack.enabled = showBackpack;
                 parachutePack.enabled = showBackpack;
             }
 
@@ -465,8 +453,8 @@ namespace TextureReplacer
             if (suit.ParachuteCanopy.HasValue() || suit.ParachuteCanopyNRM.HasValue())
             {
                 Transform parachuteCanopyTransform = transform.Find("model/EVAparachute/canopyrot/canopy");
-                Renderer  parachuteCanopy          = parachuteCanopyTransform.GetComponent<Renderer>();
-                Material  parachuteCanopyMaterial  = parachuteCanopy.material;
+                Renderer parachuteCanopy = parachuteCanopyTransform.GetComponent<Renderer>();
+                Material parachuteCanopyMaterial = parachuteCanopy.material;
 
                 if (suit.ParachuteCanopy.HasValue())
                 {

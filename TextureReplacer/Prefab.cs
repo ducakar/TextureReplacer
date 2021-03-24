@@ -70,9 +70,9 @@ namespace TextureReplacer
             // specular lighting. So, we copy shaders from male materials to respective female materials.
             Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
 
-            MaleIva   = kerbals.First(k => k.transform.name == "kerbalMale");
+            MaleIva = kerbals.First(k => k.transform.name == "kerbalMale");
             FemaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
-            MaleEva   = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
+            MaleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
             FemaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
 
             // Vintage Kerbals don't have prefab models loaded. We need to load them from assets.
@@ -81,12 +81,12 @@ namespace TextureReplacer
 
             if (missionsBundle != null)
             {
-                const string maleIvaPrefab   = "assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab";
+                const string maleIvaPrefab = "assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab";
                 const string femaleIvaPrefab = "assets/expansions/missions/kerbals/iva/kerbalfemalevintage.prefab";
 
-                MaleIvaVintage   = missionsBundle.LoadAsset(maleIvaPrefab) as GameObject;
+                MaleIvaVintage = missionsBundle.LoadAsset(maleIvaPrefab) as GameObject;
                 FemaleIvaVintage = missionsBundle.LoadAsset(femaleIvaPrefab) as GameObject;
-                MaleEvaVintage   = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
+                MaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
                 FemaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAfemaleVintage").partPrefab;
             }
 
@@ -96,12 +96,12 @@ namespace TextureReplacer
 
             if (serenityBundle != null)
             {
-                const string maleIvaPrefab   = "assets/expansions/serenity/kerbals/iva/kerbalmalefuture.prefab";
+                const string maleIvaPrefab = "assets/expansions/serenity/kerbals/iva/kerbalmalefuture.prefab";
                 const string femaleIvaPrefab = "assets/expansions/serenity/kerbals/iva/kerbalfemalefuture.prefab";
 
-                MaleIvaFuture   = serenityBundle.LoadAsset(maleIvaPrefab) as GameObject;
+                MaleIvaFuture = serenityBundle.LoadAsset(maleIvaPrefab) as GameObject;
                 FemaleIvaFuture = serenityBundle.LoadAsset(femaleIvaPrefab) as GameObject;
-                MaleEvaFuture   = PartLoader.getPartInfoByName("kerbalEVAFuture").partPrefab;
+                MaleEvaFuture = PartLoader.getPartInfoByName("kerbalEVAFuture").partPrefab;
                 FemaleEvaFuture = PartLoader.getPartInfoByName("kerbalEVAfemaleFuture").partPrefab;
             }
 

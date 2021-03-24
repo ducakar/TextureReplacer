@@ -39,7 +39,7 @@ namespace TextureReplacer
         public static readonly int ReflectColorProperty = Shader.PropertyToID("_ReflectColor");
         public static readonly System.Random Random = new System.Random();
 
-        private static readonly char[] ConfigDelimiters = {' ', '\t', ','};
+        private static readonly char[] ConfigDelimiters = { ' ', '\t', ',' };
 
         /// <summary>
         /// Split a space- and/or comma-separated configuration file value into its tokens.
@@ -169,8 +169,8 @@ namespace TextureReplacer
             targetTex.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
             RenderTexture.active = originalRenderTex;
 
-            byte[]           data = targetTex.EncodeToPNG();
-            using FileStream fs   = File.Create<TRActivator>(texture.name + ".png");
+            byte[] data = targetTex.EncodeToPNG();
+            using FileStream fs = File.Create<TRActivator>(texture.name + ".png");
             fs.Write(data, 0, data.Length);
         }
     }

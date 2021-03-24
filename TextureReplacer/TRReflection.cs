@@ -43,8 +43,8 @@ namespace TextureReplacer
             var reflections = Reflections.Instance;
 
             Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
-            Color  reflectionColour = Color.white;
-            int    updateInterval   = 1;
+            Color reflectionColour = Color.white;
+            int updateInterval = 1;
 
             Util.Parse(colour, ref reflectionColour);
             Util.Parse(interval, ref updateInterval);

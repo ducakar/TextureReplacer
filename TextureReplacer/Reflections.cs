@@ -56,11 +56,11 @@ namespace TextureReplacer
                 envMap = new RenderTexture(reflectionResolution, reflectionResolution, 24)
                 {
                     dimension = TextureDimension.Cube,
-                    wrapMode  = TextureWrapMode.Clamp
+                    wrapMode = TextureWrapMode.Clamp
                 };
 
                 transform = part.transform;
-                isEva     = part.GetComponent<KerbalEVA>() != null;
+                isEva = part.GetComponent<KerbalEVA>() != null;
 
                 if (isEva)
                 {
@@ -77,8 +77,8 @@ namespace TextureReplacer
                     }
                 }
 
-                interval    = updateInterval;
-                counter     = Util.Random.Next(updateInterval);
+                interval = updateInterval;
+                counter = Util.Random.Next(updateInterval);
                 currentFace = Util.Random.Next(6);
 
                 EnsureCamera();
@@ -149,19 +149,19 @@ namespace TextureReplacer
 
             private void Update(bool force)
             {
-                int       faceMask        = force ? 0x3f : 1 << currentFace;
+                int faceMask = force ? 0x3f : 1 << currentFace;
                 Transform cameraTransform = camera.transform;
 
                 cameraTransform.position = Vector3.zero;
 
                 // Skybox.
                 camera.farClipPlane = 100.0f;
-                camera.cullingMask  = 1 << 18;
+                camera.cullingMask = 1 << 18;
                 camera.RenderToCubemap(envMap, faceMask);
 
                 // Scaled space.
                 camera.farClipPlane = 3.0e7f;
-                camera.cullingMask  = (1 << 9) | (1 << 10) | (1 << 23);
+                camera.cullingMask = (1 << 9) | (1 << 10) | (1 << 23);
                 camera.RenderToCubemap(envMap, faceMask);
 
                 if (isEva)
@@ -175,7 +175,7 @@ namespace TextureReplacer
 
                 // Scene.
                 camera.farClipPlane = 110000.0f;
-                camera.cullingMask  = (1 << 0) | (1 << 15) | (1 << 17);
+                camera.cullingMask = (1 << 0) | (1 << 15) | (1 << 17);
                 camera.RenderToCubemap(envMap, faceMask);
 
                 currentFace = (currentFace + 1) % 6;
@@ -261,13 +261,13 @@ namespace TextureReplacer
             string shadersFileName = Application.platform switch
             {
                 RuntimePlatform.WindowsPlayer => "shaders.windows",
-                RuntimePlatform.OSXPlayer     => "shaders.osx",
-                _                             => "shaders.linux"
+                RuntimePlatform.OSXPlayer => "shaders.osx",
+                _ => "shaders.linux"
             };
             string shadersPath = IOUtils.GetFilePathFor(typeof(Reflections), shadersFileName);
 
             AssetBundle shadersBundle = null;
-            Shader      visorShader   = null;
+            Shader visorShader = null;
             try
             {
                 shadersBundle = AssetBundle.LoadFromFile(shadersPath);
@@ -328,7 +328,7 @@ namespace TextureReplacer
 
             for (int i = 0; i < ShaderNameMap.GetLength(0); ++i)
             {
-                Shader original   = Shader.Find(ShaderNameMap[i, 0]);
+                Shader original = Shader.Find(ShaderNameMap[i, 0]);
                 Shader reflective = Shader.Find(ShaderNameMap[i, 1]);
 
                 if (original == null)
@@ -378,11 +378,11 @@ namespace TextureReplacer
                 return;
             }
 
-            camera            = new GameObject("TRReflectionCamera", typeof(Camera)).GetComponent<Camera>();
-            camera.enabled    = false;
+            camera = new GameObject("TRReflectionCamera", typeof(Camera)).GetComponent<Camera>();
+            camera.enabled = false;
             camera.clearFlags = CameraClearFlags.Depth;
             // Any smaller number and visors will reflect internals of helmets.
-            camera.nearClipPlane      = 0.4f;
+            camera.nearClipPlane = 0.4f;
             camera.layerCullDistances = CullDistances;
         }
 

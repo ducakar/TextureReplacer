@@ -122,8 +122,8 @@ namespace TextureReplacer
                 if (newTexture != null && newTexture != texture)
                 {
                     newTexture.anisoLevel = texture.anisoLevel;
-                    newTexture.wrapMode   = texture.wrapMode;
-                    material.mainTexture  = newTexture;
+                    newTexture.wrapMode = texture.wrapMode;
+                    material.mainTexture = newTexture;
                 }
                 else if (texture.filterMode == FilterMode.Bilinear)
                 {
@@ -141,7 +141,7 @@ namespace TextureReplacer
                         if (newNormalMap != null && newNormalMap != normalMap)
                         {
                             newNormalMap.anisoLevel = normalMap.anisoLevel;
-                            newNormalMap.wrapMode   = normalMap.wrapMode;
+                            newNormalMap.wrapMode = normalMap.wrapMode;
                             material.SetTexture(Util.BumpMapProperty, newNormalMap);
                         }
                     }
@@ -157,7 +157,7 @@ namespace TextureReplacer
                         if (newEmissive != null && newEmissive != emissive)
                         {
                             newEmissive.anisoLevel = emissive.anisoLevel;
-                            newEmissive.wrapMode   = emissive.wrapMode;
+                            newEmissive.wrapMode = emissive.wrapMode;
                             material.SetTexture(Util.EmissiveProperty, newEmissive);
                         }
                     }
@@ -323,7 +323,7 @@ namespace TextureReplacer
             //
             // Note, though, Vintage and Modern IVA Kerbals are created on the fly, not cloned from prefabricated model,
             // hence we need to fix them each time, in Personaliser.PersonaliseKerbal().
-            Material[] visorMaterials = {null, null, null, null};
+            Material[] visorMaterials = { null, null, null, null };
 
             for (int i = 0; i < maleMeshes.Length; ++i)
             {
@@ -340,108 +340,95 @@ namespace TextureReplacer
                     switch (smr.name)
                     {
                         case "eyeballLeft":
-                        {
-                            material.shader      = EyeShader;
+                            material.shader = EyeShader;
                             material.mainTexture = eyeballLeft;
                             break;
-                        }
+
                         case "eyeballRight":
-                        {
-                            material.shader      = EyeShader;
+                            material.shader = EyeShader;
                             material.mainTexture = eyeballRight;
                             break;
-                        }
+
                         case "pupilLeft":
-                        {
-                            material.shader      = EyeShader;
+                            material.shader = EyeShader;
                             material.mainTexture = pupilLeft;
                             if (pupilLeft != null)
                             {
                                 material.color = Color.white;
                             }
                             break;
-                        }
+
                         case "pupilRight":
-                        {
-                            material.shader      = EyeShader;
+                            material.shader = EyeShader;
                             material.mainTexture = pupilRight;
                             if (pupilRight != null)
                             {
                                 material.color = Color.white;
                             }
                             break;
-                        }
+
                         case "headMesh01":
                         case "headMesh02":
-                        {
                             // Replace with bump-mapped shader, so normal maps for heads will work.
                             material.shader = kerbalHeadNRM == null ? HeadShader : BumpedHeadShader;
                             break;
-                        }
+
                         case "tongue":
                         case "upTeeth01":
                         case "upTeeth02":
-                        {
                             // Replace with bump-mapped shader, so normal maps for heads will work.
                             material.shader = kerbalHeadNRM == null ? HeadShader : BumpedHeadShader;
                             material.SetTexture(Util.BumpMapProperty, kerbalHeadNRM);
                             TeethMaterial = material;
                             break;
-                        }
+
                         case "visor":
-                        {
                             // It will be replaced with reflective shader later, if reflections are enabled.
                             switch (i)
                             {
                                 case 0:
-                                {
                                     // maleIva
                                     if (ivaVisorTexture != null)
                                     {
-                                        material.shader      = basicVisorShader;
+                                        material.shader = basicVisorShader;
                                         material.mainTexture = ivaVisorTexture;
-                                        material.color       = Color.white;
+                                        material.color = Color.white;
                                     }
                                     break;
-                                }
+
                                 case 1:
-                                {
                                     // maleEva
                                     if (evaVisorTexture != null)
                                     {
-                                        material.shader      = basicVisorShader;
+                                        material.shader = basicVisorShader;
                                         material.mainTexture = evaVisorTexture;
-                                        material.color       = Color.white;
+                                        material.color = Color.white;
                                     }
                                     break;
-                                }
+
                                 case 2:
-                                {
                                     // maleEvaVintage
                                     if (evaVisorTexture != null)
                                     {
-                                        material.shader      = basicVisorShader;
+                                        material.shader = basicVisorShader;
                                         material.mainTexture = evaVisorTexture;
-                                        material.color       = Color.white;
+                                        material.color = Color.white;
                                     }
                                     break;
-                                }
+
                                 case 3:
-                                {
                                     // maleEvaFuture
                                     if (evaVisorTexture != null)
                                     {
-                                        material.shader      = basicVisorShader;
+                                        material.shader = basicVisorShader;
                                         material.mainTexture = evaVisorTexture;
-                                        material.color       = Color.white;
+                                        material.color = Color.white;
                                     }
                                     break;
-                                }
                             }
 
                             visorMaterials[i] = material;
                             break;
-                        }
                     }
                 }
             }
@@ -461,60 +448,52 @@ namespace TextureReplacer
                     switch (smr.name)
                     {
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
-                        {
-                            material.shader      = EyeShader;
+                            material.shader = EyeShader;
                             material.mainTexture = eyeballLeft;
                             break;
-                        }
+
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
-                        {
-                            material.shader      = EyeShader;
+                            material.shader = EyeShader;
                             material.mainTexture = eyeballRight;
                             break;
-                        }
+
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
-                        {
-                            material.shader      = EyeShader;
+                            material.shader = EyeShader;
                             material.mainTexture = pupilLeft;
                             if (pupilLeft != null)
                             {
                                 material.color = Color.white;
                             }
                             break;
-                        }
+
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
-                        {
-                            material.shader      = EyeShader;
+                            material.shader = EyeShader;
                             material.mainTexture = pupilRight;
                             if (pupilRight != null)
                             {
                                 material.color = Color.white;
                             }
                             break;
-                        }
+
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-                        {
                             // Replace with bump-mapped shader, so normal maps for heads will work.
                             material.shader = kerbalHeadNRM == null ? HeadShader : BumpedHeadShader;
                             break;
-                        }
+
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_upTeeth01":
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_downTeeth01":
-                        {
                             // Females don't have textured teeth, they use the same material as for the eyeballs.
                             // Extending female head material/texture to their teeth is not possible since teeth overlap
                             // with some ponytail subtexture. However, female teeth map to the same texture coordinates
                             // as male teeth, so we fix this by applying male head & teeth material for female teeth.
                             smr.material = TeethMaterial;
                             break;
-                        }
+
                         case "visor":
                         case "mesh_female_kerbalAstronaut01_visor":
-                        {
                             smr.material = visorMaterials[i];
                             break;
-                        }
                     }
                 }
             }

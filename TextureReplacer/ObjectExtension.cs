@@ -28,7 +28,7 @@ namespace TextureReplacer
     {
         public static bool HasValue(this Object o)
         {
-            return (object) o != null;
+            return (object)o != null;
         }
     }
 }

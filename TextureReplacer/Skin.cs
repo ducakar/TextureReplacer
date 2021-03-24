@@ -41,9 +41,9 @@ namespace TextureReplacer
 
         public Skin(string name)
         {
-            Name     = name;
-            Gender   = Util.HasSuffix(name, 'f') ? Gender.Female : Gender.Male;
-            Eyeless  = Util.HasSuffix(name, 'e');
+            Name = name;
+            Gender = Util.HasSuffix(name, 'f') ? Gender.Female : Gender.Male;
+            Eyeless = Util.HasSuffix(name, 'e');
             Excluded = Util.HasSuffix(name, 'x');
         }
 
@@ -53,40 +53,32 @@ namespace TextureReplacer
             {
                 case "kerbalHead":
                 case "kerbalGirl_06_BaseColor":
-                {
                     Head ??= texture;
                     return true;
-                }
+
                 case "kerbalHeadNRM":
                 case "kerbalGirl_06_BaseColorNRM":
-                {
                     HeadNRM ??= texture;
                     return true;
-                }
+
                 case "eyeballLeft":
-                {
                     EyeballLeft ??= texture;
                     return true;
-                }
+
                 case "eyeballRight":
-                {
                     EyeballRight ??= texture;
                     return true;
-                }
+
                 case "pupilLeft":
-                {
                     PupilLeft ??= texture;
                     return true;
-                }
+
                 case "pupilRight":
-                {
                     PupilRight ??= texture;
                     return true;
-                }
+
                 default:
-                {
                     return false;
-                }
             }
         }
     }

@@ -36,14 +36,16 @@ namespace TextureReplacer
             bool useEvaSuit = false;
 
             ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
-            if (kerbal != null) {
+            if (kerbal != null)
+            {
                 var kerbalEva = GetComponent<KerbalEVA>();
 
                 useEvaSuit = kerbal.hasHelmetOn || !kerbalEva.CanEVAWithoutHelmet();
                 Personaliser.Instance.PersonaliseEva(part, kerbal, useEvaSuit);
             }
 
-            if (Reflections.Instance.ReflectionType == Reflections.Type.Real) {
+            if (Reflections.Instance.ReflectionType == Reflections.Type.Real)
+            {
                 reflectionScript = new Reflections.Script(part, 1);
                 reflectionScript.SetActive(useEvaSuit);
             }
@@ -52,7 +54,8 @@ namespace TextureReplacer
         public void OnHelmetChanged(bool hasHelmet)
         {
             ProtoCrewMember kerbal = part.protoModuleCrew.FirstOrDefault();
-            if (kerbal != null) {
+            if (kerbal != null)
+            {
                 Personaliser.Instance.PersonaliseEva(part, kerbal, hasHelmet);
             }
 

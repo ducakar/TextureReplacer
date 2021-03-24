@@ -5,7 +5,7 @@ using System.Reflection;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TextureReplacer")]
-[assembly: AssemblyCopyright("© 2020 Davorin Učakar, RangeMachine, rbray89")]
+[assembly: AssemblyCopyright("© 2021 Davorin Učakar, RangeMachine, rbray89")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyVersion("4.4.0.*")]

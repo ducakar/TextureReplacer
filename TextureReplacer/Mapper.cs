@@ -50,7 +50,7 @@ namespace TextureReplacer
         private readonly List<Suit> suits = new List<Suit>();
 
         // Default textures (from `Default/`).
-        private readonly Skin[] defaultSkin = {new Skin("DEFAULT.m"), new Skin("DEFAULT.f")};
+        private readonly Skin[] defaultSkin = { new Skin("DEFAULT.m"), new Skin("DEFAULT.f") };
         private readonly Suit defaultSuit = new Suit("DEFAULT");
         private readonly Suit vintageSuit = new Suit("DEFAULT.V");
         private readonly Suit futureSuit = new Suit("DEFAULT.F");
@@ -174,7 +174,7 @@ namespace TextureReplacer
 
         public Skin GetDefaultSkin(Gender gender)
         {
-            return defaultSkin[(int) gender];
+            return defaultSkin[(int)gender];
         }
 
         public Suit GetDefaultSuit(KerbalSuit? kind)
@@ -182,8 +182,8 @@ namespace TextureReplacer
             return kind switch
             {
                 KerbalSuit.Vintage => vintageSuit,
-                KerbalSuit.Future  => futureSuit,
-                _                  => defaultSuit
+                KerbalSuit.Future => futureSuit,
+                _ => defaultSuit
             };
         }
 
@@ -201,7 +201,7 @@ namespace TextureReplacer
             IList<Skin> availableSkins = GetAvailableSkins(kerbal, false);
             if (availableSkins.Count == 0)
             {
-                return defaultSkin[(int) kerbal.gender];
+                return defaultSkin[(int)kerbal.gender];
             }
 
             // Hash is multiplied with a large prime to increase randomisation, since hashes returned by `GetHashCode()`
@@ -316,28 +316,28 @@ namespace TextureReplacer
 
         private Appearance GetAppearanceFromNode(ProtoCrewMember kerbal, string value)
         {
-            string[] tokens   = Util.SplitConfigValue(value);
-            string   skinName = tokens.Length >= 1 ? tokens[0] : null;
-            string   suitName = tokens.Length >= 2 ? tokens[1] : null;
+            string[] tokens = Util.SplitConfigValue(value);
+            string skinName = tokens.Length >= 1 ? tokens[0] : null;
+            string suitName = tokens.Length >= 2 ? tokens[1] : null;
 
             return new Appearance(kerbal)
             {
                 Skin = skinName switch
                 {
-                    null        => null,
-                    "GENERIC"   => null,
+                    null => null,
+                    "GENERIC" => null,
                     "DEFAULT.m" => GetDefaultSkin(kerbal.gender),
                     "DEFAULT.f" => GetDefaultSkin(kerbal.gender),
-                    _           => skins.Find(h => h.Name == skinName)
+                    _ => skins.Find(h => h.Name == skinName)
                 },
                 Suit = suitName switch
                 {
-                    null        => null,
-                    "GENERIC"   => null,
-                    "DEFAULT"   => GetDefaultSuit(kerbal.suit),
+                    null => null,
+                    "GENERIC" => null,
+                    "DEFAULT" => GetDefaultSuit(kerbal.suit),
                     "DEFAULT.V" => GetDefaultSuit(kerbal.suit),
                     "DEFAULT.F" => GetDefaultSuit(kerbal.suit),
-                    _           => suits.Find(s => s.Name == suitName)
+                    _ => suits.Find(s => s.Name == suitName)
                 }
             };
         }
@@ -365,34 +365,27 @@ namespace TextureReplacer
                     {
                         case null:
                         case "GENERIC":
-                        {
                             continue;
-                        }
+
                         case "DEFAULT":
-                        {
                             map[entry.name] = defaultSuit;
                             break;
-                        }
+
                         case "DEFAULT.V":
-                        {
                             map[entry.name] = vintageSuit;
                             break;
-                        }
+
                         case "DEFAULT.F":
-                        {
                             map[entry.name] = futureSuit;
                             break;
-                        }
+
                         default:
-                        {
                             Suit suit = suits.Find(s => s.Name == suitName);
                             if (suit != null)
                             {
                                 map[entry.name] = suit;
                             }
-
                             break;
-                        }
                     }
                 }
             }
@@ -481,34 +474,29 @@ namespace TextureReplacer
                     case "eyeballRight":
                     case "pupilLeft":
                     case "pupilRight":
-                    {
                         defaultSkin[0].SetTexture(textureBaseName, texture);
                         defaultSkin[1].SetTexture(textureBaseName, texture);
                         texture.wrapMode = TextureWrapMode.Clamp;
                         break;
-                    }
+
                     case "kerbalHead":
                     case "kerbalHeadNRM":
-                    {
                         defaultSkin[0].SetTexture(textureBaseName, texture);
                         texture.wrapMode = TextureWrapMode.Clamp;
                         break;
-                    }
+
                     case "kerbalGirl_06_BaseColor":
                     case "kerbalGirl_06_BaseColorNRM":
-                    {
                         defaultSkin[1].SetTexture(textureBaseName, texture);
                         texture.wrapMode = TextureWrapMode.Clamp;
                         break;
-                    }
+
                     default:
-                    {
                         if (defaultSuit.SetTexture(textureBaseName, texture))
                         {
                             texture.wrapMode = TextureWrapMode.Clamp;
                         }
                         break;
-                    }
                 }
             }
         }
@@ -541,20 +529,16 @@ namespace TextureReplacer
                 switch (texture.name)
                 {
                     case "paleBlueSuite_diffuse":
-                    {
                         defaultSuit.SetTexture(texture.name, texture);
                         break;
-                    }
+
                     case "me_suit_difuse_low_polyBrown":
-                    {
                         vintageSuit.SetTexture(texture.name, texture);
                         break;
-                    }
+
                     case "futureSuit_diffuse_whiteOrange":
-                    {
                         futureSuit.SetTexture(texture.name, texture);
                         break;
-                    }
                 }
             }
 
@@ -614,21 +598,21 @@ namespace TextureReplacer
             int prefixIndex = path.IndexOf(prefix, StringComparison.Ordinal);
             if (prefixIndex == -1)
             {
-                name        = "";
+                name = "";
                 textureName = "";
                 return false;
             }
 
-            int prefixEnd  = prefixIndex + prefix.Length;
+            int prefixEnd = prefixIndex + prefix.Length;
             int nameLength = path.LastIndexOf('/') - prefixEnd;
             if (nameLength < 1)
             {
-                name        = "";
+                name = "";
                 textureName = "";
                 return false;
             }
 
-            name        = path.Substring(prefixEnd, nameLength);
+            name = path.Substring(prefixEnd, nameLength);
             textureName = path.Substring(prefixEnd + nameLength + 1);
             return true;
         }
