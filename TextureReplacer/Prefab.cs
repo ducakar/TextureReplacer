@@ -29,10 +29,19 @@ namespace TextureReplacer
     {
         public static Prefab Instance { get; private set; }
 
+        public bool HasSlim;
+        public bool HasVintage;
+        public bool HasFuture;
+
         public Kerbal MaleIva;
         public Kerbal FemaleIva;
         public Part MaleEva;
         public Part FemaleEva;
+
+        public Kerbal MaleIvaSlim;
+        public Kerbal FemaleIvaSlim;
+        public Part MaleEvaSlim;
+        public Part FemaleEvaSlim;
 
         public GameObject MaleIvaVintage;
         public GameObject FemaleIvaVintage;
@@ -70,10 +79,17 @@ namespace TextureReplacer
             // specular lighting. So, we copy shaders from male materials to respective female materials.
             Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
 
-            MaleIva = kerbals.First(k => k.transform.name == "kerbalMale");
+            MaleIva   = kerbals.First(k => k.transform.name == "kerbalMale");
             FemaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
-            MaleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
+            MaleEva   = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
             FemaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
+
+            MaleIvaSlim   = kerbals.FirstOrDefault(k => k.transform.name == "slimSuitIVAMale");
+            FemaleIvaSlim = kerbals.FirstOrDefault(k => k.transform.name == "slimSuitIVAFemale");
+            MaleEvaSlim   = PartLoader.getPartInfoByName("kerbalEVASlimSuit")?.partPrefab;
+            FemaleEvaSlim = PartLoader.getPartInfoByName("kerbalEVASlimSuitFemale")?.partPrefab;
+
+            HasSlim = MaleIvaSlim != null && FemaleIvaSlim != null && MaleEvaSlim != null && FemaleEvaSlim != null;
 
             // Vintage Kerbals don't have prefab models loaded. We need to load them from assets.
             AssetBundle missionsBundle = AssetBundle.GetAllLoadedAssetBundles()
@@ -81,13 +97,15 @@ namespace TextureReplacer
 
             if (missionsBundle != null)
             {
-                const string maleIvaPrefab = "assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab";
+                const string maleIvaPrefab   = "assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab";
                 const string femaleIvaPrefab = "assets/expansions/missions/kerbals/iva/kerbalfemalevintage.prefab";
 
-                MaleIvaVintage = missionsBundle.LoadAsset(maleIvaPrefab) as GameObject;
+                MaleIvaVintage   = missionsBundle.LoadAsset(maleIvaPrefab) as GameObject;
                 FemaleIvaVintage = missionsBundle.LoadAsset(femaleIvaPrefab) as GameObject;
-                MaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
+                MaleEvaVintage   = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
                 FemaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAfemaleVintage").partPrefab;
+
+                HasVintage = true;
             }
 
             // Future Kerbals don't have prefab models loaded. We need to load them from assets.
@@ -96,13 +114,15 @@ namespace TextureReplacer
 
             if (serenityBundle != null)
             {
-                const string maleIvaPrefab = "assets/expansions/serenity/kerbals/iva/kerbalmalefuture.prefab";
+                const string maleIvaPrefab   = "assets/expansions/serenity/kerbals/iva/kerbalmalefuture.prefab";
                 const string femaleIvaPrefab = "assets/expansions/serenity/kerbals/iva/kerbalfemalefuture.prefab";
 
-                MaleIvaFuture = serenityBundle.LoadAsset(maleIvaPrefab) as GameObject;
+                MaleIvaFuture   = serenityBundle.LoadAsset(maleIvaPrefab) as GameObject;
                 FemaleIvaFuture = serenityBundle.LoadAsset(femaleIvaPrefab) as GameObject;
-                MaleEvaFuture = PartLoader.getPartInfoByName("kerbalEVAFuture").partPrefab;
+                MaleEvaFuture   = PartLoader.getPartInfoByName("kerbalEVAFuture").partPrefab;
                 FemaleEvaFuture = PartLoader.getPartInfoByName("kerbalEVAfemaleFuture").partPrefab;
+
+                HasFuture = true;
             }
 
             if (logKerbalHierarchy)
@@ -146,14 +166,35 @@ namespace TextureReplacer
 
         private void LogHierarchies()
         {
-            log.Print("Male IVA Hierarchy");
+            log.Print("Male IVA Default Hierarchy");
             Util.LogDownHierarchy(MaleIva.transform);
-            log.Print("Female IVA Hierarchy");
+            log.Print("Female IVA Default Hierarchy");
             Util.LogDownHierarchy(FemaleIva.transform);
-            log.Print("Male EVA Hierarchy");
+            log.Print("Male EVA Default Hierarchy");
             Util.LogDownHierarchy(MaleEva.transform);
-            log.Print("Female EVA Hierarchy");
+            log.Print("Female EVA Default Hierarchy");
             Util.LogDownHierarchy(FemaleEva.transform);
+
+            if (MaleIvaSlim != null)
+            {
+                log.Print("Male IVA Slim Hierarchy");
+                Util.LogDownHierarchy(MaleIvaSlim.transform);
+            }
+            if (FemaleIvaSlim != null)
+            {
+                log.Print("Female IVA Slim Hierarchy");
+                Util.LogDownHierarchy(FemaleIvaSlim.transform);
+            }
+            if (MaleEvaSlim != null)
+            {
+                log.Print("Male EVA Slim Hierarchy");
+                Util.LogDownHierarchy(MaleEvaSlim.transform);
+            }
+            if (FemaleEvaSlim != null)
+            {
+                log.Print("Female EVA Slim Hierarchy");
+                Util.LogDownHierarchy(FemaleEvaSlim.transform);
+            }
 
             if (MaleIvaVintage != null)
             {

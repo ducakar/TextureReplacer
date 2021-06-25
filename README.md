@@ -53,92 +53,107 @@ course).
 Examples:
 
     GameData/**/TextureReplacer/Default/
-      kerbalHead                      // teeth and male head
-      kerbalHeadNRM                   // teeth and male head normal map
-      kerbalGirl_06_BaseColor         // female head
-      kerbalGirl_06_BaseColorNRM      // female head normal map
+      kerbalHead                              // teeth and male head
+      kerbalHeadNRM                           // teeth and male head normal map
+      kerbalGirl_06_BaseColor                 // female head
+      kerbalGirl_06_BaseColorNRM              // female head normal map
 
-      orangeSuite_diffuse             // default IVA suit (veteran)
-      paleBlueSuite_diffuse           // default IVA suit (non-veteran)
-      orangeSuite_normal              // default IVA & EVA suit normal map
-      whiteSuite_diffuse              // default EVA suit
-      EVAjetpack                      // default EVA suit jetpack
-      EVAjetpackNRM                   // default EVA suit jetpack normal map
-      EVAjetpackEmmisive              // default EVA suit jetpack emissive
+      orangeSuite_diffuse                     // default IVA suit (veteran)
+      paleBlueSuite_diffuse                   // default IVA suit (non-veteran)
+      orangeSuite_normal                      // default IVA & EVA suit normal map
+      whiteSuite_diffuse                      // default EVA suit
+      EVAjetpack                              // default EVA suit jetpack
+      EVAjetpackNRM                           // default EVA suit jetpack normal map
+      EVAjetpackEmmisive                      // default EVA suit jetpack emissive
 
-      ESASuite_diffuse                // default ESA suit
-      ESASuite_normal                 // default ESA suit normal map
+      ESASuite_diffuse                        // default ESA suit
+      ESASuite_normal                         // default ESA suit normal map
 
-      me_suit_difuse_orange           // vintage IVA suit (veteran)
-      me_suit_difuse_low_polyBrown    // vintage IVA suit (non-veteran)
-      kerbalMainNRM                   // vintage IVA & EVA suit normal map
-      me_suit_difuse_blue             // vintage EVA suit
-      EVAjetpackscondary              // vintage suit jetpack
-      EVAjetpacksecondary_N           // vintage suit jetpack normal map
+      slimSuitDiffuse_white                   // slim suit (white)
+      slimSuitDiffuse_orange                  // slim suit (orange)
+      slimSuitDiffuse_blue                    // slim suit (blue)
+      slimSuitNormals                         // slim suit normal map
 
-      futureSuit_diffuse_whiteOrange  // future IVA suit (veteran)
-      futureSuit_diffuse_whiteBlue    // future IVA suit (non-veteran)
-      futureSuitMainNRM               // future IVA suit normal map
-      futureSuit_diffuse_orange       // future EVA suit
-      futureSuitMainNRM               // future EVA suit normal map
-      futureSuit_emissive             // future EVA suit emissive
-      ksp_ig_jetpack_diffuse          // future EVA suit jetpack
-      EVAjetpackNRM                   // future EVA suit normal map
+      me_suit_difuse_orange                   // vintage IVA suit (veteran)
+      me_suit_difuse_low_polyBrown            // vintage IVA suit (non-veteran)
+      kerbalMainNRM                           // vintage IVA & EVA suit normal map
+      me_suit_difuse_blue                     // vintage EVA suit
+      EVAjetpackscondary                      // vintage suit jetpack
+      EVAjetpacksecondary_N                   // vintage suit jetpack normal map
 
-      kerbalVisor                     // IVA helmet visor
-      EVAvisor                        // EVA helmet visor
+      futureSuit_diffuse_whiteOrange          // future IVA suit (veteran)
+      futureSuit_diffuse_whiteBlue            // future IVA suit (non-veteran)
+      futureSuitMainNRM                       // future IVA suit normal map
+      futureSuit_diffuse_orange               // future EVA suit
+      futureSuitMainNRM                       // future EVA suit normal map
+      futureSuit_emissive                     // future EVA suit emissive
+      ksp_ig_jetpack_diffuse                  // future EVA suit jetpack
+      EVAjetpackNRM                           // future EVA suit normal map
 
-      cargoContainerPack_diffuse      // EVA cargo backpack
-      cargoContainerPack_NRM          // EVA cargo backpack normal map
-      cargoContainerPack_emissive     // EVA cargo backpack emissive
+      kerbalVisor                             // IVA helmet visor
+      EVAvisor                                // EVA helmet visor
 
-      backpack_Diff                   // EVA parachute backpack
-      backpack_NM                     // EVA parachute backpack normal map
-      canopy_Diff                     // EVA parachute canopy
-      canopy_NR                       // EVA parachute canopy normal map
+      cargoContainerPack_diffuse              // Small cargo backpack
+      cargoContainerPack_NRM                  // Small cargo backpack normal map
+      cargoContainerPack_emissive             // Small cargo backpack emissive
 
-      NavBall                         // HUD & IVA NavBall
-      NavBallEmissive                 // HUD & IVA NavBall emissive
+      cargoContainerPack-standalone_diffuse   // Small cargo backpack
+      cargoContainerPack-standalone_NRM       // Small cargo backpack normal map
+      cargoContainerPack-standalone_emissive  // Small cargo backpack emissive
 
-      GalaxyTex_PositiveX             // skybox right face
-      GalaxyTex_NegativeX             // skybox left face
-      GalaxyTex_PositiveY             // skybox bottom face rotated by 180°
-      GalaxyTex_NegativeY             // skybox top face
-      GalaxyTex_PositiveZ             // skybox front face
-      GalaxyTex_NegativeZ             // skybox back face
+      Storage_Diffuse                         // Big cargo backpack
+      Storage_Normal                          // Big cargo backpack noraml map
 
-      moho00                          // Moho
-      moho01                          // Moho normal map
-      Eve2_00                         // Eve
-      Eve2_01                         // Eve normal map
-      evemoon100                      // Gilly
-      evemoon101                      // Gilly normal map
-      KerbinScaledSpace300            // Kerbin
-      KerbinScaledSpace401            // Kerbin normal map
-      NewMunSurfaceMapDiffuse         // Mün
-      NewMunSurfaceMapNormals         // Mün normal map
-      NewMunSurfaceMap00              // Minmus
-      NewMunSurfaceMap01              // Minmus normal map
-      Duna5_00                        // Duna
-      Duna5_01                        // Duna normal map
-      desertplanetmoon00              // Ike
-      desertplanetmoon01              // Ike normal map
-      dwarfplanet100                  // Dres
-      dwarfplanet101                  // Dres normal map
-      gas1_clouds                     // Jool
-      cloud_normal                    // Jool normal map
-      newoceanmoon00                  // Laythe
-      newoceanmoon01                  // Laythe normal map
-      gp1icemoon00                    // Vall
-      gp1icemoon01                    // Vall normal map
-      rockyMoon00                     // Tylo
-      rockyMoon01                     // Tylo normal map
-      gp1minormoon100                 // Bop
-      gp1minormoon101                 // Bop normal map
-      gp1minormoon200                 // Pol
-      gp1minormoon201                 // Pol normal map
-      snowydwarfplanet00              // Eeloo
-      snowydwarfplanet01              // Eeloo normal map
+      StorageSlim_Diffuse                     // Slim big cargo backpack
+      StorageSlim_Normal                      // Slim big cargo backpack normal map
+
+      backpack_Diff                           // Parachute backpack
+      backpack_NM                             // Parachute backpack normal map
+      canopy_Diff                             // Parachute canopy
+      canopy_NR                               // Parachute canopy normal map
+
+      NavBall                                 // HUD & IVA NavBall
+      NavBallEmissive                         // HUD & IVA NavBall emissive
+
+      GalaxyTex_PositiveX                     // skybox right face
+      GalaxyTex_NegativeX                     // skybox left face
+      GalaxyTex_PositiveY                     // skybox bottom face rotated by 180°
+      GalaxyTex_NegativeY                     // skybox top face
+      GalaxyTex_PositiveZ                     // skybox front face
+      GalaxyTex_NegativeZ                     // skybox back face
+
+      moho00                                  // Moho
+      moho01                                  // Moho normal map
+      Eve2_00                                 // Eve
+      Eve2_01                                 // Eve normal map
+      evemoon100                              // Gilly
+      evemoon101                              // Gilly normal map
+      KerbinScaledSpace300                    // Kerbin
+      KerbinScaledSpace401                    // Kerbin normal map
+      NewMunSurfaceMapDiffuse                 // Mün
+      NewMunSurfaceMapNormals                 // Mün normal map
+      NewMunSurfaceMap00                      // Minmus
+      NewMunSurfaceMap01                      // Minmus normal map
+      Duna5_00                                // Duna
+      Duna5_01                                // Duna normal map
+      desertplanetmoon00                      // Ike
+      desertplanetmoon01                      // Ike normal map
+      dwarfplanet100                          // Dres
+      dwarfplanet101                          // Dres normal map
+      gas1_clouds                             // Jool
+      cloud_normal                            // Jool normal map
+      newoceanmoon00                          // Laythe
+      newoceanmoon01                          // Laythe normal map
+      gp1icemoon00                            // Vall
+      gp1icemoon01                            // Vall normal map
+      rockyMoon00                             // Tylo
+      rockyMoon01                             // Tylo normal map
+      gp1minormoon100                         // Bop
+      gp1minormoon101                         // Bop normal map
+      gp1minormoon200                         // Pol
+      gp1minormoon201                         // Pol normal map
+      snowydwarfplanet00                      // Eeloo
+      snowydwarfplanet01                      // Eeloo normal map
 
 It's also possible to replace textures from `GameData/` if one specifies the
 full directory hierarchy:
@@ -261,8 +276,9 @@ following letters (in an arbitrary order):
 * 'm' to make the suit male-only,
 * 'f' to make the suit female-only,
 * 'x' exclude form automatic assignment,
-* 'V' if containing textures for vintage suit model (Making History),
-* 'F' if containing textures for future suit model (Breaking Ground).
+* 'S' if containing textures for the slim suit model,
+* 'V' if containing textures for the vintage suit model (Making History),
+* 'F' if containing textures for the future suit model (Breaking Ground).
 
 ### Configuration File
 

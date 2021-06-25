@@ -170,8 +170,8 @@ namespace TextureReplacer
             targetTex.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
             RenderTexture.active = originalRenderTex;
 
-            byte[] data = targetTex.EncodeToPNG();
-            using FileStream fs = File.Create<TRActivator>(texture.name + ".png");
+            byte[]           data = targetTex.EncodeToPNG();
+            using FileStream fs   = File.Create<TRActivator>(texture.name + ".png");
             fs.Write(data, 0, data.Length);
         }
     }

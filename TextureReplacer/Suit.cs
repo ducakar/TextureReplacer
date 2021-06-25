@@ -30,6 +30,11 @@ namespace TextureReplacer
 {
     internal class Suit
     {
+        public const KerbalSuit Default = KerbalSuit.Default;
+        public const KerbalSuit Slim = (KerbalSuit)3;
+        public const KerbalSuit Vintage = KerbalSuit.Vintage;
+        public const KerbalSuit Future = KerbalSuit.Future;
+
         public readonly string Name;
         public readonly Gender? Gender;
         public readonly KerbalSuit Kind;
@@ -65,13 +70,14 @@ namespace TextureReplacer
             {
                 _ when Util.HasSuffix(name, 'm') => ProtoCrewMember.Gender.Male,
                 _ when Util.HasSuffix(name, 'f') => ProtoCrewMember.Gender.Female,
-                _ => null
+                _                                => null
             };
             Kind = true switch
             {
-                _ when Util.HasSuffix(name, 'V') => KerbalSuit.Vintage,
-                _ when Util.HasSuffix(name, 'F') => KerbalSuit.Future,
-                _ => KerbalSuit.Default
+                _ when Util.HasSuffix(name, 'S') => Slim,
+                _ when Util.HasSuffix(name, 'V') => Vintage,
+                _ when Util.HasSuffix(name, 'F') => Future,
+                _                                => KerbalSuit.Default
             };
             Excluded = Util.HasSuffix(name, 'x');
         }
@@ -106,11 +112,13 @@ namespace TextureReplacer
             switch (originalName)
             {
                 case "orangeSuite_normal":
+                case "slimSuitNormals":
                 case "futureSuitMainNRM":
                     IvaSuitNRM ??= texture;
                     EvaSuitNRM ??= texture;
                     return true;
 
+                case "slimSuitDiffuse_blue":
                 case "paleBlueSuite_diffuse":
                 case "me_suit_difuse_low_polyBrown":
                 case "futureSuit_diffuse_whiteBlue":
@@ -139,6 +147,7 @@ namespace TextureReplacer
                     return true;
 
                 case "orangeSuite_diffuse":
+                case "slimSuitDiffuse_orange":
                 case "me_suit_difuse_orange":
                 case "futureSuit_diffuse_whiteOrange":
                 case "kerbalMain":
@@ -150,6 +159,7 @@ namespace TextureReplacer
                     return true;
 
                 case "whiteSuite_diffuse":
+                case "slimSuitDiffuse_white":
                 case "me_suit_difuse_blue":
                 case "futureSuit_diffuse_orange":
                 case "EVAtexture":

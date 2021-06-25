@@ -41,9 +41,9 @@ namespace TextureReplacer
 
         public Skin(string name)
         {
-            Name = name;
-            Gender = Util.HasSuffix(name, 'f') ? Gender.Female : Gender.Male;
-            Eyeless = Util.HasSuffix(name, 'e');
+            Name     = name;
+            Gender   = Util.HasSuffix(name, 'f') ? Gender.Female : Gender.Male;
+            Eyeless  = Util.HasSuffix(name, 'e');
             Excluded = Util.HasSuffix(name, 'x');
         }
 

@@ -122,8 +122,8 @@ namespace TextureReplacer
                 if (newTexture != null && newTexture != texture)
                 {
                     newTexture.anisoLevel = texture.anisoLevel;
-                    newTexture.wrapMode = texture.wrapMode;
-                    material.mainTexture = newTexture;
+                    newTexture.wrapMode   = texture.wrapMode;
+                    material.mainTexture  = newTexture;
                 }
                 else if (texture.filterMode == FilterMode.Bilinear)
                 {
@@ -141,7 +141,7 @@ namespace TextureReplacer
                         if (newNormalMap != null && newNormalMap != normalMap)
                         {
                             newNormalMap.anisoLevel = normalMap.anisoLevel;
-                            newNormalMap.wrapMode = normalMap.wrapMode;
+                            newNormalMap.wrapMode   = normalMap.wrapMode;
                             material.SetTexture(Util.BumpMapProperty, newNormalMap);
                         }
                     }
@@ -157,7 +157,7 @@ namespace TextureReplacer
                         if (newEmissive != null && newEmissive != emissive)
                         {
                             newEmissive.anisoLevel = emissive.anisoLevel;
-                            newEmissive.wrapMode = emissive.wrapMode;
+                            newEmissive.wrapMode   = emissive.wrapMode;
                             material.SetTexture(Util.EmissiveProperty, newEmissive);
                         }
                     }
@@ -341,17 +341,17 @@ namespace TextureReplacer
                     switch (smr.name)
                     {
                         case "eyeballLeft":
-                            material.shader = EyeShader;
+                            material.shader      = EyeShader;
                             material.mainTexture = eyeballLeft;
                             break;
 
                         case "eyeballRight":
-                            material.shader = EyeShader;
+                            material.shader      = EyeShader;
                             material.mainTexture = eyeballRight;
                             break;
 
                         case "pupilLeft":
-                            material.shader = EyeShader;
+                            material.shader      = EyeShader;
                             material.mainTexture = pupilLeft;
                             if (pupilLeft != null)
                             {
@@ -360,7 +360,7 @@ namespace TextureReplacer
                             break;
 
                         case "pupilRight":
-                            material.shader = EyeShader;
+                            material.shader      = EyeShader;
                             material.mainTexture = pupilRight;
                             if (pupilRight != null)
                             {
@@ -391,9 +391,9 @@ namespace TextureReplacer
                                     // maleIva
                                     if (ivaVisorTexture != null)
                                     {
-                                        material.shader = basicVisorShader;
+                                        material.shader      = basicVisorShader;
                                         material.mainTexture = ivaVisorTexture;
-                                        material.color = Color.white;
+                                        material.color       = Color.white;
                                     }
                                     break;
 
@@ -401,9 +401,9 @@ namespace TextureReplacer
                                     // maleEva
                                     if (evaVisorTexture != null)
                                     {
-                                        material.shader = basicVisorShader;
+                                        material.shader      = basicVisorShader;
                                         material.mainTexture = evaVisorTexture;
-                                        material.color = Color.white;
+                                        material.color       = Color.white;
                                     }
                                     break;
 
@@ -411,9 +411,9 @@ namespace TextureReplacer
                                     // maleEvaVintage
                                     if (evaVisorTexture != null)
                                     {
-                                        material.shader = basicVisorShader;
+                                        material.shader      = basicVisorShader;
                                         material.mainTexture = evaVisorTexture;
-                                        material.color = Color.white;
+                                        material.color       = Color.white;
                                     }
                                     break;
 
@@ -421,9 +421,9 @@ namespace TextureReplacer
                                     // maleEvaFuture
                                     if (evaVisorTexture != null)
                                     {
-                                        material.shader = basicVisorShader;
+                                        material.shader      = basicVisorShader;
                                         material.mainTexture = evaVisorTexture;
-                                        material.color = Color.white;
+                                        material.color       = Color.white;
                                     }
                                     break;
                             }
@@ -449,17 +449,17 @@ namespace TextureReplacer
                     switch (smr.name)
                     {
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballLeft":
-                            material.shader = EyeShader;
+                            material.shader      = EyeShader;
                             material.mainTexture = eyeballLeft;
                             break;
 
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_eyeballRight":
-                            material.shader = EyeShader;
+                            material.shader      = EyeShader;
                             material.mainTexture = eyeballRight;
                             break;
 
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilLeft":
-                            material.shader = EyeShader;
+                            material.shader      = EyeShader;
                             material.mainTexture = pupilLeft;
                             if (pupilLeft != null)
                             {
@@ -468,7 +468,7 @@ namespace TextureReplacer
                             break;
 
                         case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pupilRight":
-                            material.shader = EyeShader;
+                            material.shader      = EyeShader;
                             material.mainTexture = pupilRight;
                             if (pupilRight != null)
                             {

@@ -1,5 +1,12 @@
 # Change Log
 
+* 4.5
+  - update for KSP 1.12, but keep backward compatibility
+  - add support for slim suits
+  - suit personalisation is disabled by default
+  - hide suit customisation part of GUI when suit personalisation is disabled
+  - hide radio buttons for unavailable suit types in GUI
+  - fix default suit textures being messed up by texture maps
 * 4.4
   - add texture map for de-duplicating identical textures
   - add TR suit pack (just a remap of internal suits)

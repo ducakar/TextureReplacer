@@ -52,6 +52,7 @@ namespace TextureReplacer
         // Default textures (from `Default/`).
         private readonly Skin[] defaultSkin = { new Skin("DEFAULT.m"), new Skin("DEFAULT.f") };
         private readonly Suit defaultSuit = new Suit("DEFAULT");
+        private readonly Suit slimSuit = new Suit("DEFAULT.S");
         private readonly Suit vintageSuit = new Suit("DEFAULT.V");
         private readonly Suit futureSuit = new Suit("DEFAULT.F");
 
@@ -118,7 +119,7 @@ namespace TextureReplacer
 
         public void OnLoadScenario(ConfigNode node)
         {
-            bool personaliseSuit = true;
+            bool personaliseSuit = false;
             Util.Parse(node.GetValue("personaliseSuit"), ref personaliseSuit);
             PersonaliseSuit = personaliseSuit;
 
@@ -181,9 +182,10 @@ namespace TextureReplacer
         {
             return kind switch
             {
-                KerbalSuit.Vintage => vintageSuit,
-                KerbalSuit.Future => futureSuit,
-                _ => defaultSuit
+                Suit.Slim    => slimSuit,
+                Suit.Vintage => vintageSuit,
+                Suit.Future  => futureSuit,
+                _            => defaultSuit
             };
         }
 
@@ -316,28 +318,28 @@ namespace TextureReplacer
 
         private Appearance GetAppearanceFromNode(ProtoCrewMember kerbal, string value)
         {
-            string[] tokens = Util.SplitConfigValue(value);
-            string skinName = tokens.Length >= 1 ? tokens[0] : null;
-            string suitName = tokens.Length >= 2 ? tokens[1] : null;
+            string[] tokens   = Util.SplitConfigValue(value);
+            string   skinName = tokens.Length >= 1 ? tokens[0] : null;
+            string   suitName = tokens.Length >= 2 ? tokens[1] : null;
 
             return new Appearance(kerbal)
             {
                 Skin = skinName switch
                 {
-                    null => null,
-                    "GENERIC" => null,
+                    null        => null,
+                    "GENERIC"   => null,
                     "DEFAULT.m" => GetDefaultSkin(kerbal.gender),
                     "DEFAULT.f" => GetDefaultSkin(kerbal.gender),
-                    _ => skins.Find(h => h.Name == skinName)
+                    _           => skins.Find(h => h.Name == skinName)
                 },
                 Suit = suitName switch
                 {
-                    null => null,
-                    "GENERIC" => null,
-                    "DEFAULT" => GetDefaultSuit(kerbal.suit),
+                    null        => null,
+                    "GENERIC"   => null,
+                    "DEFAULT"   => GetDefaultSuit(kerbal.suit),
                     "DEFAULT.V" => GetDefaultSuit(kerbal.suit),
                     "DEFAULT.F" => GetDefaultSuit(kerbal.suit),
-                    _ => suits.Find(s => s.Name == suitName)
+                    _           => suits.Find(s => s.Name == suitName)
                 }
             };
         }
@@ -369,6 +371,10 @@ namespace TextureReplacer
 
                         case "DEFAULT":
                             map[entry.name] = defaultSuit;
+                            break;
+
+                        case "DEFAULT.S":
+                            map[entry.name] = slimSuit;
                             break;
 
                         case "DEFAULT.V":
@@ -422,7 +428,7 @@ namespace TextureReplacer
                 {
                     if (value == texture.name)
                     {
-                        FillSkinAndSuitTexture(Replacer.DefaultPrefix + key, texture);
+                        FillSkinAndSuitTexture(key, texture);
                     }
                 }
             }
@@ -511,6 +517,12 @@ namespace TextureReplacer
             Prefab.ExtractSuit(prefab.MaleIva.transform, defaultSuit);
             Prefab.ExtractSuit(prefab.MaleEva.transform, defaultSuit);
 
+            if (prefab.MaleIvaSlim != null && prefab.MaleEvaSlim)
+            {
+                Prefab.ExtractSuit(prefab.MaleIvaSlim.transform, slimSuit);
+                Prefab.ExtractSuit(prefab.MaleEvaSlim.transform, slimSuit);
+            }
+
             if (prefab.MaleIvaVintage != null && prefab.MaleEvaVintage != null)
             {
                 Prefab.ExtractSuit(prefab.MaleIvaVintage.transform, vintageSuit);
@@ -528,6 +540,14 @@ namespace TextureReplacer
             {
                 switch (texture.name)
                 {
+                    case "slimSuitDiffuse_orange":
+                        slimSuit.SetTexture(texture.name, texture);
+                        break;
+
+                    case "slimSuitDiffuse_blue":
+                        slimSuit.SetTexture(texture.name, texture);
+                        break;
+
                     case "paleBlueSuite_diffuse":
                         defaultSuit.SetTexture(texture.name, texture);
                         break;
@@ -544,6 +564,9 @@ namespace TextureReplacer
 
             // Visor needs to be replaced every time, not only on the prefab models, so the visor from the default suit
             // must be set on all suits without a custom visor.
+            slimSuit.IvaVisor ??= defaultSuit.IvaVisor;
+            slimSuit.EvaVisor ??= defaultSuit.EvaVisor;
+
             vintageSuit.IvaVisor ??= defaultSuit.IvaVisor;
             vintageSuit.EvaVisor ??= defaultSuit.EvaVisor;
 
@@ -598,21 +621,21 @@ namespace TextureReplacer
             int prefixIndex = path.IndexOf(prefix, StringComparison.Ordinal);
             if (prefixIndex == -1)
             {
-                name = "";
+                name        = "";
                 textureName = "";
                 return false;
             }
 
-            int prefixEnd = prefixIndex + prefix.Length;
+            int prefixEnd  = prefixIndex + prefix.Length;
             int nameLength = path.LastIndexOf('/') - prefixEnd;
             if (nameLength < 1)
             {
-                name = "";
+                name        = "";
                 textureName = "";
                 return false;
             }
 
-            name = path.Substring(prefixEnd, nameLength);
+            name        = path.Substring(prefixEnd, nameLength);
             textureName = path.Substring(prefixEnd + nameLength + 1);
             return true;
         }
