@@ -600,7 +600,10 @@ namespace TextureReplacer
 
                 if (suit != null && suit.Kind != kerbal.suit)
                 {
-                    kerbal.suit = suit.Kind;
+                    kerbal.suit              = suit.Kind;
+                    kerbal.SuitTexturePath   = null;
+                    kerbal.NormalTexturePath = null;
+                    kerbal.SpritePath        = null;
                 }
             }
         }
