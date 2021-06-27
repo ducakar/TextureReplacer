@@ -291,6 +291,12 @@ namespace TextureReplacer
                         {
                             newEmissive = suit.EvaSuitEmissive;
                         }
+                        else if (!kerbal.hasNeckRingOn && kerbal.suit == KerbalSuit.Default)
+                        {
+                            // Standard IVA suit does not have a separate neck ring mesh that could be removed. Replace
+                            // it with EVA model to make the neck ring disappear.
+                            smr.sharedMesh = Replacer.Instance.StandardEvaBodyMesh;
+                        }
 
                         // Update textures in Kerbal IVA object since KSP resets them to these values a few frames
                         // later.

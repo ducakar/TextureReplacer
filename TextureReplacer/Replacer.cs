@@ -38,6 +38,7 @@ namespace TextureReplacer
         public static Replacer Instance { get; private set; }
 
         public Material TeethMaterial;
+        public Mesh StandardEvaBodyMesh;
 
         private static readonly Vector2 NavBallScale = new Vector2(-1.0f, 1.0f);
 
@@ -381,6 +382,13 @@ namespace TextureReplacer
                             material.shader = kerbalHeadNRM == null ? HeadShader : BumpedHeadShader;
                             material.SetTexture(Util.BumpMapProperty, kerbalHeadNRM);
                             TeethMaterial = material;
+                            break;
+
+                        case "body01":
+                            if (i == 1)
+                            {
+                                StandardEvaBodyMesh = smr.sharedMesh;
+                            }
                             break;
 
                         case "visor":

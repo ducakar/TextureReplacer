@@ -1,5 +1,7 @@
 # Change Log
 
+* 4.5.1
+  - implement neck ring hiding for standard suit in IVA
 * 4.5
   - update for KSP 1.12, but keep backward compatibility
   - add support for slim suits
