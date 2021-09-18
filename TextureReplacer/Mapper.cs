@@ -337,6 +337,7 @@ namespace TextureReplacer
                     null        => null,
                     "GENERIC"   => null,
                     "DEFAULT"   => GetDefaultSuit(kerbal.suit),
+                    "DEFAULT.S" => GetDefaultSuit(kerbal.suit),
                     "DEFAULT.V" => GetDefaultSuit(kerbal.suit),
                     "DEFAULT.F" => GetDefaultSuit(kerbal.suit),
                     _           => suits.Find(s => s.Name == suitName)

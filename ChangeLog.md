@@ -1,5 +1,7 @@
 # Change Log
 
+* 4.5.2
+  - fix default slim suit resetting to generic on scene switches
 * 4.5.1
   - implement neck ring hiding for standard suit in IVA
   - fix suit switches via TR GUI not being applied on the first scene switch
