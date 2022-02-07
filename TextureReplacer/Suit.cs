@@ -135,7 +135,10 @@ namespace TextureReplacer
                 case "kerbalMainGrey4":
                 case "kerbalMainGrey5":
                     level = originalName.Last() - '0';
-                    Array.Fill(IvaSuit, texture, level, IvaSuit.Length - level);
+                    for (int i = level; i < IvaSuit.Length; ++i)
+                    {
+                        IvaSuit[i] = texture;
+                    }
                     return true;
 
                 case "kerbalMainNRM":
@@ -175,7 +178,10 @@ namespace TextureReplacer
                 case "EVAtexture4":
                 case "EVAtexture5":
                     level = originalName.Last() - '0';
-                    Array.Fill(EvaSuit, texture, level, EvaSuit.Length - level);
+                    for (int i = level; i < EvaSuit.Length; ++i)
+                    {
+                        EvaSuit[i] = texture;
+                    }
                     return true;
 
                 case "EVAtextureNRM":

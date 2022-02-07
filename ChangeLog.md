@@ -1,5 +1,7 @@
 # Change Log
 
+* 4.5.3
+  - fix building with .NET Framework
 * 4.5.2
   - fix default slim suit resetting to generic on scene switches
 * 4.5.1
