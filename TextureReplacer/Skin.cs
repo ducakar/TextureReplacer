@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -25,7 +25,7 @@ using Gender = ProtoCrewMember.Gender;
 
 namespace TextureReplacer
 {
-    internal class Skin
+    public class Skin
     {
         public readonly string Name;
         public readonly Gender Gender;
@@ -41,9 +41,9 @@ namespace TextureReplacer
 
         public Skin(string name)
         {
-            Name     = name;
-            Gender   = Util.HasSuffix(name, 'f') ? Gender.Female : Gender.Male;
-            Eyeless  = Util.HasSuffix(name, 'e');
+            Name = name;
+            Gender = Util.HasSuffix(name, 'f') ? Gender.Female : Gender.Male;
+            Eyeless = Util.HasSuffix(name, 'e');
             Excluded = Util.HasSuffix(name, 'x');
         }
 
@@ -53,28 +53,28 @@ namespace TextureReplacer
             {
                 case "kerbalHead":
                 case "kerbalGirl_06_BaseColor":
-                    Head ??= texture;
+                    Head = Head != null ? Head : texture;
                     return true;
 
                 case "kerbalHeadNRM":
                 case "kerbalGirl_06_BaseColorNRM":
-                    HeadNRM ??= texture;
+                    HeadNRM = HeadNRM != null ? HeadNRM : texture;
                     return true;
 
                 case "eyeballLeft":
-                    EyeballLeft ??= texture;
+                    EyeballLeft = EyeballLeft != null ? EyeballLeft : texture;
                     return true;
 
                 case "eyeballRight":
-                    EyeballRight ??= texture;
+                    EyeballRight = EyeballRight != null ? EyeballRight : texture;
                     return true;
 
                 case "pupilLeft":
-                    PupilLeft ??= texture;
+                    PupilLeft = PupilLeft != null ? PupilLeft : texture;
                     return true;
 
                 case "pupilRight":
-                    PupilRight ??= texture;
+                    PupilRight = PupilRight != null ? PupilRight : texture;
                     return true;
 
                 default:

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -43,8 +43,8 @@ namespace TextureReplacer
             var reflections = Reflections.Instance;
 
             Shader reflectiveShader = shader.Length == 0 ? null : Shader.Find(shader);
-            Color  reflectionColour = Color.white;
-            int    updateInterval   = 1;
+            Color reflectionColour = Color.white;
+            int updateInterval = 1;
 
             Util.Parse(colour, ref reflectionColour);
             Util.Parse(interval, ref updateInterval);
@@ -69,8 +69,7 @@ namespace TextureReplacer
 
             foreach (MeshFilter meshFilter in part.FindModelComponents<MeshFilter>())
             {
-                var renderer = meshFilter.GetComponent<Renderer>();
-                if (renderer == null)
+                if (!meshFilter.TryGetComponent<Renderer>(out var renderer))
                 {
                     continue;
                 }

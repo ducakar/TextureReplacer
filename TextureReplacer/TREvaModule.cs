@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -27,7 +27,7 @@ namespace TextureReplacer
     /// <summary>
     /// This class takes cares of EVA Kerbal to assign appropriate suit on creation and manage reflection script.
     /// </summary>
-    internal class TREvaModule : PartModule
+    public class TREvaModule : PartModule
     {
         private Reflections.Script reflectionScript;
 

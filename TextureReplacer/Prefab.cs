@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -25,7 +25,7 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-    internal class Prefab
+    public class Prefab
     {
         public static Prefab Instance { get; private set; }
 
@@ -79,14 +79,14 @@ namespace TextureReplacer
             // specular lighting. So, we copy shaders from male materials to respective female materials.
             Kerbal[] kerbals = Resources.FindObjectsOfTypeAll<Kerbal>();
 
-            MaleIva   = kerbals.First(k => k.transform.name == "kerbalMale");
+            MaleIva = kerbals.First(k => k.transform.name == "kerbalMale");
             FemaleIva = kerbals.First(k => k.transform.name == "kerbalFemale");
-            MaleEva   = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
+            MaleEva = PartLoader.getPartInfoByName("kerbalEVA").partPrefab;
             FemaleEva = PartLoader.getPartInfoByName("kerbalEVAfemale").partPrefab;
 
-            MaleIvaSlim   = kerbals.FirstOrDefault(k => k.transform.name == "slimSuitIVAMale");
+            MaleIvaSlim = kerbals.FirstOrDefault(k => k.transform.name == "slimSuitIVAMale");
             FemaleIvaSlim = kerbals.FirstOrDefault(k => k.transform.name == "slimSuitIVAFemale");
-            MaleEvaSlim   = PartLoader.getPartInfoByName("kerbalEVASlimSuit")?.partPrefab;
+            MaleEvaSlim = PartLoader.getPartInfoByName("kerbalEVASlimSuit")?.partPrefab;
             FemaleEvaSlim = PartLoader.getPartInfoByName("kerbalEVASlimSuitFemale")?.partPrefab;
 
             HasSlim = MaleIvaSlim != null && FemaleIvaSlim != null && MaleEvaSlim != null && FemaleEvaSlim != null;
@@ -97,12 +97,12 @@ namespace TextureReplacer
 
             if (missionsBundle != null)
             {
-                const string maleIvaPrefab   = "assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab";
+                const string maleIvaPrefab = "assets/expansions/missions/kerbals/iva/kerbalmalevintage.prefab";
                 const string femaleIvaPrefab = "assets/expansions/missions/kerbals/iva/kerbalfemalevintage.prefab";
 
-                MaleIvaVintage   = missionsBundle.LoadAsset(maleIvaPrefab) as GameObject;
+                MaleIvaVintage = missionsBundle.LoadAsset(maleIvaPrefab) as GameObject;
                 FemaleIvaVintage = missionsBundle.LoadAsset(femaleIvaPrefab) as GameObject;
-                MaleEvaVintage   = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
+                MaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAVintage").partPrefab;
                 FemaleEvaVintage = PartLoader.getPartInfoByName("kerbalEVAfemaleVintage").partPrefab;
 
                 HasVintage = true;
@@ -114,12 +114,12 @@ namespace TextureReplacer
 
             if (serenityBundle != null)
             {
-                const string maleIvaPrefab   = "assets/expansions/serenity/kerbals/iva/kerbalmalefuture.prefab";
+                const string maleIvaPrefab = "assets/expansions/serenity/kerbals/iva/kerbalmalefuture.prefab";
                 const string femaleIvaPrefab = "assets/expansions/serenity/kerbals/iva/kerbalfemalefuture.prefab";
 
-                MaleIvaFuture   = serenityBundle.LoadAsset(maleIvaPrefab) as GameObject;
+                MaleIvaFuture = serenityBundle.LoadAsset(maleIvaPrefab) as GameObject;
                 FemaleIvaFuture = serenityBundle.LoadAsset(femaleIvaPrefab) as GameObject;
-                MaleEvaFuture   = PartLoader.getPartInfoByName("kerbalEVAFuture").partPrefab;
+                MaleEvaFuture = PartLoader.getPartInfoByName("kerbalEVAFuture").partPrefab;
                 FemaleEvaFuture = PartLoader.getPartInfoByName("kerbalEVAfemaleFuture").partPrefab;
 
                 HasFuture = true;
@@ -131,7 +131,7 @@ namespace TextureReplacer
             }
         }
 
-        public static void ExtractSkin(Transform kerbal, Skin skin)
+        public static void ExtractSkin(UnityEngine.Component kerbal, Skin skin)
         {
             foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
@@ -143,11 +143,12 @@ namespace TextureReplacer
             }
         }
 
-        public static void ExtractSuit(Transform kerbal, Suit suit)
+        public static void ExtractSuit(UnityEngine.Component kerbal, Suit suit)
         {
-            foreach (SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>())
+            foreach (var (smr, texture) in from SkinnedMeshRenderer smr in kerbal.GetComponentsInChildren<SkinnedMeshRenderer>()
+                                           let texture = smr.material.mainTexture as Texture2D
+                                           select (smr, texture))
             {
-                var texture = smr.material.mainTexture as Texture2D;
                 if (texture != null)
                 {
                     suit.SetTexture(texture.name, texture);

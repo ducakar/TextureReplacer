@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,7 +26,7 @@ using KerbalSuit = ProtoCrewMember.KerbalSuit;
 
 namespace TextureReplacer
 {
-    internal class Personaliser
+    public class Personaliser
     {
         // Instance.
         public static Personaliser Instance { get; private set; }
@@ -88,13 +88,14 @@ namespace TextureReplacer
         /// <summary>
         /// Set external EVA/IVA suit.
         /// </summary>
-        public void PersonaliseEva(Part part, ProtoCrewMember kerbal, bool useEvaSuit)
+        public void PersonaliseEva(UnityEngine.Component part, ProtoCrewMember kerbal, bool useEvaSuit)
         {
             PersonaliseKerbal(part, kerbal, true, useEvaSuit);
         }
 
+#pragma warning disable S2325 // Methods and properties that don't access instance data should be static
         // Must be non-static or the event won't work.
-        private void OnHelmetChanged(KerbalEVA eva, bool hasHelmet, bool hasNeckRing)
+        private void OnHelmetChanged(UnityEngine.Component eva, bool hasHelmet, bool hasNeckRing)
         {
             var evaModule = eva.GetComponent<TREvaModule>();
             if (evaModule)
@@ -102,6 +103,7 @@ namespace TextureReplacer
                 evaModule.OnHelmetChanged(hasHelmet);
             }
         }
+#pragma warning restore S2325 // Methods and properties that don't access instance data should be static
 
         private static void EnsureEvaModule(Component eva)
         {
@@ -124,37 +126,46 @@ namespace TextureReplacer
 
             Transform modelTransform = (isEva, kerbal.suit, kerbal.gender) switch
             {
-                (false, KerbalSuit.Vintage, _)            => transform.Find("kbIVA@idle/model01"),
-                (false, KerbalSuit.Future, Gender.Male)   => transform.Find("serenityMaleIVA/model01"),
+                (false, KerbalSuit.Vintage, _) => transform.Find("kbIVA@idle/model01"),
+                (false, KerbalSuit.Future, Gender.Male) => transform.Find("serenityMaleIVA/model01"),
                 (false, KerbalSuit.Future, Gender.Female) => transform.Find("serenityFemaleIVA/model01"),
-                _                                         => transform.Find("model01")
+                _ => transform.Find("model01")
             };
 
             // Sometimes when we switch between suits (e.g. with clothes hanger) suit kind and model get out of sync.
             // Just try all possible nodes in such cases.
-            modelTransform ??= transform.Find("model01") ?? transform.Find("kbIVA@idle/model01") ??
-                transform.Find("serenityMaleIVA/model01") ?? transform.Find("serenityFemaleIVA/model01");
+#pragma warning disable S3358 // Ternary operators should not be nested
+            modelTransform = modelTransform != null
+                ? modelTransform
+                : (transform.Find("model01") != null)
+                    ? transform.Find("model01")
+                    : (transform.Find("kbIVA@idle/model01") != null)
+                        ? transform.Find("kbIVA@idle/model01")
+                        : (transform.Find("serenityMaleIVA/model01") != null)
+                            ? transform.Find("serenityMaleIVA/model01")
+                            : transform.Find("serenityFemaleIVA/model01");
+#pragma warning restore S3358 // Ternary operators should not be nested
 
             Appearance appearance = mapper.GetAppearance(kerbal);
 
-            Skin skin        = mapper.GetKerbalSkin(kerbal, appearance);
+            Skin skin = mapper.GetKerbalSkin(kerbal, appearance);
             Skin defaultSkin = mapper.GetDefaultSkin(kerbal.gender);
 
             // We determine body and helmet texture here to avoid code duplication between suit and helmet cases in the
             // following switch. Setting the suit explicitly -- even when default -- is necessary to fix the switch to
             // the default IVA texture
             // when on EVA.
-            Suit      suit          = null;
-            Texture2D suitTexture   = null;
+            Suit suit = null;
+            Texture2D suitTexture = null;
             Texture2D suitNormalMap = null;
 
             if (mapper.PersonaliseSuit)
             {
                 Suit defaultSuit = mapper.GetDefaultSuit(kerbal.suit);
 
-                suit          = mapper.GetKerbalSuit(kerbal, appearance);
-                suitTexture   = suit.GetSuit(useEvaSuit, kerbal);
-                suitTexture   = suitTexture.HasValue() ? suitTexture : defaultSuit.GetSuit(useEvaSuit, kerbal);
+                suit = mapper.GetKerbalSuit(kerbal, appearance);
+                suitTexture = suit.GetSuit(useEvaSuit, kerbal);
+                suitTexture = suitTexture.HasValue() ? suitTexture : defaultSuit.GetSuit(useEvaSuit, kerbal);
                 suitNormalMap = suit.GetSuitNRM(useEvaSuit);
                 suitNormalMap = suitNormalMap.HasValue() ? suitNormalMap : defaultSuit.GetSuitNRM(useEvaSuit);
             }
@@ -163,9 +174,9 @@ namespace TextureReplacer
             {
                 Material material = smr.material;
 
-                Texture2D newTexture   = null;
+                Texture2D newTexture = null;
                 Texture2D newNormalMap = null;
-                Texture2D newEmissive  = null;
+                Texture2D newEmissive = null;
 
                 switch (smr.name)
                 {
@@ -181,7 +192,7 @@ namespace TextureReplacer
 
                         if (isPrefabMissing)
                         {
-                            newTexture      = newTexture.HasValue() ? newTexture : defaultSkin.EyeballLeft;
+                            newTexture = newTexture.HasValue() ? newTexture : defaultSkin.EyeballLeft;
                             material.shader = Replacer.EyeShader;
                         }
                         break;
@@ -198,7 +209,7 @@ namespace TextureReplacer
 
                         if (isPrefabMissing)
                         {
-                            newTexture      = newTexture.HasValue() ? newTexture : defaultSkin.EyeballRight;
+                            newTexture = newTexture.HasValue() ? newTexture : defaultSkin.EyeballRight;
                             material.shader = Replacer.EyeShader;
                         }
                         break;
@@ -215,7 +226,7 @@ namespace TextureReplacer
 
                         if (isPrefabMissing)
                         {
-                            newTexture      = newTexture.HasValue() ? newTexture : defaultSkin.PupilLeft;
+                            newTexture = newTexture.HasValue() ? newTexture : defaultSkin.PupilLeft;
                             material.shader = Replacer.EyeShader;
                         }
 
@@ -237,7 +248,7 @@ namespace TextureReplacer
 
                         if (isPrefabMissing)
                         {
-                            newTexture      = newTexture.HasValue() ? newTexture : defaultSkin.PupilRight;
+                            newTexture = newTexture.HasValue() ? newTexture : defaultSkin.PupilRight;
                             material.shader = Replacer.EyeShader;
                         }
 
@@ -251,13 +262,13 @@ namespace TextureReplacer
                     case "headMesh02":
                     case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_pCube1":
                     case "mesh_female_kerbalAstronaut01_kerbalGirl_mesh_polySurface51":
-                        newTexture   = skin.Head;
+                        newTexture = skin.Head;
                         newNormalMap = skin.HeadNRM;
 
                         if (isPrefabMissing)
                         {
-                            newTexture      = newTexture.HasValue() ? newTexture : defaultSkin.Head;
-                            newNormalMap    = newNormalMap.HasValue() ? newNormalMap : defaultSkin.HeadNRM;
+                            newTexture = newTexture.HasValue() ? newTexture : defaultSkin.Head;
+                            newNormalMap = newNormalMap.HasValue() ? newNormalMap : defaultSkin.HeadNRM;
                             material.shader = Replacer.HeadShader;
                         }
 
@@ -285,7 +296,7 @@ namespace TextureReplacer
                             break;
                         }
 
-                        newTexture   = suitTexture;
+                        newTexture = suitTexture;
                         newNormalMap = suitNormalMap;
                         if (isEva)
                         {
@@ -303,7 +314,7 @@ namespace TextureReplacer
                         if (component is Kerbal kerbalIva)
                         {
                             kerbalIva.textureStandard = newTexture;
-                            kerbalIva.textureVeteran  = newTexture;
+                            kerbalIva.textureVeteran = newTexture;
                         }
                         break;
 
@@ -313,7 +324,7 @@ namespace TextureReplacer
                             break;
                         }
 
-                        newTexture   = suitTexture;
+                        newTexture = suitTexture;
                         newNormalMap = suitNormalMap;
                         if (isEva)
                         {
@@ -332,7 +343,7 @@ namespace TextureReplacer
                             break;
                         }
 
-                        newTexture   = suitTexture;
+                        newTexture = suitTexture;
                         newNormalMap = suitNormalMap;
                         if (isEva)
                         {
@@ -374,9 +385,9 @@ namespace TextureReplacer
 
                         if (!mapper.IsLegacyKSP || useEvaSuit)
                         {
-                            newTexture   = suit.Jetpack;
+                            newTexture = suit.Jetpack;
                             newNormalMap = suit.JetpackNRM;
-                            newEmissive  = suit.JetpackEmissive;
+                            newEmissive = suit.JetpackEmissive;
                         }
                         break;
                 }
@@ -401,23 +412,24 @@ namespace TextureReplacer
             }
 
             // Backpacks and parachute are positioned on another node in model hierarchy.
-            Transform cargoPackTransform = transform.Find("model/EVABackpack/kerbalCargoContainerPack/base") ??
-                                           transform.Find("model/kerbalCargoContainerPack/base");
+            Transform cargoPackTransform = (transform.Find("model/EVABackpack/kerbalCargoContainerPack/base") != null)
+                ? transform.Find("model/EVABackpack/kerbalCargoContainerPack/base")
+                : transform.Find("model/kerbalCargoContainerPack/base");
             Transform parachutePackTransform = transform.Find("model/EVAparachute/base");
 
-            var cargoPack     = cargoPackTransform.GetComponent<Renderer>();
+            var cargoPack = cargoPackTransform.GetComponent<Renderer>();
             var parachutePack = parachutePackTransform.GetComponent<Renderer>();
 
             if (mapper.IsLegacyKSP)
             {
                 Transform flagTransform = transform.Find("model/kbEVA_flagDecals");
-                var       flag          = flagTransform.GetComponent<Renderer>();
+                var flag = flagTransform.GetComponent<Renderer>();
 
-                bool showJetpack  = useEvaSuit;
+                bool showJetpack = useEvaSuit;
                 bool showBackpack = showJetpack && !mapper.HideBackpack;
 
-                flag.enabled          = showJetpack;
-                cargoPack.enabled     = showBackpack;
+                flag.enabled = showJetpack;
+                cargoPack.enabled = showBackpack;
                 parachutePack.enabled = showBackpack;
             }
 
@@ -461,8 +473,8 @@ namespace TextureReplacer
             if (suit.ParachuteCanopy.HasValue() || suit.ParachuteCanopyNRM.HasValue())
             {
                 Transform parachuteCanopyTransform = transform.Find("model/EVAparachute/canopyrot/canopy");
-                Renderer  parachuteCanopy          = parachuteCanopyTransform.GetComponent<Renderer>();
-                Material  parachuteCanopyMaterial  = parachuteCanopy.material;
+                Renderer parachuteCanopy = parachuteCanopyTransform.GetComponent<Renderer>();
+                Material parachuteCanopyMaterial = parachuteCanopy.material;
 
                 if (suit.ParachuteCanopy.HasValue())
                 {

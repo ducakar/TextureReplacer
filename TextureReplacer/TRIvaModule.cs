@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -27,7 +27,7 @@ namespace TextureReplacer
     /// <summary>
     /// Component for personalisation of IVA Kerbals, similar as TREvaModule, but much simpler.
     /// </summary>
-    internal class TRIvaModule : MonoBehaviour
+    public class TRIvaModule : MonoBehaviour
     {
         public void Start()
         {
