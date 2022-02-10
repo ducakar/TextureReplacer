@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -24,7 +24,7 @@ using UnityEngine;
 
 namespace TextureReplacer
 {
-    internal class Log
+    public class Log
     {
         private readonly string header;
 

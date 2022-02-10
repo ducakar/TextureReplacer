@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -28,7 +28,7 @@ using UnityEngine.Rendering;
 
 namespace TextureReplacer
 {
-    internal class Reflections
+    public class Reflections
     {
         public enum Type
         {
@@ -56,11 +56,11 @@ namespace TextureReplacer
                 envMap = new RenderTexture(reflectionResolution, reflectionResolution, 24)
                 {
                     dimension = TextureDimension.Cube,
-                    wrapMode  = TextureWrapMode.Clamp
+                    wrapMode = TextureWrapMode.Clamp
                 };
 
                 transform = part.transform;
-                isEva     = part.GetComponent<KerbalEVA>() != null;
+                isEva = part.GetComponent<KerbalEVA>() != null;
 
                 if (isEva)
                 {
@@ -77,8 +77,8 @@ namespace TextureReplacer
                     }
                 }
 
-                interval    = updateInterval;
-                counter     = Util.Random.Next(updateInterval);
+                interval = updateInterval;
+                counter = Util.Random.Next(updateInterval);
                 currentFace = Util.Random.Next(6);
 
                 EnsureCamera();
@@ -149,33 +149,26 @@ namespace TextureReplacer
 
             private void Update(bool force)
             {
-                int       faceMask        = force ? 0x3f : 1 << currentFace;
+                int faceMask = force ? 0x3f : 1 << currentFace;
                 Transform cameraTransform = camera.transform;
 
                 cameraTransform.position = Vector3.zero;
 
                 // Skybox.
                 camera.farClipPlane = 100.0f;
-                camera.cullingMask  = 1 << 18;
+                camera.cullingMask = 1 << 18;
                 camera.RenderToCubemap(envMap, faceMask);
 
                 // Scaled space.
                 camera.farClipPlane = 3.0e7f;
-                camera.cullingMask  = (1 << 9) | (1 << 10) | (1 << 23);
+                camera.cullingMask = (1 << 9) | (1 << 10) | (1 << 23);
                 camera.RenderToCubemap(envMap, faceMask);
 
-                if (isEva)
-                {
-                    cameraTransform.position = transform.position + 0.4f * transform.up;
-                }
-                else
-                {
-                    cameraTransform.position = transform.position;
-                }
+                cameraTransform.position = isEva ? transform.position + 0.4f * transform.up : transform.position;
 
                 // Scene.
                 camera.farClipPlane = 110000.0f;
-                camera.cullingMask  = (1 << 0) | (1 << 15) | (1 << 17);
+                camera.cullingMask = (1 << 0) | (1 << 15) | (1 << 17);
                 camera.RenderToCubemap(envMap, faceMask);
 
                 currentFace = (currentFace + 1) % 6;
@@ -261,13 +254,13 @@ namespace TextureReplacer
             string shadersFileName = Application.platform switch
             {
                 RuntimePlatform.WindowsPlayer => "shaders.windows",
-                RuntimePlatform.OSXPlayer     => "shaders.osx",
-                _                             => "shaders.linux"
+                RuntimePlatform.OSXPlayer => "shaders.osx",
+                _ => "shaders.linux"
             };
             string shadersPath = IOUtils.GetFilePathFor(typeof(Reflections), shadersFileName);
 
             AssetBundle shadersBundle = null;
-            Shader      visorShader   = null;
+            Shader vShader = null;
             try
             {
                 shadersBundle = AssetBundle.LoadFromFile(shadersPath);
@@ -277,8 +270,8 @@ namespace TextureReplacer
                 }
                 else
                 {
-                    visorShader = shadersBundle.LoadAsset<Shader>(path);
-                    if (visorShader == null)
+                    vShader = shadersBundle.LoadAsset<Shader>(path);
+                    if (vShader == null)
                     {
                         log.Print("{0} not found in {1}", path, shadersPath);
                     }
@@ -295,7 +288,7 @@ namespace TextureReplacer
                     shadersBundle.Unload(false);
                 }
             }
-            return visorShader;
+            return vShader;
         }
 
         public static void Recreate()
@@ -328,7 +321,7 @@ namespace TextureReplacer
 
             for (int i = 0; i < ShaderNameMap.GetLength(0); ++i)
             {
-                Shader original   = Shader.Find(ShaderNameMap[i, 0]);
+                Shader original = Shader.Find(ShaderNameMap[i, 0]);
                 Shader reflective = Shader.Find(ShaderNameMap[i, 1]);
 
                 if (original == null)
@@ -378,11 +371,11 @@ namespace TextureReplacer
                 return;
             }
 
-            camera            = new GameObject("TRReflectionCamera", typeof(Camera)).GetComponent<Camera>();
-            camera.enabled    = false;
+            camera = new GameObject("TRReflectionCamera", typeof(Camera)).GetComponent<Camera>();
+            camera.enabled = false;
             camera.clearFlags = CameraClearFlags.Depth;
             // Any smaller number and visors will reflect internals of helmets.
-            camera.nearClipPlane      = 0.4f;
+            camera.nearClipPlane = 0.4f;
             camera.layerCullDistances = CullDistances;
         }
 

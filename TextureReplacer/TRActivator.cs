@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,6 +22,7 @@
 
 using System.Reflection;
 using UnityEngine;
+using System.Collections;
 
 namespace TextureReplacer
 {
@@ -34,7 +35,7 @@ namespace TextureReplacer
         /// </summary>
         public class TRReflectionUpdater : MonoBehaviour
         {
-            public void Update()
+            public static void Update()
             {
                 Reflections.Script.UpdateScripts();
             }

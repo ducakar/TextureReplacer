@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,19 +26,20 @@ using System.Linq;
 using UnityEngine;
 using Gender = ProtoCrewMember.Gender;
 using KerbalSuit = ProtoCrewMember.KerbalSuit;
+using KeyValuePairs;
 
 namespace TextureReplacer
 {
-    internal class Mapper
+    public class Mapper
     {
         // Instance.
         public static Mapper Instance { get; private set; }
 
         // Texture map for deduplication of identical textures.
-        public readonly Dictionary<string, string> TextureMap = new Dictionary<string, string>();
+        internal readonly IDictionary<string, string> TextureMap = new Dictionary<string, string>();
 
         // Class-specific suits.
-        public readonly Dictionary<string, Suit> ClassSuits = new Dictionary<string, Suit>();
+        internal readonly IDictionary<string, Suit> ClassSuits = new Dictionary<string, Suit>();
 
         private const string SkinsPrefix = "TextureReplacer/Skins/";
         private const string SuitsPrefix = "TextureReplacer/Suits/";
@@ -182,10 +183,10 @@ namespace TextureReplacer
         {
             return kind switch
             {
-                Suit.Slim    => slimSuit,
+                Suit.Slim => slimSuit,
                 Suit.Vintage => vintageSuit,
-                Suit.Future  => futureSuit,
-                _            => defaultSuit
+                Suit.Future => futureSuit,
+                _ => defaultSuit
             };
         }
 
@@ -260,10 +261,12 @@ namespace TextureReplacer
                 .ToList();
         }
 
+#pragma warning disable S4049 // Properties should be preferred
         public List<Suit> GetGenderlessSuits()
         {
             return suits.Where(s => s.Gender == null).ToList();
         }
+#pragma warning restore S4049 // Properties should be preferred
 
         /// <summary>
         /// Load per-game custom kerbals mapping.
@@ -318,29 +321,27 @@ namespace TextureReplacer
 
         private Appearance GetAppearanceFromNode(ProtoCrewMember kerbal, string value)
         {
-            string[] tokens   = Util.SplitConfigValue(value);
-            string   skinName = tokens.Length >= 1 ? tokens[0] : null;
-            string   suitName = tokens.Length >= 2 ? tokens[1] : null;
+            string[] tokens = Util.SplitConfigValue(value);
+            string skinName = tokens.Length >= 1 ? tokens[0] : null;
+            string suitName = tokens.Length >= 2 ? tokens[1] : null;
 
             return new Appearance(kerbal)
             {
                 Skin = skinName switch
                 {
-                    null        => null,
-                    "GENERIC"   => null,
+                    "GENERIC" => null,
                     "DEFAULT.m" => GetDefaultSkin(kerbal.gender),
                     "DEFAULT.f" => GetDefaultSkin(kerbal.gender),
-                    _           => skins.Find(h => h.Name == skinName)
+                    _ => skins.Find(h => h.Name == skinName)
                 },
                 Suit = suitName switch
                 {
-                    null        => null,
-                    "GENERIC"   => null,
-                    "DEFAULT"   => GetDefaultSuit(kerbal.suit),
+                    "GENERIC" => null,
+                    "DEFAULT" => GetDefaultSuit(kerbal.suit),
                     "DEFAULT.S" => GetDefaultSuit(kerbal.suit),
                     "DEFAULT.V" => GetDefaultSuit(kerbal.suit),
                     "DEFAULT.F" => GetDefaultSuit(kerbal.suit),
-                    _           => suits.Find(s => s.Name == suitName)
+                    _ => suits.Find(s => s.Name == suitName)
                 }
             };
         }
@@ -352,10 +353,7 @@ namespace TextureReplacer
         {
             if (node == null)
             {
-                foreach ((string key, Suit value) in globalClassSuits)
-                {
-                    map[key] = value;
-                }
+                globalClassSuits.ToList().ForEach(kvp => map.Add(kvp.Key, kvp.Value));
             }
             else
             {
@@ -403,35 +401,29 @@ namespace TextureReplacer
         /// </summary>
         private void SaveClassSuitMap(ConfigNode node)
         {
-            foreach ((string key, Suit value) in ClassSuits)
+            ClassSuits.ToList().ForEach(suit =>
             {
-                if (value != null)
-                {
-                    node.AddValue(key, value.Name);
-                }
-            }
+                node.AddValue(suit.Key, suit.Value.Name);
+            });
         }
 
         private void FillSkinsAndSuits()
         {
-            foreach (GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture)
+            foreach (var texture in from GameDatabase.TextureInfo texInfo in GameDatabase.Instance.databaseTexture
+                                    let texture = texInfo.texture
+                                    where texture != null
+                                    select texture)
             {
-                Texture2D texture = texInfo.texture;
-                if (texture != null)
-                {
-                    FillSkinAndSuitTexture(texture.name, texture);
-                }
+                FillSkinAndSuitTexture(texture.name, texture);
             }
 
             foreach (Texture2D texture in Resources.FindObjectsOfTypeAll<Texture2D>())
             {
-                foreach ((string key, string value) in TextureMap)
+                TextureMap.ToList().ForEach(suit =>
                 {
-                    if (value == texture.name)
-                    {
-                        FillSkinAndSuitTexture(key, texture);
-                    }
-                }
+                    if (suit.Value == texture.name)
+                        FillSkinAndSuitTexture(suit.Value, texture);
+                });
             }
         }
 
@@ -565,20 +557,33 @@ namespace TextureReplacer
 
             // Visor needs to be replaced every time, not only on the prefab models, so the visor from the default suit
             // must be set on all suits without a custom visor.
-            slimSuit.IvaVisor ??= defaultSuit.IvaVisor;
-            slimSuit.EvaVisor ??= defaultSuit.EvaVisor;
 
-            vintageSuit.IvaVisor ??= defaultSuit.IvaVisor;
-            vintageSuit.EvaVisor ??= defaultSuit.EvaVisor;
-
-            futureSuit.IvaVisor ??= defaultSuit.IvaVisor;
-            futureSuit.EvaVisor ??= defaultSuit.EvaVisor;
-
-            foreach (Suit suit in suits)
+            if (defaultSuit != null)
             {
-                suit.IvaVisor ??= defaultSuit.IvaVisor;
-                suit.EvaVisor ??= defaultSuit.EvaVisor;
+                if (slimSuit != null)
+                {
+                    slimSuit.IvaVisor = defaultSuit.IvaVisor;
+                    slimSuit.EvaVisor = defaultSuit.EvaVisor;
+                }
+
+                if (vintageSuit != null)
+                {
+                    vintageSuit.IvaVisor = defaultSuit.IvaVisor;
+                    vintageSuit.EvaVisor = defaultSuit.EvaVisor;
+                }
+
+                if (futureSuit != null)
+                {
+                    futureSuit.IvaVisor = defaultSuit.IvaVisor;
+                    futureSuit.EvaVisor = defaultSuit.EvaVisor;
+                }
             }
+
+            suits.ForEach(suit =>
+            {
+                suit.IvaVisor = defaultSuit.IvaVisor;
+                suit.EvaVisor = defaultSuit.EvaVisor;
+            });
         }
 
         /// <summary>
@@ -586,9 +591,10 @@ namespace TextureReplacer
         /// </summary>
         private void ReadKerbalsConfigs()
         {
-            foreach (UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer"))
+            foreach (var (file, customNode) in from UrlDir.UrlConfig file in GameDatabase.Instance.GetConfigs("TextureReplacer")
+                                               let customNode = file.config.GetNode("CustomKerbals")
+                                               select (file, customNode))
             {
-                ConfigNode customNode = file.config.GetNode("CustomKerbals");
                 if (customNode != null)
                 {
                     // Merge into `customKerbalsNode`.
@@ -622,21 +628,21 @@ namespace TextureReplacer
             int prefixIndex = path.IndexOf(prefix, StringComparison.Ordinal);
             if (prefixIndex == -1)
             {
-                name        = "";
+                name = "";
                 textureName = "";
                 return false;
             }
 
-            int prefixEnd  = prefixIndex + prefix.Length;
+            int prefixEnd = prefixIndex + prefix.Length;
             int nameLength = path.LastIndexOf('/') - prefixEnd;
             if (nameLength < 1)
             {
-                name        = "";
+                name = "";
                 textureName = "";
                 return false;
             }
 
-            name        = path.Substring(prefixEnd, nameLength);
+            name = path.Substring(prefixEnd, nameLength);
             textureName = path.Substring(prefixEnd + nameLength + 1);
             return true;
         }

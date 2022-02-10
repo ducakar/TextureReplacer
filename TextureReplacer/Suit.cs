@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -28,7 +28,7 @@ using KerbalSuit = ProtoCrewMember.KerbalSuit;
 
 namespace TextureReplacer
 {
-    internal class Suit
+    public class Suit
     {
         public const KerbalSuit Default = KerbalSuit.Default;
         public const KerbalSuit Slim = (KerbalSuit)3;
@@ -70,14 +70,14 @@ namespace TextureReplacer
             {
                 _ when Util.HasSuffix(name, 'm') => ProtoCrewMember.Gender.Male,
                 _ when Util.HasSuffix(name, 'f') => ProtoCrewMember.Gender.Female,
-                _                                => null
+                _ => null
             };
             Kind = true switch
             {
                 _ when Util.HasSuffix(name, 'S') => Slim,
                 _ when Util.HasSuffix(name, 'V') => Vintage,
                 _ when Util.HasSuffix(name, 'F') => Future,
-                _                                => KerbalSuit.Default
+                _ => KerbalSuit.Default
             };
             Excluded = Util.HasSuffix(name, 'x');
         }
@@ -114,8 +114,8 @@ namespace TextureReplacer
                 case "orangeSuite_normal":
                 case "slimSuitNormals":
                 case "futureSuitMainNRM":
-                    IvaSuitNRM ??= texture;
-                    EvaSuitNRM ??= texture;
+                    IvaSuitNRM = IvaSuitNRM != null ? IvaSuitNRM : texture;
+                    EvaSuitNRM = EvaSuitNRM != null ? EvaSuitNRM : texture;
                     return true;
 
                 case "slimSuitDiffuse_blue":
@@ -142,10 +142,10 @@ namespace TextureReplacer
                     return true;
 
                 case "kerbalMainNRM":
-                    IvaSuitNRM ??= texture;
+                    IvaSuitNRM = IvaSuitNRM != null ? IvaSuitNRM : texture;
                     if (Kind == KerbalSuit.Vintage)
                     {
-                        EvaSuitNRM ??= texture;
+                        EvaSuitNRM = EvaSuitNRM != null ? EvaSuitNRM : texture;
                     }
                     return true;
 
@@ -154,11 +154,11 @@ namespace TextureReplacer
                 case "me_suit_difuse_orange":
                 case "futureSuit_diffuse_whiteOrange":
                 case "kerbalMain":
-                    IvaSuitVeteran ??= texture;
+                    IvaSuitVeteran = IvaSuitVeteran != null ? IvaSuitVeteran : texture;
                     return true;
 
                 case "kerbalVisor":
-                    IvaVisor ??= texture;
+                    IvaVisor = IvaVisor != null ? IvaVisor : texture;
                     return true;
 
                 case "whiteSuite_diffuse":
@@ -185,58 +185,58 @@ namespace TextureReplacer
                     return true;
 
                 case "EVAtextureNRM":
-                    EvaSuitNRM ??= texture;
+                    EvaSuitNRM = EvaSuitNRM != null ? EvaSuitNRM : texture;
                     return true;
 
                 case "futureSuit_emissive":
-                    EvaSuitEmissive ??= texture;
+                    EvaSuitEmissive = EvaSuitEmissive != null ? EvaSuitEmissive : texture;
                     return true;
 
                 case "EVAvisor":
-                    EvaVisor ??= texture;
+                    EvaVisor = EvaVisor != null ? EvaVisor : texture;
                     return true;
 
                 case "ksp_ig_jetpack_diffuse":
                 case "EVAjetpackscondary":
                 case "EVAjetpack":
-                    Jetpack ??= texture;
+                    Jetpack = Jetpack != null ? Jetpack : texture;
                     return true;
 
                 case "EVAjetpacksecondary_N":
                 case "EVAjetpackNRM":
-                    JetpackNRM ??= texture;
+                    JetpackNRM = JetpackNRM != null ? JetpackNRM : texture;
                     return true;
 
                 case "EVAjetpackEmmisive":
-                    JetpackEmissive ??= texture;
+                    JetpackEmissive = JetpackEmissive != null ? JetpackEmissive : texture;
                     return true;
 
                 case "backpack_Diff":
-                    ParachutePack ??= texture;
+                    ParachutePack = ParachutePack != null ? ParachutePack : texture;
                     return true;
 
                 case "backpack_NM":
-                    ParachutePackNRM ??= texture;
+                    ParachutePackNRM = ParachutePackNRM != null ? ParachutePackNRM : texture;
                     return true;
 
                 case "canopy_Diff":
-                    ParachuteCanopy ??= texture;
+                    ParachuteCanopy = ParachuteCanopy != null ? ParachuteCanopy : texture;
                     return true;
 
                 case "canopy_NR":
-                    ParachuteCanopyNRM ??= texture;
+                    ParachuteCanopyNRM = ParachuteCanopyNRM != null ? ParachuteCanopyNRM : texture;
                     return true;
 
                 case "cargoContainerPack_diffuse":
-                    CargoPack ??= texture;
+                    CargoPack = CargoPack != null ? CargoPack : texture;
                     return true;
 
                 case "cargoContainerPack_NRM":
-                    CargoPackNRM ??= texture;
+                    CargoPackNRM = CargoPackNRM != null ? CargoPackNRM : texture;
                     return true;
 
                 case "cargoContainerPack_emissive":
-                    CargoPackEmissive ??= texture;
+                    CargoPackEmissive = CargoPackEmissive != null ? CargoPackEmissive : texture;
                     return true;
 
                 default:

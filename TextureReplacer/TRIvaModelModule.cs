@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -34,7 +34,7 @@ namespace TextureReplacer
     /// don't have preexisting proto-models. Instead, they are created anew each time, so this is the only nice way to
     /// get TRIvaModule on all IVA Kerbals, both standard and vintage ones.
     /// </summary>
-    internal class TRIvaModelModule : MonoBehaviour
+    public class TRIvaModelModule : MonoBehaviour
     {
         public void Start()
         {

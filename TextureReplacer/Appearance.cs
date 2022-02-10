@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright © 2013-2020 Davorin Učakar
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,7 +22,7 @@
 
 namespace TextureReplacer
 {
-    internal class Appearance
+    public class Appearance
     {
         public readonly int Hash;
 
